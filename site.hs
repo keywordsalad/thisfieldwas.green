@@ -1,7 +1,7 @@
 import Hakyll
 
 main :: IO ()
-main = hakyll do
+main = hakyllWith config do
   match "images/*" do
     route   idRoute
     compile copyFileCompiler
@@ -56,3 +56,9 @@ postCtx :: Context String
 postCtx =
   dateField "date" "%B %e, %Y"
   <> defaultContext
+
+config :: Configuration
+config = Hakyll.defaultConfiguration
+  { providerDirectory = "src"
+  , destinationDirectory = "docs"
+  }
