@@ -58,7 +58,4 @@ postCtx =
   <> defaultContext
 
 config :: Configuration
-config = Hakyll.defaultConfiguration
-  { providerDirectory = "src"
-  , destinationDirectory = "docs"
-  }
+config = Hakyll.defaultConfiguration { destinationDirectory = "docs" }
