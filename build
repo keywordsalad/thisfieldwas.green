@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+
+pushd ./_site
+git switch gh-pages
+git pull
+popd
+
+stack exec site build
+
+pushd ./_site
+git commit -m "Build at $(date)"
+git push origin gh-pages
+popd
