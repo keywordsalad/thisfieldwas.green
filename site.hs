@@ -1,4 +1,5 @@
 import Hakyll
+import Hakyll.Web.Sass
 
 main :: IO ()
 main = hakyll do
@@ -6,9 +7,16 @@ main = hakyll do
     route   idRoute
     compile copyFileCompiler
 
-  match "css/*" do
+  match "css/**.css" do
     route   idRoute
     compile compressCssCompiler
+
+  sassDependency <- makePatternDependency "css/**.sass"
+  rulesExtraDependencies [sassDependency]
+    $ match "css/main.sass" do
+      route $ setExtension "css"
+      let compressCssItem = fmap compressCss
+      compile (compressCssItem <$> sassCompiler)
 
   match (fromList ["about.rst", "contact.md"]) do
     route   $ setExtension "html"
