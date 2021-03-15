@@ -1,22 +1,23 @@
 html
+  font-family: "Verdana", "Arial", sans-serif
   font-size: 100%
+  font-variant: discretionary-ligatures
+
+h1, h2, h3, h4, h5, h6
+  font-family: "Georgia", "Times New Roman", serif
 
 body
   font-size: 1rem
-  font-family: "Helvetica Neue", "Arial", sans-serif
   color: #000
 
 header
   border-bottom: 0.2rem solid #000
 
 nav
-  text-align: right
-
-nav a
-  font-size: 1.4rem
-  font-weight: bold
-  color: black
-  text-decoration: none
+  a
+    font-size: 1.4rem
+    font-weight: bold
+    text-decoration: none
 
 footer
   margin-top: 3rem
@@ -24,6 +25,10 @@ footer
   border-top: 0.2rem solid #000
   font-size: 1.2rem
   color: #555
+
+a
+  color: dodgerblue
+  text-decoration: none
 
 h1
   font-size: 2.4rem
@@ -38,37 +43,68 @@ article .header
 
 .logo a
   font-weight: bold
-  color: #000
+  color: darkgreen
   text-decoration: none
 
-@media (max-width: 319px)
+@mixin small-format
+  html
+    font-size: 100%
+
   body
     width: 90%
     margin: 0
     padding: 0 5%
 
   header
-    margin: 4.2rem 0
+    margin: 1rem 0
 
   nav
-    margin: 0 auto 3rem
-    text-align: center
+    ul
+      width: auto
+      padding: 0
+      margin: 0
+      list-style: none
+      display: flex
+      justify-content: normal
+      overflow-x: scroll
+      overflow-y: hidden
+      scrollbar-width: none
+      -ms-overflow-style: none
+
+    ul::-webkit-scrollbar
+      display: none
+
+    li
+      padding: 0.1rem 1rem
+      margin: 0
+      text-indent: 0
+      display: flex
+      border: 0.1rem solid black
+      border-right: none
+
+      &:last-child
+        border-right: 0.1rem solid black
 
   footer
     text-align: center
 
+  h1
+    font-size: 1.8rem
+
+  h2
+    font-size: 1.6rem
+
   .logo
     text-align: center
-    margin: 1rem auto 3rem
+    margin: 0 auto 1rem
 
   .logo a
-    font-size: 2.4rem
+    font-size: 1.8rem
 
-  nav a
-    display: block
-    line-height: 1.6
+@mixin medium-format
+  html
+    font-size: 85%
 
-@media (min-width: 320px)
   body
     width: 90%
     margin: 0
@@ -95,7 +131,7 @@ article .header
     display: inline
     margin: 0 0.6rem
 
-@media (min-width: 640px)
+@mixin large-format
   body
     width: 60rem
     margin: 0 auto
@@ -123,3 +159,32 @@ article .header
   .logo a
     float: left
     font-size: 1.8rem
+
+@mixin huge-format
+  @include large-format
+  html
+    font-size: 200%
+
+// cover all smartphones in portrait mode
+@media (max-width: 420px)
+  @include small-format
+
+// most smartphones in landscape mode
+@media (min-width: 421px) and (max-width: 767px)
+  @include small-format
+
+// most Android tablets and iPads in portrait mode
+@media (min-width: 768px) and (max-width: 1023px)
+  @include medium-format
+
+//most Android tablets and iPads in landscape mode, older desktop/laptop monitors
+@media (min-width: 1024px) and (max-width: 1365px)
+  @include medium-format
+
+// iPad PRO, HDready and FullHD desktop laptop monitors
+@media (min-width: 1366px) and (max-width: 1919px)
+  @include large-format
+
+// 4K and above
+@media (min-width: 1920px)
+  @include huge-format
