@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+source "base.sh"
+test_sync "develop"
+
+stack build
+stack exec site build
