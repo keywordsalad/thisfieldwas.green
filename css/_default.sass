@@ -1,30 +1,32 @@
+@import "theme"
+
 html
+  margin: 0
+  padding: 0
   font-family: "Verdana", "Arial", sans-serif
   font-size: 100%
   font-variant: discretionary-ligatures
 
-h1, h2, h3, h4, h5, h6
-  font-family: "Georgia", "Times New Roman", serif
-
 body
+  margin: 0
+  padding: 0
   font-size: 1rem
-  color: #000
+  color: $color-text
+  background-color: $bg-content
 
 header
+  @include body-block
   border-bottom: 0.2rem solid #000
+  background-color: $bg-greenfield
 
 nav
-  a
-    font-size: 1.4rem
-    font-weight: bold
-    text-decoration: none
+  border-top: 0.1rem
 
 footer
-  margin-top: 3rem
-  padding: 1.2rem 0
-  border-top: 0.2rem solid #000
-  font-size: 1.2rem
-  color: #555
+  @include body-block
+
+*[role="main"]
+  @include body-block
 
 a
   color: dodgerblue
@@ -39,131 +41,17 @@ h2
 article .header
   font-size: 1.4rem
   font-style: italic
-  color: #555
+  color: slategrey
 
 .logo a
   font-weight: bold
-  color: darkgreen
+  color: $color-greenfield
   text-decoration: none
 
-@mixin small-format
-  html
-    font-size: 100%
-
-  body
-    width: 90%
-    margin: 0
-    padding: 0 5%
-
-  header
-    margin: 1rem 0
-
-  nav
-    ul
-      width: auto
-      padding: 0
-      margin: 0
-      list-style: none
-      display: flex
-      justify-content: normal
-      overflow-x: scroll
-      overflow-y: hidden
-      scrollbar-width: none
-      -ms-overflow-style: none
-
-    ul::-webkit-scrollbar
-      display: none
-
-    li
-      padding: 0.1rem 1rem
-      margin: 0
-      text-indent: 0
-      display: flex
-      border: 0.1rem solid black
-      border-right: none
-
-      &:last-child
-        border-right: 0.1rem solid black
-
-  footer
-    text-align: center
-
-  h1
-    font-size: 1.8rem
-
-  h2
-    font-size: 1.6rem
-
-  .logo
-    text-align: center
-    margin: 0 auto 1rem
-
-  .logo a
-    font-size: 1.8rem
-
-@mixin medium-format
-  html
-    font-size: 85%
-
-  body
-    width: 90%
-    margin: 0
-    padding: 0 5%
-
-  header
-    margin: 4.2rem 0
-
-  nav
-    margin: 0 auto 3rem
-    text-align: center
-
-  footer
-    text-align: center
-
-  .logo
-    text-align: center
-    margin: 1rem auto 3rem
-
-  .logo a
-    font-size: 2.4rem
-
-  nav a
-    display: inline
-    margin: 0 0.6rem
-
-@mixin large-format
-  body
-    width: 60rem
-    margin: 0 auto
-    padding: 0
-
-  header
-    margin: 0 0 3rem
-    padding: 1.2rem 0
-
-  nav
-    margin: 0
-    text-align: right
-
-  nav a
-    margin: 0 0 0 1.2rem
-    display: inline
-
-  footer
-    text-align: right
-
-  .logo
-    margin: 0
-    text-align: left
-
-  .logo a
-    float: left
-    font-size: 1.8rem
-
-@mixin huge-format
-  @include large-format
-  html
-    font-size: 200%
+@import "screen-sizes/small-format"
+@import "screen-sizes/medium-format"
+@import "screen-sizes/large-format"
+@import "screen-sizes/huge-format"
 
 // cover all smartphones in portrait mode
 @media (max-width: 420px)
