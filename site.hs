@@ -2,8 +2,13 @@ import Hakyll
 import Hakyll.Web.Sass
 import Js
 
+siteConfig :: Configuration
+siteConfig = defaultConfiguration
+  { destinationDirectory = "gh-pages"
+  }
+
 main :: IO ()
-main = hakyll do
+main = hakyllWith siteConfig do
   match "images/*" do
     route   idRoute
     compile copyFileCompiler
