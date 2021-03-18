@@ -54,25 +54,25 @@ article .header
 @import "screen-sizes/huge-format"
 
 // cover all smartphones in portrait mode
-@media (max-width: 420px)
+@media only screen and (max-width: 420px)
   @include small-format
 
 // most smartphones in landscape mode
-@media (min-width: 421px) and (max-width: 767px)
+@media only screen and (min-width: 421px) and (max-width: 767px)
   @include small-format
 
 // most Android tablets and iPads in portrait mode
-@media (min-width: 768px) and (max-width: 1023px)
+@media only screen and (min-width: 768px) and (max-width: 1023px)
   @include medium-format
 
 //most Android tablets and iPads in landscape mode, older desktop/laptop monitors
-@media (min-width: 1024px) and (max-width: 1365px)
+@media only screen and (min-width: 1024px) and (max-width: 1365px)
   @include medium-format
 
 // iPad PRO, HDready and FullHD desktop laptop monitors
-@media (min-width: 1366px) and (max-width: 1919px)
+@media only screen and (min-width: 1366px) and (max-width: 1919px)
   @include large-format
 
 // 4K and above
-@media (min-width: 1920px)
+@media only screen and (min-width: 1920px)
   @include huge-format

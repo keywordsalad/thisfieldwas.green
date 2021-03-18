@@ -81,6 +81,20 @@ packages:
       sha256: c3c1fe56c35eed093772b9900d7038287b829d67960c6f96a82c9dc46b203db0
   original:
     hackage: hlibsass-0.1.8.1
+- completed:
+    hackage: hjsmin-0.2.0.4@sha256:a6a66d99e0b13254ae67a7b1ce58293b76bd63964467bf8f5cb67d092f2245df,2160
+    pantry-tree:
+      size: 561
+      sha256: 258c527d17b1b8c80e9efebbb8559bdab45861a629eb9315e2e4472de91de19d
+  original:
+    hackage: hjsmin-0.2.0.4
+- completed:
+    hackage: language-javascript-0.7.1.0@sha256:3c68380fc4794475ff4ebec608f8cf7ce9b15b9b69eb938d423f8aafdefbe0d7,3865
+    pantry-tree:
+      size: 2193
+      sha256: 1b073d6cfedc598ed6d057e0dc0bec2c0701a6c57963f34bd15b5a562e12bf40
+  original:
+    hackage: language-javascript-0.7.1.0
 snapshots:
 - completed:
     size: 532380

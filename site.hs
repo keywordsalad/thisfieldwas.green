@@ -1,5 +1,6 @@
 import Hakyll
 import Hakyll.Web.Sass
+import Js
 
 main :: IO ()
 main = hakyll do
@@ -10,6 +11,10 @@ main = hakyll do
   match "css/**.css" do
     route   idRoute
     compile compressCssCompiler
+
+  match "js/**.js" do
+    route   idRoute
+    compile compressJsCompiler
 
   sassDependency <- makePatternDependency "css/**.sass"
   rulesExtraDependencies [sassDependency]
@@ -64,4 +69,3 @@ postCtx :: Context String
 postCtx =
   dateField "date" "%B %e, %Y"
   <> defaultContext
-

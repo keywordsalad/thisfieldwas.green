@@ -1,5 +1,31 @@
 #!/usr/bin/env bash
 
+build () {
+  stack build
+  stack exec site build
+}
+
+rebuild () {
+  rm -r _cache/*
+  ./build
+}
+
+watch () {
+  stack exec site watch
+}
+
+publish () {
+  commit="$(git log -1 HEAD --pretty=format:%H)"
+  sha="${commit:0:8}"
+
+  pushd ./_site
+  test_sync "gh-pages"
+  git add .
+  git commit -m "Build on $(date) generated from $sha"
+  git push origin "gh-pages"
+  popd
+}
+
 test_sync () {
   branch=$1
 

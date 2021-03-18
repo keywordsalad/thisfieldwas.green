@@ -51,6 +51,8 @@ extra-deps:
   - hakyll-sass-0.2.4
   - hsass-0.8.0
   - hlibsass-0.1.8.1
+  - hjsmin-0.2.0.4
+  - language-javascript-0.7.1.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
