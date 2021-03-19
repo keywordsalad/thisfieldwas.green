@@ -5,30 +5,42 @@ build () {
   stack exec site build
 }
 
-rebuild () {
+clean () {
   rm -r _cache/*
-  ./build
+  stack clean
+}
+
+rebuild () {
+  clean
+  build
 }
 
 watch () {
+  build
   stack exec site watch
 }
 
 publish () {
-  commit="$(git log -1 HEAD --pretty=format:%H)"
-  sha="${commit:0:8}"
+  current_branch="$(git branch --show-current)"
+  if [ "$current_branch" -ne "develop" ]; then
+    echo "Can't publish from current branch: $current_branch"
+    exit 1
+  fi
+  test_sync "develop"
+  build
 
-  pushd ./_site
+  commit="$$(git log -1 HEAD --pretty=format:%H)"
+  sha="$${commit:0:8}"
+  pushd ./gh-pages
   test_sync "gh-pages"
   git add .
-  git commit -m "Build on $(date) generated from $sha"
+  git commit -m "Build on $$(date) generated from $sha"
   git push origin "gh-pages"
   popd
 }
 
 test_sync () {
   branch=$1
-
   git switch $branch
   git fetch origin $branch
 
@@ -37,11 +49,12 @@ test_sync () {
   rev_parse_local="$(git rev-parse $branch)"
 
   if [ "$merge_base" == "$rev_parse_remote" ]; then
-    echo "INFO: Local branch $branch is ahead of remote"
+    echo "ERROR: Local branch $branch is ahead of remote!"
+    exit 1
   elif [ "$merge_base" == "$rev_parse_local" ]; then
     echo "ERROR: Local branch $branch is behind remote!"
     exit 1
-  else
-    echo "INFO: Local branch $branch is up to date with remote"
   fi
+
+  echo "INFO: Local branch $branch is up to date with remote"
 }
