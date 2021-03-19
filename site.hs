@@ -3,52 +3,56 @@ import Hakyll.Web.Sass
 import Js
 
 siteConfig :: Configuration
-siteConfig = defaultConfiguration
-  { destinationDirectory = "gh-pages"
-  }
+siteConfig =
+  defaultConfiguration
+    { providerDirectory = "site-src",
+      destinationDirectory = "gh-pages"
+    }
 
 main :: IO ()
 main = hakyllWith siteConfig do
   match "images/*" do
-    route   idRoute
+    route idRoute
     compile copyFileCompiler
 
   match "css/**.css" do
-    route   idRoute
+    route idRoute
     compile compressCssCompiler
 
   match "js/**.js" do
-    route   idRoute
+    route idRoute
     compile compressJsCompiler
 
   sassDependency <- makePatternDependency "css/**.sass"
-  rulesExtraDependencies [sassDependency]
-    $ match "css/main.sass" do
+  rulesExtraDependencies [sassDependency] $
+    match "css/main.sass" do
       route $ setExtension "css"
       let compressCssItem = fmap compressCss
       compile (compressCssItem <$> sassCompiler)
 
   match (fromList ["about.rst", "contact.md"]) do
-    route   $ setExtension "html"
-    compile $ pandocCompiler
-      >>= loadAndApplyTemplate "templates/default.html" defaultContext
-      >>= relativizeUrls
+    route $ setExtension "html"
+    compile $
+      pandocCompiler
+        >>= loadAndApplyTemplate "templates/default.html" defaultContext
+        >>= relativizeUrls
 
   match "posts/*" do
-    route   $ setExtension "html"
-    compile $ pandocCompiler
-      >>= loadAndApplyTemplate "templates/post.html"    postCtx
-      >>= loadAndApplyTemplate "templates/default.html" postCtx
-      >>= relativizeUrls
+    route $ setExtension "html"
+    compile $
+      pandocCompiler
+        >>= loadAndApplyTemplate "templates/post.html" postCtx
+        >>= loadAndApplyTemplate "templates/default.html" postCtx
+        >>= relativizeUrls
 
   create ["archive.html"] do
     route idRoute
     compile do
       posts <- recentFirst =<< loadAll "posts/*"
       let archiveCtx =
-            listField "posts" postCtx (return posts) `mappend`
-            constField "title" "Archives" `mappend`
-            defaultContext
+            listField "posts" postCtx (return posts)
+              `mappend` constField "title" "Archives"
+              `mappend` defaultContext
 
       makeItem ""
         >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
@@ -60,8 +64,8 @@ main = hakyllWith siteConfig do
     compile do
       posts <- recentFirst =<< loadAll "posts/*"
       let indexCtx =
-            listField "posts" postCtx (return posts) `mappend`
-            defaultContext
+            listField "posts" postCtx (return posts)
+              `mappend` defaultContext
 
       getResourceBody
         >>= applyAsTemplate indexCtx
@@ -73,4 +77,4 @@ main = hakyllWith siteConfig do
 postCtx :: Context String
 postCtx =
   dateField "date" "%B %e, %Y"
-  <> defaultContext
+    <> defaultContext
