@@ -7,13 +7,17 @@ executable site
   main-is:          site.hs
   hs-source-dirs:   .
                   , hs-src
-  other-modules:    Js
+  other-modules:    Context
+                  , Js
+                  , Route
   build-depends:    base == 4.*
                   , hakyll == 4.14.*
                   , hakyll-sass == 0.2.*
                   , hjsmin == 0.2.*
                   , language-javascript == 0.7.*
                   , bytestring == 0.*
+                  , process == 1.6.*
+                  , blaze-html == 0.9.*
   ghc-options:      -threaded
                     -rtsopts
                     -with-rtsopts=-N
