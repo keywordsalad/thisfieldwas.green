@@ -1,4 +1,4 @@
 [submodule "gh-pages"]
 	path = gh-pages
-	url = git@github.com:lmcgrath/logans-blog.git
+	url = git@ThisFieldWasGreen.github.com:ThisFieldWasGreen/thisfieldwasgreen.github.io.git
 	branch = gh-pages
