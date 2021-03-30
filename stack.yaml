@@ -43,8 +43,6 @@ packages:
 #
 extra-deps:
   - hakyll-4.14.0.0
-  - hakyll-sass-0.2.4
-  - blaze-html-0.9.1.2
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

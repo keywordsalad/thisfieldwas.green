@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+set -e
+
+setup () {
+  brew install haskell-stack
+  stack install hakyll
+  brew install sass/sass/sass
+}
 
 build () {
   stack build
@@ -6,12 +13,28 @@ build () {
 }
 
 clean () {
-  rm -r _cache/*
+  rm -rf _cache/*
   stack clean
+}
+
+clean_all () {
+  clean
+  rm -rf gh-pages/*
 }
 
 rebuild () {
   clean
+  build
+}
+
+touch_site_src () {
+  # touch all files in site-src so they're built again
+  find site-src -type f -exec touch {} +
+}
+
+rebuild_all () {
+  clean_all
+  touch_site_src
   build
 }
 

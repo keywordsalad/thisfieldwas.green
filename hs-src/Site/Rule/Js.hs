@@ -1,8 +1,14 @@
-module Js (compressJsCompiler) where
+module Site.Rule.Js (jsRules) where
 
+import qualified Data.ByteString.Lazy.Char8 as C
 import Hakyll
 import Text.Jasmine
-import qualified Data.ByteString.Lazy.Char8 as C
+
+jsRules :: Rules ()
+jsRules =
+  match "js/**.js" do
+    route idRoute
+    compile compressJsCompiler
 
 compressJsCompiler :: Compiler (Item String)
 compressJsCompiler = do
