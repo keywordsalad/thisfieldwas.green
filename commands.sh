@@ -14,11 +14,11 @@ build () {
 
 clean () {
   rm -rf _cache/*
-  stack clean
 }
 
 clean_all () {
   clean
+  stack clean
   rm -rf gh-pages/*
 }
 
@@ -27,14 +27,14 @@ rebuild () {
   build
 }
 
-touch_site_src () {
-  # touch all files in site-src so they're built again
-  find site-src -type f -exec touch {} +
+touch_all () {
+  # touch all files so they're built again
+  find . -type f -exec touch {} +
 }
 
 rebuild_all () {
   clean_all
-  touch_site_src
+  touch_all
   build
 }
 
