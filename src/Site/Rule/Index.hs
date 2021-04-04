@@ -13,16 +13,33 @@ indexRules env baseCtx =
 indexCompiler :: [(String, String)] -> Context String -> Compiler (Item String)
 indexCompiler env baseCtx = do
   let recentPosts = recentFirst =<< loadPublishedPosts
---  latestPost <- head $ fmap (take 1) recentPosts
-  otherPosts <- fmap (take 4) $ fmap (drop 1) recentPosts
-  let ctx = constField "title" "Home"
+
+  -- the most recent post
+  latestPost <- fmap (head . take 1) recentPosts
+  let latestPostId = itemIdentifier latestPost
+  latestPostTitle <- fromJust <$> getMetadataField latestPostId "title"
+  latestPostUrl <- toUrl <$> fromJust <$> getRoute latestPostId
+
+  -- other recent posts
+  otherPosts <- fmap (take 5 . drop 1) recentPosts
+
+  let ctx =
+        -- page
+        constField "siteTitle" "All About Software Engineering"
+        -- latest post
+        <> constField "title" latestPostTitle
+        <> constField "latestPostTitle" latestPostTitle
+        <> constField "latestPostUrl" latestPostUrl
+        <> constField "latestPost" (itemBody latestPost)
+        -- recent posts
         <> listField "otherPosts"
           (teaserField "teaser" "content" <> baseCtx)
           (return otherPosts)
+        -- rest of context
         <> postCtx
         <> baseCtx
+
   makeItem ""
---    >>= postCompiler env publishedSnapshot ctx
     >>= loadAndApplyTemplate "templates/index.html" ctx
     >>= loadAndApplyTemplate "templates/default.html" ctx
     >>= relativizeUrls

@@ -95,7 +95,8 @@ draftIndexRules baseCtx =
 
 draftIndexCtx :: Context String -> [Item String] -> Context String
 draftIndexCtx baseCtx posts =
-  listField "posts" (postCtx <> baseCtx) (return posts)
+  constField "title" "Drafts"
+  <> listField "posts" (postCtx <> baseCtx) (return posts)
   <> constField "title" "Drafts"
 
 draftIndexCompiler :: Context String -> Compiler (Item String)

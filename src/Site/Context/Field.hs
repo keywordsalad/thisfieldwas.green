@@ -8,7 +8,7 @@ includeCodeField = functionField "include-code" f
   where
     f (lexer:contentsPath:[]) _ = fmap wrapCode body
       where
-        wrapCode code = "```" ++ lexer ++ "\n" ++ code ++ "\n```"
+        wrapCode code = "```{." ++ lexer ++ " .numberLines}\n" ++ code ++ "\n```"
         body = loadSnapshotBody item "code"
         item = fromFilePath $ "code/" ++ contentsPath
     f _ item = error $ "codeIncludeField needs a filepath and a lexer " ++ show (itemIdentifier item)
@@ -50,3 +50,6 @@ routeToField = functionField "route-to" f
         id' = fromFilePath filePath
         fromId = itemIdentifier item
     f _ item = error $ "routeField needs a filePath " ++ show (itemIdentifier item)
+
+commentField :: Context String
+commentField = functionField "comment" \_ _ -> return ""

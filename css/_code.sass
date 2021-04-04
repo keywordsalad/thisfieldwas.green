@@ -1,14 +1,39 @@
-pre
-  overflow: scroll
-
 code
   color: $color-em-text
   font-family: "JetBrains Mono", "Source Code Pro", "Courier New", monospace
   font-variant-ligatures: discretionary-ligatures
-  width: 100%
+
+pre
+  background-color: $bg-greenfield
+  overflow: scroll
+  @include bordered
+
+  .sourceCode
+    width: 100%
+    display: table
+    &:first-child
+      margin-top: 0.5rem
+    &:last-child
+      margin-bottom: 0.5rem
+
+    .line
+      display: table-row
+      &:target
+        background-color: $color-highlight
+
+    .line-number
+      display: table-cell
+      padding: 0 0.5rem 0 0.5rem
+      border-right: $border-thin solid $border-color-sides
+      text-align: right
+      user-select: none
+    .line-content
+      display: table-cell
+      padding: 0 0.5rem
 
 .sourceCode
-  .kw, .cf // keyword
+  // keyword
+  .kw, .cf
     color: seagreen
     font-weight: bold
 
@@ -21,13 +46,15 @@ code
   .dt
     color: blue
 
-  .fu // function
-    color: purple
+  // function
+  .fu
+    color: blueviolet
 
   .st
     color: lightseagreen
 
-  .ch // character
+  // character
+  .ch
     color: yellowgreen
 
   .cn
@@ -35,3 +62,6 @@ code
 
   .at
     color: darkblue
+
+  .va
+    color: cornflowerblue

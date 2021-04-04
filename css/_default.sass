@@ -1,11 +1,14 @@
 @import "theme"
 @import "code"
 
+*
+  line-height: 1.6em
+
 html
   margin: 0
   padding: 0
   font-family: "Verdana", "Arial", sans-serif
-  font-size: 100%
+  font-size: 85%
   font-variant: discretionary-ligatures
 
 body
@@ -18,7 +21,7 @@ body
 
   > header
     @include body-block
-    border-bottom: 0.2rem solid #000
+    border-bottom: 0.2rem solid $border-color-top
     background-color: $bg-greenfield
 
 nav
@@ -26,6 +29,8 @@ nav
 
 footer
   @include body-block
+  background-color: $bg-greenfield
+  border-top: 0.2rem solid $color-text
 
 *[role="main"]
   @include body-block
@@ -34,11 +39,26 @@ a
   color: dodgerblue
   text-decoration: none
 
+h1, h2, h3, h4, h5, h6
+  line-height: 1.2em
+
 h1
-  font-size: 2.4rem
+  font-size: 1.8rem
 
 h2
-  font-size: 2rem
+  font-size: 1.6rem
+
+h3
+  font-size: 1.4rem
+
+h4
+  font-size: 1.2rem
+
+h5
+  font-size: 1rem
+
+h6
+  font-size: 0.9rem
 
 .post
   header
@@ -63,6 +83,7 @@ strong, em, b, i
 
 p
   &.image
+    @include bordered
     width: 100%
     overflow-x: scroll
   &.youtube
@@ -77,6 +98,15 @@ blockquote
 
 iframe
   border: none
+
+.teaser-list
+  .post
+    header
+      h1
+        display: block
+        font-size: 1.4rem
+      em
+        font-size: 1.2rem
 
 @import "screen-sizes/small-format"
 @import "screen-sizes/medium-format"

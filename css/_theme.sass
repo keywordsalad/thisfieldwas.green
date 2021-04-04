@@ -1,15 +1,23 @@
 $color-greenfield: darkgreen
 $color-text: darkslategray
 $color-em-text: darkslateblue
+$color-highlight: #FFFAB0
 
 $bg-content: white
 $bg-greenfield: honeydew
 
 $border-thick: 0.1rem
 $border-thin: 0.05rem
+$border-color: $color-greenfield
+$border-color-top: $border-color
+$border-color-sides: change-color($border-color, $lightness: 30%)
+$border-color-bottom: change-color($border-color, $lightness: 40%)
 
 @mixin body-block
   margin: 0
   padding: 1rem
 
-@mixin thick-border($sides...)
+@mixin bordered
+  border: $border-thick solid
+  border-radius: 0.5rem
+  border-color: $border-color-top $border-color-sides $border-color-bottom

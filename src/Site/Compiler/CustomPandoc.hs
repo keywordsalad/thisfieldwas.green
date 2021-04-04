@@ -11,16 +11,11 @@ customPandocCompiler =
 readerOpts :: Opt.ReaderOptions
 readerOpts =
   defaultHakyllReaderOptions
-    { Opt.readerExtensions = defaultExtensions <> extensions
+    { Opt.readerExtensions = defaultExtensions <> customExtensions
     }
   where
     defaultExtensions = Opt.readerExtensions defaultHakyllReaderOptions
-    extensions = Opt.extensionsFromList
-      [ Opt.Ext_tex_math_dollars
-      , Opt.Ext_tex_math_double_backslash
-      , Opt.Ext_latex_macros
-      , Opt.Ext_inline_code_attributes
-      ]
+    customExtensions = Opt.extensionsFromList []
 
 writerOpts :: Opt.WriterOptions
 writerOpts =

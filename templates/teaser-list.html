@@ -1,10 +1,12 @@
-<ul class="teaser-list">
+<section class="teaser-list">
+  <header>
+    <h1>And some more previous posts</h1>
+  </header>
   $for(otherPosts)$
-  <li>
-    <header><a href="$url$">$title$</a></header>
     $if(teaser)$
       $teaser$
+      </article> $comment("teaser slices off closing tag")$
     $endif$
-  </li>
+    <a href="$url$">Read more...</a>
   $endfor$
-</ul>
+</section>

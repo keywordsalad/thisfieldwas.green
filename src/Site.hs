@@ -23,6 +23,7 @@ site = do
           <> includeCodeField
           <> youtubeField
           <> routeToField
+          <> commentField
           <> defaultContext
 
     rules env (feedConfig absRoot) baseCtx
