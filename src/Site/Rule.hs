@@ -66,5 +66,6 @@ cssRules =
     compile compressCssCompiler
 
 templateRules :: Rules ()
-templateRules =
-  match "templates/*" $ compile templateBodyCompiler
+templateRules = do
+  match "templates/**" $ compile templateBodyCompiler
+  match "partials/**" $ compile templateBodyCompiler

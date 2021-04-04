@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "SCM-Backed Application Configuration with Perforce"
+author: "Logan McGrath"
 date: 2012-11-16 07:00
 comments: false
 published: true

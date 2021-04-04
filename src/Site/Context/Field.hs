@@ -8,7 +8,7 @@ includeCodeField = functionField "include-code" f
   where
     f (lexer:contentsPath:[]) _ = fmap wrapCode body
       where
-        wrapCode code = "```{." ++ lexer ++ " .numberLines}\n" ++ code ++ "\n```"
+        wrapCode code = "``` " ++ lexer ++ "\n" ++ code ++ "\n```"
         body = loadSnapshotBody item "code"
         item = fromFilePath $ "code/" ++ contentsPath
     f _ item = error $ "codeIncludeField needs a filepath and a lexer " ++ show (itemIdentifier item)
@@ -19,7 +19,7 @@ imgField = functionField "img" f
     f (path:[]) = f (path:"untitled":[])
     f (path:title:[]) = f (path:title:title:[])
     f (path:title:alt:[]) =
-      loadAndApplyTemplate "templates/image.html"
+      loadAndApplyTemplate "partials/image.html"
         (constField "img-src" path
          <> constField "img-title" title
          <> constField "img-alt" alt)
@@ -32,7 +32,7 @@ youtubeField = functionField "youtube" f
   where
     f (videoId:[]) = f (videoId:"YouTube video player":[])
     f (videoId:title:[]) =
-      loadAndApplyTemplate "templates/youtube.html"
+      loadAndApplyTemplate "partials/youtube.html"
         (constField "youtube-id" videoId
          <> constField "youtube-title" title)
       >=> relativizeUrls

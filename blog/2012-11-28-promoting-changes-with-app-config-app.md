@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Promoting changes with App-Config-App"
+author: "Logan McGrath"
 date: 2012-11-28 13:04
 comments: false
 published: true
@@ -28,7 +29,7 @@ promotion between environments.
 The App-Config-App `setup_example.rb` creates four branches with the following 
 mappings:
 
-```
+``` markdown
 Mapping        Source    Destination
 ------------------------------------
 dev-qa         dev       qa
@@ -72,7 +73,7 @@ Select the "qa" folder, then from the menu bar go to "Actions" >
 
 Select the following:
 
-```
+``` markdown
 Merge method: "Use branch mapping"
 Branch mapping: "dev-qa"
 Automatically resolve files after merging: checked

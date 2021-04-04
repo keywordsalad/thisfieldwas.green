@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Sterling With Memoization"
+author: "Logan McGrath"
 date: 2013-06-17 04:26
 comments: false
 published: false

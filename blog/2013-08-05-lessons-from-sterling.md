@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Lessons from Sterling"
+author: "Logan McGrath"
 date: 2013-08-05 9:37
 comments: false
 published: false

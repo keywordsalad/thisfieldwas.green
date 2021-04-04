@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "App-Config-App in Action"
+author: "Logan McGrath"
 date: 2012-11-20 07:00
 comments: false
 published: true

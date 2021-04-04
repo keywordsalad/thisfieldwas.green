@@ -1,5 +1,7 @@
 module Site.Context.Git (gitCommitFields) where
 
+import Data.List (intercalate)
+import Debug.Trace
 import Site.Common
 import System.Directory (doesFileExist)
 import System.Exit
@@ -31,10 +33,13 @@ gitCommitPartialCompiler item = unsafeCompiler gitCommitPartial
     gitCommitPartial = do
       generated <- isGenerated
       if generated
-        then return "source-generated.html"
+        then return "partials/source-generated.html"
         else do
           changed <- gitChanged
-          return $ bool "source-commit.html" "source-changed.html" changed
+          return $ "partials/" ++ bool
+            "source-commit.html"
+            "source-changed.html"
+            changed
     isGenerated = not <$> doesFileExist filePath
     gitChanged = do
       let args = ["diff", "--cached", filePath]
@@ -47,5 +52,5 @@ type LogFormat = String
 gitLog :: LogFormat -> FilePath -> IO (Maybe String)
 gitLog format filePath = do
   let args = ["log", "-1", "HEAD", "--pretty=format:" ++ format, filePath]
-  (_exitCode, stdout, _stderr) <- readProcessWithExitCode "git" args ""
+  (_exitCode, stdout, _stderr) <- seq (trace ("COMMAND: git " ++ intercalate " " args) ()) (readProcessWithExitCode "git" args "")
   return if null stdout then Nothing else Just stdout
