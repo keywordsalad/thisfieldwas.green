@@ -1,11 +1,12 @@
-<article>
-  <section class="header">
-    Posted on $date$
-    $if(author)$
-    by $author$
-    $endif$
-  </section>
-  <section>
-    $body$
-  </section>
+<article class="post">
+  <header>
+    <h1 style="display: none;">$title$</h1>
+    <em class="published">
+      Posted on $date$
+      $if(author)$
+      by $author$
+      $endif$
+    </em>
+  </header>
+  $body$
 </article>

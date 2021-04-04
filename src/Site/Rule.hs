@@ -24,7 +24,7 @@ rules env feedConfig baseCtx = do
   rulesExtraDependencies [codeDependency] do
     blogRules env baseCtx
     feedRules feedConfig baseCtx
-    indexRules baseCtx
+    indexRules env baseCtx
     pageRules baseCtx
     robotsTxtRules baseCtx
     archiveRules baseCtx

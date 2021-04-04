@@ -84,7 +84,7 @@ The source JSON configuration is the same, albeit sorted:
 
 $include-code("json", "app-config/stack_configuration.json")$
 
-The index.html page has been modified from the original to support only the
+The `index.html` page has been modified from the original to support only the
 basic _commit_ and _diffs_ functionality:
 
 $include-code("html", "app-config/index.html")$
@@ -94,7 +94,7 @@ Both of these assets were added by performing:
 1. Click "Add" from the top navbar
 1. Click "Add Content"
 1. Select "Assets" > "Plain Text"
-1. For "Title", enter "index.html" or "stack_configuration.json"
+1. For "Title", enter "`index.html`" or "`stack_configuration.json`"
 1. Paste in the appropriate "Content"
 1. Click "URL", select "Custom", and enter the same value as "Title" (otherwise,
    Chronicle will convert underscores to dashes, so be careful!)
@@ -106,14 +106,15 @@ Both of these assets were added by performing:
 
 At this point, neither asset is actually usable. Most content is heavily
 decorated with additional HTML and then displayed within a layout template, but
-I want both the index.html and stack_configuration.json assets to be viewable as
-standalone files and provide a REST interface for AngularJS to work against.
+I want both the `index.html` and `stack_configuration.json` assets to be
+viewable as standalone files and provide a REST interface for AngularJS to work
+against.
 
 ## Come back PHP! All is forgiven
 
 Chronicle is largely built using [Zend Framework][] and makes adding extra
 modules to the system pretty easy. My module needs to be able to display
-plaintext assets, update their content using an HTTP POST, and provide diffs
+plaintext assets, update their content using an `HTTP POST`, and provide diffs
 between the last commit and the current content.
 
 To create the module, the following paths need to be added:
@@ -148,39 +149,39 @@ exists by going to "Manage" > "Modules", where the "Appconfig" module will be
 listed if all goes well :) Both assets will now be viewable
 from `http://localhost/appconfig/index.html`
 and `http://localhost/appconfig/stack_configuration.json`.
-AngularJS' [resource service][] is used in index.html to fetch
+AngularJS' [resource service][] is used in `index.html` to fetch
 stack_configuration.json and post changes back.
 
 From `http://localhost/appconfig/index.html`, the data from
 stack_configuration.json is loaded into the form:
 
-{% img /images/app-config/start.png %}
+$img("/images/app-config/start.png")$
 
 Edits to stack_configuration.json can be made using the form, and the diffs
 viewed by clicking on "View Diffs":
 
-{% img /images/app-config/diffs.png %}
+$img("/images/app-config/diffs.png")$
 
 The changes can be saved by entering a commit message and clicking "Commit
 Changes". After which, clicking "View Diffs" will show no changes:
 
-{% img /images/app-config/diffs-after-commit.png %}
+$img("/images/app-config/diffs-after-commit.png")$
 
 To show that edits have in fact been made to stack_configuration.json, go
 to `http://localhost/stack_configuration.json`, select "History" and click on "
 History List":
 
-{% img /images/app-config/history.png %}
+$img("/images/app-config/history.png")$
 
 Chronicle also provides an interface for viewing diffs between revisions:
 
-{% img /images/app-config/history-diffs.png %}
+$img("/images/app-config/history-diffs.png")$
 
 ## Disk Usage
 
 Something to remember in using Chronicle is that each resource requested from
 Perforce is written to disk before being served to the client. This means that
-for each request to index.html, Chronicle allocates a new Perforce workspace,
+for each request to `index.html`, Chronicle allocates a new Perforce workspace,
 checks out the associated file, serves it to the client, then deletes the file
 and the workspace at the end of the request. This allocate/checkout/serve/delete
 cycle executes for stack_configuration.json and every other resource in the
@@ -211,7 +212,7 @@ Integrating with these actions over JSON requires detailed knowledge of
 Chronicle's form structures.
 
 Chronicle has some nice interfaces for viewing diffs. If I could call those up
-from index.html I would be major happy :)
+from `index.html` I would be major happy :)
 
 ### Automatic creation of plaintext content type
 
@@ -229,9 +230,9 @@ on that configuration.
 
 ### Better interfaces for manipulating plaintext assets
 
-I had to fiddle with index.html quite a bit. This basically involved editing a
-local copy of index.html, then pasting the entire contents into the associated
-form in Chronicle. I have not tried checking out index.html directly from
+I had to fiddle with `index.html` quite a bit. This basically involved editing a
+local copy of `index.html`, then pasting the entire contents into the associated
+form in Chronicle. I have not tried checking out `index.html` directly from
 Perforce, and I imagine that any edits would need to be made within Chronicle.
 Github offers an in-browser raw editor, and something like that would be real
 handy in Chronicle.
@@ -239,7 +240,7 @@ handy in Chronicle.
 ### Handling conflicts
 
 There is no logic in the appconfig module to catch conflicts if there are two
-users editing the same file. Conflicts are detectible because an exception is
+users editing the same file. Conflicts are detectable because an exception is
 thrown if there is a conflict, but I'm not sure what the workflow for resolution
 is in Chronicle terms, or how to integrate with it. Who wins?
 
@@ -263,7 +264,7 @@ all my questions as I worked with Chronicle, especially Randy Defauw.
 [resource service]: http://code.angularjs.org/0.9.19/docs-0.9.19/#!/api/angular.service.resource
 [App-config workflow using SCM]: http://paulhammant.com/2012/07/10/app-config-workflow-using-scm/
 [AngularJS]: http://angularjs.org/
-[json]: http://kmkeen.com/jshon/
+[jshon]: http://kmkeen.com/jshon/
 [simplediff]: https://github.com/paulgb/simplediff/
 [Zend Framework]: http://framework.zend.com/
 [Dojo Toolkit]: http://dojotoolkit.org/

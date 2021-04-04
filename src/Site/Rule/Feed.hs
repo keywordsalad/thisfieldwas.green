@@ -1,6 +1,7 @@
 module Site.Rule.Feed (feedRules) where
 
 import Site.Common
+import Site.Context.Post
 import Site.Rule.Blog (loadPublishedPosts)
 import Site.Util
 

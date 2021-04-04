@@ -1,25 +1,28 @@
 module Site.Rule.Index (indexRules) where
 
 import Site.Common
-import Site.Rule.Blog (loadPublishedPosts)
+import Site.Context.Post
+import Site.Rule.Blog (loadPublishedPosts, postCompiler, publishedSnapshot)
 
-indexRules :: Context String -> Rules ()
-indexRules baseCtx =
+indexRules :: [(String, String)] -> Context String -> Rules ()
+indexRules env baseCtx =
   match "index.md" do
     route $ setExtension "html"
-    compile $ indexCompiler baseCtx
+    compile $ indexCompiler env baseCtx
 
-indexCtx :: Context String -> [Item String] -> Context String
-indexCtx baseCtx posts =
-  listField "posts" (postCtx <> baseCtx) (return posts)
-  <> constField "title" "Home"
-  <> baseCtx
-
-indexCompiler :: Context String -> Compiler (Item String)
-indexCompiler baseCtx = do
-  posts <- recentFirst =<< loadPublishedPosts
-  let ctx = indexCtx baseCtx posts <> baseCtx
+indexCompiler :: [(String, String)] -> Context String -> Compiler (Item String)
+indexCompiler env baseCtx = do
+  let recentPosts = recentFirst =<< loadPublishedPosts
+--  latestPost <- head $ fmap (take 1) recentPosts
+  otherPosts <- fmap (take 4) $ fmap (drop 1) recentPosts
+  let ctx = constField "title" "Home"
+        <> listField "otherPosts"
+          (teaserField "teaser" "content" <> baseCtx)
+          (return otherPosts)
+        <> postCtx
+        <> baseCtx
   makeItem ""
-    >>= loadAndApplyTemplate "templates/archive.html" ctx
+--    >>= postCompiler env publishedSnapshot ctx
+    >>= loadAndApplyTemplate "templates/index.html" ctx
     >>= loadAndApplyTemplate "templates/default.html" ctx
     >>= relativizeUrls

@@ -1,6 +1,8 @@
 module Site.Rule.Sitemap (sitemapRules) where
 
 import Site.Common
+import Site.Context.Post
+import Site.Rule.Blog (loadPublishedPosts)
 
 sitemapRules :: Context String -> Rules ()
 sitemapRules baseCtx =
@@ -14,9 +16,9 @@ sitemapCtx baseCtx pages = do
 
 sitemapCompiler :: Context String -> Compiler (Item String)
 sitemapCompiler baseCtx = do
-  posts <- recentFirst =<< loadAll "blog/*"
+  posts <- recentFirst =<< loadPublishedPosts
   pages <- loadAll $ fromList
-    [ "about.md"
+    [ "about-me.md"
     , "contact.md"
     ]
   let ctx = sitemapCtx (postCtx <> baseCtx) (posts <> pages) <> baseCtx

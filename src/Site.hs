@@ -2,6 +2,7 @@ module Site where
 
 import Hakyll
 import Site.Configuration
+import Site.Context.Field
 import Site.Context.Git
 import Site.Rule
 import Site.Util
@@ -18,6 +19,10 @@ site = do
           <> tagsField "tags" tags
           <> cleanIndexPaths "url"
           <> mconcat gitCommitFields
+          <> imgField
+          <> includeCodeField
+          <> youtubeField
+          <> routeToField
           <> defaultContext
 
     rules env (feedConfig absRoot) baseCtx

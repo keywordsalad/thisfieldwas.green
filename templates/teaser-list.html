@@ -1,0 +1,10 @@
+<ul class="teaser-list">
+  $for(otherPosts)$
+  <li>
+    <header><a href="$url$">$title$</a></header>
+    $if(teaser)$
+      $teaser$
+    $endif$
+  </li>
+  $endfor$
+</ul>

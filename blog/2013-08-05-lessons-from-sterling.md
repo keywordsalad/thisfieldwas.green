@@ -26,7 +26,7 @@ expression. Some expressions accept a single argument--these were called
 as *attributes*. With a little sugar, a bag of attributes could be made 
 self-referencing and thus become an *object*.
 
-```
+```haskell
 // An assortment of basic expression types
 
 // a constant expression which takes no arguments
@@ -60,7 +60,7 @@ executed at runtime. Expressions in Sterling are represented as trees and
 leaves. Top-level expressions have names, and they could be inserted into other
 expressions by referencing those names.
 
-```
+```haskell
 // A recursive named expression looks like this:
 fibonacci = (n) -> if n <= 1 then
                        n
@@ -94,7 +94,7 @@ that I mean everything in Sterling should be an expression that can be used
 worked particularly well for arguments expressions because arguments could fold 
 into the function call result on the left:
 
-```
+```haskell
 // Consing a list by folding arguments, left-to-write
 [] 1 2 3 4
 > [1] 2 3 4
@@ -108,7 +108,7 @@ programming styles. Any function could be returned as the result of another
 function call and continue chaining against arguments. Sterling's terse syntax 
 also made defining functions very easy:
 
-```
+```haskell
 // Some basic functions in Sterling
 identity = (x) -> x
 selfApply = (x) -> x x
@@ -123,7 +123,7 @@ Because Sterling was intended to be immutable, objects would be used to
 represent state and carry behavior to return new state resulting from an 
 operation:
 
-```
+```haskell
 // Printing arguments from an immutable list iterator
 main = (args) ->
     print args.iterator // gets an Iterator
@@ -153,7 +153,7 @@ Paul Hammant at one point suggested baking dependency injection
 development of a metadata system in Sterling that could be used to support 
 metaprogramming and eventually dependency injection.
 
-```
+```haskell
 // Meta attributes on expressions
 @component { uses: [ :productionDb ] }
 @useWhen (runtime -> runtime.env is :production)
@@ -179,7 +179,7 @@ The metadata system was very flexible and could support arbitrary meta
 annotations. The above metadata translates to the following map structures at 
 runtime:
 
-```
+```haskell
 // What meta attributes look like if they were JavaScript
 Inventory.meta = {
     "component": {
@@ -253,7 +253,7 @@ Want to do something else if you receive an `Asteroid` object rather than a
 
 The na&iuml;ve solution is to implement an if-case for each expected type:
 
-```
+```haskell
 Spaceship = object {
     collideWith: (other) ->
         if other.meta.name is 'Asteroid' then
@@ -278,7 +278,7 @@ way to ensure that a method is receiving an `Asteroid` and not another object
 that simply implements its API.  A better solution is to let the colliding 
 object select the proper method from the object it's colliding with:
 
-```
+```haskell
 Spaceship = object {
     collideWith: (other) -> other.collidedWithSpaceship self,
     collideWithSpaceship: (spaceship) -> say 'Spaceships collide!',
@@ -299,7 +299,7 @@ in order for a `Bunny` to be correctly collided-with, a `collidedWithBunny`
 method must be added to both `Spaceship` and `Asteroid`. Developers may find it 
 easier instead to allow the `Bunny` to masquerade as an asteroid:
 
-```
+```haskell
 // Spaceship-eating Bunny
 Bunny = object {
     collideWith: (other) -> other.collideWithAsteroid self, // muahaha I'm an asteroid!
@@ -324,7 +324,7 @@ As I worked on Sterling, I required functionality that wasn't yet directly
 supportable in the language itself. I solved this problem using the "glue" 
 expression that could tie into a Java-based expression:
 
-```
+```haskell
 EmptyIterator = glue 'sterling.lang.builtin.EmptyIterator'
 List = glue 'sterling.lang.builtin.ListConstructor'
 Set = glue 'sterling.lang.builtin.SetConstructor'
@@ -408,6 +408,6 @@ memoization becomes a near requirement in order to make lazy evaluation useful.
 [virtually anywhere for anything]: http://brandonbyars.com/2008/07/21/orthogonality/
 [directly into a language]: http://paulhammant.com/blog/crazy-bob-and-type-safety-for-dependency-injection.html/
 [open/closed principle]: http://en.wikipedia.org/wiki/Open/closed_principle
-[memoization]: /posts/2013/06/17/sterling-with-memoization/
+[memoization]: $route-to("blog/2013-06-17-sterling-with-memoization.md")$
 [visitor pattern]: http://en.wikipedia.org/wiki/Visitor_pattern#Java_example
 [single dispatch]: http://en.wikipedia.org/wiki/Multiple_dispatch#Java

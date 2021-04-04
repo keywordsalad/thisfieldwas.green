@@ -15,6 +15,7 @@ executable site
                   , Site.Context.Git
                   , Site.Context.Post
                   , Site.Context.Tag
+                  , Site.Route
                   , Site.Rule
                   , Site.Rule.Archive
                   , Site.Rule.Blog

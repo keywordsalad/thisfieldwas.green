@@ -24,3 +24,13 @@ cleanIndexPaths key = mapContext transform (urlField key)
 
 strip :: String -> String
 strip = takeWhile (not . isSpace) . dropWhile isSpace
+
+stripIndex :: String -> String
+stripIndex text =
+  if drop prefixLength text == suffix
+  then prefix
+  else text
+  where
+    prefixLength = length text - length suffix
+    suffix = "index.html"
+    prefix = take prefixLength text
