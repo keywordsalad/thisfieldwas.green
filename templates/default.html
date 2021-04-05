@@ -9,15 +9,15 @@
   $else$
     <title>This Field Was Green - $title$</title>
   $endif$
+  $if(author)$<link rel="author" content="$author$">$endif$
   <link rel="icon" href="/images/grass.svg">
   <link rel="stylesheet" href="/css/main.css">
-  $if(author)$<link rel="author" content="$author$">$endif$
   <script type="text/javascript" src="/js/main.js"></script>
 </head>
 <body>
 <header>
   <div class="logo">
-    <span class="logo-icon"></span>
+    <a href="/"><span class="logo-icon"></span></a>
     <a href="/">This Field Was Green</a>
   </div>
   <nav>

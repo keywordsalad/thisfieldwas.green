@@ -34,6 +34,8 @@ footer
 
 *[role="main"]
   @include body-block
+  margin: 0 auto
+  max-width: 75rem
 
 a
   color: dodgerblue
@@ -74,18 +76,22 @@ h6
     font-weight: bold
     color: $color-greenfield
     text-decoration: none
-
   .logo-icon
+    display: block
+    float: right
+    width: 3.5rem
+    height: 3.5rem
     background-image: url("/images/grass.svg")
+    background-size: 3.5rem
 
 strong, em, b, i
   color: $color-em-text
 
 p
   &.image
-    @include bordered
-    width: 100%
     overflow-x: scroll
+    img
+      @include bordered
   &.youtube
     text-align: center
 

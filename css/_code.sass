@@ -6,15 +6,13 @@ code
 pre
   background-color: $bg-greenfield
   overflow: scroll
-  @include bordered
+  padding: 0
 
   .sourceCode
+    @include bordered
     width: 100%
     display: table
-    &:first-child
-      margin-top: 0.5rem
-    &:last-child
-      margin-bottom: 0.5rem
+    padding: 0.5rem 0
 
     .line
       display: table-row
@@ -30,6 +28,7 @@ pre
     .line-content
       display: table-cell
       padding: 0 0.5rem
+      width: 100%
 
 .sourceCode
   // keyword
