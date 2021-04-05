@@ -1,0 +1,5 @@
+tap "homebrew/bundle"
+tap "homebrew/core"
+tap "sass/sass"
+brew "haskell-stack"
+brew "sass"
