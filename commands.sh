@@ -60,6 +60,10 @@ publish () {
   git commit -m "Build on $$(date) generated from $sha"
   git push origin "gh-pages"
   popd
+
+  git add .
+  git commit -m "Update gh-pages generated from $sha"
+  git push origin main
 }
 
 test_sync () {
