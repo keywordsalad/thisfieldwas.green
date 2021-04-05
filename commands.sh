@@ -67,15 +67,11 @@ test_sync () {
   git switch $branch
   git fetch origin $branch
 
-  merge_base="$(git merge-base $branch origin/$branch)"
   rev_parse_remote="$(git rev-parse origin/$branch)"
   rev_parse_local="$(git rev-parse $branch)"
 
-  if [ "$merge_base" == "$rev_parse_remote" ]; then
-    echo "ERROR: Local branch $branch is ahead of remote!"
-    exit 1
-  elif [ "$merge_base" == "$rev_parse_local" ]; then
-    echo "ERROR: Local branch $branch is behind remote!"
+  if [ "$rev_parse_local" != "$rev_parse_remote" ]; then
+    echo "ERROR: Branch $branch not in sync with remote!"
     exit 1
   fi
 
