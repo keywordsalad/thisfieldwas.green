@@ -2,35 +2,9 @@ code
   color: $color-em-text
   font-family: "JetBrains Mono", "Source Code Pro", "Courier New", monospace
   font-variant-ligatures: discretionary-ligatures
+  white-space: pre-wrap
+  word-wrap: break-word
 
-pre
-  background-color: $bg-greenfield
-  overflow: scroll
-  padding: 0
-
-  .sourceCode
-    @include bordered
-    width: 100%
-    display: table
-    padding: 0.5rem 0
-
-    .line
-      display: table-row
-      &:target
-        background-color: $color-highlight
-
-    .line-number
-      display: table-cell
-      padding: 0 0.5rem 0 0.5rem
-      border-right: $border-thin solid $border-color-sides
-      text-align: right
-      user-select: none
-    .line-content
-      display: table-cell
-      padding: 0 0.5rem
-      width: 100%
-
-.sourceCode
   // keyword
   .kw, .cf
     color: seagreen
@@ -64,3 +38,33 @@ pre
 
   .va
     color: cornflowerblue
+
+pre
+  @include scrollbars
+  overflow: scroll
+  margin-right: 0.5rem
+
+  code.sourceCode
+    @include bordered
+    background-color: $bg-greenfield
+    display: table
+    padding: 0.5rem 0
+    margin-bottom: 0.5rem
+    white-space: pre
+    word-wrap: initial
+
+    .line
+      display: table-row
+      &:target
+        background-color: $color-highlight
+
+    .line-number
+      display: table-cell
+      padding: 0 0.5rem 0 0.5rem
+      border-right: $border-thin solid $border-color-sides
+      text-align: right
+      user-select: none
+    .line-content
+      display: table-cell
+      padding: 0 0.5rem
+      width: 100%
