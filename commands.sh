@@ -45,11 +45,11 @@ watch () {
 
 publish () {
   current_branch="$(git branch --show-current)"
-  if [ "$current_branch" -ne "develop" ]; then
+  if [[ "$current_branch" -ne "main" ]]; then
     echo "Can't publish from current branch: $current_branch"
     exit 1
   fi
-  test_sync "develop"
+  test_sync "main"
   build
 
   commit="$$(git log -1 HEAD --pretty=format:%H)"
