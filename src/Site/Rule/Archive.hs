@@ -7,7 +7,7 @@ import Site.Rule.Blog (loadPublishedPosts)
 
 archiveRules :: Context String -> Rules ()
 archiveRules baseCtx =
-  create ["archive.html"] do
+  create ["archives.html"] do
     route $ idRoute `composeRoutes` indexRoute
     compile $ archiveCompiler baseCtx
 
@@ -21,6 +21,6 @@ archiveCompiler baseCtx = do
   posts <- recentFirst =<< loadPublishedPosts
   let ctx = archiveCtx baseCtx posts <> baseCtx
   makeItem ""
-    >>= loadAndApplyTemplate "templates/archive.html" ctx
+    >>= loadAndApplyTemplate "templates/archives.html" ctx
     >>= loadAndApplyTemplate "templates/default.html" ctx
     >>= relativizeUrls

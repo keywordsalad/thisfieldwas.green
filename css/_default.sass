@@ -26,11 +26,17 @@ body
 
 nav
   border-top: 0.1rem
+  max-width: 75rem
+  margin: 0 auto
 
 footer
   @include body-block
   background-color: $bg-greenfield
   border-top: 0.2rem solid $color-text
+
+  > *
+    max-width: 75rem
+    margin: 0 auto
 
 *[role="main"]
   @include body-block
@@ -72,6 +78,8 @@ h6
       color: slategrey
 
 .logo
+  max-width: 75rem
+  margin: 0 auto
   a
     font-weight: bold
     color: $color-greenfield
