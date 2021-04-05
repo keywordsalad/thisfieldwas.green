@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en" xmlns:ng="http://angularjs.org">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Configuration application (alpha)</title>
+  <script type="text/javascript" ng:autobind src="http://code.angularjs.org/0.9.19/angular-0.9.19.min.js"></script>
+  <style type="text/css">
+    ins { color: #00CC00; text-decoration: none; }
+    del { color: #CC0000; text-decoration: none; }
+  </style>
+</head>
+<body ng:controller="AppCfg">
+<script type="text/javascript">
+    function AppCfg($resource, $xhr) {
+        var self = this;
+        this.newNickname = "";
+        this.svrMessage;
+        this.message;
+        this.cfg = $resource("/appconfig/stack_configuration.json").get({});
+        
+        this.save = function() {
+            self.cfg.$save({message: self.message}, function() {
+                alert("Config saved to server");
+            }, function() {
+                alert("ERROR on save");
+            });
+            self.message = "";
+        };
+        
+        this.newNick = function() {
+            self.cfg.bannedNicks.push(self.newNickname);
+            self.newNickname = "";
+        };
+        
+        this.diffs = function() {
+            $xhr("post", "/appconfig/diffs/stack_configuration.json", angular.toJson(self.cfg), function(code, svrMessage) {
+                self.svrMessage = svrMessage;
+            });
+        };
+        
+        this.deleteNick = function(nick) {
+            var oldBannedNicks = self.cfg.bannedNicks;
+            self.cfg.bannedNicks = [];
+            angular.forEach(oldBannedNicks, function(n) {
+                if (nick != n) {
+                    self.cfg.bannedNicks.push(n);
+                }
+            });
+        };
+    }
+    
+    AppCfg.$inject = ["$resource", "$xhr"];
+</script>
+  Light is on:  <input type="checkbox" name="cfg.lighton"/> <br/>
+  Default Error Reciever (email): <input name="cfg.defaultErrorReciever" ng:validate="email"/> <br/>
+  Max Load Percentage: <input name="cfg.loadMaxPercent" ng:validate="number:0:100"/> <br/>
+  Next Shutdown Date: <input name="cfg.nextShutdownDate" ng:validate="date"/> <br/>
+  Banned nicks: 
+      <ol>
+        <li ng:repeat="nick in cfg.bannedNicks"><span>{{nick}} &nbsp;&nbsp;<a ng:click="deleteNick(nick)">[X]</a></span></li>
+    </ol>
+  <form ng:submit="newNick()">
+    <input type="text" name="newNickname" size="20"/>
+    <input type="submit" value="&lt;-- Add Nick"/><br/>
+  </form>   
+  <hr/>
+  <button ng:click="diffs()">View Diffs</button><br/>
+  <button ng:disabled="{{!message}}" ng:click="save()">Commit Changes</button> Commit Message: <input name="message"></input><br/> 
+  Last Server operation: <br/>  
+  <div ng:bind="svrMessage | html:'unsafe'">
+  </div>
+</body>
+</html>

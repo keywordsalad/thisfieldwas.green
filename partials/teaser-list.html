@@ -1,0 +1,12 @@
+<section class="teaser-list">
+  <header>
+    <h1>Previous Posts</h1>
+  </header>
+  $for(otherPosts)$
+    $if(teaser)$
+      $teaser$
+      </article> $comment("teaser slices off closing tag")$
+    $endif$
+    <a href="$url$" class="read-more">Read more...</a>
+  $endfor$
+</section>
