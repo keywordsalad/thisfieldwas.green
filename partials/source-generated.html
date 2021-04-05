@@ -1,1 +1,13 @@
-GENERATED
+<p class="generated-from">
+  This page was generated
+    $if(isGenerated)$
+      from commit
+    $else$
+      from file <code><a href="$githubUrl$/blob/$gitSha1$/$path$">$path$</a></code>
+      at commit
+    $endif$
+  <a class="commit-link" href="$githubUrl$/commit/$gitSha1$">[$gitSha1$] $gitMessage$</a>
+  $if(isChanged)$
+    with local modifications
+  $endif$
+</p>

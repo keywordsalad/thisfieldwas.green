@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "Sterling Benchmarks"
-author: "Logan McGrath"
 date: 2013-06-16 21:12
 comments: false
 published: false
