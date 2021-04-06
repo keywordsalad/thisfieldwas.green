@@ -1,11 +1,12 @@
 ---
-layout: post
+contentTemplates: [post]
+templates: [default, skeleton]
 title: "Promoting changes with App-Config-App"
 author: "Logan McGrath"
 date: 2012-11-28 13:04
 comments: false
 published: true
-tags: [AngularJS, Perforce, SCM, Sinatra]
+tags: [AngularJS, Perforce, SCM, Sinatra, Configuration Management]
 ---
 
 The App-Config-App now lets you promote changes between environments!

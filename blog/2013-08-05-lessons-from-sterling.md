@@ -1,14 +1,12 @@
 ---
-layout: post
+contentTemplates: [post]
+templates: [default, skeleton]
 title: "Lessons from Sterling"
 author: "Logan McGrath"
 date: 2013-08-05 9:37
 comments: false
 published: false
-categories:
-  - Sterling
-  - Functional Programming
-  - Language Design
+tags: [Sterling, Functional Programming, Language Design]
 ---
 
 I've spent the last seven months developing a language called [Sterling][].

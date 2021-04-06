@@ -22,5 +22,5 @@ archiveCompiler baseCtx = do
   let ctx = archiveCtx baseCtx posts <> baseCtx
   makeItem ""
     >>= loadAndApplyTemplate "templates/archives.html" ctx
-    >>= applyPageTemplate ctx
+    >>= applyPageTemplates ctx
     >>= relativizeUrls

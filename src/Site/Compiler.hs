@@ -1,41 +1,51 @@
 module Site.Compiler where
 
 import Control.Monad.Except (catchError, (>=>))
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromMaybe)
 import Debug.Trace
 import Hakyll
-  ( Compiler,
-    Context,
-    Identifier,
-    Item (itemBody, itemIdentifier),
-    MonadMetadata (getMatches),
-    Pattern,
-    Snapshot,
-    applyAsTemplate,
-    defaultHakyllReaderOptions,
-    defaultHakyllWriterOptions,
-    getResourceBody,
-    loadAndApplyTemplate,
-    loadSnapshot,
-    pandocCompilerWithTransformM,
-    readPandocWith,
-    toFilePath,
-    writePandocWith,
-  )
+import Site.Metadata
 import Text.Pandoc.Highlighting (pygments)
 import qualified Text.Pandoc.Options as Opt
 
-applyDefaultTemplate :: Context String -> Item String -> Compiler (Item String)
-applyDefaultTemplate = loadAndApplyTemplate "templates/default.html"
+applyContentTemplates ::
+  Context String            -- ^ template context
+  -> Item String            -- ^ the item being compiled
+  -> Compiler (Item String) -- ^ the newly constructed compiler
+applyContentTemplates =
+  applyTemplatesFromMetadata "contentTemplate" []
 
-applySkeletonTemplate :: Context String -> Item String -> Compiler (Item String)
-applySkeletonTemplate = loadAndApplyTemplate "templates/skeleton.html"
+applyPageTemplates ::
+  Context String            -- ^ template context
+  -> Item String            -- ^ the item being compiled
+  -> Compiler (Item String) -- ^ the newly constructed compiler
+applyPageTemplates =
+  applyTemplatesFromMetadata "templates" ["default", "skeleton"]
 
-applyPageTemplate :: Context String -> Item String -> Compiler (Item String)
-applyPageTemplate baseCtx =
-  foldl (>=>) pure $ templates <*> [baseCtx]
+applyTemplatesFromMetadata ::
+  String                    -- ^ the key to read templates from
+  -> [String]               -- ^ the default templates
+  -> Context String         -- ^ template context
+  -> Item String            -- ^ the item being compiled
+  -> Compiler (Item String) -- ^ the newly constructed compiler
+applyTemplatesFromMetadata key defaultTemplates ctx item = do
+  metadata <- getMetadata <$> getUnderlying
+  let maybeTemplates = (flip fmap) (getValue key metadata) \case
+        Array
+      templates = fromMaybe defaultTemplates maybeTemplates
+  applyTemplatesFromList templates ctx item
+
+applyTemplatesFromList ::
+  [String]                  -- ^ the list of templates to apply
+  -> Context String         -- ^ template context
+  -> Item String            -- ^ the item being compiled
+  -> Compiler (Item String) -- ^ the newly constructed compiler
+applyTemplatesFromList templates ctx =
+  foldl (>=>) pure templates'
   where
-    templates = [applyDefaultTemplate, applySkeletonTemplate]
+    templates' = toTemplate' <$> templates
+    toTemplate' t = loadAndApplyTemplate (templateId t) ctx
+    templateId t = fromFilePath $ "templates/" ++ t ++ ".html"
 
 maybeLoadSnapshot :: Identifier -> Snapshot -> Compiler (Maybe (Item String))
 maybeLoadSnapshot id' snapshot =

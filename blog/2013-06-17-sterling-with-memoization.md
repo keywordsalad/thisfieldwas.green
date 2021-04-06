@@ -1,14 +1,12 @@
 ---
-layout: post
+contentTemplates: [post]
+templates: [default, skeleton]
 title: "Sterling With Memoization"
 author: "Logan McGrath"
 date: 2013-06-17 04:26
 comments: false
 published: false
-tags:
-  - Sterling
-  - Functional Programming
-  - Language Design
+tags: [Sterling, Functional Programming, Language Design]
 ---
 
 In my [last post][] I wrote about performance in the [Sterling][] programming 

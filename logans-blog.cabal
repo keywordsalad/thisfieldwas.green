@@ -38,6 +38,8 @@ executable site
                   , containers == 0.6.*
                   , pandoc == 2.11.*
                   , pandoc-types == 1.22.*
+                  , yaml == 0.11.*
+                  , text == 1.2.*
   ghc-options:      -threaded
                     -rtsopts
                     -with-rtsopts=-N

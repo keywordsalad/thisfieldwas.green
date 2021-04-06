@@ -1,11 +1,12 @@
 ---
-layout: post
+contentTemplates: [post]
+templates: [default, skeleton]
 title: "App-Config-App in Action"
 author: "Logan McGrath"
 date: 2012-11-20 07:00
 comments: false
 published: true
-tags: [AngularJS, Perforce, SCM, Sinatra]
+tags: [AngularJS, Perforce, SCM, Sinatra, Configuration Management]
 ---
 
 Paul Hammant found this cool [Server-Side Piano][] and I've modified it to be 

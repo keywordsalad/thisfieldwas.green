@@ -40,7 +40,7 @@ publishedPostRules env baseCtx =
     compile $
       postCompiler env publishedSnapshot ctx
         >>= saveSnapshot "content"
-        >>= applyPageTemplate ctx
+        >>= applyPageTemplates ctx
         >>= relativizeUrls
   where
     ctx = postCtx <> baseCtx
@@ -51,7 +51,7 @@ draftPostRules env baseCtx =
     route $ baseRoute `composeRoutes` draftsRoute
     compile $
       postCompiler env draftSnapshot ctx
-        >>= applyPageTemplate ctx
+        >>= applyPageTemplates ctx
         >>= relativizeUrls
   where
     ctx = postCtx <> baseCtx
@@ -62,10 +62,14 @@ postCompiler ::
   Snapshot ->
   Context String ->
   Compiler (Item String)
-postCompiler env snapshot ctx =
+postCompiler env snapshot ctx = do
+  metadata <- getMetadata . itemIdentifier <$> getUnderlying
+  let template = fromMaybe "post"
   interpolateResourceBody env ctx
-    >>= loadAndApplyTemplate "templates/post.html" ctx
+    >>= applyContentTemplates ctx
     >>= saveSnapshot snapshot
+  where
+    contentTemplate = getMetadata
 
 baseRoute :: Routes
 baseRoute =
@@ -94,7 +98,7 @@ draftIndexCompiler baseCtx = do
   let ctx = draftIndexCtx baseCtx posts <> baseCtx
   makeItem ""
     >>= loadAndApplyTemplate "templates/drafts.html" ctx
-    >>= applyPageTemplate ctx
+    >>= applyPageTemplates ctx
     >>= relativizeUrls
 
 isPublishable :: [(String, String)] -> Metadata -> Bool
