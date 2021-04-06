@@ -14,7 +14,7 @@ archiveRules baseCtx =
 archiveCtx :: Context String -> [Item String] -> Context String
 archiveCtx baseCtx posts =
   listField "posts" (postCtx <> baseCtx) (return posts)
-  <> constField "title" "Archives"
+    <> constField "title" "Archives"
 
 archiveCompiler :: Context String -> Compiler (Item String)
 archiveCompiler baseCtx = do
@@ -22,5 +22,5 @@ archiveCompiler baseCtx = do
   let ctx = archiveCtx baseCtx posts <> baseCtx
   makeItem ""
     >>= loadAndApplyTemplate "templates/archives.html" ctx
-    >>= loadAndApplyTemplate "templates/default.html" ctx
+    >>= applyPageTemplate ctx
     >>= relativizeUrls

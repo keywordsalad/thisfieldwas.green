@@ -1,15 +1,14 @@
 module Site.Rule.Blog
-  ( blogRules
-  , draftSnapshot
-  , loadDraftPosts
-  , loadPublishedPosts
-  , postCompiler
-  , postCtx
-  , publishedSnapshot
+  ( blogRules,
+    draftSnapshot,
+    loadDraftPosts,
+    loadPublishedPosts,
+    postCompiler,
+    postCtx,
+    publishedSnapshot,
   )
-  where
+where
 
-import Debug.Trace
 import Site.Common
 import Site.Context.Post
 import Site.Route (indexRoute)
@@ -40,9 +39,9 @@ publishedPostRules env baseCtx =
     route baseRoute
     compile $
       postCompiler env publishedSnapshot ctx
-      >>= saveSnapshot "content"
-      >>= loadAndApplyTemplate "templates/default.html" ctx
-      >>= relativizeUrls
+        >>= saveSnapshot "content"
+        >>= applyPageTemplate ctx
+        >>= relativizeUrls
   where
     ctx = postCtx <> baseCtx
 
@@ -52,37 +51,27 @@ draftPostRules env baseCtx =
     route $ baseRoute `composeRoutes` draftsRoute
     compile $
       postCompiler env draftSnapshot ctx
-      >>= loadAndApplyTemplate "templates/default.html" ctx
-      >>= relativizeUrls
+        >>= applyPageTemplate ctx
+        >>= relativizeUrls
   where
     ctx = postCtx <> baseCtx
     draftsRoute = gsubRoute "^blog/" $ replaceAll "^blog/" (const "drafts/")
 
-postCompiler :: [(String, String)]
-  -> Snapshot
-  -> Context String
-  -> Compiler (Item String)
+postCompiler ::
+  [(String, String)] ->
+  Snapshot ->
+  Context String ->
+  Compiler (Item String)
 postCompiler env snapshot ctx =
-  getResourceBody
-  >>= applyAsTemplate ctx . maybeDebugPost env
-  >>= pandocCompilerForCodeInsertion
-  >>= loadAndApplyTemplate "templates/post.html" ctx
-  >>= saveSnapshot snapshot
-
-maybeDebugPost :: [(String, String)] -> Item String -> Item String
-maybeDebugPost env item =
-  let sep = "=================================================\n"
-      y = toFilePath (itemIdentifier item) ++ sep
-      z = itemBody item ++ sep
-   in if isJust (lookup "SITE_DEBUG" env)
-      then trace (sep ++ y ++ z) item
-      else item
+  interpolateResourceBody env ctx
+    >>= loadAndApplyTemplate "templates/post.html" ctx
+    >>= saveSnapshot snapshot
 
 baseRoute :: Routes
 baseRoute =
   setExtension "html"
-  `composeRoutes` indexRoute
-  `composeRoutes` dateRoute
+    `composeRoutes` indexRoute
+    `composeRoutes` dateRoute
 
 dateRoute :: Routes
 dateRoute = gsubRoute "^blog/[0-9]{4}-[0-9]{2}-[0-9]{2}-" $ replaceAll "-" (const "/")
@@ -96,8 +85,8 @@ draftIndexRules baseCtx =
 draftIndexCtx :: Context String -> [Item String] -> Context String
 draftIndexCtx baseCtx posts =
   constField "title" "Drafts"
-  <> listField "posts" (postCtx <> baseCtx) (return posts)
-  <> constField "title" "Drafts"
+    <> listField "posts" (postCtx <> baseCtx) (return posts)
+    <> constField "title" "Drafts"
 
 draftIndexCompiler :: Context String -> Compiler (Item String)
 draftIndexCompiler baseCtx = do
@@ -105,7 +94,7 @@ draftIndexCompiler baseCtx = do
   let ctx = draftIndexCtx baseCtx posts <> baseCtx
   makeItem ""
     >>= loadAndApplyTemplate "templates/drafts.html" ctx
-    >>= loadAndApplyTemplate "templates/default.html" ctx
+    >>= applyPageTemplate ctx
     >>= relativizeUrls
 
 isPublishable :: [(String, String)] -> Metadata -> Bool

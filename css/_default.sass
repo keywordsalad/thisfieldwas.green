@@ -1,174 +1,128 @@
 @import "theme"
 @import "code"
 
-*
-  line-height: 1.6em
-
-html
-  margin: 0
-  padding: 0
-  font-family: "Verdana", "Arial", sans-serif
-  font-size: 85%
-  font-variant: discretionary-ligatures
-
-body
-  margin: 0
-  padding: 0
-  font-size: 1rem
-  color: $color-text
-  background-color: $bg-content
-  overflow: scroll
-
+body.default
   > header
     @include body-block
     border-bottom: 0.2rem solid $border-color-top
     background-color: $bg-greenfield
 
-nav
-  border-top: 0.1rem
-  max-width: 75rem
-  margin: 0 auto
-
-footer
-  @include body-block
-  background-color: $bg-greenfield
-  border-top: 0.2rem solid $color-text
-
-  > *
+  nav
+    border-top: 0.1rem
     max-width: 75rem
     margin: 0 auto
 
-*[role="main"]
-  @include body-block
-  margin: 0 auto
-  max-width: 75rem
-
-a
-  color: dodgerblue
-  text-decoration: none
-
-h1, h2, h3, h4, h5, h6
-  line-height: 1.2em
-
-h1
-  font-size: 1.8rem
-
-h2
-  font-size: 1.6rem
-
-h3
-  font-size: 1.4rem
-
-h4
-  font-size: 1.2rem
-
-h5
-  font-size: 1rem
-
-h6
-  font-size: 0.9rem
-
-.post
-  header
-    h1
-      display: none
-    .published
-      font-size: 1.4rem
-      font-style: italic
-      color: slategrey
-
-.logo
-  max-width: 75rem
-  margin: 0 auto
-  a
-    font-weight: bold
-    color: $color-greenfield
-    text-decoration: none
-  .logo-icon
-    display: block
-    float: right
-    width: 3.5rem
-    height: 3.5rem
-    background-image: url("/images/grass.svg")
-    background-size: 3.5rem
-
-strong, em, b, i
-  color: $color-em-text
-
-p
-  &.image
-    overflow-x: scroll
-    @include scrollbars
-    img
-      @include bordered
-
-  &.youtube
-    text-align: center
-
-blockquote
-  margin-left: 2rem
-  padding-left: 0.5rem
-  border-left: 0.1rem solid $color-em-text
-  color: $color-em-text
-  font-style: italic
-
-iframe
-  border: none
-
-.teaser-list
-  > header h1
-    padding: 0.6rem 0
-    margin: 0
+  footer
+    @include body-block
     background-color: $bg-greenfield
     border-top: 0.2rem solid $color-text
-    border-bottom: 0.05rem solid $color-text
+
+    > *
+      max-width: 75rem
+      margin: 0 auto
+
+  *[role="main"]
+    @include body-block
+    margin: 0 auto
+    max-width: 75rem
+
+  a
+    color: dodgerblue
+    text-decoration: none
+
+  h1, h2, h3, h4, h5, h6
+    line-height: 1.2em
+
+  h1
+    font-size: 1.8rem
+
+  h2
+    font-size: 1.6rem
+
+  h3
+    font-size: 1.4rem
+
+  h4
+    font-size: 1.2rem
+
+  h5
+    font-size: 1rem
+
+  h6
+    font-size: 0.9rem
+
   .post
     header
       h1
-        display: block
+        display: none
+      .published
         font-size: 1.4rem
-      em
-        font-size: 1.2rem
-  .read-more
-    display: block
-    padding: 0.5rem 0
-    background-color: $bg-greenfield
-    border-bottom: 0.05rem solid $color-text
+        font-style: italic
+        color: slategrey
 
-.copyright
-  font-size: 0.9rem
+  .logo
+    max-width: 75rem
+    margin: 0 auto
+    a
+      font-weight: bold
+      color: $color-greenfield
+      text-decoration: none
+    .logo-icon
+      display: block
+      float: right
+      width: 3.5rem
+      height: 3.5rem
+      background-image: url("/images/grass.svg")
+      background-size: 3.5rem
 
-.generated-by-hakyll
-  font-size: 0.8rem
+  strong, em, b, i
+    color: $color-em-text
 
-.generated-from
-  font-size: 0.9rem
+  p
+    &.image
+      overflow-x: scroll
+      @include scrollbars
+      img
+        @include bordered
 
-@import "screen-sizes/small-format"
-@import "screen-sizes/medium-format"
-@import "screen-sizes/large-format"
-@import "screen-sizes/huge-format"
+    &.youtube
+      text-align: center
 
-// cover all smartphones in portrait mode
-@media only screen and (max-width: 420px)
-  @include small-format
+  blockquote
+    margin-left: 2rem
+    padding-left: 0.5rem
+    border-left: 0.1rem solid $color-em-text
+    color: $color-em-text
+    font-style: italic
 
-// most smartphones in landscape mode
-@media only screen and (min-width: 421px) and (max-width: 767px)
-  @include small-format
+  iframe
+    border: none
 
-// most Android tablets and iPads in portrait mode
-@media only screen and (min-width: 768px) and (max-width: 1023px)
-  @include medium-format
+  .teaser-list
+    > header h1
+      padding: 0.6rem 0
+      margin: 0
+      background-color: $bg-greenfield
+      border-top: 0.2rem solid $color-text
+      border-bottom: 0.05rem solid $color-text
+    .post
+      header
+        h1
+          display: block
+          font-size: 1.4rem
+        em
+          font-size: 1.2rem
+    .read-more
+      display: block
+      padding: 0.5rem 0
+      background-color: $bg-greenfield
+      border-bottom: 0.05rem solid $color-text
 
-//most Android tablets and iPads in landscape mode, older desktop/laptop monitors
-@media only screen and (min-width: 1024px) and (max-width: 1365px)
-  @include medium-format
+  .copyright
+    font-size: 0.9rem
 
-// iPad PRO, HDready and FullHD desktop laptop monitors
-@media only screen and (min-width: 1366px) and (max-width: 1919px)
-  @include large-format
+  .generated-by-hakyll
+    font-size: 0.8rem
 
-// 4K and above
-@media only screen and (min-width: 1920px)
-  @include huge-format
+  .generated-from
+    font-size: 0.9rem

@@ -25,7 +25,7 @@ rules env feedConfig baseCtx = do
     blogRules env baseCtx
     feedRules feedConfig baseCtx
     indexRules env baseCtx
-    pageRules baseCtx
+    pageRules env baseCtx
     robotsTxtRules baseCtx
     archiveRules baseCtx
     sitemapRules baseCtx

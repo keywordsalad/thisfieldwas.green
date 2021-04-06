@@ -9,7 +9,6 @@ executable site
   other-modules:    Site
                   , Site.Common
                   , Site.Compiler
-                  , Site.Compiler.CustomPandoc
                   , Site.Configuration
                   , Site.Context.Field
                   , Site.Context.Git

@@ -17,9 +17,12 @@ sitemapCtx baseCtx pages = do
 sitemapCompiler :: Context String -> Compiler (Item String)
 sitemapCompiler baseCtx = do
   posts <- recentFirst =<< loadPublishedPosts
-  pages <- loadAll $ fromList
-    [ "about-me.md"
-    , "contact.md"
-    ]
+  pages <-
+    loadAll $
+      fromList
+        [ "about-me.md",
+          "contact.md",
+          "index.html"
+        ]
   let ctx = sitemapCtx (postCtx <> baseCtx) (posts <> pages) <> baseCtx
   makeItem "" >>= loadAndApplyTemplate "templates/sitemap.xml" ctx
