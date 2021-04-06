@@ -12,5 +12,7 @@ sassRules = do
 
 sassCompiler :: Compiler (Item String)
 sassCompiler = getResourceString
-  >>= withItemBody (unixFilter "sass" ["--trace", "--stdin", "--load-path", "css"])
+  >>= withItemBody (unixFilter "sass" args)
   >>= return . fmap compressCss
+  where
+    args = ["--trace", "--indented", "--stdin", "--load-path", "css"]
