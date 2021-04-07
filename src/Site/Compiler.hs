@@ -1,10 +1,30 @@
 module Site.Compiler where
 
 import Control.Monad.Except (catchError, (>=>))
-import qualified Data.Map as M
-import Data.Maybe (fromMaybe, isJust)
+import qualified Data.Aeson.Types as AT
+import Data.Maybe (isJust)
 import Debug.Trace
 import Hakyll
+  ( Compiler,
+    Context,
+    Identifier,
+    Item (itemBody, itemIdentifier),
+    MonadMetadata (getMatches, getMetadata),
+    Pattern,
+    Snapshot,
+    applyAsTemplate,
+    defaultHakyllReaderOptions,
+    defaultHakyllWriterOptions,
+    fromFilePath,
+    getResourceBody,
+    loadAndApplyTemplate,
+    loadSnapshot,
+    pandocCompilerWithTransformM,
+    readPandocWith,
+    toFilePath,
+    writePandocWith,
+  )
+import Site.Metadata
 import Text.Pandoc.Highlighting (pygments)
 import qualified Text.Pandoc.Options as Opt
 
@@ -16,7 +36,7 @@ applyContentTemplates ::
   -- | the newly constructed compiler
   Compiler (Item String)
 applyContentTemplates =
-  applyTemplatesFromMetadata "contentTemplate" []
+  applyTemplatesFromMetadata contentTemplates
 
 applyPageTemplates ::
   -- | template context
@@ -26,21 +46,24 @@ applyPageTemplates ::
   -- | the newly constructed compiler
   Compiler (Item String)
 applyPageTemplates =
-  applyTemplatesFromMetadata "templates" ["default", "skeleton"]
+  applyTemplatesFromMetadata templates
 
 applyTemplatesFromMetadata ::
   -- | the key to read templates from
-  String ->
-  -- | the default templates
-  [String] ->
+  (PostMetadata -> [String]) ->
   -- | template context
   Context String ->
   -- | the item being compiled
   Item String ->
   -- | the newly constructed compiler
   Compiler (Item String)
-applyTemplatesFromMetadata key defaultTemplates ctx item = do
-  applyTemplatesFromList [] ctx item -- TODO
+applyTemplatesFromMetadata f ctx item = do
+  let id' = itemIdentifier item
+  metadata <- getMetadata id'
+  postMetadata <- case AT.parse parsePostMetadata metadata of
+    AT.Error s -> fail s
+    AT.Success pm -> return pm
+  applyTemplatesFromList (f postMetadata) ctx item
 
 applyTemplatesFromList ::
   -- | the list of templates to apply

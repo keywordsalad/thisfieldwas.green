@@ -1,9 +1,9 @@
 ---
-contentTemplates: post
+content-templates: post
 templates: default, skeleton
 title: "App-Config-App in Action"
 author: "Logan McGrath"
-date: 2012-11-20 07:00
+date: 2012-11-20T07:00:00 CST
 comments: false
 published: true
 tags: AngularJS, Perforce, SCM, Sinatra, Configuration Management

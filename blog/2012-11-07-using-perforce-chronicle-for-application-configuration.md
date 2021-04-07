@@ -1,9 +1,9 @@
 ---
-contentTemplates: post
+content-templates: post
 templates: default, skeleton
 title: "Using Perforce Chronicle for application configuration"
 author: "Logan McGrath"
-date: 2012-11-07 13:54
+date: 2012-11-07T13:54:00 CST
 tags: Perforce, Configuration Management
 published: true
 ---

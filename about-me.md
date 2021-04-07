@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "About"
-date: 2015-01-23 11:42
+date: 2015-01-23T11:42:00 PST
 comments: false
 sharing: true
 footer: true

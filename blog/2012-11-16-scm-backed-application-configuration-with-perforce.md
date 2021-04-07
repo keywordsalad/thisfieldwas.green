@@ -1,9 +1,9 @@
 ---
-contentTemplates: post
+content-templates: post
 templates: default, skeleton
 title: "SCM-Backed Application Configuration with Perforce"
 author: "Logan McGrath"
-date: 2012-11-16 07:00
+date: 2012-11-16T07:00:00 CST
 comments: false
 published: true
 tags: SCM, [Perforce, Sinatra, AngularJS

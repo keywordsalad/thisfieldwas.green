@@ -1,9 +1,9 @@
 ---
-contentTemplates: post
+content-templates: post
 templates: default, skeleton
 title: "Promoting changes with App-Config-App"
 author: "Logan McGrath"
-date: 2012-11-28 13:04
+date: 2012-11-28T13:04:00 CST
 comments: false
 published: true
 tags: AngularJS, Perforce, SCM, Sinatra, Configuration Management
