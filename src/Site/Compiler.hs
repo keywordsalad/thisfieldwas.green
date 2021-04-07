@@ -2,6 +2,7 @@ module Site.Compiler where
 
 import Control.Monad.Except (catchError, (>=>))
 import qualified Data.Aeson.Types as AT
+import Data.List (foldl')
 import Data.Maybe (isJust)
 import Debug.Trace
 import Hakyll
@@ -75,7 +76,7 @@ applyTemplatesFromList ::
   -- | the newly constructed compiler
   Compiler (Item String)
 applyTemplatesFromList templates ctx =
-  foldl (>=>) pure templates'
+  foldl' (>=>) pure templates'
   where
     templates' = toTemplate' <$> templates
     toTemplate' t = loadAndApplyTemplate (templateId t) ctx

@@ -1,0 +1,113 @@
+name: logans-blog
+version: 0.1.0.0
+github: ThisFieldWasGreen/thisfieldwasgreen.github.io
+license: MIT
+author: Logan McGrath
+maintainer: "blog@thisfieldwas.green"
+copyright: "2012 Logan McGrath"
+
+extra-source-files:
+  - README.md
+
+description: Please see the README at <https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io#readme>
+
+dependencies:
+  - base >= 4.7 && < 5
+  - aeson == 1.5.*
+  - bytestring == 0.*
+  - containers == 0.6.*
+  - directory == 1.3.*
+  - filepath == 1.4.*
+  - hakyll == 4.14.*
+  - hjsmin == 0.2.*
+  - hspec == 2.7.*
+  - language-javascript == 0.7.*
+  - MissingH == 1.4.*
+  - mtl == 2.2.*
+  - pandoc == 2.11.*
+  - pandoc-types == 1.22.*
+  - process == 1.6.*
+  - text == 1.2.*
+  - time == 1.9.*
+  - unordered-containers == 0.2.*
+  - vector == 0.12.*
+
+library:
+  source-dirs: src
+
+default-extensions: &default-extensions
+  - BangPatterns
+  - BinaryLiterals
+  - BlockArguments
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveDataTypeable
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveTraversable
+  - DerivingStrategies
+  - DoAndIfThenElse
+  - EmptyDataDecls
+  - ExistentialQuantification
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - KindSignatures
+  - LambdaCase
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NamedFieldPuns
+  - OverloadedStrings
+  - PartialTypeSignatures
+  - PatternGuards
+  - PatternSynonyms
+  - PolyKinds
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TemplateHaskell
+  - TupleSections
+  - TypeFamilies
+  - TypeSynonymInstances
+  - ViewPatterns
+
+ghc-options: &ghc-options
+  - -threaded
+  - -rtsopts
+  - -with-rtsopts=-N
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-patterns
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-deriving-strategies
+  - -Wmissing-home-modules
+  - -Wname-shadowing
+  - -Wpartial-fields
+  - -Wredundant-constraints
+  - -Wunused-type-patterns
+
+executables:
+  logans-blog-exe:
+    main: Main.hs
+    source-dirs: app
+    default-extensions: *default-extensions
+    ghc-options: *ghc-options
+    dependencies:
+      - logans-blog
+
+tests:
+  logans-blog-test:
+    main: Spec.hs
+    source-dirs: test
+    default-extensions: *default-extensions
+    ghc-options: *ghc-options
+    dependencies:
+      - logans-blog

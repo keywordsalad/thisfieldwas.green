@@ -1,0 +1,8 @@
+cradle:
+  stack:
+    - path: ./src
+      component: logans-blog:lib
+    - path: ./app
+      component: logans-blog:exe:logans-blog-exe
+    - path: ./test
+      component: logans-blog:test:logans-blog-test
