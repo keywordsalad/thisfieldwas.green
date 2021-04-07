@@ -1,22 +1,22 @@
 ---
-contentTemplates: [post]
-templates: [default, skeleton]
+contentTemplates: post
+templates: default, skeleton
 title: "Sterling Benchmarks"
 date: 2013-06-16 21:12
 comments: false
 published: false
-tags: [Functional Programming, Sterling, Language Design]
+tags: Functional Programming, Sterling, Language Design
 ---
 
-Since [mid January][], I’ve been developing a functional scripting language I 
+Since [mid January][], I’ve been developing a functional scripting language I
 call [Sterling][]. In the past few weeks, Sterling has become nearly usable, but
-it doesn’t seem to be very fast. So this weekend, I’ve taking the time to create 
+it doesn’t seem to be very fast. So this weekend, I’ve taking the time to create
 a simple (read: na&iuml;ve) benchmark.
 
 <!--more-->
 
-The benchmark uses a [recursive algorithm][] to calculate the Nth member of the 
-[Fibonacci sequence][]. I’ve implemented both Sterling and Java versions of the 
+The benchmark uses a [recursive algorithm][] to calculate the Nth member of the
+[Fibonacci sequence][]. I’ve implemented both Sterling and Java versions of the
 algorithm and I will be benchmarking each for comparison.
 
 ```haskell
@@ -41,21 +41,21 @@ static int fibonacci(int n) {
 
 ### Why was the Fibonacci sequence chosen for the benchmark?
 
-The algorithm for calculating the Nth member of the Fibonacci sequence has two 
+The algorithm for calculating the Nth member of the Fibonacci sequence has two
 key traits:
 
 * It’s recursive
 * It has O(2<sup>n</sup>) complexity
 
-Sterling as of right now performs zero optimizations, so I’m assuming this 
-algorithm will bring out Sterling’s worst performance characteristics 
+Sterling as of right now performs zero optimizations, so I’m assuming this
+algorithm will bring out Sterling’s worst performance characteristics
 (muahahaha).
 
 ## The benchmark execution plan
 
-I’m using a very basic benchmark excluding Sterling’s compilation overhead and 
-comparing the results to native Java. I will execute the Fibonacci algorithm 100 
-times for 10 iterations, providing an average of the time elapsed for each 
+I’m using a very basic benchmark excluding Sterling’s compilation overhead and
+comparing the results to native Java. I will execute the Fibonacci algorithm 100
+times for 10 iterations, providing an average of the time elapsed for each
 iteration.
 
 ```java
@@ -129,14 +129,14 @@ Average for 10 iterations X 100 executions: 7,923 milliseconds
 
 Sterling is _**REALLY**_ slow!
 
-Sterling executes directly against an abstract syntax tree representing 
-operations and data. This tree is generally immutable, so the execution is 
-performed by effectively rewriting the tree to reduce each node into an “atomic” 
-expression, such as an integer constant or lambda (which can’t be further 
+Sterling executes directly against an abstract syntax tree representing
+operations and data. This tree is generally immutable, so the execution is
+performed by effectively rewriting the tree to reduce each node into an “atomic”
+expression, such as an integer constant or lambda (which can’t be further
 reduced without an applied argument).
 
-References to functions are inserted into the tree by copying the function’s 
-tree into the reference’s node. The function is then evaluated with a given 
+References to functions are inserted into the tree by copying the function’s
+tree into the reference’s node. The function is then evaluated with a given
 argument to reduce the tree to a single node. These copy-and-reduce operations
 are very costly and are a likely reason for Sterling’s poor performance.
 
@@ -144,14 +144,14 @@ are very costly and are a likely reason for Sterling’s poor performance.
 
 ### Memoization
 
-Copying and reducing a function tree for an argument is expensive. These 
-operations should not need to be performed more than once for any function and 
+Copying and reducing a function tree for an argument is expensive. These
+operations should not need to be performed more than once for any function and
 argument pair.
 
 ### Bytecode perhaps?
 
-Given the shear amount of recursion and method calls being performed to execute 
-Sterling, does it make sense to compile the syntax tree into a bytecode that can 
+Given the shear amount of recursion and method calls being performed to execute
+Sterling, does it make sense to compile the syntax tree into a bytecode that can
 be executed in a loop?
 
 ## Links

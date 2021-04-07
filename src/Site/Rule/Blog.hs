@@ -63,13 +63,9 @@ postCompiler ::
   Context String ->
   Compiler (Item String)
 postCompiler env snapshot ctx = do
-  metadata <- getMetadata . itemIdentifier <$> getUnderlying
-  let template = fromMaybe "post"
   interpolateResourceBody env ctx
     >>= applyContentTemplates ctx
     >>= saveSnapshot snapshot
-  where
-    contentTemplate = getMetadata
 
 baseRoute :: Routes
 baseRoute =

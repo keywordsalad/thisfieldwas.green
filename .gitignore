@@ -27,3 +27,6 @@ cabal.project.local~
 .HTF/
 .ghc.environment.*
 .sass-cache/
+project/
+.bsp/
+target/

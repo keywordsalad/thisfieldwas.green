@@ -1,45 +1,56 @@
 module Site.Compiler where
 
 import Control.Monad.Except (catchError, (>=>))
-import Data.Maybe (isJust, fromMaybe)
+import qualified Data.Map as M
+import Data.Maybe (fromMaybe, isJust)
 import Debug.Trace
 import Hakyll
-import Site.Metadata
 import Text.Pandoc.Highlighting (pygments)
 import qualified Text.Pandoc.Options as Opt
 
 applyContentTemplates ::
-  Context String            -- ^ template context
-  -> Item String            -- ^ the item being compiled
-  -> Compiler (Item String) -- ^ the newly constructed compiler
+  -- | template context
+  Context String ->
+  -- | the item being compiled
+  Item String ->
+  -- | the newly constructed compiler
+  Compiler (Item String)
 applyContentTemplates =
   applyTemplatesFromMetadata "contentTemplate" []
 
 applyPageTemplates ::
-  Context String            -- ^ template context
-  -> Item String            -- ^ the item being compiled
-  -> Compiler (Item String) -- ^ the newly constructed compiler
+  -- | template context
+  Context String ->
+  -- | the item being compiled
+  Item String ->
+  -- | the newly constructed compiler
+  Compiler (Item String)
 applyPageTemplates =
   applyTemplatesFromMetadata "templates" ["default", "skeleton"]
 
 applyTemplatesFromMetadata ::
-  String                    -- ^ the key to read templates from
-  -> [String]               -- ^ the default templates
-  -> Context String         -- ^ template context
-  -> Item String            -- ^ the item being compiled
-  -> Compiler (Item String) -- ^ the newly constructed compiler
+  -- | the key to read templates from
+  String ->
+  -- | the default templates
+  [String] ->
+  -- | template context
+  Context String ->
+  -- | the item being compiled
+  Item String ->
+  -- | the newly constructed compiler
+  Compiler (Item String)
 applyTemplatesFromMetadata key defaultTemplates ctx item = do
-  metadata <- getMetadata <$> getUnderlying
-  let maybeTemplates = (flip fmap) (getValue key metadata) \case
-        Array
-      templates = fromMaybe defaultTemplates maybeTemplates
-  applyTemplatesFromList templates ctx item
+  applyTemplatesFromList [] ctx item -- TODO
 
 applyTemplatesFromList ::
-  [String]                  -- ^ the list of templates to apply
-  -> Context String         -- ^ template context
-  -> Item String            -- ^ the item being compiled
-  -> Compiler (Item String) -- ^ the newly constructed compiler
+  -- | the list of templates to apply
+  [String] ->
+  -- | template context
+  Context String ->
+  -- | the item being compiled
+  Item String ->
+  -- | the newly constructed compiler
+  Compiler (Item String)
 applyTemplatesFromList templates ctx =
   foldl (>=>) pure templates'
   where

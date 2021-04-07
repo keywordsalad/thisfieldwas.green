@@ -22,5 +22,5 @@ pageList =
 pageCompiler :: [(String, String)] -> Context String -> Compiler (Item String)
 pageCompiler env baseCtx =
   interpolateResourceBody env baseCtx
-    >>= applyPageTemplate baseCtx
+    >>= applyPageTemplates baseCtx
     >>= relativizeUrls

@@ -38,5 +38,5 @@ indexCompiler env baseCtx = do
           <> baseCtx
 
   interpolateResourceBody env ctx
-    >>= applySkeletonTemplate ctx
+    >>= applyPageTemplates ctx
     >>= relativizeUrls
