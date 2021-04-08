@@ -7,12 +7,12 @@ import System.Process
 
 gitCommitFields :: [Context String]
 gitCommitFields =
-  [ constField "githubUrl" "https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io"
-  , field "gitSha1" gitSha1Compiler
-  , field "gitMessage" gitMessageCompiler
-  , field "isChanged" isChangedCompiler
-  , field "isGenerated" isGeneratedCompiler
-  , field "gitBranch" gitBranchCompiler
+  [ constField "githubUrl" "https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io",
+    field "gitSha1" gitSha1Compiler,
+    field "gitMessage" gitMessageCompiler,
+    field "isChanged" isChangedCompiler,
+    field "isGenerated" isGeneratedCompiler,
+    field "gitBranch" gitBranchCompiler
   ]
 
 itemSourcePath :: Item a -> FilePath
@@ -30,7 +30,7 @@ gitLogField format item =
     maybeResult <- gitLog format (Just $ itemSourcePath item)
     case maybeResult of
       Just result -> return result
-      Nothing     -> fromJust <$> gitLog format Nothing
+      Nothing -> fromJust <$> gitLog format Nothing
 
 isGeneratedCompiler :: Item a -> Compiler String
 isGeneratedCompiler item = do
