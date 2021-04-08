@@ -30,16 +30,16 @@ data PostMetadata = PostMetadata
   }
   deriving stock (Generic, Show)
 
-instance ToJSON PostMetadata
+data PostMetadataConfig = PostMetadataConfig
+  { defaultContentTemplates :: [String],
+    defaultTemplates :: [String]
+  }
 
-instance FromJSON PostMetadata where
-  parseJSON = withObject "PostMetadata" parsePostMetadata
-
-parsePostMetadata :: Object -> Parser PostMetadata
-parsePostMetadata pm =
+parsePostMetadata :: PostMetadataConfig -> Object -> Parser PostMetadata
+parsePostMetadata config pm =
   PostMetadata
-    <$> withOneOrMoreStrings "content-templates" "bare-content" pm
-    <*> withOneOrMoreStrings "templates" "skeleton" pm
+    <$> defaultContentTemplates config `firstIfEmpty` fromStringOrList "content-templates" pm
+    <*> defaultTemplates config `firstIfEmpty` fromStringOrList "templates" pm
     <*> (withMaybeField "title" toString pm <&> fromMaybe "Untitled")
     <*> withMaybeField "author" toString pm
     <*> withField "created" toDate pm
@@ -47,6 +47,22 @@ parsePostMetadata pm =
     <*> withField "comments" (`withBool` return) pm
     <*> withField "published" (`withBool` return) pm
     <*> withZeroOrMoreStrings "tags" pm
+
+firstIfEmpty :: (Functor m) => [a] -> m [a] -> m [a]
+firstIfEmpty d mxs = go <$> mxs
+  where
+    go [] = d
+    go xs = xs
+
+fromStringOrList :: String -> Object -> Parser [String]
+fromStringOrList k o =
+  splitAndStrip "," . T.unpack <$> (o .: k' <?> Key k' :: Parser T.Text)
+    <|> fmap T.unpack <$> (o .: k' <?> Key k' :: Parser [T.Text])
+  where
+    k' = T.pack k
+
+splitAndStrip :: String -> String -> [String]
+splitAndStrip d = fmap S.strip . S.split d
 
 withZeroOrMoreStrings ::
   -- | the field to parse

@@ -81,3 +81,8 @@ test_sync () {
 
   echo "INFO: Local branch $branch is up to date with remote"
 }
+
+test () {
+  stack test
+}
+

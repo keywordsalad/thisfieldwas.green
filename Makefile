@@ -22,5 +22,8 @@ publish:
 setup:
 	set -e; source "commands.sh"; setup
 
+test:
+	set -e; source "commands.sh"; test
+
 .ONESHELL:
-.PHONY: publish watch rebuild build clean
+.PHONY: publish watch rebuild build clean test
