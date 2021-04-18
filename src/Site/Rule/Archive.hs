@@ -14,7 +14,7 @@ archiveRules baseCtx =
 archiveCtx :: Context String -> [Item String] -> Context String
 archiveCtx baseCtx posts =
   listField "posts" (postCtx <> baseCtx) (return posts)
-  <> constField "title" "Archives"
+    <> constField "title" "Archives"
 
 archiveCompiler :: Context String -> Compiler (Item String)
 archiveCompiler baseCtx = do
