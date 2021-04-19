@@ -33,7 +33,21 @@ rebuild () {
 
 touch_all () {
   # touch all files so they're built again
-  find . -type f -exec touch {} +
+  paths=(
+    README.md
+    about-me.md
+    blog
+    code
+    contact.md
+    css
+    images
+    index.md
+    js
+    partials
+    resume.md
+    templates
+  )
+  find "$paths" -type f -exec touch {} +
 }
 
 rebuild_all () {

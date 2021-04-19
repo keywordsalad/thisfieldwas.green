@@ -32,7 +32,7 @@ rules env feedConfig baseCtx = do
 
 configRules :: Rules ()
 configRules =
-  match (fromList [".nojekyll", "CNAME"]) do
+  match (fromList [".nojekyll"]) do
     route idRoute
     compile copyFileCompiler
 
