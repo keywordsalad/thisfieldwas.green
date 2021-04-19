@@ -1,4 +1,3 @@
 [submodule "gh-pages"]
 	path = gh-pages
-	url = git@ThisFieldWasGreen.github.com:ThisFieldWasGreen/thisfieldwasgreen.github.io.git
-	branch = gh-pages
+	url = ssh://git@bitsof.thisfieldwas.green:2222/ThisFieldWasGreen/thisfieldwasgreen.github.io.git
