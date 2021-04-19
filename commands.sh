@@ -66,7 +66,7 @@ publish () {
   git commit -m "Build on $(date) generated from $sha"
   git push origin "gh-pages"
 
-  scp -r * www.thisfieldwas.green:/var/www/www.thisfieldwas.green/
+  scp -r * thisfieldwas.green:/var/www/thisfieldwas.green/
   popd
 
   git add .
