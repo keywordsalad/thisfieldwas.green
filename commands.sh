@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+init () {
+  git config core.hooksPath .githooks
+}
+
 setup () {
   brew install haskell-stack
   stack install hakyll
@@ -44,6 +48,8 @@ watch () {
 }
 
 publish () {
+  init
+
   current_branch="$(git branch --show-current)"
   if [[ "$current_branch" -ne "main" ]]; then
     echo "Can't publish from current branch: $current_branch"
