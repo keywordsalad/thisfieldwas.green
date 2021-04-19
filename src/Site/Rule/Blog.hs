@@ -11,6 +11,7 @@ where
 
 import Site.Common
 import Site.Context.Post
+import Site.Metadata
 import Site.Route (indexRoute)
 
 type PostSnapshot = String
@@ -33,6 +34,16 @@ blogRules env baseCtx = do
   draftPostRules env baseCtx
   draftIndexRules baseCtx
 
+pageMetadataConfig :: PageMetadataConfig
+pageMetadataConfig =
+  defaultPageMetadataConfig
+    { defaultContentTemplates = ["post"],
+      defaultTemplates = ["skeleton"]
+    }
+
+applyConfiguredPageTemplates :: Context String -> Item String -> Compiler (Item String)
+applyConfiguredPageTemplates = applyPageTemplates pageMetadataConfig
+
 publishedPostRules :: [(String, String)] -> Context String -> Rules ()
 publishedPostRules env baseCtx =
   matchMetadata "blog/*" (isPublishable env) do
@@ -40,7 +51,7 @@ publishedPostRules env baseCtx =
     compile $
       postCompiler env publishedSnapshot ctx
         >>= saveSnapshot "content"
-        >>= applyPageTemplates ctx
+        >>= applyConfiguredPageTemplates ctx
         >>= relativizeUrls
   where
     ctx = postCtx <> baseCtx
@@ -51,7 +62,7 @@ draftPostRules env baseCtx =
     route $ baseRoute `composeRoutes` draftsRoute
     compile $
       postCompiler env draftSnapshot ctx
-        >>= applyPageTemplates ctx
+        >>= applyConfiguredPageTemplates ctx
         >>= relativizeUrls
   where
     ctx = postCtx <> baseCtx
@@ -64,7 +75,7 @@ postCompiler ::
   Compiler (Item String)
 postCompiler env snapshot ctx = do
   interpolateResourceBody env ctx
-    >>= applyContentTemplates ctx
+    >>= applyConfiguredPageTemplates ctx
     >>= saveSnapshot snapshot
 
 baseRoute :: Routes
@@ -94,7 +105,7 @@ draftIndexCompiler baseCtx = do
   let ctx = draftIndexCtx baseCtx posts <> baseCtx
   makeItem ""
     >>= loadAndApplyTemplate "templates/drafts.html" ctx
-    >>= applyPageTemplates ctx
+    >>= applyConfiguredPageTemplates ctx
     >>= relativizeUrls
 
 isPublishable :: [(String, String)] -> Metadata -> Bool

@@ -7,7 +7,7 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-  describe "PostMetadata" do
+  describe "PageMetadata" do
     it "deserializes from YAML" do
       let yaml =
             "content-templates: post \n\

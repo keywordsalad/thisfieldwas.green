@@ -3,9 +3,6 @@ module Site.Metadata where
 import Control.Applicative ((<|>))
 import Data.Aeson
 import Data.Aeson.Types
-import Data.Functor ((<&>))
-import qualified Data.HashMap.Strict as M
-import Data.Maybe (fromJust, fromMaybe)
 import Data.String.Utils as S
 import qualified Data.Text as T
 import Data.Time
@@ -14,106 +11,66 @@ import Data.Time
     iso8601DateFormat,
     parseTimeM,
   )
-import qualified Data.Vector as V
 import GHC.Generics
 
-data PostMetadata = PostMetadata
+data PageMetadata = PageMetadata
   { contentTemplates :: [String],
     templates :: [String],
     title :: String,
     author :: Maybe String,
     created :: UTCTime,
-    date :: Maybe UTCTime,
-    comments :: Bool,
-    published :: Bool,
-    tags :: [String]
+    published :: UTCTime,
+    tags :: [String],
+    comments :: Bool
   }
   deriving stock (Generic, Show)
 
-data PostMetadataConfig = PostMetadataConfig
+data PageMetadataConfig = PageMetadataConfig
   { defaultContentTemplates :: [String],
-    defaultTemplates :: [String]
+    defaultTemplates :: [String],
+    defaultTitle :: String
   }
 
-parsePostMetadata :: PostMetadataConfig -> Object -> Parser PostMetadata
-parsePostMetadata config pm =
-  PostMetadata
-    <$> defaultContentTemplates config `firstIfEmpty` fromStringOrList "content-templates" pm
-    <*> defaultTemplates config `firstIfEmpty` fromStringOrList "templates" pm
-    <*> (withMaybeField "title" toString pm <&> fromMaybe "Untitled")
-    <*> withMaybeField "author" toString pm
-    <*> withField "created" toDate pm
-    <*> withMaybeField "date" toDate pm
-    <*> withField "comments" (`withBool` return) pm
-    <*> withField "published" (`withBool` return) pm
-    <*> withZeroOrMoreStrings "tags" pm
+defaultPageMetadataConfig :: PageMetadataConfig
+defaultPageMetadataConfig =
+  PageMetadataConfig
+    { defaultContentTemplates = ["bare-content"],
+      defaultTemplates = ["skeleton"],
+      defaultTitle = "Untitled"
+    }
 
-firstIfEmpty :: (Functor m) => [a] -> m [a] -> m [a]
-firstIfEmpty d mxs = go <$> mxs
+parsePageMetadata :: PageMetadataConfig -> Object -> Parser PageMetadata
+parsePageMetadata config pm =
+  PageMetadata
+    <$> ifEmpty' (defaultContentTemplates config) (withStringOrList "content-templates" pm)
+    <*> ifEmpty' (defaultTemplates config) (withStringOrList "templates" pm)
+    <*> ifEmpty' (defaultTitle config) (withField "title" pm)
+    <*> withField "author" pm
+    <*> (withField "created" pm >>= toDate)
+    <*> (withField "published" pm >>= toDate)
+    <*> withStringOrList "tags" pm
+    <*> withField "comments" pm
   where
-    go [] = d
-    go xs = xs
+    ifEmpty' d mxs = go <$> mxs
+      where
+        go [] = d
+        go xs = xs
 
-fromStringOrList :: String -> Object -> Parser [String]
-fromStringOrList k o =
-  splitAndStrip "," . T.unpack <$> (o .: k' <?> Key k' :: Parser T.Text)
-    <|> fmap T.unpack <$> (o .: k' <?> Key k' :: Parser [T.Text])
+withField :: (FromJSON a) => String -> Object -> Parser a
+withField k o = o .: k' <?> Key k'
   where
     k' = T.pack k
 
-splitAndStrip :: String -> String -> [String]
-splitAndStrip d = fmap S.strip . S.split d
-
-withZeroOrMoreStrings ::
-  -- | the field to parse
-  String ->
-  -- | the object with the field
-  Object ->
-  -- | the new parser
-  Parser [String]
-withZeroOrMoreStrings k o =
-  multiple <|> single
+withStringOrList :: String -> Object -> Parser [String]
+withStringOrList k o =
+  withString <|> withList
   where
-    multiple = withZeroOrMore k toString o
-    single = withField k toString o <&> fmap S.strip . S.split ","
-
-withOneOrMoreStrings ::
-  -- | the field to parse
-  String ->
-  -- | the default value if the field is empty
-  String ->
-  -- | the object with the field
-  Object ->
-  -- | the new parser
-  Parser [String]
-withOneOrMoreStrings k d o =
-  withZeroOrMoreStrings k o <&> \case
-    [] -> [d]
-    ss -> ss
-
-withScalarOrOneOrMore :: String -> a -> (String -> Value -> Parser a) -> Object -> Parser [a]
-withScalarOrOneOrMore k d f o = withOneOrMore k d f o <|> return <$> withField k f o
-
-withField :: String -> (String -> Value -> Parser a) -> Object -> Parser a
-withField k f o = fromJust <$> withMaybeField k f o
-
-withMaybeField :: String -> (String -> Value -> Parser a) -> Object -> Parser (Maybe a)
-withMaybeField k f o = sequence $ f k <$> M.lookup (T.pack k) o
-
-withOneOrMore :: String -> a -> (String -> Value -> Parser a) -> Object -> Parser [a]
-withOneOrMore k d f o =
-  withZeroOrMore k f o <&> \case
-    [] -> [d]
-    xs -> xs
-
-withZeroOrMore :: String -> (String -> Value -> Parser a) -> Object -> Parser [a]
-withZeroOrMore k f o = fromMaybe [] <$> withMaybeField k f' o
-  where
-    f' _ = withArray k f''
-    f'' a = sequence $ V.toList $ f k <$> a
+    withString = splitAndStrip "," . T.unpack <$> (withField k o :: Parser T.Text)
+    withList = fmap T.unpack <$> (withField k o :: Parser [T.Text])
+    splitAndStrip d = fmap S.strip . S.split d
 
 toString :: String -> Value -> Parser String
 toString k = withText k (return . T.unpack)
 
-toDate :: String -> Value -> Parser UTCTime
-toDate k = withText k (parseTimeM True defaultTimeLocale (iso8601DateFormat $ Just "%X %EZ") . T.unpack)
+toDate :: (MonadFail m) => String -> m UTCTime
+toDate = parseTimeM True defaultTimeLocale (iso8601DateFormat $ Just "%X%Ez")

@@ -30,41 +30,47 @@ import Text.Pandoc.Highlighting (pygments)
 import qualified Text.Pandoc.Options as Opt
 
 applyContentTemplates ::
+  -- | the metadata config
+  PageMetadataConfig ->
   -- | template context
   Context String ->
   -- | the item being compiled
   Item String ->
   -- | the newly constructed compiler
   Compiler (Item String)
-applyContentTemplates =
-  applyTemplatesFromMetadata contentTemplates
+applyContentTemplates config =
+  applyTemplatesFromMetadata config contentTemplates
 
 applyPageTemplates ::
+  -- | the metadata config
+  PageMetadataConfig ->
   -- | template context
   Context String ->
   -- | the item being compiled
   Item String ->
   -- | the newly constructed compiler
   Compiler (Item String)
-applyPageTemplates =
-  applyTemplatesFromMetadata templates
+applyPageTemplates config =
+  applyTemplatesFromMetadata config templates
 
 applyTemplatesFromMetadata ::
+  -- | the metadata config
+  PageMetadataConfig ->
   -- | the key to read templates from
-  (PostMetadata -> [String]) ->
+  (PageMetadata -> [String]) ->
   -- | template context
   Context String ->
   -- | the item being compiled
   Item String ->
   -- | the newly constructed compiler
   Compiler (Item String)
-applyTemplatesFromMetadata f ctx item = do
+applyTemplatesFromMetadata config f ctx item = do
   let id' = itemIdentifier item
   metadata <- getMetadata id'
-  postMetadata <- case AT.parse parsePostMetadata metadata of
+  pageMetadata <- case AT.parse (parsePageMetadata config) metadata of
     AT.Error s -> fail s
     AT.Success pm -> return pm
-  applyTemplatesFromList (f postMetadata) ctx item
+  applyTemplatesFromList (f pageMetadata) ctx item
 
 applyTemplatesFromList ::
   -- | the list of templates to apply
