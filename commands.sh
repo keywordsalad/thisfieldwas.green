@@ -52,13 +52,15 @@ publish () {
   test_sync "main"
   build
 
-  commit="$$(git log -1 HEAD --pretty=format:%H)"
-  sha="$${commit:0:8}"
+  sha="$(git log -1 HEAD --pretty=format:%h)"
   pushd ./gh-pages
+  
   test_sync "gh-pages"
   git add .
-  git commit -m "Build on $$(date) generated from $sha"
+  git commit -m "Build on $(date) generated from $sha"
   git push origin "gh-pages"
+
+  scp -r . www.thisfieldwas.green:/var/www/www.thisfieldwas.green/
   popd
 
   git add .
