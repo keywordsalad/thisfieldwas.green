@@ -1,18 +1,19 @@
 module Site.Rule where
 
 import Hakyll
+import Site.Compiler.Layout
+import Site.Config
 import Site.Rule.Archive
 import Site.Rule.Blog
 import Site.Rule.Feed
-import Site.Rule.Index
 import Site.Rule.Js
 import Site.Rule.Page
 import Site.Rule.Robot
 import Site.Rule.Sass
 import Site.Rule.Sitemap
 
-rules :: [(String, String)] -> Context String -> Rules ()
-rules env baseCtx = do
+rules :: SiteConfig -> Rules ()
+rules config = do
   configRules
   imageRules
   cssRules
@@ -22,13 +23,12 @@ rules env baseCtx = do
   downloadRules
   codeDependency <- codeRules
   rulesExtraDependencies [codeDependency] do
-    blogRules env baseCtx
-    feedRules baseCtx
-    indexRules env baseCtx
-    pageRules env baseCtx
-    robotsTxtRules baseCtx
-    archiveRules baseCtx
-    sitemapRules baseCtx
+    blogRules config
+    feedRules config
+    pageRules config
+    robotsTxtRules config
+    archiveRules config
+    sitemapRules config
 
 configRules :: Rules ()
 configRules =
@@ -67,5 +67,5 @@ cssRules =
 
 templateRules :: Rules ()
 templateRules = do
-  match "templates/**" $ compile templateBodyCompiler
+  match "layouts/**" $ compile layoutCompiler
   match "partials/**" $ compile templateBodyCompiler

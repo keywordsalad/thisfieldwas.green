@@ -1,25 +1,22 @@
 module Site.Rule.Feed (feedRules) where
 
 import Site.Common
-import Site.Context.Post
 import Site.Rule.Blog (loadPublishedPosts)
-import Site.Util
 
-feedRules :: Context String -> Rules ()
-feedRules baseCtx = do
+feedRules :: SiteConfig -> Rules ()
+feedRules config = do
+  let feedConfig = config ^. siteFeedConfiguration
   create ["atom.xml"] do
     route idRoute
-    compile $ feedCompiler (renderAtom feedConfig) baseCtx
+    compile $ feedCompiler config (renderAtom feedConfig)
   create ["rss.xml"] do
     route idRoute
-    compile $ feedCompiler (renderRss feedConfig) baseCtx
-  where
-    feedConfig =
+    compile $ feedCompiler config (renderRss feedConfig)
 
-feedCompiler :: RenderFeed -> Context String -> Compiler (Item String)
-feedCompiler renderFeed baseCtx = do
+feedCompiler :: SiteConfig -> RenderFeed -> Compiler (Item String)
+feedCompiler config renderFeed = do
   posts <- fmap (take 10) . recentFirst =<< loadPublishedPosts
-  renderFeed (feedCtx <> baseCtx) posts
+  renderFeed (feedContext <> config ^. siteContext) posts
 
-feedCtx :: Context String
-feedCtx = bodyField "description" <> postCtx
+feedContext :: Context String
+feedContext = bodyField "description" <> postContext

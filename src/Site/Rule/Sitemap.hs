@@ -1,28 +1,19 @@
 module Site.Rule.Sitemap (sitemapRules) where
 
 import Site.Common
-import Site.Context.Post
 import Site.Rule.Blog (loadPublishedPosts)
 
-sitemapRules :: Context String -> Rules ()
-sitemapRules baseCtx =
-  create ["sitemap.xml"] $ do
-    route idRoute
-    compile $ sitemapCompiler baseCtx
+sitemapRules :: SiteConfig -> Rules ()
+sitemapRules config =
+  match "meta/sitemap.xml" $ do
+    route metaRoute
+    compile $ sitemapCompiler config
 
-sitemapCtx :: Context String -> [Item String] -> Context String
-sitemapCtx baseCtx pages = do
-  listField "pages" baseCtx (return pages)
-
-sitemapCompiler :: Context String -> Compiler (Item String)
-sitemapCompiler baseCtx = do
+sitemapCompiler :: SiteConfig -> Compiler (Item String)
+sitemapCompiler config = do
   posts <- recentFirst =<< loadPublishedPosts
-  pages <-
-    loadAll $
-      fromList
-        [ "about-me.md",
-          "contact.md",
-          "index.html"
-        ]
-  let ctx = sitemapCtx (postCtx <> baseCtx) (posts <> pages) <> baseCtx
-  makeItem "" >>= loadAndApplyTemplate "templates/sitemap.xml" ctx
+  pages <- loadAll "pages/**"
+  let pageField = listField "pages" (config ^. siteContext) (return $ posts <> pages)
+      localConfig = config & siteContext %~ (pageField <>)
+  makeItem ""
+    >>= applyAsTemplate (localConfig ^. siteContext)

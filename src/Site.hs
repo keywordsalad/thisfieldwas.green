@@ -1,29 +1,30 @@
-module Site where
+module Site (site) where
 
-import Hakyll
-import Site.Configuration
-import Site.Context.Field
-import Site.Context.Git
+import qualified Data.Text as T
+import Site.Common
 import Site.Rule
-import Site.Util
 import System.Environment (getEnvironment)
 
 site :: IO ()
 site = do
   env <- getEnvironment
-  hakyllWith hakyllConfiguration do
-    tags <- buildTags "blog/*" $ fromCapture "tags/*.html"
-    let baseCtx =
-          constField "bodyClass" "default"
-            <> tagsField "tags" tags
-            <> cleanIndexPaths "url"
-            <> mconcat gitCommitFields
-            <> imgField
-            <> includeCodeField
-            <> youtubeField
-            <> routeToField
-            <> commentField
-            <> siteRootField
-            <> defaultContext
+  configIniText <- T.pack <$> readFile "config.ini"
+  siteConfig <- case parseConfigIni env configIniText of
+    Left e -> fail e
+    Right config -> return $ config & siteContext %~ initContext config
+  hakyllWith (siteConfig ^. siteHakyllConfiguration) (rules siteConfig)
 
-    rules env baseCtx
+initContext :: SiteConfig -> Context String -> Context String
+initContext config context =
+  constField "body-class" "default"
+    <> constField "site-root" (config ^. siteRoot)
+    <> cleanIndexPaths "url"
+    <> gitCommits (config ^. siteGitWebUrl)
+    <> imgField
+    <> includeCodeField
+    <> youtubeField
+    <> routeToField
+    <> commentField
+    <> siteRootField config
+    <> demoteHeadersByField
+    <> context

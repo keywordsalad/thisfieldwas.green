@@ -1,26 +1,38 @@
-module Site.Context.Field where
+module Site.Context.Field
+  ( siteRootField,
+    includeCodeField,
+    imgField,
+    youtubeField,
+    routeToField,
+    commentField,
+    demoteHeadersByField,
+  )
+where
 
-import Site.Common
+import Control.Monad ((>=>))
+import Hakyll hiding (demoteHeaders)
+import Lens.Micro
+import Site.Config (SiteConfig, siteRoot)
 import Site.Util
 
-siteRootField :: Context String
-siteRootField = field "site-root" siteRoot
-  where
-    siteRoot = fmap (toSiteRoot . fromJust) . getRoute . itemIdentifier
+siteRootField :: SiteConfig -> Context String
+siteRootField config = constField "site-root" (config ^. siteRoot)
 
 includeCodeField :: Context String
-includeCodeField = functionField "include-code" f
+includeCodeField = functionField fieldName f
   where
-    f [lexer, contentsPath] _ = fmap wrapCode body
+    fieldName = "include-code"
+    f [lexer, contentsPath] _ = wrapCode <$> body
       where
         wrapCode code = "``` " ++ lexer ++ "\n" ++ code ++ "\n```"
         body = loadSnapshotBody item "code"
         item = fromFilePath $ "code/" ++ contentsPath
-    f _ item = error $ "codeIncludeField needs a filepath and a lexer " ++ show (itemIdentifier item)
+    f _ item = error $ fieldName ++ " needs a filepath and a lexer " ++ show (itemIdentifier item)
 
 imgField :: Context String
-imgField = functionField "img" f
+imgField = functionField fieldName f
   where
+    fieldName = "img"
     f [path] = f [path, "untitled"]
     f [path, title] = f [path, title, title]
     f [path, title, alt] =
@@ -30,13 +42,13 @@ imgField = functionField "img" f
             <> constField "img-title" title
             <> constField "img-alt" alt
         )
-        >=> relativizeUrls
         >=> return . itemBody
-    f _ = \item -> error $ "imgField needs an image source and optionally a title " ++ show (itemIdentifier item)
+    f _ = \item -> error $ fieldName ++ " needs an image source and optionally a title " ++ show (itemIdentifier item)
 
 youtubeField :: Context String
-youtubeField = functionField "youtube" f
+youtubeField = functionField fieldName f
   where
+    fieldName = "youtube"
     f [videoId] = f [videoId, "YouTube video player"]
     f [videoId, title] =
       loadAndApplyTemplate
@@ -44,21 +56,28 @@ youtubeField = functionField "youtube" f
         ( constField "youtube-id" videoId
             <> constField "youtube-title" title
         )
-        >=> relativizeUrls
         >=> return . itemBody
-    f _ = \item -> error $ "youtubeField needs a youtube video id and optionally a title " ++ show (itemIdentifier item)
+    f _ = \item -> error $ fieldName ++ " needs a youtube video id and optionally a title " ++ show (itemIdentifier item)
 
 routeToField :: Context String
-routeToField = functionField "route-to" f
+routeToField = functionField fieldName f
   where
+    fieldName = "route-to"
     f [filePath] item = do
       getRoute id' >>= \case
-        Just r -> return ("/" ++ stripSuffix "index.html" r)
-        Nothing -> error $ "routeField in " ++ show fromId ++ ": no route to " ++ show id'
+        Just route' -> return $ "/" ++ stripSuffix "index.html" route'
+        Nothing -> error $ fieldName ++ " in " ++ show fromId ++ ": no route to " ++ show id'
       where
         id' = fromFilePath filePath
         fromId = itemIdentifier item
-    f _ item = error $ "routeField needs a filePath " ++ show (itemIdentifier item)
+    f _ item = error $ fieldName ++ " needs a filePath " ++ show (itemIdentifier item)
 
 commentField :: Context String
 commentField = functionField "comment" \_ _ -> return ""
+
+demoteHeadersByField :: Context String
+demoteHeadersByField = functionField fieldName f
+  where
+    fieldName = "demote-headers-by"
+    f [amount, content] _ = return $ demoteHeadersBy (read amount :: Int) content
+    f _ item = error $ fieldName ++ " requires a reduction amount and content " ++ show (itemIdentifier item)

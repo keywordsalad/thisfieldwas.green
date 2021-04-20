@@ -1,13 +1,9 @@
 module Site.Rule.Robot where
 
 import Site.Common
-import Site.Util
 
-robotsTxtRules :: Context String -> Rules ()
-robotsTxtRules baseCtx =
-  match "robots.txt" do
-    route idRoute
-    compile do
-      siteRoot <- buildSiteRoot
-      let robotsCtx = constField "site-root" siteRoot <> baseCtx
-      applyAsTemplate robotsCtx =<< getResourceBody
+robotsTxtRules :: SiteConfig -> Rules ()
+robotsTxtRules config = do
+  match "meta/robots.txt" do
+    route metaRoute
+    compile $ applyAsTemplate (config ^. siteContext) =<< getResourceBody

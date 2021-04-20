@@ -1,0 +1,25 @@
+---
+layout: skeleton
+---
+<header>
+  <div class="logo">
+    <a href='$route-to("pages/index.md")$'><span class="logo-icon"></span></a>
+    <a href='$route-to("pages/index.md")$'>This Field Was Green</a>
+  </div>
+  <nav>
+    <a href='$route-to("pages/index.md")$'>Home</a>
+    <a href='$route-to("pages/blog.md")$'>Posts</a>
+    <a href='$route-to("pages/about-me.md")$'>About</a>
+    <a href='$route-to("pages/resume.md")$'>Resume</a>
+    <a href='$route-to("pages/contact.md")$'>Contact</a>
+  </nav>
+</header>
+
+<main>
+  <article>
+    <h1>$title$</h1>
+    $body$
+  </article>
+</main>
+
+$partial("partials/footer.html")$

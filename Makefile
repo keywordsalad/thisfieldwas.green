@@ -1,5 +1,3 @@
-.ONESHELL:
-
 build:
 	set -e; source commands.sh; build
 .PHONY: build
@@ -33,7 +31,5 @@ init:
 .PHONY: init
 
 test:
-	set -e
-	source commands.sh
-	test
+	set -e; source commands.sh; test
 .PHONY: test

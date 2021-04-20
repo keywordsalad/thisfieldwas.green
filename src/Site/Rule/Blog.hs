@@ -3,24 +3,61 @@ module Site.Rule.Blog
     draftSnapshot,
     loadDraftPosts,
     loadPublishedPosts,
-    postCompiler,
-    postCtx,
     publishedSnapshot,
   )
 where
 
 import Site.Common
-import Site.Context.Post
-import Site.Metadata
-import Site.Route (indexRoute)
+
+{-----------------------------------------------------------------------------}
+{- Rules -}
+{-----------------------------------------------------------------------------}
+
+blogRules :: SiteConfig -> Rules ()
+blogRules config =
+  let rules =
+        [ blogIndexRules,
+          publishedPostRules,
+          draftPostRules,
+          draftArchiveRules
+        ]
+   in sequenceA_ $ rules <*> pure config
+
+blogIndexRules :: SiteConfig -> Rules ()
+blogIndexRules config =
+  match "pages/blog.md" do
+    route htmlPageRoute
+    compile $ blogCompiler config
+
+publishedPostRules :: SiteConfig -> Rules ()
+publishedPostRules localConfig = do
+  matchMetadata "blog/*" (isPublishable (localConfig ^. sitePreview)) do
+    route postRoute
+    compile $ postCompiler localConfig publishedSnapshot
+
+draftPostRules :: SiteConfig -> Rules ()
+draftPostRules localConfig = do
+  matchMetadata "blog/*" isDraft do
+    route draftRoute
+    compile $ postCompiler localConfig draftSnapshot
+
+draftArchiveRules :: SiteConfig -> Rules ()
+draftArchiveRules config = do
+  create ["pages/drafts.md"] do
+    route htmlPageRoute
+    compile $ draftPostsCompiler config
+
+{-----------------------------------------------------------------------------}
+{- Snapshots -}
+{-----------------------------------------------------------------------------}
 
 type PostSnapshot = String
 
 publishedSnapshot :: PostSnapshot
-publishedSnapshot = "_publishedposts"
+publishedSnapshot = "_publishedPost"
 
 draftSnapshot :: PostSnapshot
-draftSnapshot = "_draftposts"
+draftSnapshot = "_draftPost"
 
 loadPublishedPosts :: Compiler [Item String]
 loadPublishedPosts = loadExistingSnapshots "blog/*" publishedSnapshot
@@ -28,94 +65,87 @@ loadPublishedPosts = loadExistingSnapshots "blog/*" publishedSnapshot
 loadDraftPosts :: Compiler [Item String]
 loadDraftPosts = loadExistingSnapshots "blog/*" draftSnapshot
 
-blogRules :: [(String, String)] -> Context String -> Rules ()
-blogRules env baseCtx = do
-  publishedPostRules env baseCtx
-  draftPostRules env baseCtx
-  draftIndexRules baseCtx
+{-----------------------------------------------------------------------------}
+{- Routes -}
+{-----------------------------------------------------------------------------}
 
-pageMetadataConfig :: PageMetadataConfig
-pageMetadataConfig =
-  defaultPageMetadataConfig
-    { defaultContentTemplates = ["post"],
-      defaultTemplates = ["skeleton"]
-    }
-
-applyConfiguredPageTemplates :: Context String -> Item String -> Compiler (Item String)
-applyConfiguredPageTemplates = applyPageTemplates pageMetadataConfig
-
-publishedPostRules :: [(String, String)] -> Context String -> Rules ()
-publishedPostRules env baseCtx =
-  matchMetadata "blog/*" (isPublishable env) do
-    route baseRoute
-    compile $
-      postCompiler env publishedSnapshot ctx
-        >>= saveSnapshot "content"
-        >>= applyConfiguredPageTemplates ctx
-        >>= relativizeUrls
-  where
-    ctx = postCtx <> baseCtx
-
-draftPostRules :: [(String, String)] -> Context String -> Rules ()
-draftPostRules env baseCtx =
-  matchMetadata "blog/*" isDraft do
-    route $ baseRoute `composeRoutes` draftsRoute
-    compile $
-      postCompiler env draftSnapshot ctx
-        >>= applyConfiguredPageTemplates ctx
-        >>= relativizeUrls
-  where
-    ctx = postCtx <> baseCtx
-    draftsRoute = gsubRoute "^blog/" $ replaceAll "^blog/" (const "drafts/")
-
-postCompiler ::
-  [(String, String)] ->
-  Snapshot ->
-  Context String ->
-  Compiler (Item String)
-postCompiler env snapshot ctx = do
-  interpolateResourceBody env ctx
-    >>= applyConfiguredPageTemplates ctx
-    >>= saveSnapshot snapshot
-
-baseRoute :: Routes
-baseRoute =
+postRoute :: Routes
+postRoute =
   setExtension "html"
-    `composeRoutes` indexRoute
-    `composeRoutes` dateRoute
+    <> indexRoute
+    <> dateRoute
+
+draftRoute :: Routes
+draftRoute =
+  postRoute
+    <> gsubRoute "^blog/" (replaceAll "^blog/" (const "drafts/"))
 
 dateRoute :: Routes
 dateRoute = gsubRoute "^blog/[0-9]{4}-[0-9]{2}-[0-9]{2}-" $ replaceAll "-" (const "/")
 
-draftIndexRules :: Context String -> Rules ()
-draftIndexRules baseCtx =
-  create ["drafts.html"] do
-    route $ idRoute `composeRoutes` indexRoute
-    compile $ draftIndexCompiler baseCtx
+{-----------------------------------------------------------------------------}
+{- Compilers -}
+{-----------------------------------------------------------------------------}
 
-draftIndexCtx :: Context String -> [Item String] -> Context String
-draftIndexCtx baseCtx posts =
-  constField "title" "Drafts"
-    <> listField "posts" (postCtx <> baseCtx) (return posts)
-    <> constField "title" "Drafts"
-
-draftIndexCompiler :: Context String -> Compiler (Item String)
-draftIndexCompiler baseCtx = do
-  posts <- recentFirst =<< loadDraftPosts
-  let ctx = draftIndexCtx baseCtx posts <> baseCtx
-  makeItem ""
-    >>= loadAndApplyTemplate "templates/drafts.html" ctx
-    >>= applyConfiguredPageTemplates ctx
+postCompiler :: SiteConfig -> PostSnapshot -> Compiler (Item String)
+postCompiler localConfig snapshot =
+  interpolateResourceBody localConfig
+    >>= saveSnapshot snapshot
+    >>= applyLayoutFromMetadata localConfig
     >>= relativizeUrls
 
-isPublishable :: [(String, String)] -> Metadata -> Bool
-isPublishable env metadata = or $ [isPreview env, isPublished] <*> [metadata]
+blogCompiler :: SiteConfig -> Compiler (Item String)
+blogCompiler config = do
+  let recentPosts = recentFirst =<< loadPublishedPosts
+
+  -- the most recent post
+  latestPost <- head . take 1 <$> recentPosts
+  -- other recent posts
+  otherPosts <- take 5 . drop 1 <$> recentPosts
+
+  -- set local config
+  let localConfig = config & siteContext %~ blogContext latestPost otherPosts
+
+  interpolateResourceBody localConfig
+    >>= applyLayoutFromMetadata config
+    >>= relativizeUrls
+
+draftPostsCompiler :: SiteConfig -> Compiler (Item String)
+draftPostsCompiler config = do
+  posts <- recentFirst =<< loadDraftPosts
+  let localConfig = config & siteContext %~ (draftArchiveContext config posts <>)
+  makeItem ""
+    >>= interpolateItem localConfig
+    >>= applyLayoutFromMetadata localConfig
+    >>= relativizeUrls
+
+{-----------------------------------------------------------------------------}
+{- Contexts -}
+{-----------------------------------------------------------------------------}
+
+draftArchiveContext :: SiteConfig -> [Item String] -> Context String
+draftArchiveContext config posts = do
+  constField "title" "Draft Archive"
+    <> listField "posts" (config ^. siteContext) (return posts)
+
+blogContext :: Item String -> [Item String] -> Context String -> Context String
+blogContext latestPost otherPosts siteContext' = do
+  constField "latest-post" (itemBody latestPost)
+    <> listField
+      "previous-posts"
+      (teaserField "teaser" publishedSnapshot <> siteContext')
+      (return otherPosts)
+    <> siteContext'
+
+{-----------------------------------------------------------------------------}
+{- Metadata -}
+{-----------------------------------------------------------------------------}
+
+isPublishable :: Bool -> Metadata -> Bool
+isPublishable preview metadata = preview || isPublished metadata
 
 isPublished :: Metadata -> Bool
 isPublished = maybe True (== "true") . lookupString "published"
-
-isPreview :: [(String, String)] -> Metadata -> Bool
-isPreview env metadata = isDraft metadata && isJust (lookup "SITE_PREVIEW" env)
 
 isDraft :: Metadata -> Bool
 isDraft = not . isPublished

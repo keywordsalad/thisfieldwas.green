@@ -13,29 +13,18 @@ init () {
     exit 1
   fi
 
-  if [[ "$PATH" != *"$new_make_path"* ]]; then
-    echo
-    echo "A new version of make has been installed."
-    echo "Configure your \$PATH and rerun the command:"
-    echo
-    echo "export PATH=$new_make_path:\$PATH"
-    echo
-    exit 1
-  fi
-
   echo
   echo "Setup completed successfully"
   echo
 }
 
 build () {
-  if [[ "$PATH" != *"$new_make_path"* ]]; then
-    echo "ERROR: Run `make init` first"
-    exit 1
+  if ! command -v stack &> /dev/null; then
+    init
   fi
 
   stack build
-  stack exec site build
+  stack exec logans-blog-exe build
 }
 
 clean () {
@@ -45,7 +34,7 @@ clean () {
 clean_all () {
   clean
   stack clean
-  rm -rf gh-pages/*
+  rm -rf _site/*
 }
 
 rebuild () {
@@ -80,7 +69,7 @@ rebuild_all () {
 
 watch () {
   build
-  stack exec site watch
+  stack exec logans-blog-exe watch
 }
 
 publish () {
@@ -94,18 +83,18 @@ publish () {
   test_sync "main"
   build
 
+  if [ ! -d _site ] || [ -z "$(ls -A _site)" ]; then
+    git clone --branch _site "$(git config --get remote.origin.url)" _site
+  fi
+
   sha="$(git log -1 HEAD --pretty=format:%h)"
-  pushd ./gh-pages
-  test_sync "gh-pages"
+  pushd ./_site
+  test_sync "_site"
   git add .
   git commit -m "Build on $(date) generated from $sha"
-  git push origin "gh-pages"
+  git push origin "_site"
   scp -r * thisfieldwas.green:/var/www/thisfieldwas.green/
   popd
-
-  git add .
-  git commit -m "Update gh-pages generated from $sha"
-  git push origin main
 }
 
 test_sync () {

@@ -1,19 +1,20 @@
-module Site.Context.Git (gitCommitFields) where
+module Site.Context.GitCommits (gitCommits) where
 
-import Site.Common
+import Data.Bool (bool)
+import Data.Maybe (fromJust, isJust)
+import Hakyll
 import System.Directory (doesFileExist)
 import System.Exit
 import System.Process
 
-gitCommitFields :: [Context String]
-gitCommitFields =
-  [ constField "githubUrl" "https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io",
-    field "gitSha1" gitSha1Compiler,
-    field "gitMessage" gitMessageCompiler,
-    field "isChanged" isChangedCompiler,
-    field "isGenerated" isGeneratedCompiler,
-    field "gitBranch" gitBranchCompiler
-  ]
+gitCommits :: String -> Context String
+gitCommits gitWebUrl =
+  constField "git-web-url" gitWebUrl
+    <> field "git-sha1" gitSha1Compiler
+    <> field "git-message" gitMessageCompiler
+    <> field "is-changed" isChangedCompiler
+    <> field "is-generated" isGeneratedCompiler
+    <> field "git-branch" gitBranchCompiler
 
 itemSourcePath :: Item a -> FilePath
 itemSourcePath item = toFilePath (itemIdentifier item)

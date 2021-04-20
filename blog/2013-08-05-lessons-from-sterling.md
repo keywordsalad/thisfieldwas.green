@@ -1,11 +1,9 @@
 ---
-content-templates: post
-templates: default, skeleton
+layout: post
 title: "Lessons from Sterling"
 author: "Logan McGrath"
 date: 2013-08-05T09:37:00-07:00
 comments: false
-published: false
 tags: Sterling, Functional Programming, Language Design
 ---
 

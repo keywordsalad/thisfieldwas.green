@@ -14,11 +14,9 @@ make init
 If this error occurs:
 `hakyll> <command line>: can't load framework: Cocoa (not found)`
 
-Follow [this workaround][] to build `macos11ghcwa.dylib` and then re-run the
+Follow [this workaround](https://github.com/yairchu/macos11-haskell-workaround/) to build `macos11ghcwa.dylib` and then re-run the
 command with the path to the library:
 
 ```
 DYLD_INSERT_LIBRARIES="<PATH_TO>/macos11ghcwa.dylib" stack install hakyll
 ```
-
-[this workaround]: https://github.com/yairchu/macos11-haskell-workaround/

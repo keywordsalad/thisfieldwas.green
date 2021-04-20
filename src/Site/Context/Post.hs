@@ -2,6 +2,6 @@ module Site.Context.Post where
 
 import Hakyll
 
-postCtx :: Context String
-postCtx =
+postContext :: Context String
+postContext =
   dateField "date" "%B %e, %Y"

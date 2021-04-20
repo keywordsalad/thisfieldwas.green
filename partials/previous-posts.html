@@ -1,0 +1,19 @@
+<article class="previous-posts">
+  <header>
+    <h1>Previous Posts</h1>
+  </header>
+  $for(previous-posts)$
+  <section>
+    <header>
+      <h1>$title$</h1>
+      <p class="published">
+        Posted on $date$
+        $if(author)$
+        by $author$
+        $endif$
+      </p>
+    </header>
+    $demote-headers-by("1", teaser)$
+  </section>
+  $endfor$
+</article>
