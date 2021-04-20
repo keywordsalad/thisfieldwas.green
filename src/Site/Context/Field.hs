@@ -4,9 +4,9 @@ import Site.Common
 import Site.Util
 
 siteRootField :: Context String
-siteRootField = field "site-root" buildSiteRoot
+siteRootField = field "site-root" siteRoot
   where
-    buildSiteRoot = fmap (toSiteRoot . fromJust) . getRoute . itemIdentifier
+    siteRoot = fmap (toSiteRoot . fromJust) . getRoute . itemIdentifier
 
 includeCodeField :: Context String
 includeCodeField = functionField "include-code" f

@@ -2,18 +2,9 @@
 
 ## Setup
 
-Run the following command to obtain the necessary software. A newer version of
-`make` is installed with this, and your path will need to be changed to support
-it. The specific directory to add is shown in the command's output:
-
+Run the following command to set up the necessary dependencies:
 ```shell
-brew bundle
-```
-
-Then install Hakyll:
-
-```
-stack install hakyll
+make init
 ```
 
 ### Troubleshooting:
