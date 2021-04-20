@@ -3,6 +3,11 @@ module Site.Context.Field where
 import Site.Common
 import Site.Util
 
+siteRootField :: Context String
+siteRootField = field "site-root" buildSiteRoot
+  where
+    buildSiteRoot = fmap (toSiteRoot . fromJust) . getRoute . itemIdentifier
+
 includeCodeField :: Context String
 includeCodeField = functionField "include-code" f
   where

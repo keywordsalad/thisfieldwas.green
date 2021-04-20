@@ -1,20 +1,13 @@
 module Site.Util where
 
-import Data.String.Utils as S
 import Site.Common
 import System.FilePath (splitFileName, takeDirectory)
 
 -- | Feed renderer signature
 type RenderFeed =
-  Context String ->
-  [Item String] ->
-  Compiler (Item String)
-
-loadAbsRoot :: IO String
-loadAbsRoot = ("https://" ++) . S.strip <$> readFile "CNAME"
-
-buildSiteRoot :: Compiler String
-buildSiteRoot = toSiteRoot . fromJust <$> (getUnderlying >>= getRoute)
+  Context String -> -- Item context
+  [Item String] -> -- Feed items
+  Compiler (Item String) -- Resulting feed
 
 cleanIndexPaths :: String -> Context a
 cleanIndexPaths key = mapContext transform (urlField key)

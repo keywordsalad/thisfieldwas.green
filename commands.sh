@@ -1,13 +1,39 @@
 #!/usr/bin/env bash
 set -e
 
-setup () {
-  brew install haskell-stack
+new_make_path="/usr/local/opt/make/libexec/gnubin"
+
+init () {
+  git config core.hooksPath .githooks
+  brew bundle
+
   stack install hakyll
-  brew install sass/sass/sass
+  if [ $? -ne 0 ]; then
+    echo "Failed to install Hakyll, check README.md for troubleshooting"
+    exit 1
+  fi
+
+  if [[ "$PATH" != *"$new_make_path"* ]]; then
+    echo
+    echo "A new version of make has been installed."
+    echo "Configure your \$PATH and rerun the command:"
+    echo
+    echo "export PATH=$new_make_path:\$PATH"
+    echo
+    exit 1
+  fi
+
+  echo
+  echo "Setup completed successfully"
+  echo
 }
 
 build () {
+  if [[ "$PATH" != *"$new_make_path"* ]]; then
+    echo "ERROR: Run `make init` first"
+    exit 1
+  fi
+
   stack build
   stack exec site build
 }
@@ -29,7 +55,21 @@ rebuild () {
 
 touch_all () {
   # touch all files so they're built again
-  find . -type f -exec touch {} +
+  paths=(
+    README.md
+    about-me.md
+    blog
+    code
+    contact.md
+    css
+    images
+    index.md
+    js
+    partials
+    resume.md
+    templates
+  )
+  find "$paths" -type f -exec touch {} +
 }
 
 rebuild_all () {
@@ -44,6 +84,8 @@ watch () {
 }
 
 publish () {
+  init
+
   current_branch="$(git branch --show-current)"
   if [[ "$current_branch" -ne "main" ]]; then
     echo "Can't publish from current branch: $current_branch"
@@ -54,13 +96,11 @@ publish () {
 
   sha="$(git log -1 HEAD --pretty=format:%h)"
   pushd ./gh-pages
-  
   test_sync "gh-pages"
   git add .
   git commit -m "Build on $(date) generated from $sha"
   git push origin "gh-pages"
-
-  scp -r . www.thisfieldwas.green:/var/www/www.thisfieldwas.green/
+  scp -r * thisfieldwas.green:/var/www/thisfieldwas.green/
   popd
 
   git add .

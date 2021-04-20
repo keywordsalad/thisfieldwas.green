@@ -6,13 +6,13 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
     <url>
-        <loc>$absRoot$</loc>
+        <loc>$site-root$</loc>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     $for(pages)$
     <url>
-        <loc>$absRoot$$url$</loc>
+        <loc>$site-root$$url$</loc>
         <lastmod>$if(updated)$$updated$$else$$if(date)$$date$$endif$$endif$</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>

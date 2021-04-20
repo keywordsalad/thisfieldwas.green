@@ -11,12 +11,10 @@ import System.Environment (getEnvironment)
 site :: IO ()
 site = do
   env <- getEnvironment
-  absRoot <- loadAbsRoot
   hakyllWith hakyllConfiguration do
     tags <- buildTags "blog/*" $ fromCapture "tags/*.html"
     let baseCtx =
-          constField "absRoot" absRoot
-            <> constField "bodyClass" "default"
+          constField "bodyClass" "default"
             <> tagsField "tags" tags
             <> cleanIndexPaths "url"
             <> mconcat gitCommitFields
@@ -25,6 +23,7 @@ site = do
             <> youtubeField
             <> routeToField
             <> commentField
+            <> siteRootField
             <> defaultContext
 
-    rules env (feedConfig absRoot) baseCtx
+    rules env baseCtx

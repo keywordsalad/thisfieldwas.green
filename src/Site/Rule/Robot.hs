@@ -9,5 +9,5 @@ robotsTxtRules baseCtx =
     route idRoute
     compile do
       siteRoot <- buildSiteRoot
-      let robotsCtx = constField "siteRoot" siteRoot <> baseCtx
+      let robotsCtx = constField "site-root" siteRoot <> baseCtx
       applyAsTemplate robotsCtx =<< getResourceBody

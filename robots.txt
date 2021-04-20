@@ -1,4 +1,4 @@
 # Generated from commit $gitSha1$
 User-agent: *
-Disallow: $siteRoot$/drafts/*
-Sitemap: $siteRoot$/sitemap.xml
+Disallow: $site-root$/drafts/*
+Sitemap: $site-root$/sitemap.xml

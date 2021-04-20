@@ -11,8 +11,8 @@ import Site.Rule.Robot
 import Site.Rule.Sass
 import Site.Rule.Sitemap
 
-rules :: [(String, String)] -> FeedConfiguration -> Context String -> Rules ()
-rules env feedConfig baseCtx = do
+rules :: [(String, String)] -> Context String -> Rules ()
+rules env baseCtx = do
   configRules
   imageRules
   cssRules
@@ -23,7 +23,7 @@ rules env feedConfig baseCtx = do
   codeDependency <- codeRules
   rulesExtraDependencies [codeDependency] do
     blogRules env baseCtx
-    feedRules feedConfig baseCtx
+    feedRules baseCtx
     indexRules env baseCtx
     pageRules env baseCtx
     robotsTxtRules baseCtx
@@ -32,7 +32,7 @@ rules env feedConfig baseCtx = do
 
 configRules :: Rules ()
 configRules =
-  match (fromList [".nojekyll", "CNAME"]) do
+  match (fromList [".nojekyll"]) do
     route idRoute
     compile copyFileCompiler
 
