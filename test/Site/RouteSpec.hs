@@ -23,7 +23,7 @@ spec = do
 
     describe "stripPrefixRoute" do
       let inputsOutputs =
-            first fromFilePath
+            bimap fromFilePath toFilePath
               <$> [ ("pages/contact.md", "contact.md"),
                     ("pages/archives.html", "archives.html"),
                     ("404.md", "404.md")
@@ -31,4 +31,16 @@ spec = do
       it "strips the prefix from the identifier path" \run -> do
         runIOs $
           inputsOutputs <&> \(input, output) -> do
-            (`shouldBe` Just output) . fst =<< run indexRoute input
+            (`shouldBe` Just output) . fst =<< run (stripPrefixRoute "^pages/") input
+
+    describe "htmlPageRoute" do
+      let inputsOutputs =
+            bimap fromFilePath toFilePath
+              <$> [ ("pages/contact.md", "contacts/index.html"),
+                    ("pages/archives.md", "archives/index.html"),
+                    ("pages/about-me.md", "about-me/index.html")
+                  ]
+      it "strips the prefix and changes creates an index html page" \run -> do
+        runIOs $
+          inputsOutputs <&> \(input, output) -> do
+            (`shouldBe` Just output) . fst =<< run htmlPageRoute input
