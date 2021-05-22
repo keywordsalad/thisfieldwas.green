@@ -1,4 +1,4 @@
-module Site.SpecUtil where
+module Site.Spec.Util where
 
 import Control.Exception (bracket)
 import qualified Data.Set as S
@@ -11,9 +11,10 @@ import Hakyll.Core.Routes
 import Hakyll.Core.Store (Store)
 import qualified Hakyll.Core.Store as Store
 import Hakyll.Core.Util.File
+import Test.Hspec
 
-runIOs :: [IO ()] -> IO ()
-runIOs = foldl (>>) (return ())
+runExpectations :: [Expectation] -> Expectation
+runExpectations = foldl (>>) (return ())
 
 type RunRoutes = Routes -> Identifier -> IO (Maybe FilePath, UsedMetadata)
 

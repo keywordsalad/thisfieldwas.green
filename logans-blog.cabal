@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4ff263d23fd9ae32c51eec9bb05b7a07df4dc4cd9c279246a0661dfcafc8268b
+-- hash: b8cd8031775d5fd8aed98cb3043e5f46beddbb0f67748889b0197f74c7e91265
 
 name:           logans-blog
 version:        0.1.0.0
@@ -244,8 +244,8 @@ test-suite logans-blog-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Site.RouteSpec
-      Site.SpecUtil
+      Site.Route.Spec
+      Site.Spec.Util
       Paths_logans_blog
   hs-source-dirs:
       test
