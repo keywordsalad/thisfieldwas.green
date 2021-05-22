@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b8cd8031775d5fd8aed98cb3043e5f46beddbb0f67748889b0197f74c7e91265
+-- hash: 635b48f2a29cf3a538d8222465c4322a8f12851cc98648de5fae3eeb6e85f8e2
 
 name:           logans-blog
 version:        0.1.0.0
@@ -105,7 +105,6 @@ library
     , filepath ==1.4.*
     , hakyll ==4.14.*
     , hjsmin ==0.2.*
-    , hspec ==2.7.*
     , language-javascript ==0.7.*
     , microlens ==0.4.*
     , microlens-th ==0.4.*
@@ -222,7 +221,6 @@ executable logans-blog-exe
     , filepath ==1.4.*
     , hakyll ==4.14.*
     , hjsmin ==0.2.*
-    , hspec ==2.7.*
     , language-javascript ==0.7.*
     , logans-blog
     , microlens ==0.4.*
@@ -244,7 +242,7 @@ test-suite logans-blog-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Site.Route.Spec
+      Site.RouteSpec
       Site.Spec.Util
       Paths_logans_blog
   hs-source-dirs:

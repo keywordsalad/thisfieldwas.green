@@ -22,7 +22,6 @@ dependencies:
   - filepath == 1.4.*
   - hakyll == 4.14.*
   - hjsmin == 0.2.*
-  - hspec == 2.7.*
   - language-javascript == 0.7.*
   - microlens == 0.4.*
   - microlens-th == 0.4.*
@@ -119,3 +118,4 @@ tests:
     ghc-options: *ghc-options
     dependencies:
       - logans-blog
+      - hspec == 2.7.*

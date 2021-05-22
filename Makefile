@@ -33,3 +33,7 @@ init:
 test:
 	set -e; source commands.sh; test
 .PHONY: test
+
+hpack:
+	stack exec hpack
+.PHONY: test

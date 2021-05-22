@@ -1,13 +1,13 @@
 module Site.Route where
 
-import Data.String.Utils (endswith)
+import Data.List (isSuffixOf)
 import Hakyll
 
 indexRoute :: Routes
 indexRoute = gsubRoute "\\.html$" replaceWithIndex
   where
     replaceWithIndex s
-      | endswith "/index.html" s = s
+      | "/index.html" `isSuffixOf` s = s
       | otherwise = replaceAll "\\.html$" (const "/index.html") s
 
 pageRoute :: Routes

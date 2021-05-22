@@ -31,3 +31,4 @@ project/
 .bsp/
 target/
 _site/
+_test/

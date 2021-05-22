@@ -7,7 +7,6 @@ import Hakyll.Core.Configuration
 import Hakyll.Core.Identifier
 import qualified Hakyll.Core.Logger as Logger
 import Hakyll.Core.Provider
-import Hakyll.Core.Routes
 import Hakyll.Core.Store (Store)
 import qualified Hakyll.Core.Store as Store
 import Hakyll.Core.Util.File
@@ -15,17 +14,6 @@ import Test.Hspec
 
 runExpectations :: [Expectation] -> Expectation
 runExpectations = foldl (>>) (return ())
-
-type RunRoutes = Routes -> Identifier -> IO (Maybe FilePath, UsedMetadata)
-
-withRunRoutes :: (RunRoutes -> IO a) -> IO a
-withRunRoutes = bracket acquire release
-  where
-    acquire = flip runRoutes . snd <$> createStoreAndProvider
-    release = cleanTestEnv
-
-withRunRoutes' :: (RunRoutes -> IO a) -> IO a
-withRunRoutes' f = withStoreAndProvider \(_, provider) -> f (`runRoutes` provider)
 
 createStoreAndProvider :: IO (Store, Provider)
 createStoreAndProvider = do
@@ -68,7 +56,7 @@ testConfiguration =
     { destinationDirectory = "_test/site",
       storeDirectory = "_test/store",
       tmpDirectory = "_test/tmp",
-      providerDirectory = "tests/data"
+      providerDirectory = "test/data"
     }
 
 cleanTestEnv :: a -> IO ()
