@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 635b48f2a29cf3a538d8222465c4322a8f12851cc98648de5fae3eeb6e85f8e2
+-- hash: 8e0ce69427e4325772aa57f58eda9c6ab8fc5077a280e21247168723e13ef5d9
 
 name:           logans-blog
 version:        0.1.0.0
@@ -342,6 +342,7 @@ test-suite logans-blog-test
     , hakyll ==4.14.*
     , hjsmin ==0.2.*
     , hspec ==2.7.*
+    , hspec-core ==2.7.*
     , language-javascript ==0.7.*
     , logans-blog
     , microlens ==0.4.*
