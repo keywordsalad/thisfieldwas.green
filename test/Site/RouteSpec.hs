@@ -8,7 +8,26 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
+  describe "appendIndexHtml" do
+    let ids =
+          first fromFilePath
+            <$> [ ("this/appends/it.html", "this/appends/it/index.html"),
+                  ("this/does/not/append/index.html", "this/does/not/append/index.html"),
+                  ("index.html", "index.html")
+                ]
+    runAll $
+      ids <&> \(from', to') ->
+        it ("changes " ++ toFilePath from' ++ " into " ++ to') do
+          appendIndexHtml from' `shouldBe` to'
+
   around withRunRoutes do
+    describe "pageRoute" do
+      runTable pageRoute $
+        [ ("pages/hello.txt", "hello.txt"),
+          ("pages/contact.html", "contact.html"),
+          ("pages/special.pdf", "special.pdf")
+        ]
+
     describe "indexRoute" do
       runTable indexRoute $
         [ ("info/tag-cloud.html", "info/tag-cloud/index.html"),
@@ -23,13 +42,13 @@ spec = do
         ]
     describe "htmlPageRoute" do
       runTable htmlPageRoute $
-        [ ("pages/contact.md", "contacts/index.html"),
+        [ ("pages/contact.md", "contact/index.html"),
           ("pages/archives.md", "archives/index.html"),
           ("pages/about-me.md", "about-me/index.html")
         ]
 
 runTable :: Routes -> [(String, String)] -> SpecWith RunRoutes
-runTable routes = foldl (>>) (return ()) . fmap makeExample
+runTable routes = runAll . fmap makeExample
   where
     makeExample inputOutput = it ("routes " ++ fst inputOutput ++ " to " ++ snd inputOutput) $ runExample inputOutput
     runExample inputOutput runRoutes' =

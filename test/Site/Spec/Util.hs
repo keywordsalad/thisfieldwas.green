@@ -10,6 +10,10 @@ import Hakyll.Core.Provider
 import Hakyll.Core.Store (Store)
 import qualified Hakyll.Core.Store as Store
 import Hakyll.Core.Util.File
+import Test.Hspec
+
+runAll :: [SpecWith a] -> SpecWith a
+runAll = foldl (>>) (return ())
 
 createStoreAndProvider :: IO (Store, Provider)
 createStoreAndProvider = do
