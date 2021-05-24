@@ -2,7 +2,6 @@
 layout: post
 title: "Sterling Benchmarks"
 date: 2013-06-16T21:12:00-07:00
-published: 2013-06-16T21:12:00-07:00
 comments: false
 tags: Functional Programming, Sterling, Language Design
 ---

@@ -1,15 +1,29 @@
-module Site.Spec.Util where
+module Site.Spec.Common
+  ( module Hakyll,
+    module Test.Hspec,
+    module Site.Common,
+    runAll,
+    createStoreAndProvider,
+    newTestProvider,
+    newTestStore,
+    withStoreAndProvider,
+    testCompiler,
+    testConfiguration,
+    cleanTestEnv,
+    runRoutesTable,
+    withRunRoutes,
+  )
+where
 
 import Control.Exception (bracket)
 import qualified Data.Set as S
+import Hakyll
 import Hakyll.Core.Compiler.Internal
-import Hakyll.Core.Configuration
-import Hakyll.Core.Identifier
 import qualified Hakyll.Core.Logger as Logger
 import Hakyll.Core.Provider
 import Hakyll.Core.Store (Store)
 import qualified Hakyll.Core.Store as Store
-import Hakyll.Core.Util.File
+import Site.Common
 import Test.Hspec
 
 runAll :: [SpecWith a] -> SpecWith a
@@ -68,3 +82,21 @@ cleanTestEnv _ = do
         storeDirectory,
         tmpDirectory
       ]
+
+runRoutesTable :: Routes -> [(String, Maybe String)] -> SpecWith RunRoutes
+runRoutesTable routes = runAll . fmap makeExample
+  where
+    makeExample inputOutput = it (makeLabel inputOutput) $ runExample inputOutput
+    makeLabel (input, Just output)
+      | input == output = "does not change the route of " ++ input
+      | otherwise = "routes " ++ input ++ " to " ++ output
+    makeLabel (input, Nothing) = "does not route " ++ input
+    runExample inputOutput runRoutes' =
+      let applyRoutes = fmap fst . runRoutes' routes . fromFilePath
+          (actual, expected) = first applyRoutes inputOutput
+       in actual >>= (`shouldBe` expected)
+
+type RunRoutes = Routes -> Identifier -> IO (Maybe FilePath, UsedMetadata)
+
+withRunRoutes :: (RunRoutes -> IO a) -> IO a
+withRunRoutes f = withStoreAndProvider \(_, provider) -> f (`runRoutes` provider)

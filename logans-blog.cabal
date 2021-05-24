@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8e0ce69427e4325772aa57f58eda9c6ab8fc5077a280e21247168723e13ef5d9
+-- hash: d2a97e97f33590b8613bb27a17ceac2489cdfa1c3c7041739f323b91a4d4fb46
 
 name:           logans-blog
 version:        0.1.0.0
@@ -42,10 +42,9 @@ library
       Site.Rule.Blog
       Site.Rule.Feed
       Site.Rule.Js
+      Site.Rule.Meta
       Site.Rule.Page
-      Site.Rule.Robot
       Site.Rule.Sass
-      Site.Rule.Sitemap
       Site.Util
   other-modules:
       Paths_logans_blog
@@ -243,7 +242,8 @@ test-suite logans-blog-test
   main-is: Spec.hs
   other-modules:
       Site.RouteSpec
-      Site.Spec.Util
+      Site.Rule.BlogSpec
+      Site.Spec.Common
       Paths_logans_blog
   hs-source-dirs:
       test

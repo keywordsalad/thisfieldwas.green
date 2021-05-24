@@ -1,11 +1,4 @@
-module Site.Rule.Blog
-  ( blogRules,
-    draftSnapshot,
-    loadDraftPosts,
-    loadPublishedPosts,
-    publishedSnapshot,
-  )
-where
+module Site.Rule.Blog where
 
 import Site.Common
 
@@ -31,14 +24,14 @@ blogIndexRules config =
 
 publishedPostRules :: SiteConfig -> Rules ()
 publishedPostRules localConfig = do
-  matchMetadata "blog/*" (isPublishable (localConfig ^. sitePreview)) do
-    route postRoute
+  matchMetadata "blog/**" (isPublishable (localConfig ^. sitePreview)) do
+    route publishedPostRoute
     compile $ postCompiler localConfig publishedSnapshot
 
 draftPostRules :: SiteConfig -> Rules ()
 draftPostRules localConfig = do
-  matchMetadata "blog/*" isDraft do
-    route draftRoute
+  matchMetadata "blog/**" isDraft do
+    route draftPostRoute
     compile $ postCompiler localConfig draftSnapshot
 
 draftArchiveRules :: SiteConfig -> Rules ()
@@ -69,19 +62,29 @@ loadDraftPosts = loadExistingSnapshots "blog/*" draftSnapshot
 {- Routes -}
 {-----------------------------------------------------------------------------}
 
-postRoute :: Routes
-postRoute =
-  setExtension "html"
-    <> indexRoute
-    <> dateRoute
+postPattern :: String
+postPattern = "^blog/[0-9]{4}-[0-9]{2}-[0-9]{2}-"
 
-draftRoute :: Routes
-draftRoute =
-  postRoute
-    <> gsubRoute "^blog/" (replaceAll "^blog/" (const "drafts/"))
+matchPostRoute :: Routes -> Routes
+matchPostRoute = matchRoute (fromRegex postPattern)
+
+publishedPostRoute :: Routes
+publishedPostRoute =
+  matchPostRoute . composeRoutesList $
+    [ dateRoute,
+      setExtension "html",
+      indexRoute
+    ]
+
+draftPostRoute :: Routes
+draftPostRoute =
+  matchPostRoute . composeRoutesList $
+    [ publishedPostRoute,
+      gsubRoute "^blog/" (replaceAll "^blog/" (const "drafts/"))
+    ]
 
 dateRoute :: Routes
-dateRoute = gsubRoute "^blog/[0-9]{4}-[0-9]{2}-[0-9]{2}-" $ replaceAll "-" (const "/")
+dateRoute = gsubRoute postPattern (replaceAll "-" (const "/"))
 
 {-----------------------------------------------------------------------------}
 {- Compilers -}
@@ -145,7 +148,7 @@ isPublishable :: Bool -> Metadata -> Bool
 isPublishable preview metadata = preview || isPublished metadata
 
 isPublished :: Metadata -> Bool
-isPublished = maybe True (== "true") . lookupString "published"
+isPublished = isJust . lookupString "published"
 
 isDraft :: Metadata -> Bool
 isDraft = not . isPublished

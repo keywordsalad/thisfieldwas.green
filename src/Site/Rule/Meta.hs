@@ -1,7 +1,13 @@
-module Site.Rule.Sitemap (sitemapRules) where
+module Site.Rule.Meta where
 
 import Site.Common
 import Site.Rule.Blog (loadPublishedPosts)
+
+robotsTxtRules :: SiteConfig -> Rules ()
+robotsTxtRules config = do
+  match "meta/robots.txt" do
+    route metaRoute
+    compile $ applyAsTemplate (config ^. siteContext) =<< getResourceBody
 
 sitemapRules :: SiteConfig -> Rules ()
 sitemapRules config =

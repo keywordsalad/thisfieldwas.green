@@ -29,7 +29,7 @@ import Data.Bifunctor (bimap, first, second)
 import Data.Bool (bool)
 import Data.Foldable (sequenceA_)
 import Data.Functor ((<&>))
-import Data.Maybe (fromJust, fromMaybe, isJust)
+import Data.Maybe (fromJust, fromMaybe, isJust, isNothing)
 import Hakyll
 import Lens.Micro hiding ((<&>))
 import Lens.Micro.TH

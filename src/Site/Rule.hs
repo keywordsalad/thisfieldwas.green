@@ -7,10 +7,9 @@ import Site.Rule.Archive
 import Site.Rule.Blog
 import Site.Rule.Feed
 import Site.Rule.Js
+import Site.Rule.Meta
 import Site.Rule.Page
-import Site.Rule.Robot
 import Site.Rule.Sass
-import Site.Rule.Sitemap
 
 rules :: SiteConfig -> Rules ()
 rules config = do

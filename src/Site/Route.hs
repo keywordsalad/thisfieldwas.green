@@ -30,3 +30,6 @@ stripPrefixRoute prefix = subPrefixRoute prefix ""
 subPrefixRoute :: String -> String -> Routes
 subPrefixRoute prefix replacement =
   gsubRoute prefix (replaceAll prefix (const replacement))
+
+composeRoutesList :: [Routes] -> Routes
+composeRoutesList = foldr composeRoutes idRoute
