@@ -22,9 +22,15 @@ blogIndexRules config =
     route htmlPageRoute
     compile $ blogCompiler config
 
+draftArchiveRules :: SiteConfig -> Rules ()
+draftArchiveRules config = do
+  match "pages/drafts.md" do
+    route htmlPageRoute
+    compile $ draftPostsCompiler config
+
 publishedPostRules :: SiteConfig -> Rules ()
 publishedPostRules localConfig = do
-  matchMetadata "blog/**" (isPublishable (localConfig ^. sitePreview)) do
+  matchMetadata "blog/**" isPublished do
     route publishedPostRoute
     compile $ postCompiler localConfig publishedSnapshot
 
@@ -33,12 +39,6 @@ draftPostRules localConfig = do
   matchMetadata "blog/**" isDraft do
     route draftPostRoute
     compile $ postCompiler localConfig draftSnapshot
-
-draftArchiveRules :: SiteConfig -> Rules ()
-draftArchiveRules config = do
-  create ["pages/drafts.md"] do
-    route htmlPageRoute
-    compile $ draftPostsCompiler config
 
 {-----------------------------------------------------------------------------}
 {- Snapshots -}
@@ -143,9 +143,6 @@ blogContext latestPost otherPosts siteContext' = do
 {-----------------------------------------------------------------------------}
 {- Metadata -}
 {-----------------------------------------------------------------------------}
-
-isPublishable :: Bool -> Metadata -> Bool
-isPublishable preview metadata = preview || isPublished metadata
 
 isPublished :: Metadata -> Bool
 isPublished = isJust . lookupString "published"

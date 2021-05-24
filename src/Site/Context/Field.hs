@@ -63,16 +63,14 @@ routeToField :: Context String
 routeToField = functionField fieldName f
   where
     fieldName = "route-to"
-    f _ _ = return "/dummy.html"
-
--- f [filePath] item = do
---   getRoute id' >>= \case
---     Just route' -> return $ "/" ++ stripSuffix "index.html" route'
---     Nothing -> error $ fieldName ++ " in " ++ show fromId ++ ": no route to " ++ show id'
---   where
---     id' = fromFilePath filePath
---     fromId = itemIdentifier item
--- f _ item = error $ fieldName ++ " needs a filePath " ++ show (itemIdentifier item)
+    f [filePath] item = do
+      getRoute id' >>= \case
+        Just route' -> return $ "/" ++ stripSuffix "index.html" route'
+        Nothing -> error $ fieldName ++ " in " ++ show fromId ++ ": no route to " ++ show id'
+      where
+        id' = fromFilePath filePath
+        fromId = itemIdentifier item
+    f _ item = error $ fieldName ++ " needs a filePath " ++ show (itemIdentifier item)
 
 commentField :: Context String
 commentField = functionField "comment" \_ _ -> return ""

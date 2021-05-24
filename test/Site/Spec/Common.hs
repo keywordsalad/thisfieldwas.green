@@ -27,7 +27,7 @@ import Site.Common
 import Test.Hspec
 
 runAll :: [SpecWith a] -> SpecWith a
-runAll = foldl (>>) (return ())
+runAll = sequenceA_
 
 createStoreAndProvider :: IO (Store, Provider)
 createStoreAndProvider = do
@@ -74,8 +74,7 @@ testConfiguration =
     }
 
 cleanTestEnv :: a -> IO ()
-cleanTestEnv _ = do
-  foldl (>>) mempty (removeDirectory . ($ testConfiguration) <$> cleanDirectories)
+cleanTestEnv _ = sequenceA_ (removeDirectory . ($ testConfiguration) <$> cleanDirectories)
   where
     cleanDirectories =
       [ destinationDirectory,

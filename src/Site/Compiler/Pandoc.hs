@@ -14,8 +14,8 @@ import Text.Pandoc.Definition
 import Text.Pandoc.Highlighting (pygments)
 import qualified Text.Pandoc.Options as Opt
 
-pandocCompilerForCodeInsertion :: Item String -> Compiler (Item String)
-pandocCompilerForCodeInsertion = compilePandocWith return
+compilePandocWithDefault :: Item String -> Compiler (Item String)
+compilePandocWithDefault = compilePandocWith return
 
 compilePandocWith :: (Item Pandoc -> Compiler (Item Pandoc)) -> Item String -> Compiler (Item String)
 compilePandocWith f =
@@ -30,17 +30,8 @@ interpolateResourceBody config =
 
 interpolateItem :: SiteConfig -> Item String -> Compiler (Item String)
 interpolateItem config =
-  applyAsTemplate (config ^. siteContext) . printDebug config
-    >=> pandocCompilerForCodeInsertion
-
-printDebug :: SiteConfig -> Item String -> Item String
-printDebug config item =
-  let sep = "=================================================\n"
-      y = toFilePath (itemIdentifier item) ++ sep
-      z = itemBody item ++ sep
-   in if config ^. siteDebug
-        then trace (sep ++ y ++ z) item
-        else item
+  applyAsTemplate (config ^. siteContext) . printDebugItem config
+    >=> compilePandocWithDefault
 
 readerOpts :: Opt.ReaderOptions
 readerOpts =
@@ -57,3 +48,13 @@ writerOpts =
     { Opt.writerHTMLMathMethod = Opt.MathJax "",
       Opt.writerHighlightStyle = Just pygments
     }
+
+printDebugItem :: SiteConfig -> Item String -> Item String
+printDebugItem config item =
+  if config ^. siteDebug
+    then trace (sep ++ y ++ z) item
+    else item
+  where
+    sep = "=================================================\n"
+    y = toFilePath (itemIdentifier item) ++ sep
+    z = itemBody item ++ sep

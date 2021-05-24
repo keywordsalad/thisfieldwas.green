@@ -39,9 +39,8 @@ applyLayoutFromMetadata :: SiteConfig -> Item String -> Compiler (Item String)
 applyLayoutFromMetadata config item = do
   metadata <- getMetadata $ itemIdentifier item
   maybeLayout <- sequence (loadLayout . fromLayoutName <$> lookupString "layout" metadata)
-  body <- getResourceBody
-  let f layout = applyLayout config layout body
-  maybe (return body) f maybeLayout
+  let f layout = applyLayout config layout item
+  maybe (return item) f maybeLayout
 
 applyLayout :: SiteConfig -> Item Layout -> Item String -> Compiler (Item String)
 applyLayout config layout = go templates
