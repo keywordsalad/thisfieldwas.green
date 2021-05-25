@@ -1,9 +1,9 @@
-name: logans-blog
+name: logans-site
 version: 0.1.0.0
 github: ThisFieldWasGreen/thisfieldwasgreen.github.io
 license: MIT
 author: Logan McGrath
-maintainer: "blog@thisfieldwas.green"
+maintainer: "site@thisfieldwas.green"
 copyright: "2012 Logan McGrath"
 
 extra-source-files:
@@ -27,6 +27,7 @@ dependencies:
   - microlens-th == 0.4.*
   - MissingH == 1.4.*
   - mtl == 2.2.*
+  - optparse-applicative >= 0.12 && < 0.17
   - pandoc == 2.11.*
   - pandoc-types == 1.22.*
   - process == 1.6.*
@@ -37,6 +38,7 @@ dependencies:
   - unordered-containers == 0.2.*
   - utf8-string == 1.0.*
   - vector == 0.12.*
+  - yaml == 0.11.*
 
 library:
   source-dirs: src
@@ -102,21 +104,21 @@ ghc-options: &ghc-options
   - -Wunused-type-patterns
 
 executables:
-  logans-blog-exe:
+  logans-site-exe:
     main: Main.hs
     source-dirs: app
     default-extensions: *default-extensions
     ghc-options: *ghc-options
     dependencies:
-      - logans-blog
+      - logans-site
 
 tests:
-  logans-blog-test:
+  logans-site-test:
     main: Spec.hs
     source-dirs: test
     default-extensions: *default-extensions
     ghc-options: *ghc-options
     dependencies:
-      - logans-blog
+      - logans-site
       - hspec == 2.7.*
       - hspec-core == 2.7.*

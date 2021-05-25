@@ -4,15 +4,15 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d2a97e97f33590b8613bb27a17ceac2489cdfa1c3c7041739f323b91a4d4fb46
+-- hash: 9a35c08a9d6989bc59e76bcec423a66ecb6b9ef0cc57cce3fc5d7b1376e0b0cc
 
-name:           logans-blog
+name:           logans-site
 version:        0.1.0.0
 description:    Please see the README at <https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io#readme>
 homepage:       https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io#readme
 bug-reports:    https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io/issues
 author:         Logan McGrath
-maintainer:     blog@thisfieldwas.green
+maintainer:     site@thisfieldwas.green
 copyright:      2012 Logan McGrath
 license:        MIT
 build-type:     Simple
@@ -31,23 +31,23 @@ library
       Site.Compiler.Layout
       Site.Compiler.Pandoc
       Site.Config
+      Site.Context
       Site.Context.Field
       Site.Context.GitCommits
       Site.Context.Post
       Site.Context.Tag
-      Site.Metadata
       Site.Route
       Site.Rule
-      Site.Rule.Archive
       Site.Rule.Blog
       Site.Rule.Feed
       Site.Rule.Js
-      Site.Rule.Meta
       Site.Rule.Page
+      Site.Rule.Robot
       Site.Rule.Sass
+      Site.Rule.Sitemap
       Site.Util
   other-modules:
-      Paths_logans_blog
+      Paths_logans_site
   hs-source-dirs:
       src
   default-extensions:
@@ -108,6 +108,7 @@ library
     , microlens ==0.4.*
     , microlens-th ==0.4.*
     , mtl ==2.2.*
+    , optparse-applicative >=0.12 && <0.17
     , pandoc ==2.11.*
     , pandoc-types ==1.22.*
     , process ==1.6.*
@@ -118,12 +119,13 @@ library
     , unordered-containers ==0.2.*
     , utf8-string ==1.0.*
     , vector ==0.12.*
+    , yaml ==0.11.*
   default-language: Haskell2010
 
-executable logans-blog-exe
+executable logans-site-exe
   main-is: Main.hs
   other-modules:
-      Paths_logans_blog
+      Paths_logans_site
   hs-source-dirs:
       app
   default-extensions:
@@ -221,10 +223,11 @@ executable logans-blog-exe
     , hakyll ==4.14.*
     , hjsmin ==0.2.*
     , language-javascript ==0.7.*
-    , logans-blog
+    , logans-site
     , microlens ==0.4.*
     , microlens-th ==0.4.*
     , mtl ==2.2.*
+    , optparse-applicative >=0.12 && <0.17
     , pandoc ==2.11.*
     , pandoc-types ==1.22.*
     , process ==1.6.*
@@ -235,16 +238,18 @@ executable logans-blog-exe
     , unordered-containers ==0.2.*
     , utf8-string ==1.0.*
     , vector ==0.12.*
+    , yaml ==0.11.*
   default-language: Haskell2010
 
-test-suite logans-blog-test
+test-suite logans-site-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Site.Compiler.LayoutSpec
       Site.RouteSpec
       Site.Rule.BlogSpec
       Site.Spec.Common
-      Paths_logans_blog
+      Paths_logans_site
   hs-source-dirs:
       test
   default-extensions:
@@ -344,10 +349,11 @@ test-suite logans-blog-test
     , hspec ==2.7.*
     , hspec-core ==2.7.*
     , language-javascript ==0.7.*
-    , logans-blog
+    , logans-site
     , microlens ==0.4.*
     , microlens-th ==0.4.*
     , mtl ==2.2.*
+    , optparse-applicative >=0.12 && <0.17
     , pandoc ==2.11.*
     , pandoc-types ==1.22.*
     , process ==1.6.*
@@ -358,4 +364,5 @@ test-suite logans-blog-test
     , unordered-containers ==0.2.*
     , utf8-string ==1.0.*
     , vector ==0.12.*
+    , yaml ==0.11.*
   default-language: Haskell2010

@@ -24,7 +24,7 @@ build () {
   fi
 
   stack build
-  stack exec logans-blog-exe build
+  stack exec logans-site-exe build
 }
 
 clean () {
@@ -34,7 +34,7 @@ clean () {
 clean_all () {
   clean
   stack clean
-  rm -rf _site/*
+  rm -rf _cache/* _site/*
 }
 
 rebuild () {
@@ -44,21 +44,7 @@ rebuild () {
 
 touch_all () {
   # touch all files so they're built again
-  paths=(
-    README.md
-    about-me.md
-    blog
-    code
-    contact.md
-    css
-    images
-    index.md
-    js
-    partials
-    resume.md
-    templates
-  )
-  find "$paths" -type f -exec touch {} +
+  touch site
 }
 
 rebuild_all () {
@@ -69,7 +55,7 @@ rebuild_all () {
 
 watch () {
   build
-  stack exec logans-blog-exe watch
+  stack exec logans-site-exe watch
 }
 
 publish () {

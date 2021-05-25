@@ -6,8 +6,10 @@ import Data.Maybe
 import Data.String.Utils as S
 import Hakyll
 import Lens.Micro
-import System.FilePath (splitFileName, takeDirectory)
 import qualified Text.HTML.TagSoup as TS
+
+timeFormat :: String
+timeFormat = "%Y-%m-%dT%H:%M:%S%Z"
 
 -- | Feed renderer signature
 type RenderFeed =
@@ -17,13 +19,6 @@ type RenderFeed =
 
 itemSiteRoot :: Item a -> Compiler String
 itemSiteRoot = fmap (toSiteRoot . fromJust) . getRoute . itemIdentifier
-
-cleanIndexPaths :: String -> Context a
-cleanIndexPaths key = mapContext transform (urlField key)
-  where
-    transform url = case splitFileName url of
-      (p, "index.html") -> takeDirectory p
-      _ -> url
 
 stripSuffix :: String -> String -> String
 stripSuffix suffix text =

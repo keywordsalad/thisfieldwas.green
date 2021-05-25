@@ -1,6 +1,7 @@
 module Site.Route where
 
-import Data.String.Utils (endswith, join, split)
+import Data.List (isSuffixOf)
+import Data.String.Utils (join, split)
 import Hakyll
 
 appendIndexHtml :: Identifier -> FilePath
@@ -9,20 +10,19 @@ appendIndexHtml = join "/" . reverse . indexIt . reverse . split "/" . toFilePat
     indexIt [] = []
     indexIt a@(x : xs)
       | x == "index.html" = a
-      | endswith ".html" x = (head (split "." x) ++ "/index.html") : xs
+      | ".html" `isSuffixOf` x = (head (split "." x) ++ "/index.html") : xs
       | otherwise = a
 
 indexRoute :: Routes
 indexRoute = customRoute appendIndexHtml
 
 pageRoute :: Routes
-pageRoute = stripPrefixRoute "^pages/"
-
-metaRoute :: Routes
-metaRoute = stripPrefixRoute "^meta/"
-
-htmlPageRoute :: Routes
-htmlPageRoute = pageRoute `composeRoutes` setExtension "html" `composeRoutes` indexRoute
+pageRoute =
+  composeRoutesList
+    [ stripPrefixRoute "^pages/",
+      setExtension "html",
+      indexRoute
+    ]
 
 stripPrefixRoute :: String -> Routes
 stripPrefixRoute prefix = subPrefixRoute prefix ""

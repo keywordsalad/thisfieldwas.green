@@ -2,7 +2,7 @@
 layout: post
 title: "Lessons from Sterling"
 author: "Logan McGrath"
-date: 2013-08-05T09:37:00-07:00
+created: 2013-08-05T09:37:00-07:00
 comments: false
 tags: Sterling, Functional Programming, Language Design
 ---
@@ -405,6 +405,6 @@ memoization becomes a near requirement in order to make lazy evaluation useful.
 [virtually anywhere for anything]: http://brandonbyars.com/2008/07/21/orthogonality/
 [directly into a language]: http://paulhammant.com/blog/crazy-bob-and-type-safety-for-dependency-injection.html/
 [open/closed principle]: http://en.wikipedia.org/wiki/Open/closed_principle
-[memoization]: $route-to("blog/2013-06-17-sterling-with-memoization.md")$
+[memoization]: $route-to("posts/2013-06-17-sterling-with-memoization.md")$
 [visitor pattern]: http://en.wikipedia.org/wiki/Visitor_pattern#Java_example
 [single dispatch]: http://en.wikipedia.org/wiki/Multiple_dispatch#Java

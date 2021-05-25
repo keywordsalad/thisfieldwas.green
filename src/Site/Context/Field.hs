@@ -6,6 +6,7 @@ module Site.Context.Field
     routeToField,
     commentField,
     demoteHeadersByField,
+    removeIndexUrlField,
   )
 where
 
@@ -14,6 +15,14 @@ import Hakyll hiding (demoteHeaders)
 import Lens.Micro
 import Site.Config (SiteConfig, siteRoot)
 import Site.Util
+import System.FilePath (splitFileName, takeDirectory)
+
+removeIndexUrlField :: String -> Context a
+removeIndexUrlField key = mapContext transform (urlField key)
+  where
+    transform url = case splitFileName url of
+      (p, "index.html") -> takeDirectory p
+      _ -> url
 
 siteRootField :: SiteConfig -> Context String
 siteRootField config = constField "site-root" (config ^. siteRoot)

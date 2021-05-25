@@ -28,17 +28,30 @@ instance Binary Layout where
 instance Writable Layout where
   write p = LBS.writeFile p . B.encode . itemBody
 
+layoutKey :: String
+layoutKey = "layout"
+
+layoutScriptsKey :: String
+layoutScriptsKey = "scripts"
+
+layoutStylesheetsKey :: String
+layoutStylesheetsKey = "stylesheets"
+
 layoutContext :: SimpleGetter Layout (Context String)
 layoutContext = to \layout ->
-  listField "scripts" context (return $ layout ^. layoutScripts)
-    <> listField "stylesheets" context (return $ layout ^. layoutStylesheets)
+  listField layoutScriptsKey context (return $ layout ^. layoutScripts)
+    <> listField layoutStylesheetsKey context (return $ layout ^. layoutStylesheets)
   where
     context = bodyField "src"
+
+loadLayoutFromMetadata :: Metadata -> Compiler (Maybe (Item Layout))
+loadLayoutFromMetadata metadata =
+  mapM (loadLayout . fromLayoutName) (lookupString layoutKey metadata)
 
 applyLayoutFromMetadata :: SiteConfig -> Item String -> Compiler (Item String)
 applyLayoutFromMetadata config item = do
   metadata <- getMetadata $ itemIdentifier item
-  maybeLayout <- sequence (loadLayout . fromLayoutName <$> lookupString "layout" metadata)
+  maybeLayout <- loadLayoutFromMetadata metadata
   let f layout = applyLayout config layout item
   maybe (return item) f maybeLayout
 
@@ -57,13 +70,13 @@ layoutCompiler :: Compiler (Item Layout)
 layoutCompiler = do
   metadata <- getMetadata =<< getUnderlying
   template <- makeItem =<< compileTemplateItem =<< getResourceBody
-  parent <- sequence (loadLayout . fromLayoutName <$> lookupString "layout" metadata)
+  parent <- loadLayoutFromMetadata metadata
 
   let parentScripts = parentItems layoutScripts parent
-      scripts = parentScripts ++ toUrlItems (lookupStringList "scripts" metadata)
+      scripts = parentScripts ++ toUrlItems (lookupStringList layoutScriptsKey metadata)
 
       parentStylesheets = parentItems layoutStylesheets parent
-      stylesheets = parentStylesheets ++ toUrlItems (lookupStringList "stylesheets" metadata)
+      stylesheets = parentStylesheets ++ toUrlItems (lookupStringList layoutStylesheetsKey metadata)
 
       parentStack = parentItems layoutStack parent
       stack = template : parentStack

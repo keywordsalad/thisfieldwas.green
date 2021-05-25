@@ -4,4 +4,6 @@ import Hakyll
 
 postContext :: Context String
 postContext =
-  dateField "date" "%B %e, %Y"
+  dateField "published" "%B %e, %Y"
+    <> dateField "created" "%B %e, %Y"
+    <> dateField "updated" "%B %e, %Y"

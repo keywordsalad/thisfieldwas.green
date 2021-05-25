@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "Logan McGrath's Online CV"
-page-type: static
+updated: 2021-05-24T20:07:11-05:00
 ---
 
 TODO finish this

@@ -5,15 +5,19 @@ import Site.Rule.Blog (loadPublishedPosts)
 
 sitemapRules :: SiteConfig -> Rules ()
 sitemapRules config =
-  match "meta/sitemap.xml" $ do
-    route metaRoute
+  create ["sitemap.xml"] do
+    route idRoute
     compile $ sitemapCompiler config
 
 sitemapCompiler :: SiteConfig -> Compiler (Item String)
 sitemapCompiler config = do
-  posts <- recentFirst =<< loadPublishedPosts
-  pages <- loadAll "pages/**"
-  let pageField = listField "pages" (config ^. siteContext) (return $ posts <> pages)
+  staticPages <- loadAll "*.html"
+  blogIndexes <- loadAll $ fromList ["blog.html", "archives.html"]
+  blogPosts <- recentFirst =<< loadPublishedPosts
+  let pageField = listField "pages" (config ^. siteContext) (return $ mconcat [staticPages, blogIndexes, blogPosts])
       localConfig = config & siteContext %~ (pageField <>)
-  interpolateResourceBody localConfig
+  makeItem ""
+    >>= loadAndApplyTemplate
+      (fromFilePath "templates/sitemap.xml")
+      (localConfig ^. siteContext)
     >>= relativizeUrls

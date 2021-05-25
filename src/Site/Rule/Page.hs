@@ -4,8 +4,8 @@ import Site.Common
 
 pageRules :: SiteConfig -> Rules ()
 pageRules config = do
-  matchMetadata "pages/**" isStaticPage do
-    route htmlPageRoute
+  match "pages/**" do
+    route pageRoute
     compile $
       interpolateResourceBody config
         >>= applyLayoutFromMetadata config

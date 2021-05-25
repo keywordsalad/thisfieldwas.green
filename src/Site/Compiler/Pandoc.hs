@@ -1,7 +1,8 @@
 module Site.Compiler.Pandoc
-  ( interpolateResourceBody,
+  ( compilePandoc,
     compilePandocWith,
     interpolateItem,
+    interpolateResourceBody,
   )
 where
 
@@ -14,8 +15,8 @@ import Text.Pandoc.Definition
 import Text.Pandoc.Highlighting (pygments)
 import qualified Text.Pandoc.Options as Opt
 
-compilePandocWithDefault :: Item String -> Compiler (Item String)
-compilePandocWithDefault = compilePandocWith return
+compilePandoc :: Item String -> Compiler (Item String)
+compilePandoc = compilePandocWith return
 
 compilePandocWith :: (Item Pandoc -> Compiler (Item Pandoc)) -> Item String -> Compiler (Item String)
 compilePandocWith f =
@@ -31,7 +32,7 @@ interpolateResourceBody config =
 interpolateItem :: SiteConfig -> Item String -> Compiler (Item String)
 interpolateItem config =
   applyAsTemplate (config ^. siteContext) . printDebugItem config
-    >=> compilePandocWithDefault
+    >=> compilePandoc
 
 readerOpts :: Opt.ReaderOptions
 readerOpts =

@@ -3,13 +3,13 @@ module Site.Rule where
 import Hakyll
 import Site.Compiler.Layout
 import Site.Config
-import Site.Rule.Archive
 import Site.Rule.Blog
 import Site.Rule.Feed
 import Site.Rule.Js
-import Site.Rule.Meta
 import Site.Rule.Page
+import Site.Rule.Robot
 import Site.Rule.Sass
+import Site.Rule.Sitemap
 
 rules :: SiteConfig -> Rules ()
 rules config = do
@@ -17,15 +17,15 @@ rules config = do
   imageRules
   cssRules
   templateRules
-  jsRules
-  sassRules
   downloadRules
+  jsRules
+  sassRules config
+  pageRules config
+  robotsTxtRules config
   codeDependency <- codeRules
   rulesExtraDependencies [codeDependency] do
     blogRules config
     feedRules config
-    pageRules config
-    robotsTxtRules config
     archiveRules config
     sitemapRules config
 
@@ -67,4 +67,5 @@ cssRules =
 templateRules :: Rules ()
 templateRules = do
   match "layouts/**" $ compile layoutCompiler
-  match "partials/**" $ compile templateBodyCompiler
+  match "partials/**" $ compile templateCompiler
+  match "templates/**" $ compile templateCompiler

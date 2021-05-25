@@ -2,7 +2,7 @@
 layout: post
 title: "SCM-Backed Application Configuration with Perforce"
 author: "Logan McGrath"
-date: 2012-11-16T07:00:00-05:00
+created: 2012-11-16T07:00:00-05:00
 published: 2012-11-16T07:00:00-05:00
 comments: false
 tags: SCM, Perforce, Sinatra, AngularJS
@@ -170,7 +170,7 @@ existing infrastructure.
 The reason I point out Subversion and TFS is largely due to support of
 per-branch permissions.
 
-[last post]: $route-to("blog/2012-11-07-using-perforce-chronicle-for-application-configuration.md")$
+[last post]: $route-to("posts/2012-11-07-using-perforce-chronicle-for-application-configuration.md")$
 [forked]: https://github.com/lmcgrath/App-Config-App/
 [AngularJS]: http://angularjs.org/
 [App-Config-App's README]: https://github.com/lmcgrath/app-config-app/blob/master/README.md

@@ -9,12 +9,14 @@ import System.Process
 
 gitCommits :: String -> Context String
 gitCommits gitWebUrl =
-  constField "git-web-url" gitWebUrl
-    <> field "git-sha1" gitSha1Compiler
-    <> field "git-message" gitMessageCompiler
-    <> field "is-changed" isChangedCompiler
-    <> field "is-generated" isGeneratedCompiler
-    <> field "git-branch" gitBranchCompiler
+  mconcat
+    [ constField "git-web-url" gitWebUrl,
+      field "git-sha1" gitSha1Compiler,
+      field "git-message" gitMessageCompiler,
+      field "is-changed" isChangedCompiler,
+      field "is-generated" isGeneratedCompiler,
+      field "git-branch" gitBranchCompiler
+    ]
 
 itemSourcePath :: Item a -> FilePath
 itemSourcePath item = toFilePath (itemIdentifier item)

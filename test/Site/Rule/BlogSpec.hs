@@ -5,22 +5,32 @@ import Site.Spec.Common
 
 spec :: Spec
 spec = do
-  around withRunRoutes do
+  around (withDefaultTestEnv `providing` runRouteSpec) do
     describe "dateRoute" do
-      runRoutesTable dateRoute $
-        [ ("blog/2012-11-07-this-one.md", Just "blog/2012/11/07/this-one.md"),
-          ("blog/2012-11-16-that-one.md", Just "blog/2012/11/16/that-one.md"),
-          ("blog/not-this-one.md", Just "blog/not-this-one.md")
+      runRouteExamples dateRoute $
+        [ ("posts/2012-11-07-this-one.md", Just "posts/2012/11/07/this-one.md"),
+          ("posts/2012-11-16-that-one.md", Just "posts/2012/11/16/that-one.md"),
+          ("posts/not-this-one.md", Just "posts/not-this-one.md"),
+          ("posts/underwater-basketry/2012-11-07-this-one.md", Just "posts/underwater-basketry/2012/11/07/this-one.md")
+        ]
+    describe "basePostRoute" do
+      runRouteExamples basePostRoute $
+        [ ("posts/2012-11-07-this-one.md", Just "posts/2012/11/07/this-one/index.html"),
+          ("posts/2012-11-16-that-one.md", Just "posts/2012/11/16/that-one/index.html"),
+          ("posts/not-this-one.md", Nothing),
+          ("posts/underwater-basketry/2012-11-07-this-one.md", Just "posts/underwater-basketry/2012/11/07/this-one/index.html")
         ]
     describe "publishedPostRoute" do
-      runRoutesTable publishedPostRoute $
-        [ ("blog/2012-11-07-this-one.md", Just "blog/2012/11/07/this-one/index.html"),
-          ("blog/2012-11-16-that-one.md", Just "blog/2012/11/16/that-one/index.html"),
-          ("blog/not-this-one.md", Nothing)
+      runRouteExamples publishedPostRoute $
+        [ ("posts/2012-11-07-this-one.md", Just "blog/2012/11/07/this-one/index.html"),
+          ("posts/2012-11-16-that-one.md", Just "blog/2012/11/16/that-one/index.html"),
+          ("posts/not-this-one.md", Nothing),
+          ("posts/underwater-basketry/2012-11-07-this-one.md", Just "blog/underwater-basketry/2012/11/07/this-one/index.html")
         ]
     describe "draftPostRoute" do
-      runRoutesTable draftPostRoute $
-        [ ("blog/2012-11-07-this-one.md", Just "drafts/2012/11/07/this-one/index.html"),
-          ("blog/2012-11-16-that-one.md", Just "drafts/2012/11/16/that-one/index.html"),
-          ("blog/not-this-one.md", Nothing)
+      runRouteExamples draftPostRoute $
+        [ ("posts/2012-11-07-this-one.md", Just "blog/drafts/2012/11/07/this-one/index.html"),
+          ("posts/2012-11-16-that-one.md", Just "blog/drafts/2012/11/16/that-one/index.html"),
+          ("posts/not-this-one.md", Nothing),
+          ("posts/underwater-basketry/2012-11-07-this-one.md", Just "blog/drafts/underwater-basketry/2012/11/07/this-one/index.html")
         ]

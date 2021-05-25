@@ -36,4 +36,4 @@ test:
 
 hpack:
 	stack exec hpack
-.PHONY: test
+.PHONY: hpack

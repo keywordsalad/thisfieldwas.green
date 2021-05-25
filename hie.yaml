@@ -1,8 +1,8 @@
 cradle:
   stack:
     - path: ./src
-      component: logans-blog:lib
+      component: logans-site:lib
     - path: ./app
-      component: logans-blog:exe:logans-blog-exe
+      component: logans-site:exe:logans-site-exe
     - path: ./test
-      component: logans-blog:test:logans-blog-test
+      component: logans-site:test:logans-site-test
