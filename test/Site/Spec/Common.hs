@@ -166,10 +166,10 @@ runCompilerSpec testEnv f = do
 --         ...
 providing ::
   -- | The factory providing the bracketed resource
-  ((a -> IO c) -> IO c) ->
+  ((a -> m c) -> m c) ->
   -- | The factory providing the spec resource dependent on the bracketed resource
-  (a -> (b -> IO c) -> IO c) ->
+  (a -> (b -> m c) -> m c) ->
   -- | The spec requiring the dependent resource
-  (b -> IO c) ->
-  IO c
+  (b -> m c) ->
+  m c
 providing withResource thingForSpec theSpec = withResource (`thingForSpec` theSpec)
