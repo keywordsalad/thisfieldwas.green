@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d9716e3f43d029a60421af48f4fd6f80d43ac0f2e0166a7fad8275eb0a98e5a9
+-- hash: c2a201f0e9fb8f7a66fd23f2bda9bb18fd1a782745ae9d442bf692a7702ceb21
 
 name:           logans-site
 version:        0.1.0.0
@@ -252,7 +252,12 @@ test-suite logans-site-test
       Site.Compiler.LayoutSpec
       Site.RouteSpec
       Site.Rule.BlogSpec
-      Site.Spec.Common
+      Site.TestSupport
+      Site.TestSupport.Compiler
+      Site.TestSupport.Config
+      Site.TestSupport.Resource
+      Site.TestSupport.Routes
+      Site.TestSupport.TestEnv
       Paths_logans_site
   hs-source-dirs:
       test

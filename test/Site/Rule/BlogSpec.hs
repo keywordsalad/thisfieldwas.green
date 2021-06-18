@@ -1,7 +1,7 @@
 module Site.Rule.BlogSpec where
 
 import Site.Rule.Blog
-import Site.Spec.Common
+import Site.TestSupport
 
 spec :: Spec
 spec = do

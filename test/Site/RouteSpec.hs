@@ -1,7 +1,7 @@
 module Site.RouteSpec where
 
 import Data.Bifunctor
-import Site.Spec.Common
+import Site.TestSupport
 
 spec :: Spec
 spec = do
