@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9a35c08a9d6989bc59e76bcec423a66ecb6b9ef0cc57cce3fc5d7b1376e0b0cc
+-- hash: d9716e3f43d029a60421af48f4fd6f80d43ac0f2e0166a7fad8275eb0a98e5a9
 
 name:           logans-site
 version:        0.1.0.0
@@ -36,6 +36,8 @@ library
       Site.Context.GitCommits
       Site.Context.Post
       Site.Context.Tag
+      Site.Lens
+      Site.Lens.Hakyll
       Site.Route
       Site.Rule
       Site.Rule.Blog
@@ -113,6 +115,7 @@ library
     , pandoc-types ==1.22.*
     , process ==1.6.*
     , tagsoup ==0.14.*
+    , template-haskell ==2.16.*
     , text ==1.2.*
     , time ==1.9.*
     , transformers ==0.5.*
@@ -232,6 +235,7 @@ executable logans-site-exe
     , pandoc-types ==1.22.*
     , process ==1.6.*
     , tagsoup ==0.14.*
+    , template-haskell ==2.16.*
     , text ==1.2.*
     , time ==1.9.*
     , transformers ==0.5.*
@@ -358,6 +362,7 @@ test-suite logans-site-test
     , pandoc-types ==1.22.*
     , process ==1.6.*
     , tagsoup ==0.14.*
+    , template-haskell ==2.16.*
     , text ==1.2.*
     , time ==1.9.*
     , transformers ==0.5.*

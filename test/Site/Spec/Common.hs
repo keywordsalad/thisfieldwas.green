@@ -52,7 +52,7 @@ defaultFeedConfig =
     { feedTitle = "This Old Feed",
       feedDescription = "Feeding the old worm the good stuff",
       feedAuthorName = "Slurms McKenzie",
-      feedAuthorEmail = "slurms@wormitup.net",
+      feedAuthorEmail = "slurms@thisold.blog",
       feedRoot = "https://thisold.blog"
     }
 

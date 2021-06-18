@@ -10,6 +10,7 @@ import Hakyll
 import Hakyll.Core.Configuration as HC
 import Lens.Micro
 import Lens.Micro.TH
+import Site.Lens.Hakyll
 import System.FilePath
 
 data SiteConfig = SiteConfig
@@ -30,23 +31,17 @@ data SiteConfig = SiteConfig
 
 makeLenses ''SiteConfig
 
-makeHakyllConfigLens :: (Configuration -> a) -> (Configuration -> a -> Configuration) -> Lens' SiteConfig a
-makeHakyllConfigLens getter setter = lens getter' setter'
-  where
-    getter' siteConfig = getter (siteConfig ^. siteHakyllConfiguration)
-    setter' siteConfig val = siteConfig & siteHakyllConfiguration %~ flip setter val
-
 siteDestinationDirectory :: Lens' SiteConfig FilePath
-siteDestinationDirectory = makeHakyllConfigLens destinationDirectory (\h v -> h {destinationDirectory = v})
+siteDestinationDirectory = siteHakyllConfiguration . destinationDirectoryL
 
 siteProviderDirectory :: Lens' SiteConfig FilePath
-siteProviderDirectory = makeHakyllConfigLens providerDirectory (\h v -> h {providerDirectory = v})
+siteProviderDirectory = siteHakyllConfiguration . providerDirectoryL
 
 siteStoreDirectory :: Lens' SiteConfig FilePath
-siteStoreDirectory = makeHakyllConfigLens storeDirectory (\h v -> h {storeDirectory = v})
+siteStoreDirectory = siteHakyllConfiguration . storeDirectoryL
 
 siteInMemoryCache :: Lens' SiteConfig Bool
-siteInMemoryCache = makeHakyllConfigLens inMemoryCache (\h v -> h {inMemoryCache = v})
+siteInMemoryCache = siteHakyllConfiguration . inMemoryCacheL
 
 hasEnvFlag :: String -> [(String, String)] -> Bool
 hasEnvFlag f e = isJust (lookup f e)

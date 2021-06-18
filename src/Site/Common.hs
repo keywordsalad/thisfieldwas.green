@@ -15,6 +15,8 @@ module Site.Common
     module Site.Compiler.Pandoc,
     module Site.Context.Field,
     module Site.Context,
+    module Site.Lens,
+    module Site.Lens.Hakyll,
     module Site.Route,
     module Site.Util,
     module System.Directory,
@@ -38,6 +40,8 @@ import Site.Compiler.Pandoc
 import Site.Config
 import Site.Context
 import Site.Context.Field
+import Site.Lens
+import Site.Lens.Hakyll
 import Site.Route
 import Site.Util
 import System.Directory (copyFile, createDirectoryIfMissing, doesFileExist)
