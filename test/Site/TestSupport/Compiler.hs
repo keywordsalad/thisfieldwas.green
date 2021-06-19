@@ -7,11 +7,11 @@ import qualified Hakyll.Core.Logger as Logger
 import Site.TestSupport.TestEnv
 import Test.Hspec
 
-type RunCompiler a = (Identifier -> Compiler a) -> Identifier -> IO (CompilerResult a)
+type RunCompiler a = Compiler a -> Identifier -> IO (CompilerResult a)
 
 runCompilerSpec :: TestEnv -> (RunCompiler a -> IO b) -> IO b
 runCompilerSpec testEnv f = do
-  let runner compiler identifier = do
+  let run compiler identifier = do
         logger <- Logger.new Logger.Debug
         let compilerRead =
               CompilerRead
@@ -26,7 +26,7 @@ runCompilerSpec testEnv f = do
         result <- runCompiler compiler compilerRead
         Logger.flush logger
         return result
-  f runner
+  f run
 
 shouldProduce :: (Eq a, Show a) => CompilerResult (Item a) -> a -> Expectation
 shouldProduce (CompilerDone item _) expected =
@@ -41,3 +41,6 @@ shouldProduce (CompilerError errors) _ = expectationFailure message
       CompilationFailure exceptions -> "Compiler failed with exceptions: " ++ show exceptions
       CompilationNoResult [] -> "Compiler produced no result"
       CompilationNoResult exceptions -> "Compiler produced no result with exceptions: " ++ show exceptions
+
+compileBody :: (Item String -> Compiler (Item String)) -> Compiler (Item String)
+compileBody compiler = getUnderlying >>= loadBody >>= compiler
