@@ -7,16 +7,16 @@ import qualified Hakyll.Core.Logger as Logger
 import Site.TestSupport.TestEnv
 import Test.Hspec
 
-type RunCompiler a = Identifier -> Compiler a -> IO (CompilerResult a)
+type RunCompiler a = (Identifier -> Compiler a) -> Identifier -> IO (CompilerResult a)
 
 runCompilerSpec :: TestEnv -> (RunCompiler a -> IO b) -> IO b
 runCompilerSpec testEnv f = do
-  let runner underlying compiler = do
+  let runner compiler identifier = do
         logger <- Logger.new Logger.Debug
         let compilerRead =
               CompilerRead
                 { compilerConfig = testHakyllConfig testEnv,
-                  compilerUnderlying = underlying,
+                  compilerUnderlying = identifier,
                   compilerProvider = testProvider testEnv,
                   compilerUniverse = S.empty,
                   compilerRoutes = mempty,

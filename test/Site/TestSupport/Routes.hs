@@ -6,6 +6,11 @@ import Site.Common
 import Site.TestSupport.TestEnv
 import Test.Hspec
 
+type RunRoutes = Routes -> Identifier -> IO (Maybe FilePath, UsedMetadata)
+
+runRouteSpec :: TestEnv -> (RunRoutes -> IO a) -> IO a
+runRouteSpec testEnv f = f (`H.runRoutes` testProvider testEnv)
+
 runRouteExamples :: Routes -> [(String, Maybe String)] -> SpecWith RunRoutes
 runRouteExamples routes = traverse_ makeExample
   where
@@ -18,8 +23,3 @@ runRouteExamples routes = traverse_ makeExample
       let applyRoutes = fmap fst . runRoutes' routes . fromFilePath
           (actual, expected) = first applyRoutes inputOutput
        in actual >>= (`shouldBe` expected)
-
-type RunRoutes = Routes -> Identifier -> IO (Maybe FilePath, UsedMetadata)
-
-runRouteSpec :: TestEnv -> (RunRoutes -> IO a) -> IO a
-runRouteSpec testEnv f = f (`H.runRoutes` testProvider testEnv)
