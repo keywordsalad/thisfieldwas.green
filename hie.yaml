@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./site/main.hs"
+      component: "logans-blog:exe:site"
+
+    - path: "./src"
+      component: "logans-blog:lib:site-lib"

@@ -5,9 +5,17 @@ cabal-version:      >= 1.10
 
 executable site
   main-is:          main.hs
+  hs-source-dirs:   site
+  build-depends:    site-lib
+                  , base == 4.*
+  ghc-options:      -threaded
+                    -rtsopts
+                    -with-rtsopts=-N
+
+library site-lib
   hs-source-dirs:   src
-  other-modules:    Site
-                  , Site.Common
+  exposed-modules:  Site
+  other-modules:    Site.Common
                   , Site.Compiler
                   , Site.Compiler.CustomPandoc
                   , Site.Configuration
@@ -39,10 +47,7 @@ executable site
                   , containers == 0.6.*
                   , pandoc == 2.11.*
                   , pandoc-types == 1.22.*
-  ghc-options:      -threaded
-                    -rtsopts
-                    -with-rtsopts=-N
-                    -Wall
+  ghc-options:      -Wall
                     -Wcompat
                     -Widentities
                     -Wincomplete-patterns
