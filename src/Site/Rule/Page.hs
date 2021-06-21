@@ -7,6 +7,7 @@ pageRules config = do
   match "pages/**" do
     route pageRoute
     compile $
-      interpolateResourceBody config
+      getResourceBody
+        >>= applyAsTemplate baseCtx
         >>= applyLayoutFromMetadata config
         >>= relativizeUrls
