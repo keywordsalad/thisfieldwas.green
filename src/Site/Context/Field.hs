@@ -53,6 +53,8 @@ imgField = functionField fieldName f
         )
         >=> return . itemBody
     f _ = \item -> error $ fieldName ++ " needs an image source and optionally a title " ++ show (itemIdentifier item)
+
+youtubeField :: Context String
 youtubeField = functionField fieldName f
   where
     fieldName = "youtube"
