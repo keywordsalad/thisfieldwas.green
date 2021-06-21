@@ -3,6 +3,7 @@
 *.ipr
 .stack-work/
 _cache/
+_site/
 *~
 dist
 dist-*
@@ -27,3 +28,6 @@ cabal.project.local~
 .HTF/
 .ghc.environment.*
 .sass-cache/
+.bsp
+project/
+target/

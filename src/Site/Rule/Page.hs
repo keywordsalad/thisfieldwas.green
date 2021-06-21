@@ -10,14 +10,17 @@ pageRules baseCtx =
     compile $ pageCompiler baseCtx
 
 pageCompiler :: Context String -> Compiler (Item String)
-pageCompiler baseCtx = pandocCompiler
-  >>= loadAndApplyTemplate "templates/default.html" baseCtx
-  >>= relativizeUrls
+pageCompiler baseCtx =
+  getResourceBody
+    >>= applyAsTemplate baseCtx
+    >>= pandocCompilerForCodeInsertion
+    >>= loadAndApplyTemplate "templates/default.html" baseCtx
+    >>= relativizeUrls
 
 pageList :: [Identifier]
 pageList =
-  [ "about-me.md"
-  , "contact.md"
-  , "404.md"
-  , "resume.md"
+  [ "about-me.md",
+    "contact.md",
+    "404.md",
+    "resume.md"
   ]

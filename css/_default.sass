@@ -7,8 +7,8 @@
 html
   margin: 0
   padding: 0
-  font-family: "Verdana", "Arial", sans-serif
-  font-size: 85%
+  font-family: $font-family
+  font-size: 90%
   font-variant: discretionary-ligatures
 
 body
@@ -21,8 +21,20 @@ body
 
   > header
     @include body-block
-    border-bottom: 0.2rem solid $border-color-top
-    background-color: $bg-greenfield
+    border-top: 0.7rem solid $border-color
+    border-bottom: $border-very-thick solid $border-color
+    // background-color: $bg-greenfield
+
+    > nav
+      font-size: 0
+      > a
+        font-size: $font-size-nav
+        display: inline-block
+        line-height: 1.2em
+        & + a
+          margin-left: 0.5rem
+          padding-left: 0.5rem
+          border-left: $border-regular solid $border-color
 
 nav
   border-top: 0.1rem
@@ -31,9 +43,11 @@ nav
 
 footer
   @include body-block
-  background-color: $bg-greenfield
-  border-top: 0.2rem solid $color-text
-
+  // background-color: $bg-greenfield
+  border-bottom: 0.7rem solid $border-color
+  border-top: $border-very-thick solid $border-color
+  padding-bottom: 3em
+  clear: both
   > *
     max-width: 75rem
     margin: 0 auto
@@ -45,10 +59,11 @@ footer
 
 a
   color: dodgerblue
-  text-decoration: none
+  text-decoration: underline
 
 h1, h2, h3, h4, h5, h6
   line-height: 1.2em
+  color: $color-em-text
 
 h1
   font-size: 1.8rem
@@ -79,7 +94,7 @@ h6
 
 .logo
   max-width: 75rem
-  margin: 0 auto
+  margin: 0 auto 0.5rem
   a
     font-weight: bold
     color: $color-greenfield
@@ -100,7 +115,7 @@ p
     overflow-x: scroll
     @include scrollbars
     img
-      @include bordered
+      @include bordered-figure
 
   &.youtube
     text-align: center
