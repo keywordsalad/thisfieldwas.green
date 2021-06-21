@@ -1,4 +1,4 @@
-name: logans-site
+name: green-site
 version: 0.1.0.0
 github: ThisFieldWasGreen/thisfieldwasgreen.github.io
 license: MIT
@@ -105,21 +105,28 @@ ghc-options: &ghc-options
   - -Wunused-type-patterns
 
 executables:
-  logans-site-exe:
+  site:
     main: Main.hs
-    source-dirs: app
+    source-dirs: app/site
     default-extensions: *default-extensions
     ghc-options: *ghc-options
     dependencies:
-      - logans-site
+      - green-site
+  green:
+    main: Main.hs
+    source-dirs: app/green
+    default-extensions: *default-extensions
+    ghc-options: *ghc-options
+    dependencies:
+      - green-site
 
 tests:
-  logans-site-test:
+  test:
     main: Spec.hs
     source-dirs: test
     default-extensions: *default-extensions
     ghc-options: *ghc-options
     dependencies:
-      - logans-site
+      - green-site
       - hspec == 2.7.*
       - hspec-core == 2.7.*

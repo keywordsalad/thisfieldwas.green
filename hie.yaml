@@ -1,8 +1,13 @@
 cradle:
   stack:
-    - path: ./src
-      component: logans-site:lib
-    - path: ./app
-      component: logans-site:exe:logans-site-exe
-    - path: ./test
-      component: logans-site:test:logans-site-test
+    - path: "src"
+      component: "green-site:lib"
+
+    - path: "app/green"
+      component: "green-site:exe:green"
+
+    - path: "app/site"
+      component: "green-site:exe:site"
+
+    - path: "test"
+      component: "green-site:test:green-site-test"

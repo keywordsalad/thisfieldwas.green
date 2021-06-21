@@ -24,7 +24,7 @@ build () {
   fi
 
   stack build
-  stack exec logans-site-exe build
+  stack exec site build
 }
 
 clean () {
@@ -55,7 +55,7 @@ rebuild_all () {
 
 watch () {
   build
-  stack exec logans-site-exe watch
+  stack exec site watch
 }
 
 publish () {
@@ -102,4 +102,3 @@ test_sync () {
 test () {
   stack test
 }
-

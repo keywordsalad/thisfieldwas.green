@@ -2,7 +2,7 @@
 layout: post
 title: "SCM-Backed Application Configuration with Perforce"
 author: "Logan McGrath"
-created: 2012-11-16T07:00:00-05:00
+date: 2012-11-16T07:00:00-05:00
 published: 2012-11-16T07:00:00-05:00
 comments: false
 tags: SCM, Perforce, Sinatra, AngularJS
