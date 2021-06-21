@@ -35,7 +35,7 @@ As an adjunct to a solid technical foundation, I apply functional programming te
 
 ### Employment Opportunities
 
-For prospective employers, referrals, and recruiters: _I optimize engineering practices in order to maximize value._ My relationships with any business and team thrive when my skills directly aid in realizing value, and I'm loath to be in a position where my experience is made irrelevant. I am happily employed for now but I am available for prospective chats and knowledge sharing.
+$partial("partials/employment-opportunities.html")$
 
 ## My Life Away from Work
 
