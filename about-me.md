@@ -9,8 +9,8 @@ footer: true
 
 <figure style="width: 200px; float: right;">
   <picture>
-    <source srcset='$route-to("images/personal/headshot-w-meatball-doge.png")$'>
-    <img width="200" height="266" src='$route-to("images/personal/headshot-w-meatball-doge.png")$'>
+    <source srcset='$route-to("images/about-me/headshot-w-meatball-doge_400w.png")$'>
+    <img width="200" height="266" src='$route-to("images/about-me/headshot-w-meatball-doge_400w.png")$'>
   </picture>
   <figcaption style="width: 200px; font-weight: bold;">Myself and Meatball, who is a very good boy</figcaption>
 </figure>
@@ -41,8 +41,8 @@ For prospective employers, referrals, and recruiters: _I optimize engineering pr
 
 <figure style="float: right;">
   <picture>
-    <source srcset='$route-to("images/personal/meatball-n-jelly-doges.png")$'>
-    <img width="200" height="266" src='$route-to("images/personal/meatball-n-jelly-doges.png")$'>
+    <source srcset='$route-to("images/about-me/meatball-n-jelly-doges_400w.png")$'>
+    <img width="200" height="266" src='$route-to("images/about-me/meatball-n-jelly-doges_400w.png")$'>
   </picture>
   <figcaption style="width: 200px; font-weight: bold;">The little one is Meatball, the big one is Jellybean. Both are very good boys.</figcaption>
 </figure>
