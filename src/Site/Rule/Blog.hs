@@ -20,7 +20,7 @@ blogRules config =
 blogIndexRules :: SiteConfig -> Rules ()
 blogIndexRules config =
   create ["blog/blog.html"] do
-    route indexRoute
+    route $ constRoute "blog/index.html"
     compile $ blogCompiler config
 
 archiveRules :: SiteConfig -> Rules ()

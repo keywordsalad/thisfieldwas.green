@@ -10,7 +10,7 @@ sassRules config = do
       route $ setExtension "css"
       compile $ sassCompiler config
   where
-    filePattern = config ^. siteProviderDirectory ++ "/css/**.sass"
+    filePattern = config ^. siteProviderDirectory ++ "/css/**/*.sass"
 
 sassCompiler :: SiteConfig -> Compiler (Item String)
 sassCompiler config =
