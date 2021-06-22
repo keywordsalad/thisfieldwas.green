@@ -1,6 +1,6 @@
 module GreenSite.Util where
 
-import Data.Char (digitToInt, intToDigit, isDigit)
+import Data.Char
 import Data.Foldable (sequenceA_)
 import Data.Maybe
 import Data.String.Utils as S
@@ -58,3 +58,16 @@ demoteHeadersBy amount = withTags $ \case
       | isDigit n = ['h', intToDigit (min 6 $ digitToInt n + amount)]
       | otherwise = t
     demote t = t
+
+kebabCase :: String -> String
+kebabCase [] = []
+kebabCase (first : rest)
+  | notAllowed first = go rest
+  | otherwise = toLower first : go rest
+  where
+    go [] = []
+    go (x : xs)
+      | isUpper x = '-' : toLower x : kebabCase xs
+      | notAllowed x = '-' : kebabCase xs
+      | otherwise = x : kebabCase xs
+    notAllowed x = not (isAlphaNum x || x `elem` ("_." :: [Char]))

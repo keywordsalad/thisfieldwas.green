@@ -1,2 +1,4 @@
+import GreenSite
+
 main :: IO ()
-main = putStrLn "work in progress"
+main = green

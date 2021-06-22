@@ -24,6 +24,7 @@ source-repository head
 library
   exposed-modules:
       GreenSite
+      GreenSite.Command
       GreenSite.Common
       GreenSite.Compiler
       GreenSite.Compiler.Layout
