@@ -35,7 +35,7 @@ As an adjunct to a solid technical foundation, I apply functional programming te
 
 ### Employment Opportunities
 
-$partial("partials/employment-opportunities.html")$
+$partial("partials/employment-opportunities.md")$
 
 ## My Life Away from Work
 
