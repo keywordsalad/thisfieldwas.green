@@ -1,4 +1,4 @@
-name: green-site
+name: green
 version: 0.1.0.0
 github: ThisFieldWasGreen/thisfieldwasgreen.github.io
 license: MIT
@@ -111,14 +111,14 @@ executables:
     default-extensions: *default-extensions
     ghc-options: *ghc-options
     dependencies:
-      - green-site
-  green:
+      - green
+  author:
     main: Main.hs
-    source-dirs: app/green
+    source-dirs: app/author
     default-extensions: *default-extensions
     ghc-options: *ghc-options
     dependencies:
-      - green-site
+      - green
 
 tests:
   test:
@@ -127,6 +127,6 @@ tests:
     default-extensions: *default-extensions
     ghc-options: *ghc-options
     dependencies:
-      - green-site
+      - green
       - hspec == 2.7.*
       - hspec-core == 2.7.*
