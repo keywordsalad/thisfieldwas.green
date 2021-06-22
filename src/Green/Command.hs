@@ -1,6 +1,7 @@
 module Green.Command where
 
 import Green.Util
+import Green.Config
 import Options.Applicative
 
 data AuthorCommand
@@ -31,12 +32,12 @@ authorCommands progName = authorOptions
     publishCommand = command "publish" $ info publishOptions (progDesc "Publish an existing draft")
     publishOptions = PublishPost <$> strOption (long "file" <> short 'f')
 
-processAuthorCommand :: AuthorCommand -> IO ()
-processAuthorCommand (CreateDraft draftOpts) = createDraft draftOpts
-processAuthorCommand (PublishPost file) = putStrLn ("Publishing " ++ file)
+processAuthorCommand :: SiteConfig -> AuthorCommand -> IO ()
+processAuthorCommand siteConfig (CreateDraft draftOpts) = createDraft siteConfig draftOpts
+processAuthorCommand _ (PublishPost file) = putStrLn ("Publishing " ++ file)
 
-createDraft :: CreateDraftOpts -> IO ()
-createDraft (CreateDraftOpts title maybeCategory) =
+createDraft :: SiteConfig -> CreateDraftOpts -> IO ()
+createDraft _ (CreateDraftOpts title maybeCategory) =
   putStrLn $ "Writing post '" ++ title ++ "' to file " ++ draftFilePath
   where
     draftFilePath = categoryPrefix ++ kebabCase title ++ ".md"

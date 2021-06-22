@@ -10,19 +10,22 @@ import System.Environment
 
 site :: IO ()
 site = do
-  env <- getEnvironment
-  zonedTime <- getZonedTime
-
-  configIniText <- TIO.readFile "config.ini"
-  siteConfig <- case parseConfigIni env zonedTime configIniText of
-    Left e -> fail e
-    Right config -> return $ config & siteContext %~ baseContext config
-
+  siteConfig <- loadSiteConfig
   hakyllWith (siteConfig ^. siteHakyllConfiguration) (rules siteConfig)
 
 author :: IO ()
 author = do
   progName <- getProgName
-  processAuthorCommand =<< customExecParser prefs' (authorCommands progName)
+  siteConfig <- loadSiteConfig
+  processAuthorCommand siteConfig =<< customExecParser prefs' (authorCommands progName)
   where
     prefs' = prefs (showHelpOnError <> showHelpOnEmpty)
+
+loadSiteConfig :: IO SiteConfig
+loadSiteConfig = do
+  env <- getEnvironment
+  zonedTime <- getZonedTime
+  configIniText <- TIO.readFile "config.ini"
+  case parseConfigIni env zonedTime configIniText of
+    Left e -> fail e
+    Right config -> return $ config & siteContext %~ baseContext config
