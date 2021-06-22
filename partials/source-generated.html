@@ -1,13 +1,27 @@
-<p class="generated-from">
+<p class="source-generated">
+  This page was generated from commit
+  <a class="commit-link" href="$githubUrl$/commit/$gitSha1$">[$gitSha1$] $gitMessage$</a>
+  $if(isChanged)$
+    with local changes
+  $endif$
+</p>
+$if(isGenerated)$
+$else$
+<p class="source-generated">
+  The source for this page may be found at <a href="$githubUrl$/blob/$gitSha1$/$path$">$path$</a>
+</p>
+$endif$
+
+<!-- <p class="generated-from">
   This page was generated
     $if(isGenerated)$
       from commit
     $else$
-      from file <code><a href="$githubUrl$/blob/$gitSha1$/$path$">$path$</a></code>
+      from file <a href="$githubUrl$/blob/$gitSha1$/$path$">$path$</a>
       at commit
     $endif$
-  <a class="commit-link" href="$githubUrl$/commit/$gitSha1$">[$gitSha1$] $gitMessage$</a>
+  Log: <a class="commit-link" href="$githubUrl$/commit/$gitSha1$">[$gitSha1$] $gitMessage$</a>
   $if(isChanged)$
     with local modifications
   $endif$
-</p>
+</p> -->

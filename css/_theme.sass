@@ -1,4 +1,9 @@
-$font-family: "Freight Text", "Georgia", serif
+@import "fonts/code"
+
+$text-font-family: "Georgia", serif
+$text-font-size: 1rem
+$code-font-family: "JetBrains Mono", monospace
+$code-font-size: 85% // because JetBrains Mono runs a bit big
 
 $color-greenfield: darkgreen
 $color-text: darkslategray
@@ -16,8 +21,6 @@ $border-thin: 0.05rem
 $border-color: change-color($color-greenfield, $green: 80%)
 // $border-color-sides: change-color($border-color, $lightness: 30%)
 $border-color-sides: change-color($color-greenfield, $green: 80%)
-
-$font-size-nav: 1rem
 
 @mixin body-block
   margin: 0

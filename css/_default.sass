@@ -10,14 +10,13 @@ html
   margin: 0
   padding: 0
   background-color: $color-greenfield
-  font-family: $font-family
-  font-size: 90%
+  font-family: $text-font-family
+  font-size: $text-font-size
   font-variant: discretionary-ligatures
 
 body
   margin: 0
   padding: 0
-  font-size: 1rem
   color: $color-text
   background-color: $bg-content
   overflow: scroll
@@ -26,12 +25,11 @@ body
     @include body-block
     border-top: 0.7rem solid $border-color
     border-bottom: $border-very-thick solid $border-color
-    // background-color: $bg-greenfield
 
     > nav
       font-size: 0
       > a
-        font-size: $font-size-nav
+        font-size: $text-font-size
         display: inline-block
         line-height: 1.2em
         & + a
@@ -46,7 +44,6 @@ nav
 
 footer
   @include body-block
-  // background-color: $bg-greenfield
   border-bottom: 0.7rem solid $border-color
   border-top: $border-very-thick solid $border-color
   padding-bottom: 3em
@@ -69,7 +66,7 @@ h1, h2, h3, h4, h5, h6
   color: $color-em-text
 
 h1
-  font-size: 1.8rem
+  font-size: 2rem
 
 h2
   font-size: 1.6rem
