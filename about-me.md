@@ -19,21 +19,60 @@ Hello! I'm Logan McGrath, I'm a senior software engineer, and I specialize in a 
 
 I have been working in tech since 2007, where I started as just a wee web developer putting together shopping carts. I've since found my way into heavier engineering work.
 
-## Tools of the Trade
+## My Professional Toolbox
 
-I introduce my skills as a professional with the baseline requirements of modern software engineering: CI, "Agile", editor of choice (or mandate), and my employer's tech stack. My personal offering is software engineering as a craft, setting for my work a high bar for repeatability, high availability, stability, and quality so that I can reliably deliver tangible value to the stakeholders I work with and serve.
+<div class="tools-flexbox">
+<div>
+  <h3>Foundations</h3>
+  - Agile, Scrum, Kanban
+  - Source control
+  - Test automation
+  - Pair programming
+  - Continuous integration
+  - Continuous deployment
+  - Continuous improvement
+</div>
+<div>
+  <h3>Languages</h3>
+  - Scala
+  - Ruby
+  - Python
+  - Java
+  - C#
+  - Haskell
+  - TypeScript
+  - JavaScript
+</div>
+<div>
+  <h3>Databases</h3>
+  - Postgres
+  - MySQL
+  - Oracle
+  - SQL Server
+  - Mongo
+  - Firebase
+</div>
+<div>
+  <h3>Interfaces</h3>
+  - React
+  - Angular
+  - HTML, by hand!
+</div>
+<div>
+  <h3>Integrations</h3>
+  - GraphQL
+  - Protobuf
+  - Thrift
+  - gRPC
+  - REST
+</div>
+</div>
 
-I excel as an enabler of excellence in software. I serve my teams by teaching the basics, such as automating tests and cultivating reliable builds to ensure each commit to main produces a production-ready artifact. I work with leadership to provide teams leeway to optimize their practices so that they can deliver results reliably, creating a confidence that rises through the reporting structure. This foundation of practices is requisite to modern software delivery, as technically healthy teams provide better outcomes for businesses and their customers.
+### Tying It All Together
 
-This foundation is requisite independent of technology and project management. You need it for Java just as much as you need it for Haskell. Sometimes that's all a team needs, but if they (and especially leadership) have the appetite to continue improving practices and delivery, functional programming is a force multiplier that is well worth the investment.
+Product teams need solid building blocks to deliver features. I work as a force multiplier to provide the low code tools that businesses require for quicker implementation of features and product experiences for their customers. I  provide solutions that are stable and highly usable by product engineers, and I take great pride in high quality work that delivers value.
 
-I will be sharing retrospectives of my team experiences as no single tool or technology is more important than teaching and learning from each other. I believe being able to teach should be a cornerstone of any professional's career, as I have found no better way to highlight gaps in my own knowledge. To that end, I share here what I have learned in my life and career with hopes that others may find these experiences useful.
-
-### Fringe Benefits
-
-As an adjunct to a solid technical foundation, I apply functional programming techniques and I have professionally found that using even a subset of them elevates engineering as a craft. With functional programming, I can produce better outcomes with fewer bugs and greater flexibility in changing existing features and adding new ones. As this style of programming is in a certain sense still fringe, introducing it into a team's toolbox requires bringing colleagues on a journey through unknown and _seemingly dubious_ waters. The value propositions of functional programming are only apparent with experience over time, but the total investment required to become productive is no greater than that of good object oriented code, and it provides a better rate of return.
-
-### Employment Opportunities
+### Looking for an Engineer?
 
 $partial("partials/employment-opportunities.md")$
 

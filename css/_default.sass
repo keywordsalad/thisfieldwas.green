@@ -159,6 +159,28 @@ iframe
 .generated-from
   font-size: 0.9rem
 
+.tools-flexbox
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  justify-content: flex-start
+  align-items: space-between
+  align-content: flex-start
+
+  > div
+    & + div
+      margin-left: 1rem
+      padding-left: 1rem
+      border-left: $border-regular solid $border-color
+
+  h3
+    margin-bottom: 0
+    padding-bottom: 0
+
+  ul
+    padding-left: 1rem
+    margin-left: 0
+
 @import "screen-sizes/small-format"
 @import "screen-sizes/medium-format"
 @import "screen-sizes/large-format"
