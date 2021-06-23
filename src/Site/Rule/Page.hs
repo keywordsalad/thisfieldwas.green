@@ -19,7 +19,7 @@ pageCompiler baseCtx =
 
 pageList :: [Identifier]
 pageList =
-  [ "about-me.md",
+  [ "about-me.html",
     "contact.md",
     "404.md",
     "resume.md"

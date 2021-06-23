@@ -9,7 +9,7 @@
   $else$
     <title>This Field Was Green - $title$</title>
   $endif$
-  $if(author)$<link rel="author" content="$author$">$endif$
+  $if(author)$<link rel="author" content='$author$'>$endif$
   <link rel="icon" href="/images/grass.svg">
   <link rel="stylesheet" href="/css/main.css">
   <script type="text/javascript" src="/js/main.js"></script>
@@ -21,11 +21,11 @@
     <a href="/">This Field Was Green</a>
   </div>
   <nav>
-    <a href="$route-to("index.md")$">Home</a>
-    <a href="$route-to("archives.html")$">Posts</a>
-    <a href="$route-to("about-me.md")$">About</a>
-    <a href="$route-to("resume.md")$">Resume</a>
-    <a href="$route-to("contact.md")$">Contact</a>
+    <a href='$route-to("index.md")$'>Home</a>
+    <a href='$route-to("archives.html")$'>Posts</a>
+    <a href='$route-to("about-me.html")$'>About</a>
+    <a href='$route-to("resume.md")$'>Resume</a>
+    <a href='$route-to("contact.md")$'>Contact</a>
   </nav>
 </header>
 <main role="main">
