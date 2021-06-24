@@ -1,0 +1,24 @@
+@import "../theme"
+
+@mixin bordered-figure
+  border-top: $border-thick
+  border-bottom: $border-very-thick
+  padding: 1rem 0.5rem
+
+  @include media('>=tablet', '<desktop')
+    &.figure-left
+      margin-right: 2rem
+      float: left
+    &.figure-right
+      margin-left: 2rem
+      float: right
+
+  figure
+    padding: 0
+    margin: 0
+
+  figcaption
+    font-size: 0.9rem
+
+*[role=figure]
+  @include bordered-figure

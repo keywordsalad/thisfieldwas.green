@@ -1,3 +1,5 @@
+@import "figures"
+
 code
   color: $color-em-text
   font-family: $code-font-family
@@ -47,7 +49,6 @@ pre
 
   code.sourceCode
     @include bordered-figure
-    // background-color: $bg-greenfield
     display: table
     padding: 0.5rem 0
     margin-bottom: 0.5rem
@@ -64,7 +65,7 @@ pre
     .line-number
       display: table-cell
       padding: 0 0.5rem 0 0.5rem
-      border-right: $border-thin solid $border-color-sides
+      border-right: $border-thin
       text-align: right
       user-select: none
       text-decoration: none

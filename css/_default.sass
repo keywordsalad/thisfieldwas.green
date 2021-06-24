@@ -1,5 +1,7 @@
 @import "theme"
-@import "code"
+@import "components/code"
+@import "components/figures"
+@import "components/headers"
 
 *
   line-height: 1.6em
@@ -14,6 +16,7 @@ html
   font-size: $text-font-size
   font-variant: discretionary-ligatures
   text-align: $text-align-default
+  hyphens: auto
 
 body
   margin: 0
@@ -24,8 +27,8 @@ body
 
   > header
     @include body-block
-    border-top: 0.7rem solid $border-color
-    border-bottom: $border-very-thick solid $border-color
+    border-top: $border-ginormous
+    border-bottom: $border-very-thick
 
     > nav
       font-size: 0
@@ -36,7 +39,7 @@ body
         & + a
           margin-left: 0.5rem
           padding-left: 0.5rem
-          border-left: $border-thin solid $border-color
+          border-left: $border-thin
 
 nav
   border-top: 0.1rem
@@ -45,8 +48,8 @@ nav
 
 footer
   @include body-block
-  border-bottom: 0.7rem solid $border-color
-  border-top: $border-very-thick solid $border-color
+  border-bottom: $border-ginormous
+  border-top: $border-very-thick
   padding-bottom: 3em
   clear: both
   > *
@@ -62,39 +65,7 @@ a
   color: dodgerblue
   text-decoration: underline
 
-h1, h2, h3, h4, h5, h6
-  line-height: 1.2em
-  color: $color-em-text
-
-h1
-  font-size: 2rem
-
-h2
-  font-size: 1.6rem
-
-h3
-  font-size: 1.4rem
-
-h4
-  font-size: 1.2rem
-
-h5
-  font-size: 1rem
-
-h6
-  font-size: 0.9rem
-
-figure
-  @include bordered-figure
-  padding: 1rem 0.5rem
-
-  &[style*="float: right"]
-    border-left: $border-thin solid $border-color
-
-figcaption
-  font-size: 0.9rem
-
-.grid-container
+*[role=grid-container]
   display: grid
 
 .post
@@ -171,7 +142,3 @@ iframe
   font-size: 0.8rem
 
 @import "pages/about-me"
-
-@mixin centered-headers
-  h1, h2, h3, h4, h5, h6
-    text-align: center

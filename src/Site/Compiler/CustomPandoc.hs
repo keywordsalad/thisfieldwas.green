@@ -1,8 +1,16 @@
 module Site.Compiler.CustomPandoc where
 
 import Hakyll
-import Text.Pandoc.Highlighting (pygments)
 import qualified Text.Pandoc.Options as Opt
+
+customPandocExtensions :: Opt.Extensions
+customPandocExtensions =
+  Opt.pandocExtensions <> customExtensions
+  where
+    customExtensions =
+      Opt.extensionsFromList
+        [ Opt.Ext_emoji
+        ]
 
 customPandocCompiler :: Compiler (Item String)
 customPandocCompiler =
@@ -11,15 +19,16 @@ customPandocCompiler =
 readerOpts :: Opt.ReaderOptions
 readerOpts =
   defaultHakyllReaderOptions
-    { Opt.readerExtensions = defaultExtensions <> customExtensions
+    { Opt.readerExtensions = defaultExtensions <> customPandocExtensions
     }
   where
     defaultExtensions = Opt.readerExtensions defaultHakyllReaderOptions
-    customExtensions = Opt.extensionsFromList []
 
 writerOpts :: Opt.WriterOptions
 writerOpts =
   defaultHakyllWriterOptions
-    { Opt.writerHTMLMathMethod = Opt.MathJax ""
-    , Opt.writerHighlightStyle = Just pygments
+    { Opt.writerHTMLMathMethod = Opt.MathJax "",
+      Opt.writerExtensions = defaultExtensions <> customPandocExtensions
     }
+  where
+    defaultExtensions = Opt.writerExtensions defaultHakyllWriterOptions

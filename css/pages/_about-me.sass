@@ -1,23 +1,26 @@
-.doge figure
-  width: 14rem
-  text-align: center
-  float: right
-  figcaption
-    text-align: left
+.intro
+  grid-template-columns: 1fr 1fr 1fr 1fr
+  grid-gap: 0 2rem
 
-.tools
-  display: flex
-  flex-direction: row
-  flex-wrap: wrap
-  justify-content: flex-start
-  align-items: space-between
-  align-content: flex-start
-  section
-    width: 14rem
-    padding: 0 1rem 1rem
-    border-left: $border-regular solid $border-color
-  h3
-    margin: 0 0 1rem 0
-  ul
-    padding: 0 0 0 1rem
-    margin: 0
+.meatball-headshot
+  grid-column: 4 / span 1
+  grid-row: 1 / span 2
+
+.myself
+  grid-column: 1 / span 3
+  grid-row: 1
+
+.life-itself
+  grid-column: 1 / span 3
+  grid-row: 2
+
+.meatball-jellybean
+  grid-column: 1 / span 1
+  grid-row: 3
+  text-align: center
+  figcaption
+    text-align: justify
+
+.life-on-site
+  grid-column: 2 / span 2
+  grid-row: 3
