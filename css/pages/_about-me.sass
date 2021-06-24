@@ -21,32 +21,3 @@
   ul
     padding: 0 0 0 1rem
     margin: 0
-
-@mixin small-format
-  .doge figure
-    margin: 0 auto
-    float: none
-
-  .tools
-    text-align: center
-    section
-      border-right: $border-regular solid $border-color
-      margin: 0 auto
-    ul
-      padding: 0
-      margin: 0
-    li
-      display: inline-block
-      padding: 0
-      margin: 0 0.2rem
-      & + li:before
-
-@media only screen and (max-width: $media-phone-portrait-max)
-  @include small-format
-@media only screen and (min-width: $media-phone-landscape-min) and (max-width: $media-phone-landscape-max)
-  @include small-format
-@media only screen and (min-width: $media-tablet-portrait-min) and (max-width: $media-tablet-portrait-max)
-  @include small-format
-@media only screen and (min-width: $media-tablet-landscape-min) and (max-width: $media-tablet-landscape-max)
-@media only screen and (min-width: $media-hd-min) and (max-width: $media-hd-max)
-@media only screen and (min-width: $media-4k-min)

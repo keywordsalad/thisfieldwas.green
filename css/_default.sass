@@ -13,10 +13,7 @@ html
   font-family: $text-font-family
   font-size: $text-font-size
   font-variant: discretionary-ligatures
-
-@media only screen and (max-width: $small-format-max)
-  html
-    text-align: justify
+  text-align: $text-align-default
 
 body
   margin: 0
@@ -178,8 +175,3 @@ iframe
 @mixin centered-headers
   h1, h2, h3, h4, h5, h6
     text-align: center
-
-@media only screen and (max-width: $media-phone-portrait-max)
-  @include centered-headers
-@media only screen and (min-width: $media-phone-landscape-min) and (max-width: $media-phone-landscape-max)
-  @include centered-headers

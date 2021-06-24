@@ -1,7 +1,9 @@
 @import "fonts/code"
+@import "media"
 
 $text-font-family: "Georgia", serif
 $text-font-size: 1rem
+$text-align-default: justify
 $code-font-family: "JetBrains Mono", monospace
 $code-font-size: 85% // because JetBrains Mono runs a bit big
 
@@ -19,27 +21,7 @@ $border-thick: 0.3rem
 $border-regular: 0.2rem
 $border-thin: 0.1rem
 $border-color: change-color($color-greenfield, $green: 80%)
-// $border-color-sides: change-color($border-color, $lightness: 30%)
 $border-color-sides: change-color($color-greenfield, $green: 80%)
-
-// smartphones in portrait mode
-$media-phone-portrait-max: 420px
-// most smartphones in landscape mode
-$media-phone-landscape-min: 421px
-$media-phone-landscape-max: 767px
-// most Android tablets and iPads in portrait mode
-$media-tablet-portrait-min: 768px
-$media-tablet-portrait-max: 1023px
-//most Android tablets and iPads in landscape mode, older desktop/laptop monitors
-$media-tablet-landscape-min: 1024px
-$media-tablet-landscape-max: 1365px
-// iPad PRO, HDready and FullHD desktop laptop monitors
-$media-hd-min: 1366px
-$media-hd-max: 1919px
-// 4K and above
-$media-4k-min: 1920px
-
-$small-format-max: $media-phone-landscape-max
 
 @mixin body-block
   margin: 0
