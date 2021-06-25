@@ -5,11 +5,17 @@ import qualified Text.Pandoc.Options as Opt
 
 customPandocExtensions :: Opt.Extensions
 customPandocExtensions =
-  Opt.pandocExtensions <> customExtensions
+  foldl (\exts f -> f exts) customExtensions disableExtensions
   where
     customExtensions =
-      Opt.extensionsFromList
-        [ Opt.Ext_emoji
+      Opt.pandocExtensions <> Opt.extensionsFromList
+        [ Opt.Ext_emoji,
+          Opt.Ext_raw_html,
+          Opt.Ext_attributes
+        ]
+    disableExtensions =
+      Opt.disableExtension <$>
+        [ Opt.Ext_implicit_figures
         ]
 
 customPandocCompiler :: Compiler (Item String)

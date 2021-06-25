@@ -1,20 +1,22 @@
 @import "../variables";
 @import "containers";
 
-figure {
-  @include container;
-  border-top: $border-regular;
-  border-bottom: $border-thin;
-  text-align: center;
-}
-
-figcaption {
-  color: darken($color-green, 90%);
-  font-size: 0.9rem;
-  margin: 0 1rem;
-  text-align: left;
-  @include media('<tablet') {
-    text-align: center
+aside {
+  .frame {
+    @include container;
+    border-top: $border-regular;
+    border-bottom: $border-thin;
+    text-align: center;
+  }
+  caption {
+    color: darken($color-green, 90%);
+    font-size: 0.9rem;
+    text-align: left;
+    padding: 0;
+    margin: 0;
+    @include media('<tablet') {
+      text-align: center
+    }
   }
 }
 
