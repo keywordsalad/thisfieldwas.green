@@ -1,0 +1,26 @@
+@mixin body-segment {
+  margin: 0;
+  padding: 0 1rem;
+}
+
+@mixin segment {
+  margin: 1rem 0;
+}
+
+@mixin container {
+  @include segment;
+  padding: 1rem 0.5rem;
+}
+
+@mixin scrollable($scroll) {
+  scroll: $scroll;
+  width: fit-content;
+  &::-webkit-scrollbar {
+    height: 0.5rem;
+    width: 0.5rem;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: cadetblue;
+    border-radius: 0.5rem;
+  }
+}

@@ -8,17 +8,16 @@ import Site.Rule.Index
 import Site.Rule.Js
 import Site.Rule.Page
 import Site.Rule.Robot
-import Site.Rule.Sass
+import Site.Rule.Css
 import Site.Rule.Sitemap
 
 rules :: [(String, String)] -> FeedConfiguration -> Context String -> Rules ()
 rules env feedConfig baseCtx = do
   configRules
   imageRules
-  cssRules
   templateRules
   jsRules
-  sassRules
+  cssRules
   downloadRules
   codeDependency <- codeRules
   rulesExtraDependencies [codeDependency] do
@@ -58,12 +57,6 @@ imageRules =
   match "images/**" do
     route idRoute
     compile copyFileCompiler
-
-cssRules :: Rules ()
-cssRules =
-  match "css/**.css" do
-    route idRoute
-    compile compressCssCompiler
 
 templateRules :: Rules ()
 templateRules = do

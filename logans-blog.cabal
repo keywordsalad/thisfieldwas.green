@@ -32,7 +32,7 @@ library site-lib
                   , Site.Rule.Js
                   , Site.Rule.Page
                   , Site.Rule.Robot
-                  , Site.Rule.Sass
+                  , Site.Rule.Css
                   , Site.Rule.Sitemap
                   , Site.Util
   build-depends:    base == 4.*

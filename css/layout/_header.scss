@@ -1,0 +1,46 @@
+@import "../variables";
+@import "../vendor/include-media";
+
+body > header {
+  padding: 0.5rem 1rem;
+  border-top: $border-ginormous;
+  border-bottom: $border-very-thick;
+  nav {
+    font-size: 0;
+    a {
+      font-size: $text-font-size;
+      display: inline-block;
+      line-height: 1.2em;
+      @include media("<tablet") {
+        font-size: 0.9rem;
+      }
+      & + a {
+        margin-left: 0.5rem;
+        padding-left: 0.5rem;
+        border-left: $border-thin;
+        @include media("<tablet") {
+          margin-left: 0.2rem;
+          padding-left: 0.2rem;
+        }
+      }
+    }
+  }
+}
+
+.logo {
+  max-width: 75rem;
+  margin: 0 auto 0.5rem;
+  a {
+    font-weight: bold;
+    color: $color-green;
+    text-decoration: none;
+  }
+  .logo-icon {
+    display: block;
+    float: right;
+    width: 3.5rem;
+    height: 3.5rem;
+    background-image: url("/images/grass.svg");
+    background-size: 3.5rem;
+  }
+}

@@ -1,0 +1,33 @@
+@import "../variables";
+@import "containers";
+
+figure {
+  @include container;
+  border-top: $border-regular;
+  border-bottom: $border-thin;
+  text-align: center;
+}
+
+figcaption {
+  color: darken($color-green, 90%);
+  font-size: 0.9rem;
+  margin: 0 1rem;
+  text-align: left;
+  @include media('<tablet') {
+    text-align: center
+  }
+}
+
+.image {
+  @include scrollable(scroll-x);
+  overflow-x: scroll;
+  span {
+    width: fit-content;
+    display: block;
+    padding: 1rem 0.5rem 0.5rem;
+    border-top: $border-regular;
+    border-left: $border-thin;
+    border-right: $border-thin;
+    border-bottom: $border-thin;
+  }
+}
