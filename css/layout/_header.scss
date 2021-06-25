@@ -2,18 +2,50 @@
 @import "../vendor/include-media";
 
 body > header {
+  $logo-icon-width: 3.5rem;
+
+  @include body-segment {
+    display: grid;
+    grid-template-columns: auto $logo-icon-width;
+  }
+
   padding: 0.5rem 1rem;
   border-top: $border-ginormous;
-  border-bottom: $border-very-thick;
-  nav {
-    font-size: 0;
+  border-bottom: $border-regular;
+
+  .logo {
+    grid-column: 1 / span 1;
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 1.1rem;
     a {
-      font-size: $text-font-size;
+      color: $color-green;
+      text-decoration: none;
+    }
+  }
+
+  .logo-icon {
+    grid-column: 2 / span 1;
+    grid-row: 1 / span 2;
+    display: block;
+    background-image: url("/images/grass.svg");
+    background-size: 3.5rem;
+    &, & > a {
+      width: $logo-icon-width;
+      height: $logo-icon-width;
+      display: block
+    }
+  }
+
+  nav {
+    grid-column: 1 / span 1;
+    font-size: 0;
+    margin: 0;
+    a {
+      font-size: 0.9rem;
+      line-height: 1.2;
       display: inline-block;
-      line-height: 1.2em;
-      @include media("<tablet") {
-        font-size: 0.9rem;
-      }
       & + a {
         margin-left: 0.5rem;
         padding-left: 0.5rem;
@@ -21,26 +53,9 @@ body > header {
         @include media("<tablet") {
           margin-left: 0.2rem;
           padding-left: 0.2rem;
+          border-left: none
         }
       }
     }
-  }
-}
-
-.logo {
-  max-width: 75rem;
-  margin: 0 auto 0.5rem;
-  a {
-    font-weight: bold;
-    color: $color-green;
-    text-decoration: none;
-  }
-  .logo-icon {
-    display: block;
-    float: right;
-    width: 3.5rem;
-    height: 3.5rem;
-    background-image: url("/images/grass.svg");
-    background-size: 3.5rem;
   }
 }

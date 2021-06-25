@@ -19,9 +19,9 @@ site = do
             <> cleanIndexPaths "url"
             <> mconcat gitCommitFields
             <> imgField
-            <> includeCodeField
+            <> getCodeField
             <> youtubeField
-            <> routeToField
+            <> getRouteField
             <> commentField
             <> defaultContext
 

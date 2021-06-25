@@ -7,20 +7,20 @@ $code-font-family: "JetBrains Mono", monospace;
 $code-font-size: 85%; // because JetBrains Mono runs a bit big
 
 $color-green: darkgreen;
-$color-green-accent: lighten($color-green, 78%);
+$color-green-light: lighten($color-green, 78%);
 $color-text: darkslategray;
 $color-text-em: $color-green;
 $color-highlight: yellow;
 $color-hover: lemonchiffon;
 
-$bg-content: white;
+$bg-content: ivory;
 
 $border-ginormous-width: 0.5rem;
 $border-very-thick-width: 0.4rem;
 $border-thick-width: 0.3rem;
 $border-regular-width: 0.2rem;
 $border-thin-width: 0.1rem;
-$border-color: $color-green;
+$border-color: darken($color-green, 4%);
 $border-style: solid $border-color;
 
 $border-ginormous: $border-ginormous-width $border-style;

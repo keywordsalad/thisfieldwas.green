@@ -1,3 +1,10 @@
-<p class="image">
-  <span><img src="$img-src$" title="$img-title$" alt="$img-alt$"></span>
-</p>
+<aside id="$imgId$-aside" class="image">
+  <figure>
+    <a href="$imgSrc$" class="image-link">
+      <img id="$imgId$" src="$imgSrc$" title="$imgTitle$" alt="$imgAlt$">
+    </a>
+  </figure>
+  $if(imgTitle)$
+  <figcaption>$imgTitle$</figcaption>
+  $endif$
+</aside>

@@ -38,10 +38,11 @@ p {
 }
 
 blockquote {
-  background-color: $color-green-accent;
-  margin-left: 2rem;
+  background-color: $color-green-light;
+  margin: 0.5rem 1rem;
   padding: 0.5rem 1rem;
   border-left: $border-regular;
+  border-right: $border-thin;
   color: $color-text-em;
   font-style: italic;
   & > *:first-child {
@@ -67,17 +68,8 @@ a {
   text-decoration: underline;
 }
 
-.post {
-  header {
-    h1 {
-      display: none;
-    }
-    .published {
-      font-size: 1.4rem;
-      font-style: italic;
-      color: slategrey;
-    }
-  }
+.image-link {
+  text-decoration: none;
 }
 
 .teaser-list {

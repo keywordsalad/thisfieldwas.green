@@ -3,48 +3,56 @@ module Site.Context.Field where
 import Site.Common
 import Site.Util
 
-includeCodeField :: Context String
-includeCodeField = functionField "include-code" f
+getCodeField :: Context String
+getCodeField = functionField "getCode" f
   where
-    f (lexer : contentsPath : []) _ = fmap wrapCode body
+    f [lexer, contentsPath] _ = fmap wrapCode body
       where
         wrapCode code = "``` " ++ lexer ++ "\n" ++ code ++ "\n```"
         body = loadSnapshotBody item "code"
         item = fromFilePath $ "code/" ++ contentsPath
-    f _ item = error $ "codeIncludeField needs a filepath and a lexer " ++ show (itemIdentifier item)
+    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
+      where
+        msg = "expected [lexer, contentsPath] but received " ++ show args
 
 imgField :: Context String
 imgField = functionField "img" f
   where
-    f (path : []) = f (path : "untitled" : [])
-    f (path : title : []) = f (path : title : title : [])
-    f (path : title : alt : []) =
+    f [imgId, src] = f [imgId, src, ""]
+    f [imgId, src, title] = f [imgId, src, title, ""]
+    f [imgId, src, title, alt] =
       loadAndApplyTemplate
         "partials/image.html"
-        ( constField "img-src" path
-            <> constField "img-title" title
-            <> constField "img-alt" alt
+        ( constField "imgId" imgId
+            <> constField "imgSrc" src
+            <> constField "imgTitle" title
+            <> constField "imgAlt" alt
         )
         >=> relativizeUrls
         >=> return . itemBody
-    f _ = \item -> error $ "imgField needs an image source and optionally a title " ++ show (itemIdentifier item)
+    f args = \item -> error $ msg ++ " in " ++ show (itemIdentifier item)
+      where
+        msg = "expected [imgId, imgSrc, imgTitle, imgAlt] but received " ++ show args
 
 youtubeField :: Context String
 youtubeField = functionField "youtube" f
   where
-    f (videoId : []) = f (videoId : "YouTube video player" : [])
-    f (videoId : title : []) =
+    f [asideId, videoId] = f [asideId, videoId, ""]
+    f [asideId, videoId, title] =
       loadAndApplyTemplate
         "partials/youtube.html"
-        ( constField "youtube-id" videoId
-            <> constField "youtube-title" title
+        ( constField "youtubeAsideId" asideId
+            <> constField "youtubeVideoId" videoId
+            <> constField "youtubeVideoTitle" title
         )
         >=> relativizeUrls
         >=> return . itemBody
-    f _ = \item -> error $ "youtubeField needs a youtube video id and optionally a title " ++ show (itemIdentifier item)
+    f args = \item -> error $ msg ++ " in " ++ show (itemIdentifier item)
+      where
+        msg = "expected [youtubeAsideId, youtubeVideoId, youtubeVideoTitle] but received " ++ show args
 
-routeToField :: Context String
-routeToField = functionField "route-to" f
+getRouteField :: Context String
+getRouteField = functionField "getRoute" f
   where
     f (filePath : []) item = do
       getRoute id' >>= \case

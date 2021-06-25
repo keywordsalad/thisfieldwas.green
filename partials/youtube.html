@@ -1,7 +1,14 @@
-<p class="youtube">
-  <iframe src="https://www.youtube.com/embed/$youtube-id$"
-          title="$youtube-title$"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen>
-  </iframe>
-</p>
+<aside id="$youtubeAsideId$" class="youtube">
+  <figure>
+    <iframe src="https://www.youtube.com/embed/$youtubeVideoId$"
+            title="$youtubeVideoTitle$"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+    </iframe>
+  </figure>
+  $if(youtubeVideoTitle)$
+  <figcaption>
+    $youtubeVideoTitle$
+  </figcaption>
+  $endif$
+</aside>

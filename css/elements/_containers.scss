@@ -1,6 +1,15 @@
+
+
 @mixin body-segment {
   margin: 0;
   padding: 0 1rem;
+
+  .content-bound {
+    max-width: 75rem;
+    margin: 0 auto;
+    text-align: $text-align-default;
+    @content
+  }
 }
 
 @mixin segment {
@@ -12,9 +21,14 @@
   padding: 1rem 0.5rem;
 }
 
-@mixin scrollable($scroll) {
-  scroll: $scroll;
+@mixin scrollable {
   width: fit-content;
+  overflow: hidden;
+
+  & > * {
+    overflow-x: scroll;
+  }
+
   &::-webkit-scrollbar {
     height: 0.5rem;
     width: 0.5rem;

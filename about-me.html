@@ -5,21 +5,21 @@ updated: 2021-06-19T23:57:31-07:00
 comments: false
 sharing: true
 footer: true
+body-class: about-me
 ---
 
 <section class="intro">
   <aside class="meatball-headshot">
-    <div class="frame">
-      <div class="image">
-        <img width="288" height="384"
-          src='$route-to("images/about-me/headshot-w-meatball-doge_400w.png")$'
-          title="Myself and Meatball. He's cute cuz he's little."
-          alt="Mysql and Meatball">
-        </div>
-      <p id="caption">
-        Myself and Meatball, who is a very good boy.
-      </p>
-    </div>
+    <figure>
+      <img width="288" height="384"
+        src='$getRoute("images/about-me/headshot-w-meatball-doge_400w.png")$'
+        title="Myself and Meatball. He's cute cuz he's little."
+        alt="Mysql and Meatball">
+      </div>
+      <figcaption>
+        Myself and Meatball, who is a very good boy and wearing his very best treat face.
+      </figcaption>
+    </figure>
   </aside>
   <div class="myself">
     <p>
@@ -44,23 +44,25 @@ footer: true
   </div>
 </section>
 
-<section class="personally-online">
-  <aside class="meatball-jellybean framed">
-    <img width="200" height="266"
-      src='$route-to("images/about-me/meatball-n-jelly-doges_400w.png")$'
-      title="Meatball is the little one, Jellybean is the big one."
-      alt="Meatball and Jellybean">
-    <p class="caption">
-      The little one is Meatball, the big one is Jellybean. Both are very good boys. <em>Photo obtained in abundance of treats.</em>
-    </p>
+<section class="personal-stuff">
+  <aside class="meatball-jellybean">
+    <figure>
+      <img width="200" height="266"
+        src='$getRoute("images/about-me/meatball-n-jelly-doges_400w.png")$'
+        title="Meatball is the little one, Jellybean is the big one."
+        alt="Meatball and Jellybean">
+      <figcaption>
+        The little one is Meatball, the big one is Jellybean. Both are very good boys, <em>and they both know I have a treat in my hand.</em>
+      </figcaption>
+    </figure>
   </aside>
-  <h2>My Life as It Relates To My Site</h2>
-  <div class="life-on-site">
+  <div class="my-life">
+    <h2>My Life as It Relates to My Site</h2>
+    <p>
+      <em>As this is my site and my life, all opinions I express here are my own.</em>
+    </p>
     <p>
       There is a large intersection between my personal and professional experiences. Many engineers post about their lives in their technical blogs, sometimes sharing deeply personal and difficult stories. I have the deepest of respect for their bravery and great appreciation for the empathy their writing instills. Though there are many events that have bled across my boundaries with work, I feel much trepidation sharing how I feel and describing how I process the world around me. I hope to share what is constructive, and that I can contribute to others' validation of their life experience as others have for myself.
-    </p>
-    <p>
-      All opinions I express here are my own, even the technical ones, and I aim to be mindful of everyone's life experiences. I'm sure I'll have a hard learning opportunity at some point, and that's ok. It's how we collectively grow.
     </p>
   </div>
 </section>
@@ -79,10 +81,11 @@ footer: true
         <li>Test Automation</li>
         <li>Experimentation</li>
         <li>Test in Production</li>
+        <li>Automate the Hard Parts</li>
         <li>Pair Programming</li>
-        <li>CI</li>
-        <li>CD</li>
+        <li>Mentorship</li>
         <li>Continuous Improvement</li>
+        <li>Always Learning</li>
       </ul>
     </section>
     <section class="skills languages">
@@ -116,7 +119,7 @@ footer: true
       <ul>
         <li>React</li>
         <li>Angular</li>
-        <li>HTML sometimes by hand!</li>
+        <li>HTML, <em>by hand!</em></li>
       </ul>
     </section>
     <section class="skills integrations">
@@ -136,7 +139,7 @@ footer: true
         My primary customers are technical teams looking to accelerate time to market for new features and changes. Product teams need solid building blocks to deliver these features and I work as a force multiplier by providing the low code frameworks, tools, and infrastructure required to ship quickly and be nimble to change. My goal as a professional is to craft systems that reduce the number of teams and organizations, and more importantly <em>time and cost</em>, required to ship work in order to maximize value to the business and better serve customers.
       </p>
       <p>
-        Engineers are too valuable to be putting together bespoke content with high rates of churn. Low code allows engineers to focus on the hard problems deeper down the stack and enables more opportunities for businesses to better harness their value as core contributors.
+        Engineers are too expensive to be putting together bespoke content with high rates of churn. Low code allows engineers to focus on the hard problems and enables more opportunities for businesses to better harness the value they bring.
       </p>
       $partial("partials/employment-opportunities.html")$
     </div>

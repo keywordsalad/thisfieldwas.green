@@ -51,41 +51,50 @@ code {
   }
 }
 
-pre {
-  @include scrollable(scroll-x);
-  margin-right: 0.5rem;
+div.sourceCode {
+  @include scrollable;
+  margin-left: 1rem;
+  margin-right: 1rem;
 
-  .sourceCode {
-    background-color: lighten($color-green, 78%);
-    border-top: $border-regular;
-    border-bottom: $border-thin;
-    display: table;
-    white-space: pre;
-    word-wrap: initial;
+  pre {
+    .sourceCode {
+      background-color: lighten($color-green, 78%);
+      border-top: $border-regular;
+      border-bottom: $border-thin;
+      display: table;
+      white-space: pre;
+      word-wrap: initial;
 
-    .line {
-      display: table-row;
-      &:target {
-        background-color: $color-highlight;
+      .line {
+        display: table-row;
+        &:target {
+          background-color: $color-highlight;
+        }
+        &:hover {
+          background-color: $color-hover;
+        }
+        &:first-child > * {
+          padding-top: 0.3rem;
+        }
+        &:last-child > * {
+          padding-bottom: 0.3rem;
+        }
       }
-      &:hover {
-        background-color: $color-hover;
+
+      .line-number {
+        display: table-cell;
+        padding: 0 0.5rem 0 0.5rem;
+        border-right: $border-thin;
+        text-align: right;
+        user-select: none;
+        text-decoration: none;
       }
-    }
 
-    .line-number {
-      display: table-cell;
-      padding: 0 0.5rem 0 0.5rem;
-      border-right: $border-thin;
-      text-align: right;
-      user-select: none;
-      text-decoration: none;
-    }
-
-    .line-content {
-      display: table-cell;
-      padding: 0 0.5rem;
-      width: 100%;
+      .line-content {
+        display: table-cell;
+        padding: 0 0.5rem;
+        width: 100%;
+      }
     }
   }
 }
