@@ -1,4 +1,4 @@
-@import "dist/include-media"
+@import "vendor/include-media"
 @import "fonts/code"
 
 $text-font-family: "Georgia", serif
@@ -28,6 +28,10 @@ $border-very-thick: $border-very-thick-width solid $border-color
 $border-thick: $border-thick-width solid $border-color
 $border-regular: $border-regular-width solid $border-color
 $border-thin: $border-thin-width solid $border-color
+
+@mixin paragraph
+  margin: 1rem 0
+  padding: 0
 
 @mixin body-block
   margin: 0

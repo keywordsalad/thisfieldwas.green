@@ -4,7 +4,7 @@ import Site.Common
 
 sassRules :: Rules ()
 sassRules = do
-  sassDependency <- makePatternDependency "css/**.s(a|c)ss"
+  sassDependency <- makePatternDependency "css/**"
   rulesExtraDependencies [sassDependency] $
     match "css/main.sass" do
       route $ setExtension "css"

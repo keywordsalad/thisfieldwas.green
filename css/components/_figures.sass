@@ -1,9 +1,10 @@
 @import "../theme"
 
 @mixin bordered-figure
-  border-top: $border-thick
-  border-bottom: $border-very-thick
+  @include paragraph
   padding: 1rem 0.5rem
+  border-top: $border-very-thick
+  border-bottom: $border-thick
 
   @include media('>=tablet', '<desktop')
     &.figure-left
