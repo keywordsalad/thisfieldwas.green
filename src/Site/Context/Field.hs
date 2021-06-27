@@ -1,5 +1,6 @@
 module Site.Context.Field where
 
+import Data.String.Utils (endswith)
 import Site.Common
 import Site.Util
 
@@ -54,14 +55,40 @@ youtubeField = functionField "youtube" f
 getRouteField :: Context String
 getRouteField = functionField "getRoute" f
   where
-    f (filePath : []) item = do
-      getRoute id' >>= \case
-        Just r -> return $ ("/" ++ stripIndex r)
-        Nothing -> error $ "routeField in " ++ show fromId ++ ": no route to " ++ show id'
+    f [filePath] _ = getUrlFromRoute (fromFilePath filePath)
+    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
       where
-        id' = fromFilePath filePath
-        fromId = itemIdentifier item
-    f _ item = error $ "routeField needs a filePath " ++ show (itemIdentifier item)
+        msg = "expected [filePath] but received " ++ show args
+
+getUrlFromRoute :: Identifier -> Compiler String
+getUrlFromRoute id' =
+  getRoute id' >>= \case
+    Just r -> return $ "/" ++ stripIndex r
+    Nothing -> error $ "no route to " ++ show id'
 
 commentField :: Context String
 commentField = functionField "comment" \_ _ -> return ""
+
+linkedTitleField :: Context String
+linkedTitleField = functionField fieldKey f
+  where
+    fieldKey = "linkedTitle"
+    f [filePath] _ = do
+      let id' = fromFilePath filePath
+      url <- getUrlFromRoute id'
+      item :: Item String <- load id'
+      let ctx = metadataField <> titleField "title" <> constField "title" url
+      title <- unContext ctx "title" [] item >>= \case
+        StringField s -> return s
+        _ -> error $ "Could not resolve title in " ++ show id'
+      return $ makeLink title url
+      where
+        isHtml = endswith ".html" filePath
+        isMarkdown = endswith ".md" filePath || endswith ".markdown" filePath
+        makeLink title url
+          | isHtml = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
+          | isMarkdown = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
+          | otherwise = title ++ " <" ++ url ++ ">"
+    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
+      where
+        msg = "expected [filePath] but received " ++ show args

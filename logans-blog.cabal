@@ -47,6 +47,7 @@ library site-lib
                   , containers == 0.6.*
                   , pandoc == 2.11.*
                   , pandoc-types == 1.22.*
+                  , MissingH == 1.4.*
   ghc-options:      -Wall
                     -Wcompat
                     -Widentities

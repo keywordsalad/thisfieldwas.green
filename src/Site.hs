@@ -22,6 +22,7 @@ site = do
             <> getCodeField
             <> youtubeField
             <> getRouteField
+            <> linkedTitleField
             <> commentField
             <> defaultContext
 
