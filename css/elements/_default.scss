@@ -73,24 +73,16 @@ a {
 }
 
 .teaser-list {
-  > header h1 {
-    border-top: $border-regular;
-    padding-top: 0.5rem;
+  h2 {
+    margin-bottom: 0.5rem;
   }
   .post {
-    border-top: $border-thin;
-    header {
-      h1 {
-        display: block;
-        font-size: 1.4rem;
-      }
-      em {
-        font-size: 1.2rem;
-      }
-    }
     & *:last-child {
       margin-bottom: 0.5rem;
     }
+  }
+  .read-more + .post {
+    border-top: $border-thin;
   }
   .read-more {
     display: block;

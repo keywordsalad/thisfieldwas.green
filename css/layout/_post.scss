@@ -1,10 +1,14 @@
+.homepage .page-title, .post .page-title {
+  display: none;
+}
+
 .post {
   header {
     h1 {
-      display: none;
+      margin-bottom: 0.5rem;
     }
     .published {
-      font-size: 1.4rem;
+      font-size: 0.85rem;
       font-style: italic;
       color: slategrey;
     }
@@ -29,6 +33,9 @@
     @include media("<tablet") {
       figure {
         border-top: none;
+        img {
+          width: 100%;
+        }
       }
     }
   }

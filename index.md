@@ -1,5 +1,6 @@
 ---
 layout: default
+body-class: homepage
 ---
 
 # Latest Posts

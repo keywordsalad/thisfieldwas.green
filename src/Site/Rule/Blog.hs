@@ -30,9 +30,10 @@ loadDraftPosts = loadExistingSnapshots "blog/*" draftSnapshot
 
 blogRules :: [(String, String)] -> Context String -> Rules ()
 blogRules env baseCtx = do
-  publishedPostRules env baseCtx
-  draftPostRules env baseCtx
-  draftIndexRules baseCtx
+  let blogCtx = constField "body-class" "post" <> baseCtx
+  publishedPostRules env blogCtx
+  draftPostRules env blogCtx
+  draftIndexRules blogCtx
 
 publishedPostRules :: [(String, String)] -> Context String -> Rules ()
 publishedPostRules env baseCtx =
