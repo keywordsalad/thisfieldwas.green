@@ -22,7 +22,6 @@
 }
 
 @mixin scrollable {
-  width: fit-content;
   overflow: hidden;
 
   & > * {

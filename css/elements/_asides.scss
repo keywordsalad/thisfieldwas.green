@@ -5,13 +5,14 @@ aside {
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex-basis: 0;
 
   > * {
     flex-basis: 0;
   }
 
   figure {
+    background-color: $color-green-light;
+    margin: 1rem 0.5rem;
     padding: 0.75rem 1.5rem;
     border-top: $border-regular;
     border-bottom: $border-thin;
@@ -25,9 +26,9 @@ aside {
     figcaption {
       color: darken($color-green, 10%);
       font-size: 1rem;
-      padding: 0;
-      margin: 0.5rem 0 0;
       text-align: center;
+      padding: 0.5rem;
+      margin: 0.5rem 0 0;
     }
 
     @include media('<tablet') {
@@ -49,10 +50,30 @@ aside {
     }
   }
 
-  > .scrollable {
-    @include scrollable;
+  &.image {
     figure {
-      overflow-x: scroll;
+      border-top: none;
+      img {
+        margin: 0;
+        padding: 0;
+      }
+    }
+    @include media('>=tablet') {
+      figure {
+        border-top: none;
+        display: block;
+        img {
+          width: 100%;
+        }
+      }
+    }
+    @include media("<tablet") {
+      figure {
+        border-top: none;
+        img {
+          width: 100%;
+        }
+      }
     }
   }
 }

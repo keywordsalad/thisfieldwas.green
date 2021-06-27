@@ -28,6 +28,34 @@
     }
   }
 
+  > h2 {
+    grid-area: header;
+  }
+
+  .foundations {
+    grid-area: foundations;
+  }
+
+  .languages {
+    grid-area: languages;
+  }
+
+  .databases {
+    grid-area: databases;
+  }
+
+  .interfaces {
+    grid-area: interfaces;
+  }
+
+  .integrations {
+    grid-area: integrations;
+  }
+
+  .applied {
+    grid-area: applied;
+  }
+
   @include media('<tablet') {
     .page-title {
       text-align: center;
@@ -52,40 +80,41 @@
     }
   }
 
-  @include media('>=tablet') {
+  @include media('>=tablet', '<desktop') {
     .intro {
       display: grid;
-      grid-template-columns: 3fr 1fr;
-      grid-gap: 0 2rem;
+      grid-gap: 1rem;
+      grid-template-columns: 2fr 1fr;
+      grid-template-areas:
+        "myself doge"
+        "life life";
 
       .meatball-headshot {
-        grid-column: 2 / span 1;
-        grid-row: 1 / span 2;
+        grid-area: doge;
       }
 
       .myself {
-        grid-column: 1 / span 1;
-        grid-row: 1;
+        grid-area: myself;
       }
 
       .life-itself {
-        grid-column: 1 / span 1;
-        grid-row: 2;
+        grid-area: life;
       }
     }
 
     .personal-stuff {
       display: grid;
+      grid-gap: 1rem;
       grid-template-columns: 1fr 2fr;
-      grid-gap: 0 2rem;
+      grid-template-areas: "doges life";
 
       .meatball-jellybean {
-        grid-column: 1 / span 1;
+        grid-area: doges;
         text-align: center;
       }
 
       .my-life {
-        grid-column: 2 / span 1;
+        grid-area: life;
       }
     }
 
@@ -101,7 +130,69 @@
 
     .professional-toolbox {
       display: grid;
-      grid-gap: 0 2rem;
+      grid-template-columns: 1fr 2fr;
+      grid-gap: 1rem;
+      grid-template-areas:
+        "header       header"
+        "foundations  foundations"
+        "languages    applied"
+        "integrations applied"
+        "databases    applied"
+        "interfaces   applied";
+    }
+  }
+
+  @include media('>=desktop') {
+    .intro {
+      display: grid;
+      grid-gap: 1rem;
+      grid-template-areas:
+        "myself myself myself doge"
+        "life life life doge";
+
+      .meatball-headshot {
+        grid-area: doge;
+      }
+
+      .myself {
+        grid-area: myself;
+      }
+
+      .life-itself {
+        grid-area: life;
+      }
+    }
+
+    .personal-stuff {
+      display: grid;
+      grid-gap: 1rem;
+      grid-template-columns: 1fr 2fr;
+      grid-template-areas: "doges life";
+
+      .meatball-jellybean {
+        grid-area: doges;
+        text-align: center;
+        align-items: center;;
+      }
+
+      .my-life {
+        grid-area: life;
+      }
+    }
+
+    .professional-offering {
+      padding-bottom: 1rem;
+      margin-top: 3rem;
+      margin-bottom: 3rem;
+      > h2 {
+        padding: 0 0 0.5rem;
+        margin: 0.5rem 0 0;
+      }
+    }
+
+    .professional-toolbox {
+      display: grid;
+      grid-gap: 1rem;
       grid-template-columns: 1fr 1fr 2fr;
       grid-template-rows: 1fr 3fr 3fr 3fr;
       grid-template-areas:
@@ -109,34 +200,6 @@
         "foundations foundations  applied"
         "languages   integrations applied"
         "databases   interfaces   applied";
-
-      > h2 {
-        grid-area: header;
-      }
-
-      .foundations {
-        grid-area: foundations;
-      }
-
-      .languages {
-        grid-area: languages;
-      }
-
-      .databases {
-        grid-area: databases;
-      }
-
-      .interfaces {
-        grid-area: interfaces;
-      }
-
-      .integrations {
-        grid-area: integrations;
-      }
-
-      .applied {
-        grid-area: applied;
-      }
     }
   }
 }

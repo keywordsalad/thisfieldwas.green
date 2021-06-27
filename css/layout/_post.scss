@@ -13,30 +13,4 @@
       color: slategrey;
     }
   }
-
-  > aside.image {
-    figure {
-      background: $color-green-light;
-    }
-    @include media(">=tablet") {
-      align-items: flex-start;
-      margin-left: 1rem;
-      figure {
-        padding-left: 3rem;
-        margin-left: 0;
-        border-top: none;
-        border-bottom: none;
-        border-left: $border-ginormous;
-        text-align: left;
-      }
-    }
-    @include media("<tablet") {
-      figure {
-        border-top: none;
-        img {
-          width: 100%;
-        }
-      }
-    }
-  }
 }
