@@ -20,8 +20,7 @@ sitemapCompiler baseCtx = do
   pages <-
     loadAll $
       fromList
-        [ "about-me.html",
-          "contact.md"
+        [ "contact.md"
         ]
   let ctx = sitemapCtx (postCtx <> baseCtx) (posts <> pages) <> baseCtx
   makeItem "" >>= loadAndApplyTemplate "templates/sitemap.xml" ctx

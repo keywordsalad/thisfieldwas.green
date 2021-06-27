@@ -13,25 +13,12 @@ indexRules env baseCtx =
 
 indexCompiler :: [(String, String)] -> Context String -> Compiler (Item String)
 indexCompiler _env baseCtx = do
-  publishedPosts <- recentFirst =<< loadPublishedPosts
-  let recentPosts = take 5 . drop 1 $ publishedPosts
-  let latestPost = head . take 1 $ publishedPosts
-  let latestPostId = itemIdentifier latestPost
-  latestPostTitle <- fromJust <$> getMetadataField latestPostId "title"
-  latestPostUrl <- toUrl . fromJust <$> getRoute latestPostId
-
+  recentPosts <- take 5 <$> (recentFirst =<< loadPublishedPosts)
   let teasers = mapContext demoteHeaders (teaserField "teaser" "content")
   let ctx =
         -- page
         constField "siteTitle" "Software Engineering and Me"
-          -- latest post
-          <> constField "title" latestPostTitle
-          <> constField "latestPostTitle" latestPostTitle
-          <> constField "latestPostUrl" latestPostUrl
-          <> constField "latestPost" (itemBody latestPost)
-          -- recent posts
           <> listField "recentPosts" (teasers <> baseCtx) (return recentPosts)
-          -- rest of context
           <> postCtx
           <> baseCtx
 
