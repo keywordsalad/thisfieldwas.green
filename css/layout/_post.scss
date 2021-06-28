@@ -1,16 +1,9 @@
 .post .page-title {
-  display: none;
+  margin-bottom: 0;
 }
 
-.post {
-  header {
-    h1 {
-      margin-bottom: 0.5rem;
-    }
-    .published {
-      font-size: 0.85rem;
-      font-style: italic;
-      color: slategrey;
-    }
-  }
+.published {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: slategrey;
 }

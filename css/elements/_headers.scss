@@ -5,12 +5,28 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
   padding: 0;
   color: $color-text-em;
+  a {
+    color: inherit;
+    text-decoration: none;
+    &:hover {
+      color: dodgerblue;
+    }
+  }
 }
 
-section > h1, section > header h1 {
+h1.page-title {
+  border-bottom: $border-thin;
+  padding: 0 0 0.5rem;
+}
+
+section h1 {
   border-top: $border-regular;
   border-bottom: $border-thin;
   padding: 0.5rem 0;
+}
+
+h1.logo {
+  border: none;
 }
 
 @include media("<tablet") {

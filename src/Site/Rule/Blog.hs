@@ -4,6 +4,7 @@ module Site.Rule.Blog
   , loadDraftPosts
   , loadPublishedPosts
   , postCompiler
+  , contentOnly
   , postCtx
   , publishedSnapshot
   )
@@ -17,10 +18,13 @@ import Site.Route (indexRoute)
 type PostSnapshot = String
 
 publishedSnapshot :: PostSnapshot
-publishedSnapshot = "_publishedposts"
+publishedSnapshot = "_publishedPosts"
 
 draftSnapshot :: PostSnapshot
-draftSnapshot = "_draftposts"
+draftSnapshot = "_draftPosts"
+
+contentOnly :: PostSnapshot -> PostSnapshot
+contentOnly = (++ "_contentOnly")
 
 loadPublishedPosts :: Compiler [Item String]
 loadPublishedPosts = loadExistingSnapshots "blog/*" publishedSnapshot
@@ -41,7 +45,6 @@ publishedPostRules env baseCtx =
     route baseRoute
     compile $
       postCompiler env publishedSnapshot ctx
-      >>= saveSnapshot "content"
       >>= loadAndApplyTemplate "templates/default.html" ctx
       >>= relativizeUrls
   where
@@ -67,6 +70,7 @@ postCompiler env snapshot ctx =
   getResourceBody
   >>= applyAsTemplate ctx . maybeDebugPost env
   >>= pandocCompilerForCodeInsertion
+  >>= saveSnapshot (contentOnly snapshot)
   >>= loadAndApplyTemplate "templates/post.html" ctx
   >>= saveSnapshot snapshot
 
@@ -106,6 +110,7 @@ draftIndexCompiler baseCtx = do
   let ctx = draftIndexCtx baseCtx posts <> baseCtx
   makeItem ""
     >>= loadAndApplyTemplate "templates/drafts.html" ctx
+    >>= loadAndApplyTemplate "templates/page.html" ctx
     >>= loadAndApplyTemplate "templates/default.html" ctx
     >>= relativizeUrls
 

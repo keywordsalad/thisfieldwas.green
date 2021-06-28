@@ -71,21 +71,3 @@ a {
 .image-link {
   text-decoration: none;
 }
-
-.teaser-list {
-  h2 {
-    margin-bottom: 0.5rem;
-  }
-  .post {
-    & *:last-child {
-      margin-bottom: 0.5rem;
-    }
-  }
-  .read-more + .post {
-    border-top: $border-thin;
-  }
-  .read-more {
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-}

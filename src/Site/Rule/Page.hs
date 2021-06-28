@@ -14,6 +14,7 @@ pageCompiler baseCtx =
   getResourceBody
     >>= applyAsTemplate baseCtx
     >>= pandocCompilerForCodeInsertion
+    >>= loadAndApplyTemplate "templates/page.html" baseCtx
     >>= loadAndApplyTemplate "templates/default.html" baseCtx
     >>= relativizeUrls
 
