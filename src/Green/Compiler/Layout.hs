@@ -93,4 +93,4 @@ layoutCompiler = do
     parentItems lens' = maybe [] (^. to itemBody . lens')
 
 fromLayoutName :: String -> Identifier
-fromLayoutName name = fromFilePath ("layouts/" ++ name ++ ".html")
+fromLayoutName name = fromFilePath ("_layouts/" ++ name ++ ".html")

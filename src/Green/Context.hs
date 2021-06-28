@@ -12,21 +12,24 @@ import Green.Context.Field
 import Green.Context.GitCommits
 import Green.Context.Post
 import Green.Context.Tag
-import Hakyll (Context, constField)
+import Hakyll
 import Lens.Micro
 
-baseContext :: SiteConfig -> Context String -> Context String
-baseContext config defaultContext =
-  constField "body-class" "default"
-    <> constField "site-root" (config ^. siteRoot)
-    <> constField "linkedin-profile" (config ^. siteLinkedInProfile)
-    <> removeIndexUrlField "url"
-    <> gitCommits (config ^. siteGitWebUrl)
-    <> imgField
-    <> includeCodeField
-    <> youtubeField
-    <> routeToField
-    <> commentField
-    <> siteRootField config
-    <> demoteHeadersByField
-    <> defaultContext
+baseContext :: SiteConfig -> Context String
+baseContext config =
+  mconcat
+    [ constField "siteRoot" (config ^. siteRoot),
+      constField "linkedinProfile" (config ^. siteLinkedInProfile),
+      removeIndexUrlField "url",
+      gitCommits (config ^. siteGitWebUrl),
+      linkedTitleField,
+      imgField,
+      getCodeField,
+      youtubeField,
+      getRouteField,
+      commentField,
+      siteRootField config,
+      defaultContext,
+      constField "body-class" "default",
+      constField "contactEmail" (config ^. siteAuthorEmail)
+    ]

@@ -1,0 +1,44 @@
+
+
+@mixin body-segment {
+  margin: 0;
+  padding: 0 1rem;
+
+  .content-bound {
+    max-width: 75rem;
+    margin: 0 auto;
+    text-align: $text-align-default;
+    @content
+  }
+}
+
+@mixin segment {
+  margin: 1rem 0;
+}
+
+@mixin container {
+  @include segment;
+  padding: 1rem 0.5rem;
+}
+
+@mixin scrollable {
+  overflow: hidden;
+
+  & > * {
+    overflow-x: scroll;
+  }
+
+  &::-webkit-scrollbar {
+    height: 0.5rem;
+    width: 0.5rem;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: cadetblue;
+    border-radius: 0.5rem;
+  }
+}
+
+@mixin grid-container {
+  display: grid;
+  grid-gap: 1rem;
+}

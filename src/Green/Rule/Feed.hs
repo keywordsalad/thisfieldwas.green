@@ -1,7 +1,7 @@
 module Green.Rule.Feed (feedRules) where
 
 import Green.Common
-import Green.Rule.Blog (loadPublishedPosts)
+import Green.Rule.Blog (loadPosts)
 
 feedRules :: SiteConfig -> Rules ()
 feedRules config = do
@@ -15,7 +15,7 @@ feedRules config = do
 
 feedCompiler :: SiteConfig -> RenderFeed -> Compiler (Item String)
 feedCompiler config renderFeed = do
-  posts <- fmap (take 10) . recentFirst =<< loadPublishedPosts
+  posts <- fmap (take 10) . recentFirst =<< loadPosts
   renderFeed (feedContext <> config ^. siteContext) posts
 
 feedContext :: Context String

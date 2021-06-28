@@ -15,7 +15,7 @@ configuration without reloading the UI.
 
 <!--more-->
 
-$youtube("hZbQhF6fsEo")$
+$youtube("app-config-demo", "hZbQhF6fsEo")$
 
 ## Making it work for yourself
 

@@ -4,32 +4,30 @@ import Data.List (isSuffixOf)
 import Data.String.Utils (join, split)
 import Hakyll
 
-appendIndexHtml :: Identifier -> FilePath
-appendIndexHtml = join "/" . reverse . indexIt . reverse . split "/" . toFilePath
+indexRoute :: Routes
+indexRoute = customRoute appendIndexHtml
   where
+    appendIndexHtml = join "/" . reverse . indexIt . reverse . split "/" . toFilePath
     indexIt [] = []
     indexIt a@(x : xs)
       | x == "index.html" = a
       | ".html" `isSuffixOf` x = (head (split "." x) ++ "/index.html") : xs
       | otherwise = a
 
-indexRoute :: Routes
-indexRoute = customRoute appendIndexHtml
-
 pageRoute :: Routes
 pageRoute =
-  composeRoutesList
+  mconcat
     [ stripPrefixRoute "^pages/",
       setExtension "html",
       indexRoute
     ]
 
+subPrefixRoute :: String -> String -> Routes
+subPrefixRoute srcPrefix = subRoute ("^" ++ srcPrefix)
+
 stripPrefixRoute :: String -> Routes
 stripPrefixRoute prefix = subPrefixRoute prefix ""
 
-subPrefixRoute :: String -> String -> Routes
-subPrefixRoute prefix replacement =
-  gsubRoute prefix (replaceAll prefix (const replacement))
-
-composeRoutesList :: [Routes] -> Routes
-composeRoutesList = foldr composeRoutes idRoute
+subRoute :: String -> String -> Routes
+subRoute findPattern replacement =
+  gsubRoute findPattern (replaceAll findPattern (const replacement))

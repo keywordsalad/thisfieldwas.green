@@ -133,7 +133,7 @@ function should not leverage memoization.
 * [Commit containing memoization changes][]
 * [Benchmark showing O(1) complexity][]
 
-[last post]: $route-to("posts/2013-06-16-sterling-benchmarks.md")$
+[last post]: $getRoute("_drafts/sterling-benchmarks.md")$
 [Sterling]: https://github.com/lmcgrath/sterling
 [Memoization]: https://en.wikipedia.org/wiki/Memoization
 [Commit containing memoization changes]: https://github.com/lmcgrath/sterling/commit/7d69d49a911d2d916701fa973e02ffabe82afe9d

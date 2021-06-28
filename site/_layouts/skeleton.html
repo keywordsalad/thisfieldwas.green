@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+$if(siteTitle)$
+  <title>This Field Was Green - $siteTitle$</title>
+$else$
+  <title>This Field Was Green - $title$</title>
+$endif$
+
+$if(author)$<link rel="author" content="$author$">$endif$
+
+<link rel="icon" href="/images/grass.svg">
+<link rel="stylesheet" href="/css/main.css">
+<script src="/js/main.js"></script>
+
+</head>
+<body class="$if(body-class)$$body-class$$endif$">
+
+  $body$
+
+</body>
+</html>

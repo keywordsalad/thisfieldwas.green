@@ -41,21 +41,21 @@ All installation and example setup details may be found in
 
 When you login, you should see this screen:
 
-$img("/images/app-config2/start.png")$
+$img("img-app-start", "/images/app-config2/start.png")$
 
 You'll notice I made the extra effort to add colors and drop shadows :D The
 application works from the project root in Perforce, so the files in each branch
 are viewable here. Clicking on "Dev" > "aardvark_configuration.html" will bring
 up a form for editing `aardvark_configuration.json` as in the previous version:
 
-$img("/images/app-config2/aardvark_configuration.png")$
+$img("img-app-config", "/images/app-config2/aardvark_configuration.png")$
 
 Changes to the form data are automatically saved. After making a view edits, you
 can click "View Diff" to get the diffs or "Revert" your changes. Go ahead and
 change the email address and fiddle around with the banned nicks, then go click
 "Pending Changes":
 
-$img("/images/app-config2/changes.png")$
+$img("img-app-changes", "/images/app-config2/changes.png")$
 
 This screen shows all files that were changed and their diffs as well. You can
 "Revert" each file individually, and if you want to commit all changes, then
@@ -63,7 +63,7 @@ enter a commit message and click "Commit Changes". If you commit the changes and
 go back to "Dev" > "aardvark_configuration.html", you'll see the new values in
 the form:
 
-$img("/images/app-config2/aardvark_configuration-changed.png")$
+$img("image-app-commit", "/images/app-config2/aardvark_configuration-changed.png")$
 
 ## Security and Permissions
 
@@ -170,7 +170,7 @@ existing infrastructure.
 The reason I point out Subversion and TFS is largely due to support of
 per-branch permissions.
 
-[last post]: $route-to("posts/2012-11-07-using-perforce-chronicle-for-application-configuration.md")$
+[last post]: $getRoute("_posts/2012-11-07-using-perforce-chronicle-for-application-configuration.md")$
 [forked]: https://github.com/lmcgrath/App-Config-App/
 [AngularJS]: http://angularjs.org/
 [App-Config-App's README]: https://github.com/lmcgrath/app-config-app/blob/master/README.md

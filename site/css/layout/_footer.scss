@@ -1,0 +1,20 @@
+@import "../elements/containers";
+
+body > footer {
+  @include body-segment;
+  margin: 0 auto;
+  padding: 1rem;
+  border-top: $border-regular;
+  border-bottom: $border-ginormous;
+  text-align: center;
+  p {
+    text-align: left;
+    margin: 0.3rem 0;
+  }
+  .copyright {
+    font-size: 0.9rem;
+  }
+  .generated-by-hakyll {
+    font-size: 0.8rem
+  }
+}

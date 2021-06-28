@@ -40,7 +40,9 @@ library
       Green.Route
       Green.Rule
       Green.Rule.Blog
+      Green.Rule.Css
       Green.Rule.Feed
+      Green.Rule.Index
       Green.Rule.Js
       Green.Rule.Page
       Green.Rule.Robot

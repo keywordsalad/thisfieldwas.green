@@ -4,6 +4,7 @@ title: "Using Perforce Chronicle for application configuration"
 author: "Logan McGrath"
 date: 2012-11-07T13:54:00-05:00
 published: 2012-11-07T13:54:00-05:00
+updated: 2021-06-27T10:12:00-05:00
 tags: Perforce, Configuration Management
 ---
 
@@ -82,12 +83,12 @@ with PHP.
 
 The source JSON configuration is the same, albeit sorted:
 
-$include-code("json", "app-config/stack_configuration.json")$
+$getCode("json", "app-config/stack_configuration.json")$
 
 The `index.html` page has been modified from the original to support only the
 basic _commit_ and _diffs_ functionality:
 
-$include-code("html", "app-config/index.html")$
+$getCode("html", "app-config/index.html")$
 
 Both of these assets were added by performing:
 
@@ -125,22 +126,22 @@ To create the module, the following paths need to be added:
 
 Declare the module with `INSTALL/application/appconfig/module.ini`:
 
-$include-code("ini", "app-config/module/module.ini")$
+$getCode("ini", "app-config/module/module.ini")$
 
 Add a view script for displaying plaintext
 assets, `INSTALL/application/appconfig/views/scripts/index/index.phtml`:
 
-$include-code("php", "app-config/module/views/scripts/index/index.phtml")$
+$getCode("php", "app-config/module/views/scripts/index/index.phtml")$
 
 Add a view script for displaying
 diffs, `INSTALL/application/appconfig/views/scripts/index/diffs.phtml`:
 
-$include-code("php", "app-config/module/views/scripts/index/diffs.phtml")$
+$getCode("php", "app-config/module/views/scripts/index/diffs.phtml")$
 
 And a controller
 at `INSTALL/application/appconfig/controllers/IndexController.phtml`:
 
-$include-code("php", "app-config/module/controllers/IndexController.php")$
+$getCode("php", "app-config/module/controllers/IndexController.php")$
 
 ## AngularJS
 
@@ -155,27 +156,27 @@ stack_configuration.json and post changes back.
 From `http://localhost/appconfig/index.html`, the data from
 stack_configuration.json is loaded into the form:
 
-$img("/images/app-config/start.png")$
+$img("img-config-form", "/images/app-config/start.png")$
 
 Edits to stack_configuration.json can be made using the form, and the diffs
 viewed by clicking on "View Diffs":
 
-$img("/images/app-config/diffs.png")$
+$img("img-config-diffs", "/images/app-config/diffs.png")$
 
 The changes can be saved by entering a commit message and clicking "Commit
 Changes". After which, clicking "View Diffs" will show no changes:
 
-$img("/images/app-config/diffs-after-commit.png")$
+$img("img-config-commit", "/images/app-config/diffs-after-commit.png")$
 
 To show that edits have in fact been made to stack_configuration.json, go
 to `http://localhost/stack_configuration.json`, select "History" and click on "
 History List":
 
-$img("/images/app-config/history.png")$
+$img("img-config-history", "/images/app-config/history.png")$
 
 Chronicle also provides an interface for viewing diffs between revisions:
 
-$img("/images/app-config/history-diffs.png")$
+$img("img-config-revisions", "/images/app-config/history-diffs.png")$
 
 ## Disk Usage
 
@@ -256,6 +257,22 @@ repository and work independently of Chronicle.
 
 I would like to thank the guys at Perforce for their assistance and answering
 all my questions as I worked with Chronicle, especially Randy Defauw.
+
+## Update 06/27/2021
+
+This is the first blog post I have ever written. Paul Hammant, who I had met in other contexts previously, happened to be working out of the ThoughtWorks office in Dallas, TX the very same day I started at ThoughtWorks. He asked me if I knew PHP, which I did, and set me off to explore Perforce Chronicle as a solution for managing configuration.
+
+I had never written professionally before or been aware of configuration management: I was very lucky to explore a passion space that Paul has worked within for a very long time. I don't believe I ever gave him a proper thanks. He gave me an opportunity that probably not a lot of people get in their early careers, and it was an invaluable experience that I learned a lot from and think about fairly often.
+
+The other posts in this series were also written with guidance from Paul:
+
+- $linkedTitle("_posts/2012-11-16-scm-backed-application-configuration-with-perforce.md")$
+- $linkedTitle("_posts/2012-11-20-app-config-app-in-action.md")$
+- $linkedTitle("_posts/2012-11-28-promoting-changes-with-app-config-app.md")$
+
+The subject of configuration as described in these posts is still fresh even after nearly ten years. Even now configuration as code still doesn't have a perfect solution, though products have become available that make managing configuration easier. Changing configuration in a running process as a general solution remains elusive, as supporting it imposes a lot of constraints on design.
+
+On a more personal note: today is Pride. This is the first Pride I've ever participated in and only in the last two years have I felt safe enough to come out in circles beyond close friends. I was out to Paul but only as a detail I confided in passing. When I was working with Paul on these posts he advised that I should consider relocating to the Bay Area. In January, 2013, I moved to San Francisco. Discovering my own life as a _person_ was set by Paul being brave enough to share a deeply personal piece of advice. I'm so thankful he said it, and I'm glad I listened.
 
 [proof of concept]: http://paulhammant.com/2012/08/14/app-config-using-git-and-angular/
 [Perforce]: http://en.wikipedia.org/wiki/Perforce

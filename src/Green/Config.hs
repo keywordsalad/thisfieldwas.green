@@ -91,9 +91,7 @@ parseConfigIni env zonedTime iniText = parseIniFile iniText do
                 feedRoot = root
               },
           _siteTime = zonedTime,
-          _siteContext =
-            defaultContext
-              <> constField "contactEmail" authorEmail
+          _siteContext = mempty
         }
   where
     customIgnoreFile allowedFiles path =

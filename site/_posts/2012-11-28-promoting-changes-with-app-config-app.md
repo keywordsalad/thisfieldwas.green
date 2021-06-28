@@ -40,7 +40,7 @@ staging-prod   staging   prod
 If you login to App-Config-App and go to "Promote Changes," you get an interface
 showing these relationships:
 
-$img("/images/app-config3/promote_changes.png")$
+$img("img-promote-changes", "/images/app-config3/promote_changes.png")$
 
 Changes between environments can be promoted in either direction along a mapping
 configuration. The receiving environment accepts all changes (developers would
@@ -49,11 +49,11 @@ the changes by clicking on the "Pending Changes" link.
 
 For example, I've promoted changes from "qa" to "dev":
 
-$img("/images/app-config3/promote_result.png")$
+$img("img-promote-result", "/images/app-config3/promote_result.png")$
 
 I can then review the changes by clicking on "Pending Changes":
 
-$img("/images/app-config3/pending_changes.png")$
+$img("img-pending-changes", "/images/app-config3/pending_changes.png")$
 
 Changes may be edited or reverted before committing them.
 
@@ -66,7 +66,7 @@ changes get promoted, but it requires a little more work.
 I've connected P4V to my App-Config-App user workspace to perform the same
 promotion from "qa" to "dev":
 
-$img("/images/app-config3/p4v.png")$
+$img("img-config-promotion", "/images/app-config3/p4v.png")$
 
 Select the "qa" folder, then from the menu bar go to "Actions" >
 "Merge/Integrate". This will bring up a wizard for performing the integration.
@@ -82,12 +82,12 @@ Resolve option: "Accept source"
 
 And ensure the direction of integration is "Target" < "Source":
 
-$img("/images/app-config3/p4v_integrate.png")$
+$img("img-config-integrate", "/images/app-config3/p4v_integrate.png")$
 
 Finally, click "Merge". If you expand the "dev" folder, you can see the where
 the changes are:
 
-$img("/images/app-config3/p4v_integrate_result.png")$
+$img("img-config-results", "/images/app-config3/p4v_integrate_result.png")$
 
 You are now free to modify the files further before finally committing the
 changes.

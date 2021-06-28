@@ -3,11 +3,12 @@ module Green.Rule where
 import Green.Compiler.Layout
 import Green.Config
 import Green.Rule.Blog
+import Green.Rule.Css
 import Green.Rule.Feed
+import Green.Rule.Index
 import Green.Rule.Js
 import Green.Rule.Page
 import Green.Rule.Robot
-import Green.Rule.Sass
 import Green.Rule.Sitemap
 import Hakyll
 
@@ -15,15 +16,15 @@ rules :: SiteConfig -> Rules ()
 rules config = do
   configRules
   imageRules
-  cssRules
-  templateRules
-  downloadRules
   jsRules
-  sassRules config
-  pageRules config
-  robotsTxtRules config
+  cssRules
+  downloadRules
   codeDependency <- codeRules
   rulesExtraDependencies [codeDependency] do
+    templateRules
+    pageRules config
+    indexRules config
+    robotsTxtRules config
     blogRules config
     feedRules config
     archiveRules config
@@ -58,14 +59,8 @@ imageRules =
     route idRoute
     compile copyFileCompiler
 
-cssRules :: Rules ()
-cssRules =
-  match "css/**.css" do
-    route idRoute
-    compile compressCssCompiler
-
 templateRules :: Rules ()
 templateRules = do
-  match "layouts/**" $ compile layoutCompiler
-  match "partials/**" $ compile templateCompiler
-  match "templates/**" $ compile templateCompiler
+  match "_layouts/**" $ compile layoutCompiler
+  match "_partials/**" $ compile templateCompiler
+  match "_templates/**" $ compile templateCompiler

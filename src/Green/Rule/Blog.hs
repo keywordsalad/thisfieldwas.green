@@ -12,40 +12,40 @@ blogRules config =
         [ blogIndexRules,
           archiveRules,
           draftArchiveRules,
-          publishedPostRules,
-          draftPostRules
+          postRules,
+          draftRules
         ]
    in sequenceA_ $ rules <*> pure config
 
 blogIndexRules :: SiteConfig -> Rules ()
 blogIndexRules config =
-  create ["blog/blog.html"] do
-    route $ constRoute "blog/index.html"
+  match "blog/index.html" do
+    route idRoute
     compile $ blogCompiler config
 
 archiveRules :: SiteConfig -> Rules ()
 archiveRules config = do
-  create ["blog/archives.html"] do
+  match "blog/archives.html" do
     route indexRoute
-    compile $ archiveCompiler config
+    compile $ archivesCompiler config
 
 draftArchiveRules :: SiteConfig -> Rules ()
 draftArchiveRules config = do
-  create ["blog/drafts.html"] do
+  match "blog/drafts.html" do
     route indexRoute
-    compile $ draftPostsCompiler config
+    compile $ draftArchivesCompiler config
 
-publishedPostRules :: SiteConfig -> Rules ()
-publishedPostRules localConfig = do
-  matchMetadata "posts/**" isPublished do
-    route publishedPostRoute
-    compile $ postCompiler localConfig publishedSnapshot
+postRules :: SiteConfig -> Rules ()
+postRules localConfig = do
+  match "_posts/**" do
+    route postRoute
+    compile $ postCompiler localConfig
 
-draftPostRules :: SiteConfig -> Rules ()
-draftPostRules localConfig = do
-  matchMetadata "posts/**" isDraft do
-    route draftPostRoute
-    compile $ postCompiler localConfig draftSnapshot
+draftRules :: SiteConfig -> Rules ()
+draftRules localConfig = do
+  match "_drafts/**" do
+    route draftRoute
+    compile $ draftCompiler localConfig
 
 {-----------------------------------------------------------------------------}
 {- Snapshots -}
@@ -53,17 +53,20 @@ draftPostRules localConfig = do
 
 type PostSnapshot = String
 
-publishedSnapshot :: PostSnapshot
-publishedSnapshot = "_publishedPost"
+postSnapshot :: PostSnapshot
+postSnapshot = "_post"
 
 draftSnapshot :: PostSnapshot
-draftSnapshot = "_draftPost"
+draftSnapshot = "_draft"
 
-loadPublishedPosts :: Compiler [Item String]
-loadPublishedPosts = loadExistingSnapshots "posts/**" publishedSnapshot
+contentOnly :: PostSnapshot -> PostSnapshot
+contentOnly = (++ "_contentOnly")
 
-loadDraftPosts :: Compiler [Item String]
-loadDraftPosts = loadExistingSnapshots "posts/**" draftSnapshot
+loadPosts :: Compiler [Item String]
+loadPosts = loadExistingSnapshots "_posts/**" (contentOnly postSnapshot)
+
+loadDrafts :: Compiler [Item String]
+loadDrafts = loadExistingSnapshots "_drafts/**" (contentOnly draftSnapshot)
 
 {-----------------------------------------------------------------------------}
 {- Routes -}
@@ -73,25 +76,24 @@ datePattern :: String
 datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}-"
 
 postPattern :: String
-postPattern = "^posts/([^/]+/)?" ++ datePattern
+postPattern = "^_posts/([^/]+/)?" ++ datePattern
 
-basePostRoute :: Routes
-basePostRoute =
-  matchRoute (fromRegex postPattern) . composeRoutesList $
+postRoute :: Routes
+postRoute =
+  matchRoute (fromRegex postPattern) . mconcat $
     [ dateRoute,
       setExtension "html",
-      indexRoute
+      indexRoute,
+      subPrefixRoute "_posts/" "blog/"
     ]
 
-publishedPostRoute :: Routes
-publishedPostRoute = basePostRoute `composeRoutes` postDestination "blog/"
-
-draftPostRoute :: Routes
-draftPostRoute = basePostRoute `composeRoutes` postDestination "blog/drafts/"
-
-postDestination :: String -> Routes
-postDestination destinationDir =
-  gsubRoute "^posts/" (replaceAll "^posts/" (const destinationDir))
+draftRoute :: Routes
+draftRoute =
+  mconcat
+    [ setExtension "html",
+      indexRoute,
+      subPrefixRoute "_drafts/" "blog/drafts/"
+    ]
 
 dateRoute :: Routes
 dateRoute = gsubRoute datePattern (replaceAll "-" (const "/"))
@@ -100,42 +102,42 @@ dateRoute = gsubRoute datePattern (replaceAll "-" (const "/"))
 {- Compilers -}
 {-----------------------------------------------------------------------------}
 
-postCompiler :: SiteConfig -> PostSnapshot -> Compiler (Item String)
-postCompiler localConfig snapshot =
+postCompiler :: SiteConfig -> Compiler (Item String)
+postCompiler localConfig = postSnapshotCompiler localConfig postSnapshot
+
+draftCompiler :: SiteConfig -> Compiler (Item String)
+draftCompiler localConfig = postSnapshotCompiler localConfig postSnapshot
+
+postSnapshotCompiler :: SiteConfig -> String -> Compiler (Item String)
+postSnapshotCompiler localConfig snapshot = do
   interpolateResourceBody localConfig
-    >>= saveSnapshot snapshot
+    >>= saveSnapshot (contentOnly snapshot)
     >>= applyLayoutFromMetadata localConfig
     >>= relativizeUrls
 
 blogCompiler :: SiteConfig -> Compiler (Item String)
 blogCompiler config = do
-  let recentPosts = recentFirst =<< loadPublishedPosts
-
-  -- the most recent post
-  latestPost <- head . take 1 <$> recentPosts
-  -- other recent posts
-  otherPosts <- take 5 . drop 1 <$> recentPosts
-
-  -- set local config
-  let localConfig = config & siteContext %~ blogContext latestPost otherPosts
-
-  makeItem ""
+  allPostsByRecent <- recentFirst =<< loadPosts
+  let latestPost = head allPostsByRecent
+  let recentPosts = take 5 . drop 1 $ allPostsByRecent
+  let localConfig = config & siteContext %~ blogContext latestPost recentPosts
+  interpolateResourceBody localConfig
     >>= applyLayoutFromMetadata localConfig
     >>= relativizeUrls
 
-draftPostsCompiler :: SiteConfig -> Compiler (Item String)
-draftPostsCompiler config = do
-  posts <- recentFirst =<< loadDraftPosts
-  let localConfig = config & siteContext %~ (draftArchiveContext config posts <>)
-  makeItem ""
+archivesCompiler :: SiteConfig -> Compiler (Item String)
+archivesCompiler config = do
+  posts <- recentFirst =<< loadPosts
+  let localConfig = config & siteContext %~ archivesContext posts
+  interpolateResourceBody localConfig
     >>= applyLayoutFromMetadata localConfig
     >>= relativizeUrls
 
-archiveCompiler :: SiteConfig -> Compiler (Item String)
-archiveCompiler config = do
-  posts <- recentFirst =<< loadPublishedPosts
-  let localConfig = config & siteContext %~ archiveContext posts
-  makeItem ""
+draftArchivesCompiler :: SiteConfig -> Compiler (Item String)
+draftArchivesCompiler config = do
+  drafts <- recentFirst =<< loadDrafts
+  let localConfig = config & siteContext %~ draftArchivesContext drafts
+  interpolateResourceBody localConfig
     >>= applyLayoutFromMetadata localConfig
     >>= relativizeUrls
 
@@ -143,32 +145,23 @@ archiveCompiler config = do
 {- Contexts -}
 {-----------------------------------------------------------------------------}
 
-draftArchiveContext :: SiteConfig -> [Item String] -> Context String
-draftArchiveContext config posts = do
-  constField "title" "Draft Archive"
-    <> listField "posts" (config ^. siteContext) (return posts)
-
 blogContext :: Item String -> [Item String] -> Context String -> Context String
-blogContext latestPost otherPosts siteContext' = do
-  constField "latest-post" (itemBody latestPost)
-    <> listField
-      "previous-posts"
-      (teaserField "teaser" publishedSnapshot <> siteContext')
-      (return otherPosts)
+blogContext latestPost recentPosts siteContext' = do
+  constField "latestPost" (itemBody latestPost)
+    <> recentPostsField
     <> siteContext'
+  where
+    teaserField' = teaserField "teaser" (contentOnly postSnapshot)
+    recentPostsField = listField "recentPosts" (teaserField' <> siteContext') (return recentPosts)
 
-archiveContext :: [Item String] -> Context String -> Context String
-archiveContext posts siteContext' =
+archivesContext :: [Item String] -> Context String -> Context String
+archivesContext posts siteContext' =
   constField "title" "Archives"
     <> listField "posts" siteContext' (return posts)
     <> siteContext'
 
-{-----------------------------------------------------------------------------}
-{- Metadata -}
-{-----------------------------------------------------------------------------}
-
-isPublished :: Metadata -> Bool
-isPublished = isJust . lookupString "published"
-
-isDraft :: Metadata -> Bool
-isDraft = not . isPublished
+draftArchivesContext :: [Item String] -> Context String -> Context String
+draftArchivesContext drafts siteContext' = do
+  constField "title" "Draft Archive"
+    <> listField "posts" siteContext' (return drafts)
+    <> siteContext'

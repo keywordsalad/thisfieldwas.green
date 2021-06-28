@@ -1,0 +1,14 @@
+<aside id="$youtubeAsideId$" class="youtube">
+  <figure>
+    <iframe src="https://www.youtube.com/embed/$youtubeVideoId$"
+            title="$youtubeVideoTitle$"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+    </iframe>
+  </figure>
+  $if(youtubeVideoTitle)$
+  <figcaption>
+    $youtubeVideoTitle$
+  </figcaption>
+  $endif$
+</aside>

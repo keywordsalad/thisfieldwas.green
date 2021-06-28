@@ -12,5 +12,5 @@ robotsTxtCompiler :: SiteConfig -> Compiler (Item String)
 robotsTxtCompiler config = do
   makeItem ""
     >>= loadAndApplyTemplate
-      (fromFilePath "templates/robots.txt")
+      (fromFilePath "_templates/robots.txt")
       (config ^. siteContext)

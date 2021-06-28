@@ -1,0 +1,30 @@
+$text-font-family: "Georgia", serif;
+$text-font-size: 1rem;
+$text-hyphens: none;
+$text-align-default: left;
+
+$code-font-family: "JetBrains Mono", monospace;
+$code-font-size: 80%; // because JetBrains Mono runs a bit big
+
+$color-green: darkgreen;
+$color-green-light: lighten($color-green, 78%);
+$color-text: darkslategray;
+$color-text-em: $color-green;
+$color-highlight: yellow;
+$color-hover: lemonchiffon;
+
+$bg-content: ivory;
+
+$border-ginormous-width: 0.5rem;
+$border-very-thick-width: 0.4rem;
+$border-thick-width: 0.3rem;
+$border-regular-width: 0.2rem;
+$border-thin-width: 0.1rem;
+$border-color: darken($color-green, 4%);
+$border-style: solid $border-color;
+
+$border-ginormous: $border-ginormous-width $border-style;
+$border-very-thick: $border-very-thick-width $border-style;
+$border-thick: $border-thick-width $border-style;
+$border-regular: $border-regular-width $border-style;
+$border-thin: $border-thin-width $border-style;

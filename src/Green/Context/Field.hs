@@ -1,16 +1,17 @@
 module Green.Context.Field
   ( siteRootField,
-    includeCodeField,
+    getCodeField,
     imgField,
     youtubeField,
-    routeToField,
+    getRouteField,
     commentField,
-    demoteHeadersByField,
     removeIndexUrlField,
+    linkedTitleField,
   )
 where
 
 import Control.Monad ((>=>))
+import Data.String.Utils
 import Green.Config (SiteConfig, siteRoot)
 import Green.Util
 import Hakyll hiding (demoteHeaders)
@@ -27,66 +28,92 @@ removeIndexUrlField key = mapContext transform (urlField key)
 siteRootField :: SiteConfig -> Context String
 siteRootField config = constField "site-root" (config ^. siteRoot)
 
-includeCodeField :: Context String
-includeCodeField = functionField fieldName f
+getCodeField :: Context String
+getCodeField = functionField "getCode" f
   where
-    fieldName = "include-code"
-    f [lexer, contentsPath] _ = wrapCode <$> body
+    f [lexer, contentsPath] _ = fmap wrapCode body
       where
         wrapCode code = "``` " ++ lexer ++ "\n" ++ code ++ "\n```"
         body = loadSnapshotBody item "code"
         item = fromFilePath $ "code/" ++ contentsPath
-    f _ item = error $ fieldName ++ " needs a filepath and a lexer " ++ show (itemIdentifier item)
+    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
+      where
+        msg = "expected [lexer, contentsPath] but received " ++ show args
 
 imgField :: Context String
-imgField = functionField fieldName f
+imgField = functionField "img" f
   where
-    fieldName = "img"
-    f [path] = f [path, "untitled"]
-    f [path, title] = f [path, title, title]
-    f [path, title, alt] =
+    f [imgId, src] = f [imgId, src, ""]
+    f [imgId, src, title] = f [imgId, src, title, ""]
+    f [imgId, src, title, alt] =
       loadAndApplyTemplate
-        "partials/image.html"
-        ( constField "img-src" path
-            <> constField "img-title" title
-            <> constField "img-alt" alt
+        "_templates/image.html"
+        ( constField "imgId" imgId
+            <> constField "imgSrc" src
+            <> constField "imgTitle" title
+            <> constField "imgAlt" alt
         )
+        >=> relativizeUrls
         >=> return . itemBody
-    f _ = \item -> error $ fieldName ++ " needs an image source and optionally a title " ++ show (itemIdentifier item)
+    f args = \item -> error $ msg ++ " in " ++ show (itemIdentifier item)
+      where
+        msg = "expected [imgId, imgSrc, imgTitle, imgAlt] but received " ++ show args
 
 youtubeField :: Context String
-youtubeField = functionField fieldName f
+youtubeField = functionField "youtube" f
   where
-    fieldName = "youtube"
-    f [videoId] = f [videoId, "YouTube video player"]
-    f [videoId, title] =
+    f [asideId, videoId] = f [asideId, videoId, ""]
+    f [asideId, videoId, title] =
       loadAndApplyTemplate
-        "partials/youtube.html"
-        ( constField "youtube-id" videoId
-            <> constField "youtube-title" title
+        "_templates/youtube.html"
+        ( constField "youtubeAsideId" asideId
+            <> constField "youtubeVideoId" videoId
+            <> constField "youtubeVideoTitle" title
         )
+        >=> relativizeUrls
         >=> return . itemBody
-    f _ = \item -> error $ fieldName ++ " needs a youtube video id and optionally a title " ++ show (itemIdentifier item)
-
-routeToField :: Context String
-routeToField = functionField fieldName f
-  where
-    fieldName = "route-to"
-    f [filePath] item = do
-      getRoute id' >>= \case
-        Just route' -> return $ "/" ++ stripSuffix "index.html" route'
-        Nothing -> error $ fieldName ++ " in " ++ show fromId ++ ": no route to " ++ show id'
+    f args = \item -> error $ msg ++ " in " ++ show (itemIdentifier item)
       where
-        id' = fromFilePath filePath
-        fromId = itemIdentifier item
-    f _ item = error $ fieldName ++ " needs a filePath " ++ show (itemIdentifier item)
+        msg = "expected [youtubeAsideId, youtubeVideoId, youtubeVideoTitle] but received " ++ show args
+
+getRouteField :: Context String
+getRouteField = functionField "getRoute" f
+  where
+    f [filePath] _ = getUrlFromRoute (fromFilePath filePath)
+    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
+      where
+        msg = "expected [filePath] but received " ++ show args
+
+getUrlFromRoute :: Identifier -> Compiler String
+getUrlFromRoute id' =
+  getRoute id' >>= \case
+    Just r -> return $ "/" ++ stripSuffix "index.html" r
+    Nothing -> error $ "no route to " ++ show id'
 
 commentField :: Context String
 commentField = functionField "comment" \_ _ -> return ""
 
-demoteHeadersByField :: Context String
-demoteHeadersByField = functionField fieldName f
+linkedTitleField :: Context String
+linkedTitleField = functionField fieldKey f
   where
-    fieldName = "demote-headers-by"
-    f [amount, content] _ = return $ demoteHeadersBy (read amount :: Int) content
-    f _ item = error $ fieldName ++ " requires a reduction amount and content " ++ show (itemIdentifier item)
+    fieldKey = "linkedTitle"
+    f [filePath] _ = do
+      let id' = fromFilePath filePath
+      url <- getUrlFromRoute id'
+      item :: Item String <- load id'
+      let ctx = metadataField <> titleField "title" <> constField "title" url
+      title <-
+        unContext ctx "title" [] item >>= \case
+          StringField s -> return s
+          _ -> error $ "Could not resolve title in " ++ show id'
+      return $ makeLink title url
+      where
+        isHtml = endswith ".html" filePath
+        isMarkdown = endswith ".md" filePath || endswith ".markdown" filePath
+        makeLink title url
+          | isHtml = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
+          | isMarkdown = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
+          | otherwise = title ++ " <" ++ url ++ ">"
+    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
+      where
+        msg = "expected [filePath] but received " ++ show args

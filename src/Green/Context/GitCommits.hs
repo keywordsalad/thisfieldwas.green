@@ -10,12 +10,12 @@ import System.Process
 gitCommits :: String -> Context String
 gitCommits gitWebUrl =
   mconcat
-    [ constField "git-web-url" gitWebUrl,
-      field "git-sha1" gitSha1Compiler,
-      field "git-message" gitMessageCompiler,
-      field "is-changed" isChangedCompiler,
-      field "is-generated" isGeneratedCompiler,
-      field "git-branch" gitBranchCompiler
+    [ constField "gitWebUrl" gitWebUrl,
+      field "gitSha1" gitSha1Compiler,
+      field "gitMessage" gitMessageCompiler,
+      field "isChanged" isChangedCompiler,
+      field "isGenerated" isGeneratedCompiler,
+      field "gitBranch" gitBranchCompiler
     ]
 
 itemSourcePath :: Item a -> FilePath

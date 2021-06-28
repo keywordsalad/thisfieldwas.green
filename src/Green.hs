@@ -28,4 +28,4 @@ loadSiteConfig = do
   configIniText <- TIO.readFile "config.ini"
   case parseConfigIni env zonedTime configIniText of
     Left e -> fail e
-    Right config -> return $ config & siteContext %~ baseContext config
+    Right config -> return $ config & siteContext .~ baseContext config

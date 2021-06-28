@@ -6,7 +6,6 @@ import Data.Maybe
 import Data.String.Utils as S
 import Hakyll
 import Lens.Micro
-import qualified Text.HTML.TagSoup as TS
 
 timeFormat :: String
 timeFormat = "%Y-%m-%dT%H:%M:%S%Z"
@@ -47,17 +46,6 @@ sequenceRules = sequenceA_
 {-# INLINE (~<>) #-}
 
 infixr 4 ~<>
-
-demoteHeadersBy :: Int -> String -> String
-demoteHeadersBy amount = withTags $ \case
-  TS.TagOpen t a -> TS.TagOpen (demote t) a
-  TS.TagClose t -> TS.TagClose (demote t)
-  t -> t
-  where
-    demote t@['h', n]
-      | isDigit n = ['h', intToDigit (min 6 $ digitToInt n + amount)]
-      | otherwise = t
-    demote t = t
 
 kebabCase :: String -> String
 kebabCase [] = []
