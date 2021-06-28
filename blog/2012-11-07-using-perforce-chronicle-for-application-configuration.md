@@ -270,7 +270,7 @@ The other posts in this series were also written with guidance from Paul:
 - $linkedTitle("blog/2012-11-20-app-config-app-in-action.md")$
 - $linkedTitle("blog/2012-11-28-promoting-changes-with-app-config-app.md")$
 
-The subject of configuration as described in these posts is still fresh despite these posts being being nearly a decade old. Even now configuration as code still doesn't have a perfect solution, though products have become available that make managing configuration easier. Changing configuration in a running process as a general solution remains elusive, as supporting it imposes a lot of constraints on design.
+The subject of configuration as described in these posts is still fresh even after nearly ten years. Even now configuration as code still doesn't have a perfect solution, though products have become available that make managing configuration easier. Changing configuration in a running process as a general solution remains elusive, as supporting it imposes a lot of constraints on design.
 
 On a more personal note: today is Pride. This is the first Pride I've ever participated in and only in the last two years have I felt safe enough to come out in circles beyond close friends. I was out to Paul but only as a detail I confided in passing. When I was working with Paul on these posts he advised that I should consider relocating to the Bay Area. In January, 2013, I moved to San Francisco. Discovering my own life as a _person_ was set by Paul being brave enough to share a deeply personal piece of advice. I'm so thankful he said it, and I'm glad I listened.
 
