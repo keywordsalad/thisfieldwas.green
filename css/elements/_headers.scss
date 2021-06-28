@@ -14,62 +14,40 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-h1.page-title {
-  border-bottom: $border-thin;
-  padding: 0 0 0.5rem;
-}
-
 section h1 {
   border-top: $border-regular;
   border-bottom: $border-thin;
   padding: 0.5rem 0;
 }
 
-h1.logo {
-  border: none;
+h1 {
+  font-size: 1.4rem;
+  &.logo {
+    border: none;
+  }
+  &.page-title {
+    border-bottom: $border-thin;
+    padding: 0 0 0.5rem;
+  }
+}
+h2 {
+  font-size: 1.3rem;
+}
+h3 {
+  font-size: 1.2rem;
+}
+h4 {
+  font-size: 1.1rem;
+}
+h5 {
+  font-size: 1rem;
+}
+h6 {
+  font-size: 0.9rem;
 }
 
 @include media("<tablet") {
-  h1 {
-    font-size: 1.4rem;
-  }
-  h2 {
-    font-size: 1.3rem;
-  }
-  h3 {
-    font-size: 1.2rem;
-  }
-  h4 {
-    font-size: 1.1rem;
-  }
-  h5 {
-    font-size: 1rem;
-  }
-  h6 {
-    font-size: 0.9rem;
-  }
   section > h1, section > header h1 {
     text-align: center;
-  }
-}
-
-@include media(">=tablet") {
-  h1 {
-    font-size: 2rem;
-  }
-  h2 {
-    font-size: 1.6rem;
-  }
-  h3 {
-    font-size: 1.4rem;
-  }
-  h4 {
-    font-size: 1.2rem;
-  }
-  h5 {
-    font-size: 1rem;
-  }
-  h6 {
-    font-size: 0.9rem;
   }
 }
