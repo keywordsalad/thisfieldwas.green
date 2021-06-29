@@ -33,20 +33,18 @@ library
       Green.Context
       Green.Context.Field
       Green.Context.GitCommits
-      Green.Context.Post
-      Green.Context.Tag
       Green.Lens
       Green.Lens.Hakyll
       Green.Route
       Green.Rule
       Green.Rule.Blog
+      Green.Rule.BrokenLinks
       Green.Rule.Css
       Green.Rule.Feed
       Green.Rule.Index
       Green.Rule.Js
       Green.Rule.Page
       Green.Rule.Robot
-      Green.Rule.Sass
       Green.Rule.Sitemap
       Green.Util
   other-modules:

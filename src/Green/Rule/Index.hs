@@ -11,13 +11,12 @@ indexRules config =
 
 indexCompiler :: SiteConfig -> Compiler (Item String)
 indexCompiler config = do
-  recentPosts <- take 5 <$> (recentFirst =<< loadPosts)
+  recentPosts <- take 5 <$> (recentFirst =<< loadPostsContent)
   let ctx =
         listField
           "recentPosts"
           (teaserCtx <> (config ^. siteContext))
           (return recentPosts)
-          <> postContext
           <> (config ^. siteContext)
   getResourceBody
     >>= applyAsTemplate ctx

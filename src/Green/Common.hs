@@ -15,7 +15,6 @@ module Green.Common
     module Green.Compiler,
     module Green.Compiler.Layout,
     module Green.Compiler.Pandoc,
-    module Green.Context.Field,
     module Green.Context,
     module Green.Lens,
     module Green.Lens.Hakyll,
@@ -40,12 +39,11 @@ import Green.Compiler.Layout
 import Green.Compiler.Pandoc
 import Green.Config
 import Green.Context
-import Green.Context.Field
 import Green.Lens
 import Green.Lens.Hakyll
 import Green.Route
 import Green.Util
-import Hakyll
+import Hakyll hiding (dateField)
 import Lens.Micro hiding ((<&>))
 import Lens.Micro.TH
 import System.Directory (copyFile, createDirectoryIfMissing, doesFileExist)

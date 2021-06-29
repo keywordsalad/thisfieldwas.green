@@ -62,11 +62,11 @@ draftSnapshot = "_draft"
 contentOnly :: PostSnapshot -> PostSnapshot
 contentOnly = (++ "_contentOnly")
 
-loadPosts :: Compiler [Item String]
-loadPosts = loadExistingSnapshots "_posts/**" (contentOnly postSnapshot)
+loadPostsContent :: Compiler [Item String]
+loadPostsContent = loadExistingSnapshots "_posts/**" (contentOnly postSnapshot)
 
-loadDrafts :: Compiler [Item String]
-loadDrafts = loadExistingSnapshots "_drafts/**" (contentOnly draftSnapshot)
+loadDraftsContent :: Compiler [Item String]
+loadDraftsContent = loadExistingSnapshots "_drafts/**" (contentOnly draftSnapshot)
 
 {-----------------------------------------------------------------------------}
 {- Routes -}
@@ -80,20 +80,17 @@ postPattern = "^_posts/([^/]+/)?" ++ datePattern
 
 postRoute :: Routes
 postRoute =
-  matchRoute (fromRegex postPattern) . mconcat $
-    [ dateRoute,
-      setExtension "html",
-      indexRoute,
-      subPrefixRoute "_posts/" "blog/"
-    ]
+  matchRoute (fromRegex postPattern) $
+    dateRoute
+      `composeRoutes` setExtension "html"
+      `composeRoutes` indexRoute
+      `composeRoutes` subPrefixRoute "_posts/" "blog/"
 
 draftRoute :: Routes
 draftRoute =
-  mconcat
-    [ setExtension "html",
-      indexRoute,
-      subPrefixRoute "_drafts/" "blog/drafts/"
-    ]
+  setExtension "html"
+    `composeRoutes` indexRoute
+    `composeRoutes` subPrefixRoute "_drafts/" "blog/drafts/"
 
 dateRoute :: Routes
 dateRoute = gsubRoute datePattern (replaceAll "-" (const "/"))
@@ -106,7 +103,7 @@ postCompiler :: SiteConfig -> Compiler (Item String)
 postCompiler localConfig = postSnapshotCompiler localConfig postSnapshot
 
 draftCompiler :: SiteConfig -> Compiler (Item String)
-draftCompiler localConfig = postSnapshotCompiler localConfig postSnapshot
+draftCompiler localConfig = postSnapshotCompiler localConfig draftSnapshot
 
 postSnapshotCompiler :: SiteConfig -> String -> Compiler (Item String)
 postSnapshotCompiler localConfig snapshot = do
@@ -117,17 +114,17 @@ postSnapshotCompiler localConfig snapshot = do
 
 blogCompiler :: SiteConfig -> Compiler (Item String)
 blogCompiler config = do
-  allPostsByRecent <- recentFirst =<< loadPosts
+  allPostsByRecent <- recentFirst =<< loadPostsContent
   let latestPost = head allPostsByRecent
   let recentPosts = take 5 . drop 1 $ allPostsByRecent
-  let localConfig = config & siteContext %~ blogContext latestPost recentPosts
+  localConfig <- forOf siteContext config (buildBlogContext latestPost recentPosts)
   interpolateResourceBody localConfig
     >>= applyLayoutFromMetadata localConfig
     >>= relativizeUrls
 
 archivesCompiler :: SiteConfig -> Compiler (Item String)
 archivesCompiler config = do
-  posts <- recentFirst =<< loadPosts
+  posts <- recentFirst =<< loadPostsContent
   let localConfig = config & siteContext %~ archivesContext posts
   interpolateResourceBody localConfig
     >>= applyLayoutFromMetadata localConfig
@@ -135,7 +132,7 @@ archivesCompiler config = do
 
 draftArchivesCompiler :: SiteConfig -> Compiler (Item String)
 draftArchivesCompiler config = do
-  drafts <- recentFirst =<< loadDrafts
+  drafts <- recentFirst =<< loadDraftsContent
   let localConfig = config & siteContext %~ draftArchivesContext drafts
   interpolateResourceBody localConfig
     >>= applyLayoutFromMetadata localConfig
@@ -145,14 +142,23 @@ draftArchivesCompiler config = do
 {- Contexts -}
 {-----------------------------------------------------------------------------}
 
-blogContext :: Item String -> [Item String] -> Context String -> Context String
-blogContext latestPost recentPosts siteContext' = do
-  constField "latestPost" (itemBody latestPost)
-    <> recentPostsField
-    <> siteContext'
+buildBlogContext :: Item String -> [Item String] -> Context String -> Compiler (Context String)
+buildBlogContext latestPost recentPosts siteContext' = do
+  latestPostTitle <- unContextString siteContext' "title" [] latestPost
+  return $
+    mconcat
+      [ constField "title" ("Most Recently Mowed: " ++ latestPostTitle),
+        constField "latestPost" (itemBody latestPost),
+        recentPostsField,
+        siteContext'
+      ]
   where
+    recentPostsField =
+      listField
+        "recentPosts"
+        (teaserField' <> siteContext')
+        (return recentPosts)
     teaserField' = teaserField "teaser" (contentOnly postSnapshot)
-    recentPostsField = listField "recentPosts" (teaserField' <> siteContext') (return recentPosts)
 
 archivesContext :: [Item String] -> Context String -> Context String
 archivesContext posts siteContext' =
@@ -161,7 +167,7 @@ archivesContext posts siteContext' =
     <> siteContext'
 
 draftArchivesContext :: [Item String] -> Context String -> Context String
-draftArchivesContext drafts siteContext' = do
+draftArchivesContext drafts siteContext' =
   constField "title" "Draft Archive"
     <> listField "posts" siteContext' (return drafts)
     <> siteContext'

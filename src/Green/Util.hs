@@ -2,10 +2,15 @@ module Green.Util where
 
 import Data.Char
 import Data.Foldable (sequenceA_)
-import Data.Maybe
 import Data.String.Utils as S
 import Hakyll
 import Lens.Micro
+import System.FilePath (splitFileName, takeDirectory)
+
+dropIndex :: FilePath -> FilePath
+dropIndex url = case splitFileName url of
+  (p, "index.html") -> takeDirectory p
+  _ -> url
 
 timeFormat :: String
 timeFormat = "%Y-%m-%dT%H:%M:%S%Z"
@@ -15,9 +20,6 @@ type RenderFeed =
   Context String -> -- Item context
   [Item String] -> -- Feed items
   Compiler (Item String) -- Resulting feed
-
-itemSiteRoot :: Item a -> Compiler String
-itemSiteRoot = fmap (toSiteRoot . fromJust) . getRoute . itemIdentifier
 
 stripSuffix :: String -> String -> String
 stripSuffix suffix text =

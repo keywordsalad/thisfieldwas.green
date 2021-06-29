@@ -1,7 +1,7 @@
 module Green.Rule.Sitemap (sitemapRules) where
 
 import Green.Common
-import Green.Rule.Blog (loadPosts)
+import Green.Rule.Blog (loadPostsContent)
 
 sitemapRules :: SiteConfig -> Rules ()
 sitemapRules config =
@@ -13,7 +13,7 @@ sitemapCompiler :: SiteConfig -> Compiler (Item String)
 sitemapCompiler config = do
   staticPages <- loadAll "*.html"
   blogIndexes <- loadAll $ fromList ["blog/index.html", "blog/archives.html"]
-  posts <- recentFirst =<< loadPosts
+  posts <- recentFirst =<< loadPostsContent
   let pageField = listField "pages" (config ^. siteContext) (return $ mconcat [staticPages, blogIndexes, posts])
       localConfig = config & siteContext %~ (pageField <>)
   makeItem ""

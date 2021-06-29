@@ -1,8 +1,8 @@
 module Green.TestSupport.Config where
 
 import Data.Time
-import Hakyll as H
 import Green.Common
+import Hakyll as H
 
 defaultTestTimeString :: String
 defaultTestTimeString = "2013-06-16T21:12:00-07:00"
@@ -45,10 +45,9 @@ defaultSiteConfigWith hakyllConfig =
       _siteAuthorEmail = "slurms@thisold.blog",
       _siteLinkedInProfile = "https://linkedin.com/in/the-secret-ingredient",
       _siteGitWebUrl = "https://bitsof.thisold.blog/slurms/blog",
-      _sitePreview = False,
-      _siteDebug = False,
       _siteHakyllConfiguration = hakyllConfig,
       _siteFeedConfiguration = defaultFeedConfig,
       _siteTime = fromJust defaultTestTime,
-      _siteContext = mempty
+      _siteContext = mempty,
+      _siteDebug = defaultSiteDebug
     }

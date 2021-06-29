@@ -1,48 +1,40 @@
-module Green.Context.Field
-  ( siteRootField,
-    getCodeField,
-    imgField,
-    youtubeField,
-    getRouteField,
-    commentField,
-    removeIndexUrlField,
-    linkedTitleField,
-  )
-where
+module Green.Context.Field where
 
 import Control.Monad ((>=>))
+import Data.Maybe (fromJust)
 import Data.String.Utils
-import Green.Config (SiteConfig, siteRoot)
+import Data.Time (ZonedTime)
+import Data.Time.Format
 import Green.Util
-import Hakyll hiding (demoteHeaders)
+import Hakyll hiding (dateField)
 import Lens.Micro
-import System.FilePath (splitFileName, takeDirectory)
 
-removeIndexUrlField :: String -> Context a
-removeIndexUrlField key = mapContext transform (urlField key)
+trimIndexUrlField :: String -> Context a
+trimIndexUrlField = mapContext dropIndex . urlField
+
+siteRootField :: String -> Context String
+siteRootField = constField "siteRoot"
+
+getCodeField :: Context String -> Context String
+getCodeField siteContext' = functionField key f
   where
-    transform url = case splitFileName url of
-      (p, "index.html") -> takeDirectory p
-      _ -> url
-
-siteRootField :: SiteConfig -> Context String
-siteRootField config = constField "site-root" (config ^. siteRoot)
-
-getCodeField :: Context String
-getCodeField = functionField "getCode" f
-  where
-    f [lexer, contentsPath] _ = fmap wrapCode body
+    key = "getCode"
+    f [lexer, contentsPath] _ =
+      let localContext = constField "lexer" lexer <> siteContext'
+       in loadSnapshot codeId "code"
+            >>= loadAndApplyTemplate templateId localContext
+            <&> itemBody
       where
-        wrapCode code = "``` " ++ lexer ++ "\n" ++ code ++ "\n```"
-        body = loadSnapshotBody item "code"
-        item = fromFilePath $ "code/" ++ contentsPath
+        codeId = fromFilePath $ "code/" ++ contentsPath
+        templateId = fromFilePath "_templates/code.md"
     f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
       where
-        msg = "expected [lexer, contentsPath] but received " ++ show args
+        msg = key ++ " expected [lexer, contentsPath] but received " ++ show args
 
 imgField :: Context String
-imgField = functionField "img" f
+imgField = functionField key f
   where
+    key = "img"
     f [imgId, src] = f [imgId, src, ""]
     f [imgId, src, title] = f [imgId, src, title, ""]
     f [imgId, src, title, alt] =
@@ -57,13 +49,15 @@ imgField = functionField "img" f
         >=> return . itemBody
     f args = \item -> error $ msg ++ " in " ++ show (itemIdentifier item)
       where
-        msg = "expected [imgId, imgSrc, imgTitle, imgAlt] but received " ++ show args
+        msg = key ++ " expected [imgId, imgSrc, imgTitle, imgAlt] but received " ++ show args
 
 youtubeField :: Context String
-youtubeField = functionField "youtube" f
+youtubeField = functionField key f
   where
-    f [asideId, videoId] = f [asideId, videoId, ""]
-    f [asideId, videoId, title] =
+    key = "youtube"
+    f [videoId] = f [videoId, ""]
+    f [videoId, asideId] = f [videoId, asideId, ""]
+    f [videoId, asideId, title] =
       loadAndApplyTemplate
         "_templates/youtube.html"
         ( constField "youtubeAsideId" asideId
@@ -74,46 +68,57 @@ youtubeField = functionField "youtube" f
         >=> return . itemBody
     f args = \item -> error $ msg ++ " in " ++ show (itemIdentifier item)
       where
-        msg = "expected [youtubeAsideId, youtubeVideoId, youtubeVideoTitle] but received " ++ show args
-
-getRouteField :: Context String
-getRouteField = functionField "getRoute" f
-  where
-    f [filePath] _ = getUrlFromRoute (fromFilePath filePath)
-    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
-      where
-        msg = "expected [filePath] but received " ++ show args
-
-getUrlFromRoute :: Identifier -> Compiler String
-getUrlFromRoute id' =
-  getRoute id' >>= \case
-    Just r -> return $ "/" ++ stripSuffix "index.html" r
-    Nothing -> error $ "no route to " ++ show id'
+        msg = key ++ " expected [youtubeAsideId, youtubeVideoId, youtubeVideoTitle] but received " ++ show args
 
 commentField :: Context String
 commentField = functionField "comment" \_ _ -> return ""
 
-linkedTitleField :: Context String
-linkedTitleField = functionField fieldKey f
+getRouteField :: Context String
+getRouteField = functionField key f
   where
-    fieldKey = "linkedTitle"
+    key = "getRoute"
     f [filePath] _ = do
       let id' = fromFilePath filePath
-      url <- getUrlFromRoute id'
-      item :: Item String <- load id'
-      let ctx = metadataField <> titleField "title" <> constField "title" url
-      title <-
-        unContext ctx "title" [] item >>= \case
-          StringField s -> return s
-          _ -> error $ "Could not resolve title in " ++ show id'
-      return $ makeLink title url
+      getRoute id' >>= \case
+        Just r -> return $ "/" ++ stripSuffix "index.html" r
+        Nothing -> error $ "no route to " ++ show id'
+    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
       where
-        isHtml = endswith ".html" filePath
-        isMarkdown = endswith ".md" filePath || endswith ".markdown" filePath
+        msg = key ++ " expected [filePath] but received " ++ show args
+
+unContextString :: Context String -> String -> [String] -> Item String -> Compiler String
+unContextString context key args item =
+  unContext context key args item >>= \case
+    StringField s -> return s
+    _ -> error $ "Got a non-string value in field " ++ key
+
+linkedTitleField :: Context String -> Context String
+linkedTitleField context = functionField linkedTitleKey f
+  where
+    linkedTitleKey = "linkedTitle"
+    f [filePath] _ = do
+      linkedItem <- load (fromFilePath filePath)
+      makeLink <$> getTitle linkedItem <*> getUrl linkedItem
+      where
         makeLink title url
           | isHtml = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
           | isMarkdown = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
           | otherwise = title ++ " <" ++ url ++ ">"
+        getTitle = getField "title"
+        getUrl = getField "url"
+        isHtml = endswith ".html" filePath
+        isMarkdown = endswith ".md" filePath || endswith ".markdown" filePath
+        getField key = unContextString context key []
     f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
       where
-        msg = "expected [filePath] but received " ++ show args
+        msg = linkedTitleKey ++ " expected [filePath] but received " ++ show args
+
+dateField :: TimeLocale -> String -> String -> Context String
+dateField timeLocale key format = field key \i -> do
+  maybeField <- lookupString key <$> getMetadata (itemIdentifier i)
+  maybeDate <- p <$> maybeField
+  return $ maybe "" f maybeDate
+  where
+    f :: ZonedTime -> String
+    f = formatTime timeLocale format
+    p = fromJust . parseTime timeLocale timeFormat

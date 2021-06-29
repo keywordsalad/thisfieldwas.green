@@ -52,7 +52,7 @@ writerOpts =
 
 printDebugItem :: SiteConfig -> Item String -> Item String
 printDebugItem config item =
-  if config ^. siteDebug
+  if config ^. siteDebug . debugPrintItem
     then trace (sep ++ y ++ z) item
     else item
   where

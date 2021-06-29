@@ -1,9 +1,19 @@
-.post .page-title {
-  margin-bottom: 0;
-}
+.post {
+  .page-title {
+    margin-bottom: 0;
+  }
 
-.published {
-  font-size: 0.85rem;
-  font-style: italic;
-  color: slategrey;
+  .post-header {
+    .post-title {
+      margin: 0.5rem 0 0;
+      padding: 0;
+    }
+
+    .post-published {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      font-style: italic;
+      color: slategrey;
+    }
+  }
 }

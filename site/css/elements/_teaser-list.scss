@@ -1,0 +1,21 @@
+.teaser-list {
+  .post-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  .teaser-item {
+    > *:nth-last-child(2) {
+      margin-bottom: 0.5rem;
+    }
+  }
+  .teaser-item + .teaser-item {
+    border-top: $border-thin;
+  }
+  header + * {
+    margin-top: 0.5rem;
+  }
+  .read-more {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+}

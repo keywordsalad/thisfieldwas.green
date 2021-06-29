@@ -3,6 +3,7 @@ module Green.Rule where
 import Green.Compiler.Layout
 import Green.Config
 import Green.Rule.Blog
+import Green.Rule.BrokenLinks
 import Green.Rule.Css
 import Green.Rule.Feed
 import Green.Rule.Index
@@ -14,10 +15,11 @@ import Hakyll
 
 rules :: SiteConfig -> Rules ()
 rules config = do
+  brokenLinks
   configRules
   imageRules
   jsRules
-  cssRules
+  cssRules config
   downloadRules
   codeDependency <- codeRules
   rulesExtraDependencies [codeDependency] do
