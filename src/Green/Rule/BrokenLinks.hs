@@ -1,6 +1,8 @@
 module Green.Rule.BrokenLinks (brokenLinks) where
 
-import Green.Common
+import Data.Bifunctor (bimap)
+import Data.Maybe (fromJust)
+import Hakyll
 
 brokenLinks :: Rules ()
 brokenLinks = foldl (>>) (return ()) $ fmap fixBrokenLink brokenLinkTargetIds
