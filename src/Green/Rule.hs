@@ -23,13 +23,14 @@ rules config = do
   downloadRules
   codeDependency <- codeRules
   rulesExtraDependencies [codeDependency] do
-    blogRules env baseCtx
-    feedRules feedConfig baseCtx
-    indexRules env baseCtx
-    pageRules baseCtx
-    robotsTxtRules baseCtx
-    archiveRules baseCtx
-    sitemapRules baseCtx
+    templateRules
+    blogRules config
+    feedRules config
+    indexRules config
+    pageRules config
+    robotsTxtRules config
+    archiveRules config
+    sitemapRules config
     brokenLinks
 
 configRules :: Rules ()

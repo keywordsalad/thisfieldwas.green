@@ -31,7 +31,6 @@ library
       Green.Compiler.Pandoc
       Green.Config
       Green.Context
-      Green.Context.Field
       Green.Context.GitCommits
       Green.Lens
       Green.Lens.Hakyll
