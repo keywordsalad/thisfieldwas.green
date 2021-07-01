@@ -27,6 +27,7 @@ library site-lib
                   , Site.Rule
                   , Site.Rule.Archive
                   , Site.Rule.Blog
+                  , Site.Rule.BrokenLinks
                   , Site.Rule.Feed
                   , Site.Rule.Index
                   , Site.Rule.Js

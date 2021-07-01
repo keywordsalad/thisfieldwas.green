@@ -4,7 +4,7 @@ import Site.Common
 import Site.Route (indexRoute)
 
 pageRules :: Context String -> Rules ()
-pageRules baseCtx =
+pageRules baseCtx = do
   match (fromList pageList) do
     route $ setExtension "html" `composeRoutes` indexRoute
     compile $ pageCompiler baseCtx

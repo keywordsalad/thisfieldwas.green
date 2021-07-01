@@ -3,12 +3,13 @@ module Site.Rule where
 import Hakyll
 import Site.Rule.Archive
 import Site.Rule.Blog
+import Site.Rule.BrokenLinks
+import Site.Rule.Css
 import Site.Rule.Feed
 import Site.Rule.Index
 import Site.Rule.Js
 import Site.Rule.Page
 import Site.Rule.Robot
-import Site.Rule.Css
 import Site.Rule.Sitemap
 
 rules :: [(String, String)] -> FeedConfiguration -> Context String -> Rules ()
@@ -28,6 +29,7 @@ rules env feedConfig baseCtx = do
     robotsTxtRules baseCtx
     archiveRules baseCtx
     sitemapRules baseCtx
+    brokenLinks
 
 configRules :: Rules ()
 configRules =
