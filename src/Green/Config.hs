@@ -1,18 +1,12 @@
 module Green.Config where
 
-import Control.Applicative ((<|>))
 import Data.Ini.Config
-import Data.Maybe (isJust)
 import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Time
+import Green.Common
 import Green.Lens.Hakyll
-import Hakyll
 import Hakyll.Core.Configuration as HC
-import Lens.Micro
-import Lens.Micro.TH
-import System.FilePath
 
 data SiteDebug = SiteDebug
   { _debugPrintItem :: Bool,

@@ -1,6 +1,7 @@
 module Green.Rule.Css (cssRules) where
 
 import Green.Common
+import Green.Config
 
 cssRules :: SiteConfig -> Rules ()
 cssRules siteConfig = do

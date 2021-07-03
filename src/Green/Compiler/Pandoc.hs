@@ -6,11 +6,9 @@ module Green.Compiler.Pandoc
   )
 where
 
-import Control.Monad ((>=>))
 import Debug.Trace
+import Green.Common
 import Green.Config
-import Hakyll
-import Lens.Micro
 import Text.Pandoc.Definition
 import Text.Pandoc.Highlighting (pygments)
 import qualified Text.Pandoc.Options as Opt

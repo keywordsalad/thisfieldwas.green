@@ -1,5 +1,6 @@
 module Green.Rule where
 
+import Green.Common
 import Green.Compiler.Layout
 import Green.Config
 import Green.Rule.Blog
@@ -11,7 +12,6 @@ import Green.Rule.Js
 import Green.Rule.Page
 import Green.Rule.Robot
 import Green.Rule.Sitemap
-import Hakyll
 
 rules :: SiteConfig -> Rules ()
 rules config = do

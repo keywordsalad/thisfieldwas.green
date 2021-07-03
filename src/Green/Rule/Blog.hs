@@ -1,6 +1,10 @@
 module Green.Rule.Blog where
 
 import Green.Common
+import Green.Compiler
+import Green.Config
+import Green.Context
+import Green.Route
 
 {-----------------------------------------------------------------------------}
 {- Rules -}

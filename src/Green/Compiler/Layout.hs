@@ -1,13 +1,10 @@
 module Green.Compiler.Layout where
 
-import Control.Monad ((<=<))
 import Data.Binary as B
 import Data.ByteString.Lazy as LBS
 import GHC.Generics hiding (to)
+import Green.Common
 import Green.Config
-import Hakyll
-import Lens.Micro
-import Lens.Micro.TH
 
 data Layout = Layout
   { _layoutStack :: [Item Template],

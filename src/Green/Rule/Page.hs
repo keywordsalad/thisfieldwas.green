@@ -1,6 +1,9 @@
 module Green.Rule.Page (pageRules) where
 
 import Green.Common
+import Green.Compiler
+import Green.Config
+import Green.Route
 
 pageRules :: SiteConfig -> Rules ()
 pageRules baseCtx =

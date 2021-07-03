@@ -1,9 +1,6 @@
 module Green.Context.GitCommits (gitCommits) where
 
-import Data.Bool (bool)
-import Data.Maybe (fromJust, isJust)
-import Hakyll
-import System.Directory (doesFileExist)
+import Green.Common
 import System.Exit
 import System.Process
 

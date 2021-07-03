@@ -1,6 +1,8 @@
 module Green.Rule.Index where
 
 import Green.Common
+import Green.Compiler.Layout
+import Green.Config
 import Green.Rule.Blog
 
 indexRules :: SiteConfig -> Rules ()

@@ -4,6 +4,8 @@ import qualified Data.Text.IO as TIO
 import Data.Time
 import Green.Command
 import Green.Common
+import Green.Config
+import Green.Context
 import Green.Rule
 import Options.Applicative
 import System.Environment

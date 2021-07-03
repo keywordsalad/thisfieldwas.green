@@ -1,6 +1,6 @@
 module Green.Lens.Hakyll where
 
-import Green.Lens
+import Green.Lens.TH
 import Hakyll
 
 makeLensesWithL ''Configuration

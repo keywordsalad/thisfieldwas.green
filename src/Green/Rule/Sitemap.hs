@@ -1,6 +1,7 @@
 module Green.Rule.Sitemap (sitemapRules) where
 
 import Green.Common
+import Green.Config
 import Green.Rule.Blog (loadPostsContent)
 
 sitemapRules :: SiteConfig -> Rules ()

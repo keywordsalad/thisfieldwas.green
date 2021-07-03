@@ -4,18 +4,12 @@ module Green.Context
   )
 where
 
-import Control.Applicative ((<|>))
-import Control.Monad ((<=<))
 import Data.List (intercalate, tails)
-import Data.String.Utils
-import Data.Time (ZonedTime)
-import Data.Time.Format
+import Data.String.Utils (endswith)
+import Green.Common
 import Green.Config
 import Green.Context.GitCommits
-import Green.Util (dropIndex, stripSuffix)
-import Hakyll hiding (dateField)
-import Lens.Micro
-import System.FilePath
+import Green.Util (dropIndex, firstMaybe, stripSuffix)
 
 baseContext :: SiteConfig -> Context String
 baseContext config = do
@@ -24,6 +18,7 @@ baseContext config = do
           [ siteRootField (config ^. siteRoot),
             linkedInProfileField (config ^. siteLinkedInProfile),
             trimmedUrlField,
+            dateFields (config ^. siteTimeLocale),
             gitCommits (config ^. siteGitWebUrl),
             imgField,
             youtubeField,
@@ -31,8 +26,7 @@ baseContext config = do
             commentField,
             defaultContext,
             bodyClassField "default",
-            contactEmailField (config ^. siteAuthorEmail),
-            dateFields (config ^. siteTimeLocale)
+            contactEmailField (config ^. siteAuthorEmail)
           ]
       dependentContexts =
         [ getCodeField,
@@ -50,21 +44,7 @@ linkedInProfileField :: String -> Context String
 linkedInProfileField = constField "linkedInProfile"
 
 dateFields :: TimeLocale -> Context String
-dateFields timeLocale =
-  mconcat $ formatField <$> keys
-  where
-    formatField (skey, tkey) = dateField timeLocale skey tkey targetFormat
-    targetFormat = "%B %e, %Y"
-    keys =
-      [ ("date", "updated"),
-        ("date", "published"),
-        ("date", "date"),
-        ("published", "published"),
-        ("published", "date"),
-        ("updated", "updated"),
-        ("updated", "published"),
-        ("updated", "date")
-      ]
+dateFields = undefined
 
 -- | Trims @index.html@ from @$url$@'s
 trimmedUrlField :: Context String
@@ -175,33 +155,21 @@ linkedTitleField context = functionField linkedTitleKey f
       where
         msg = linkedTitleKey ++ " expected [filePath] but received " ++ show args
 
-dateField :: TimeLocale -> String -> Context String
-dateField timeLocale =
-  mconcat $
-    [fromMetadata', dateFieldFromPath'] <*> pure timeLocale
+dateFromMetadataFields :: TimeLocale -> String -> [String] -> String -> Context String
+dateFromMetadataFields timeLocale targetKey sourceKeys targetFormat = Context \k _ i ->
+  if k == targetKey
+    then f $ itemIdentifier i
+    else return EmptyField
   where
-    fromMetadata' =
-      mconcat $
-        dateFromMetadataField timeLocale "date"
-          <$> ["date", "published", "updated"]
-
-dateFromMetadataField :: TimeLocale -> String -> String -> String -> Context String
-dateFromMetadataField timeLocale targetKey sourceKey targetFormat = field targetKey \i -> do
-  maybeMetadata <- lookupString sourceKey <$> getMetadata (itemIdentifier i)
-  let maybeDate :: Maybe ZonedTime = tryParse =<< maybeMetadata
-  let directories = splitDirectories $ (dropExtension . toFilePath) (itemIdentifier i)
-  return $ maybe "" format maybeDate
-  where
-    format = formatTime timeLocale targetFormat
-    parse = parseTimeM True timeLocale
-    tryParse = foldl (<|>) Nothing . flip fmap sourceFormats . flip parse
-    directories = splitDirectories . (dropExtension . toFilePath) . itemIdentifier
-    dateParts paths =
-      let dashedDates =
-            parseTimeM True timeLocale "%Y-%m-%d" . intercalate "-" <$>
-              [take 3 $ splitAll "-" part | part <- reverse paths]
-                ++ [part | part <- map (take 3) . reverse . tails $ paths]
-    sourceFormats =
+    f id' = foldl (<|>) (return EmptyField) (findDate id' <$> sourceKeys)
+    findDate id' sourceKey = do
+      maybeString <- lookupString sourceKey <$> getMetadata id'
+      let maybeDate = tryParseDate' =<< maybeString
+      let maybeFormat = formatTime timeLocale targetFormat <$> maybeDate
+      return $ maybe EmptyField StringField maybeFormat
+    tryParseDate' :: String -> Maybe ZonedTime
+    tryParseDate' = tryParseDate timeLocale sourceDateFormats
+    sourceDateFormats =
       [ "%FT%T%Z",
         "%Y-%m-%d",
         "%Y-%m-%dT%H:%M:%S%Z",
@@ -222,17 +190,25 @@ dateFromMetadataField timeLocale targetKey sourceKey targetFormat = field target
         "%b %d, %Y"
       ]
 
-dateFromPathField' :: TimeLocale -> String -> Context String
-dateFromPathField' timeLocale key = Context \k _ i -> do
-  if k == key
-    then f
+tryParseDate :: (ParseTime a) => TimeLocale -> [String] -> String -> Maybe a
+tryParseDate timeLocale dateFormats = firstMaybe . flip fmap dateFormats . parse
+  where
+    parse = flip $ parseTimeM True timeLocale
+
+dateFromFilePath :: TimeLocale -> String -> String -> Context String
+dateFromFilePath timeLocale targetKey targetFormat = Context \k _ i ->
+  if k == targetKey
+    then return . maybe EmptyField StringField . f $ itemIdentifier i
     else return EmptyField
   where
-    f = do
-      let paths = splitDirectories $ (dropExtension . toFilePath) (itemIdentifier i)
-      return $ foldl (<|>) Nothing (tryParse <$> dateParts paths)
-      where
-        dateParts paths =
-          [take 3 $ splitAll "-" fnCand | fnCand <- reverse paths]
-            ++ [fnCand | fnCand <- map (take 3) . reverse . tails $ paths]
-        tryParse = parseTimeM True timeLocale "%Y-%m-%d" . intercalate "-"
+    f :: Identifier -> Maybe String
+    f = fmap (formatTime timeLocale targetFormat) . tryParseDate'
+    paths = splitDirectories . dropExtension . toFilePath
+    tryParseDate' :: Identifier -> Maybe ZonedTime
+    tryParseDate' id' =
+      let paths' = paths id'
+       in firstMaybe $
+            dateFromPath
+              <$> [take 3 $ splitAll "-" fnCand | fnCand <- reverse paths']
+              ++ [fnCand | fnCand <- map (take 3) $ reverse $ tails paths']
+    dateFromPath = tryParseDate timeLocale ["%Y-%m-%d"] . intercalate "-"

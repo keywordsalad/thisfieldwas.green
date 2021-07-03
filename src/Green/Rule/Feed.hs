@@ -1,7 +1,14 @@
 module Green.Rule.Feed (feedRules) where
 
 import Green.Common
+import Green.Config
 import Green.Rule.Blog (loadPostsContent)
+
+-- | Feed renderer signature
+type RenderFeed =
+  Context String -> -- Item context
+  [Item String] -> -- Feed items
+  Compiler (Item String) -- Resulting feed
 
 feedRules :: SiteConfig -> Rules ()
 feedRules config = do

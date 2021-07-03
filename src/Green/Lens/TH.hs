@@ -1,8 +1,7 @@
-module Green.Lens where
+module Green.Lens.TH where
 
+import Green.Common
 import Language.Haskell.TH
-import Lens.Micro
-import Lens.Micro.TH
 
 makeLensesWithL :: Name -> DecsQ
 makeLensesWithL = makeLensesWith $ lensRules & lensField .~ lensFieldL

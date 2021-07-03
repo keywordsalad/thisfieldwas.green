@@ -32,8 +32,8 @@ library
       Green.Config
       Green.Context
       Green.Context.GitCommits
-      Green.Lens
       Green.Lens.Hakyll
+      Green.Lens.TH
       Green.Route
       Green.Rule
       Green.Rule.Blog
