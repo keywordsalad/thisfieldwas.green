@@ -23,6 +23,15 @@ defaultSiteDebug =
       _debugRawCss = False
     }
 
+data SiteDisplayFormat = SiteDisplayFormat
+  { _displayDateLongFormat :: String,
+    _displayDateShortFormat :: String,
+    _displayTimeFormat :: String
+    -- new fields should be appended, do not rearrange
+  }
+
+makeLenses ''SiteDisplayFormat
+
 data SiteConfig = SiteConfig
   { _siteEnv :: [(String, String)],
     _siteRoot :: String,
@@ -36,7 +45,8 @@ data SiteConfig = SiteConfig
     _siteHakyllConfiguration :: Configuration,
     _siteTime :: ZonedTime,
     _siteContext :: Context String,
-    _siteTimeLocale :: TimeLocale
+    _siteTimeLocale :: TimeLocale,
+    _siteDisplayFormat :: SiteDisplayFormat
     -- new fields should be appended, do not rearrange
   }
 
@@ -71,7 +81,7 @@ hasEnvFlag f e = isJust (lookup f e)
 
 parseConfigIni :: [(String, String)] -> TimeLocale -> ZonedTime -> Text -> Either String SiteConfig
 parseConfigIni env timeLocale zonedTime iniText = parseIniFile iniText do
-  hakyllConfiguration <- section "hakyll" do
+  hakyllConfiguration <- section "Hakyll" do
     providerDirectory' <- fieldOf "providerDirectory" string
     destinationDirectory' <- fieldOf "destinationDirectory" string
     allowedFiles <- fieldOfStrings "allowedFiles"
@@ -82,12 +92,18 @@ parseConfigIni env timeLocale zonedTime iniText = parseIniFile iniText do
           ignoreFile = customIgnoreFile allowedFiles
         }
 
-  debugSettings <- sectionDef "debug" defaultSiteDebug do
+  debugSettings <- sectionDef "Debug" defaultSiteDebug do
     SiteDebug
       <$> configFlag "printItems" "SITE_PREVIEW" False env
       <*> configFlag "rawCss" "SITE_RAW_CSS" False env
 
-  section "site" do
+  displayFormat <- section "DisplayFormats" do
+    SiteDisplayFormat
+      <$> fieldOf "dateLongFormat" string
+      <*> fieldOf "dateShortFormat" string
+      <*> fieldOf "timeFormat" string
+
+  section "Site" do
     SiteConfig env
       <$> fieldOf "root" string
       <*> fieldOf "title" string
@@ -101,6 +117,7 @@ parseConfigIni env timeLocale zonedTime iniText = parseIniFile iniText do
       <*> pure zonedTime
       <*> pure mempty
       <*> pure timeLocale
+      <*> pure displayFormat
   where
     customIgnoreFile allowedFiles path =
       ignoreFile defaultConfiguration path

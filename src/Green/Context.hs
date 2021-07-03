@@ -1,15 +1,17 @@
 module Green.Context
   ( module Green.Context,
+    module Green.Context.DateFields,
     module Green.Context.GitCommits,
   )
 where
 
-import Data.List (intercalate, tails)
 import Data.String.Utils (endswith)
 import Green.Common
 import Green.Config
+import Green.Context.DateFields
+import Green.Context.FieldError
 import Green.Context.GitCommits
-import Green.Util (dropIndex, firstMaybe, stripSuffix)
+import Green.Util (dropIndex, stripSuffix)
 
 baseContext :: SiteConfig -> Context String
 baseContext config = do
@@ -17,16 +19,16 @@ baseContext config = do
         mconcat
           [ siteRootField (config ^. siteRoot),
             linkedInProfileField (config ^. siteLinkedInProfile),
-            trimmedUrlField,
-            dateFields (config ^. siteTimeLocale),
+            contactEmailField (config ^. siteAuthorEmail),
+            dateFields config,
             gitCommits (config ^. siteGitWebUrl),
+            bodyClassField "default",
+            trimmedUrlField,
             imgField,
             youtubeField,
             getRouteField,
             commentField,
-            defaultContext,
-            bodyClassField "default",
-            contactEmailField (config ^. siteAuthorEmail)
+            defaultContext
           ]
       dependentContexts =
         [ getCodeField,
@@ -42,9 +44,6 @@ contactEmailField = constField "contactEmail"
 
 linkedInProfileField :: String -> Context String
 linkedInProfileField = constField "linkedInProfile"
-
-dateFields :: TimeLocale -> Context String
-dateFields = undefined
 
 -- | Trims @index.html@ from @$url$@'s
 trimmedUrlField :: Context String
@@ -65,9 +64,7 @@ getCodeField siteContext' = functionField key f
       where
         codeId = fromFilePath $ "code/" ++ contentsPath
         templateId = fromFilePath "_templates/code.md"
-    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
-      where
-        msg = key ++ " expected [lexer, contentsPath] but received " ++ show args
+    f args item = fieldError key ["lexer, contentsPath"] args item
 
 imgField :: Context String
 imgField = functionField key f
@@ -87,9 +84,9 @@ imgField = functionField key f
                 constField "imgAlt" alt
               ]
           )
-    f args = \item -> error $ msg ++ " in " ++ show (itemIdentifier item)
+    f args = fieldError key expectedArgs args
       where
-        msg = key ++ " expected [imgId, imgSrc, imgTitle, imgAlt] but received " ++ show args
+        expectedArgs = ["imgId", "imgSrc", "imgTitle", "imgAlt"]
 
 youtubeField :: Context String
 youtubeField = functionField key f
@@ -108,9 +105,9 @@ youtubeField = functionField key f
                 constField "youtubeVideoTitle" title
               ]
           )
-    f args = \item -> error $ msg ++ " in " ++ show (itemIdentifier item)
+    f args = fieldError key expectedArgs args
       where
-        msg = key ++ " expected [youtubeAsideId, youtubeVideoId, youtubeVideoTitle] but received " ++ show args
+        expectedArgs = ["youtubeAsideId", "youtubeVideoId", "youtubeVideoTitle"]
 
 commentField :: Context String
 commentField = functionField "comment" \_ _ -> return ""
@@ -124,9 +121,7 @@ getRouteField = functionField key f
       getRoute id' >>= \case
         Just r -> return $ "/" ++ stripSuffix "index.html" r
         Nothing -> error $ "no route to " ++ show id'
-    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
-      where
-        msg = key ++ " expected [filePath] but received " ++ show args
+    f args item = fieldError key ["filePath"] args item
 
 unContextString :: Context String -> String -> [String] -> Item String -> Compiler String
 unContextString context key args item =
@@ -135,9 +130,9 @@ unContextString context key args item =
     _ -> error $ "Got a non-string value in field " ++ key
 
 linkedTitleField :: Context String -> Context String
-linkedTitleField context = functionField linkedTitleKey f
+linkedTitleField context = functionField targetKey f
   where
-    linkedTitleKey = "linkedTitle"
+    targetKey = "linkedTitle"
     f [filePath] _ = do
       linkedItem <- load (fromFilePath filePath)
       makeLink <$> getTitle linkedItem <*> getUrl linkedItem
@@ -151,64 +146,4 @@ linkedTitleField context = functionField linkedTitleKey f
         isHtml = endswith ".html" filePath
         isMarkdown = endswith ".md" filePath || endswith ".markdown" filePath
         getField key = unContextString context key []
-    f args item = error $ msg ++ " in " ++ show (itemIdentifier item)
-      where
-        msg = linkedTitleKey ++ " expected [filePath] but received " ++ show args
-
-dateFromMetadataFields :: TimeLocale -> String -> [String] -> String -> Context String
-dateFromMetadataFields timeLocale targetKey sourceKeys targetFormat = Context \k _ i ->
-  if k == targetKey
-    then f $ itemIdentifier i
-    else return EmptyField
-  where
-    f id' = foldl (<|>) (return EmptyField) (findDate id' <$> sourceKeys)
-    findDate id' sourceKey = do
-      maybeString <- lookupString sourceKey <$> getMetadata id'
-      let maybeDate = tryParseDate' =<< maybeString
-      let maybeFormat = formatTime timeLocale targetFormat <$> maybeDate
-      return $ maybe EmptyField StringField maybeFormat
-    tryParseDate' :: String -> Maybe ZonedTime
-    tryParseDate' = tryParseDate timeLocale sourceDateFormats
-    sourceDateFormats =
-      [ "%FT%T%Z",
-        "%Y-%m-%d",
-        "%Y-%m-%dT%H:%M:%S%Z",
-        "%Y-%m-%dT%H:%M:%S",
-        "%Y-%m-%d %H:%M:%S%Z",
-        "%Y-%m-%d %H:%M:%S",
-        "%a, %d %b %Y %H:%M:%S %Z",
-        "%a, %d %b %Y %H:%M:%S %Z",
-        "%a, %d %b %Y %H:%M:%S",
-        "%a, %d %b %Y %I:%M:%S %P %Z",
-        "%a, %d %b %Y %I:%M:%S %P %Z",
-        "%a, %d %b %Y %I:%M:%S %P ",
-        "%a, %d %b %Y %I:%M:%S %p %Z",
-        "%a, %d %b %Y %I:%M:%S %p %Z",
-        "%a, %d %b %Y %I:%M:%S %p",
-        "%B %e, %Y %l:%M %p",
-        "%B %e, %Y",
-        "%b %d, %Y"
-      ]
-
-tryParseDate :: (ParseTime a) => TimeLocale -> [String] -> String -> Maybe a
-tryParseDate timeLocale dateFormats = firstMaybe . flip fmap dateFormats . parse
-  where
-    parse = flip $ parseTimeM True timeLocale
-
-dateFromFilePath :: TimeLocale -> String -> String -> Context String
-dateFromFilePath timeLocale targetKey targetFormat = Context \k _ i ->
-  if k == targetKey
-    then return . maybe EmptyField StringField . f $ itemIdentifier i
-    else return EmptyField
-  where
-    f :: Identifier -> Maybe String
-    f = fmap (formatTime timeLocale targetFormat) . tryParseDate'
-    paths = splitDirectories . dropExtension . toFilePath
-    tryParseDate' :: Identifier -> Maybe ZonedTime
-    tryParseDate' id' =
-      let paths' = paths id'
-       in firstMaybe $
-            dateFromPath
-              <$> [take 3 $ splitAll "-" fnCand | fnCand <- reverse paths']
-              ++ [fnCand | fnCand <- map (take 3) $ reverse $ tails paths']
-    dateFromPath = tryParseDate timeLocale ["%Y-%m-%d"] . intercalate "-"
+    f args item = fieldError targetKey ["filePath"] args item
