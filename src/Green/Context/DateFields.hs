@@ -4,7 +4,7 @@ import Data.List (intercalate, tails)
 import Green.Common
 import Green.Config
 import Green.Context.FieldError
-import Green.Util (firstMaybe)
+import Green.Util
 
 dateFields :: SiteConfig -> Context String
 dateFields config =
@@ -19,17 +19,16 @@ dateFields config =
     timeFormatField = constField "timeFormat" $ displayFormat ^. displayTimeFormat
     fields = uncurry mkFields <$> fieldKeys
     mkFields f k = f longDateFormat timeLocale k
-    fieldKeys = [(dateField, "date")]
-
--- [ (dateField, "date"),
---   (publishedField, "published"),
---   (updatedField, "updated")
--- ]
+    fieldKeys =
+      [ (dateField, "date"),
+        (publishedField, "published"),
+        (updatedField, "updated")
+      ]
 
 dateField :: String -> TimeLocale -> String -> Context String
-dateField = dateField' ["published", "date"]
-
--- <> dateFromFilePathField timeLocale targetKey
+dateField = mconcat . (fns <*>) . pure
+  where
+    fns = [dateField' ["published", "date"], dateFromFilePathField]
 
 publishedField :: String -> TimeLocale -> String -> Context String
 publishedField = dateField' ["published"]
@@ -40,14 +39,12 @@ updatedField = dateField' ["updated"]
 dateField' :: [String] -> String -> TimeLocale -> String -> Context String
 dateField' sourceKeys defaultFormat timeLocale targetKey = functionField targetKey f
   where
+    notFound = noResult $ "Could not find $" ++ targetKey ++ "$ from metadata keys " ++ show sourceKeys
     f [] item = f [defaultFormat] item
     f [dateFormat] item = do
-      maybeDate :: Maybe ZonedTime <- dateFromMetadata sourceKeys timeLocale item
+      maybeDate :: Maybe LocalTime <- dateFromMetadata sourceKeys timeLocale item
       let maybeFormatted = formatTime timeLocale dateFormat <$> maybeDate
-      maybe notFound found maybeFormatted
-      where
-        notFound = noResult $ "Could not find $" ++ targetKey ++ "$ from metadata keys " ++ show sourceKeys
-        found = return
+      maybe notFound return maybeFormatted
     f args item = fieldError targetKey ["dateFormat"] args item
 
 dateFromMetadata :: (ParseTime a) => [String] -> TimeLocale -> Item String -> Compiler (Maybe a)
@@ -61,18 +58,18 @@ dateFromMetadata sourceKeys timeLocale item = do
       maybeString <- lookupString sourceKey <$> getMetadata id'
       return (tryParseDate' =<< maybeString)
 
-dateFromFilePathField :: TimeLocale -> String -> Context String
-dateFromFilePathField timeLocale targetKey = Context \k a i ->
-  if k == targetKey
-    then return $ f a i
-    else return EmptyField
+dateFromFilePathField :: String -> TimeLocale -> String -> Context String
+dateFromFilePathField defaultFormat timeLocale targetKey = functionField targetKey f
   where
+    f [] item = f [defaultFormat] item
     f [dateFormat] item =
       let maybeFormatted = formatTime timeLocale dateFormat <$> maybeDate
-       in maybe EmptyField StringField maybeFormatted
+       in maybe notFound return maybeFormatted
       where
-        maybeDate :: Maybe ZonedTime = resolveDateFromFilePath timeLocale item
-    f args item = fieldError targetKey ["dateFormat"] args item
+        maybeDate :: Maybe LocalTime = resolveDateFromFilePath timeLocale item
+        notFound = noResult $ "Could not find $" ++ targetKey ++ "$ from file path " ++ filePath
+        filePath = toFilePath (itemIdentifier item)
+    f args item = fieldError targetKey ["defaultFormat"] args item
 
 resolveDateFromFilePath :: (ParseTime a) => TimeLocale -> Item String -> Maybe a
 resolveDateFromFilePath timeLocale item =

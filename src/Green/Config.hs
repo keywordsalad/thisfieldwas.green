@@ -43,7 +43,7 @@ data SiteConfig = SiteConfig
     _siteGitWebUrl :: String,
     _siteDebug :: SiteDebug,
     _siteHakyllConfiguration :: Configuration,
-    _siteTime :: ZonedTime,
+    _siteTime :: LocalTime,
     _siteContext :: Context String,
     _siteTimeLocale :: TimeLocale,
     _siteDisplayFormat :: SiteDisplayFormat
@@ -79,8 +79,8 @@ siteInMemoryCache = siteHakyllConfiguration . inMemoryCacheL
 hasEnvFlag :: String -> [(String, String)] -> Bool
 hasEnvFlag f e = isJust (lookup f e)
 
-parseConfigIni :: [(String, String)] -> TimeLocale -> ZonedTime -> Text -> Either String SiteConfig
-parseConfigIni env timeLocale zonedTime iniText = parseIniFile iniText do
+parseConfigIni :: [(String, String)] -> TimeLocale -> LocalTime -> Text -> Either String SiteConfig
+parseConfigIni env timeLocale time iniText = parseIniFile iniText do
   hakyllConfiguration <- section "Hakyll" do
     providerDirectory' <- fieldOf "providerDirectory" string
     destinationDirectory' <- fieldOf "destinationDirectory" string
@@ -114,7 +114,7 @@ parseConfigIni env timeLocale zonedTime iniText = parseIniFile iniText do
       <*> fieldOf "gitWebUrl" string
       <*> pure debugSettings
       <*> pure hakyllConfiguration
-      <*> pure zonedTime
+      <*> pure time
       <*> pure mempty
       <*> pure timeLocale
       <*> pure displayFormat

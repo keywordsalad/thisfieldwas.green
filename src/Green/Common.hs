@@ -27,7 +27,7 @@ import Data.Bool (bool)
 import Data.Foldable (sequenceA_)
 import Data.Functor ((<&>))
 import Data.Maybe (fromJust, fromMaybe, isJust, isNothing, maybe)
-import Data.Time (ZonedTime)
+import Data.Time (LocalTime)
 import Data.Time.Format
 import Hakyll hiding (dateField)
 import Lens.Micro hiding ((<&>))

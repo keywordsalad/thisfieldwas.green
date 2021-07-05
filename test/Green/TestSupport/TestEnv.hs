@@ -1,14 +1,14 @@
 module Green.TestSupport.TestEnv where
 
 import Data.Time
+import Green.Common
+import Green.TestSupport.Config
 import Hakyll as H
 import qualified Hakyll.Core.Provider as HP
 import qualified Hakyll.Core.Store as HS
-import Green.Common
-import Green.TestSupport.Config
 
 data TestEnv = TestEnv
-  { testTime :: ZonedTime,
+  { testTime :: LocalTime,
     testHakyllConfig :: H.Configuration,
     testStore :: HS.Store,
     testProvider :: HP.Provider,

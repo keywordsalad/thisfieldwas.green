@@ -15,34 +15,33 @@ import Green.Rule.Sitemap
 
 rules :: SiteConfig -> Rules ()
 rules config = do
-  brokenLinks
-  configRules
-  imageRules
-  jsRules
-  cssRules config
-  downloadRules
-  codeDependency <- codeRules
-  rulesExtraDependencies [codeDependency] do
-    templateRules
-    blogRules config
-    feedRules config
-    indexRules config
-    pageRules config
-    robotsTxtRules config
-    archiveRules config
-    sitemapRules config
+  configDep <- configRules
+  rulesExtraDependencies [configDep] do
     brokenLinks
+    imageRules
+    jsRules
+    cssRules config
+    downloadRules
+    codeDep <- codeRules
+    rulesExtraDependencies [codeDep] do
+      templateRules
+      blogRules config
+      feedRules config
+      indexRules config
+      pageRules config
+      robotsTxtRules config
+      archiveRules config
+      sitemapRules config
+      brokenLinks
 
-configRules :: Rules ()
-configRules =
-  match (fromList [".nojekyll"]) do
-    route idRoute
-    compile copyFileCompiler
+configRules :: Rules Dependency
+configRules = do
+  let configFile = "../config.ini"
+  makePatternDependency configFile
 
 downloadRules :: Rules ()
 downloadRules = do
-  let path = "downloads/**"
-  match path do
+  match "downloads/**" do
     route idRoute
     compile copyFileCompiler
 

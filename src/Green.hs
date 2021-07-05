@@ -26,8 +26,8 @@ author = do
 loadSiteConfig :: IO SiteConfig
 loadSiteConfig = do
   env <- getEnvironment
-  zonedTime <- getZonedTime
+  time <- utcToLocalTime <$> getCurrentTimeZone <*> getCurrentTime
   configIniText <- TIO.readFile "config.ini"
-  case parseConfigIni env defaultTimeLocale zonedTime configIniText of
+  case parseConfigIni env defaultTimeLocale time configIniText of
     Left e -> fail e
     Right config -> return $ config & siteContext .~ baseContext config

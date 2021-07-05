@@ -11,7 +11,7 @@ import Green.Config
 import Green.Context.DateFields
 import Green.Context.FieldError
 import Green.Context.GitCommits
-import Green.Util (dropIndex, stripSuffix)
+import Green.Util (dropIndex, firstMaybe, stripSuffix)
 
 baseContext :: SiteConfig -> Context String
 baseContext config = do
@@ -37,7 +37,15 @@ baseContext config = do
    in mconcat (dependentContexts <*> pure context) <> context
 
 bodyClassField :: String -> Context String
-bodyClassField = constField "body-class"
+bodyClassField defaultValue =
+  mconcat $ functionField <$> keys <*> pure f
+  where
+    keys = ["bodyClass", "body-class"]
+    f [] item = do
+      metadata <- getMetadata (itemIdentifier item)
+      let maybeValue = firstMaybe $ lookupString <$> keys <*> pure metadata
+      return $ fromMaybe defaultValue maybeValue
+    f args item = fieldError (show keys) [] args item
 
 contactEmailField :: String -> Context String
 contactEmailField = constField "contactEmail"

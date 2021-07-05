@@ -2,8 +2,8 @@
 layout: post
 title: "App-Config-App in Action"
 author: "Logan McGrath"
-date: 2012-11-20T07:00:00-05:00
-published: 2012-11-20T07:00:00-05:00
+date: 2012-11-20T17:00:00-06:00
+published: 2012-11-20T17:00:00-06:00
 comments: false
 tags: AngularJS, Perforce, SCM, Sinatra, Configuration Management
 ---

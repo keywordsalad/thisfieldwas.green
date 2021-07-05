@@ -59,3 +59,9 @@ kebabCase (first : rest)
 
 firstMaybe :: (Foldable m) => m (Maybe a) -> Maybe a
 firstMaybe = foldl (<|>) Nothing
+
+uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
+uncurry3 f (x, y, z) = f x y z
+
+curry3 :: ((a, b, c) -> d) -> a -> b -> c -> d
+curry3 f x y z = f (x, y, z)
