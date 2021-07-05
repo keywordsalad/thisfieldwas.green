@@ -51,7 +51,7 @@ code {
   }
 }
 
-div.sourceCode > div.sourceCode {
+pre.sourceCode {
   @include scrollable;
   margin: 1rem;
 
