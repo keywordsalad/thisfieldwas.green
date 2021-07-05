@@ -148,14 +148,29 @@ draftArchivesCompiler config = do
 
 buildBlogContext :: Item String -> [Item String] -> Context String -> Compiler (Context String)
 buildBlogContext latestPost recentPosts siteContext' = do
-  latestPostTitle <- unContextString siteContext' "title" [] latestPost
-  return $
-    mconcat
-      [ constField "title" ("Most Recently Mowed: " ++ latestPostTitle),
-        constField "latestPost" (itemBody latestPost),
-        recentPostsField,
-        siteContext'
+  -- TODO find a less sucky way to get this info
+  let f k = unContextString siteContext' k [] latestPost
+  [published, date, title, author, url] <-
+    mapM
+      f
+      [ "published",
+        "date",
+        "title",
+        "author",
+        "url"
       ]
+
+  let latestPostFields =
+        uncurry constField
+          <$> [ ("latestPostPublished", published),
+                ("latestPostDate", date),
+                ("latestPostTitle", title),
+                ("latestPostAuthor", author),
+                ("latestPostUrl", url),
+                ("latestPostBody", itemBody latestPost)
+              ]
+
+  return $ mconcat latestPostFields <> recentPostsField <> siteContext'
   where
     recentPostsField =
       listField

@@ -1,6 +1,32 @@
 ---
-layout: page
-updated: 2021-05-24T20:07:11-05:00
+layout: default
+title: "Blogging About Life and Tech"
+updated: $latestPostDate$
+body-class: blog
 ---
-$latestPost$
+
+<header>
+  <h1 class="page-title">$title$ -- Latest Posts</h1>
+</header>
+
+<article class="post latest-post">
+  <header class="post-header">
+    <h1 class="post-title"><a href="$latestPostUrl$">$latestPostTitle$</a></h1>
+    <div class="post-published">
+      <p>
+        This latest post
+        $if(latestPostPublished)$
+          published on $latestPostPublished$
+        $else$
+          drafted on $latestPostDate$
+        $endif$
+        $if(latestPostAuthor)$
+          by $latestPostAuthor$
+        $endif$
+      </p>
+    </div>
+  </header>
+  $latestPostBody$
+</article>
+
 $partial("_partials/teaser-list.html")$
