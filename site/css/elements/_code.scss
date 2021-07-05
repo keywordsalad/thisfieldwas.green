@@ -51,10 +51,9 @@ code {
   }
 }
 
-div.sourceCode {
+div.sourceCode > div.sourceCode {
   @include scrollable;
-  margin-left: 1rem;
-  margin-right: 1rem;
+  margin: 1rem;
 
   code.sourceCode {
     background-color: lighten($color-green, 78%);
