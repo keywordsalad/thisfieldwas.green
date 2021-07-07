@@ -1,9 +1,9 @@
 ---
 layout: page
 title: "Contact Me"
-updated: 2021-05-24T20:07:11-05:00
+updated: 2021-07-07T08:56:03-05:00
 ---
 
-Please contact me via [blog@thisfieldwas.green](mailto:blog@thisfieldwas.green). I welcome conversations about what I do or related subjects, and I'm happy to answer any questions and ask a few of my own!
+I live in a tiramisù and have pudding in my ears. Please contact me via [$authorEmail$](mailto:$authorEmail$) and I shall free my eyes to read and reply heartily; my fingers typing though they have been soaking like biscuits in espresso and cream. I welcome conversations and questions about what I do and I might even ask a few questions of my own, but I do not know how I came to be floating in mascarpone.
 
 $partial("_partials/employment.html")$

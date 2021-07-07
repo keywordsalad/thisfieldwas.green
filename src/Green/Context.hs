@@ -19,7 +19,7 @@ baseContext config = do
         mconcat
           [ siteRootField (config ^. siteRoot),
             linkedInProfileField (config ^. siteLinkedInProfile),
-            contactEmailField (config ^. siteAuthorEmail),
+            authorEmailField (config ^. siteAuthorEmail),
             dateFields config,
             gitCommits (config ^. siteGitWebUrl),
             bodyClassField "default",
@@ -47,8 +47,8 @@ bodyClassField defaultValue =
       return $ fromMaybe defaultValue maybeValue
     f args item = fieldError (show keys) [] args item
 
-contactEmailField :: String -> Context String
-contactEmailField = constField "contactEmail"
+authorEmailField :: String -> Context String
+authorEmailField = constField "authorEmail"
 
 linkedInProfileField :: String -> Context String
 linkedInProfileField = constField "linkedInProfile"
