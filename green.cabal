@@ -6,20 +6,18 @@ cabal-version: 1.12
 
 name:           green
 version:        0.1.0.0
-description:    Please see the README at <https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io#readme>
-homepage:       https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io#readme
-bug-reports:    https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io/issues
+description:    Please see the README at <https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green#readme>
 author:         Logan McGrath
-maintainer:     site@thisfieldwas.green
-copyright:      2012 Logan McGrath
-license:        MIT
+maintainer:     website@thisfieldwas.green
+copyright:      Copyright (C) 2012-2021 Logan McGrath
+license:        bsd-3-clause
 build-type:     Simple
 extra-source-files:
     README.md
 
 source-repository head
   type: git
-  location: https://github.com/ThisFieldWasGreen/thisfieldwasgreen.github.io
+  location: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green
 
 library
   exposed-modules:
@@ -34,6 +32,7 @@ library
       Green.Context.DateFields
       Green.Context.FieldError
       Green.Context.GitCommits
+      Green.Lens
       Green.Lens.Hakyll
       Green.Lens.TH
       Green.Route

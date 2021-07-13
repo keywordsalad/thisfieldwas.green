@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-new_make_path="/usr/local/opt/make/libexec/gnubin"
+ARGS=()
+
+if [ -n "$VERBOSE" ]; then
+  ARGS+=("--verbose")
+fi
 
 init () {
   git config core.hooksPath .githooks
@@ -24,7 +28,7 @@ build () {
   fi
 
   stack build
-  stack exec site build
+  stack exec site build -- ${ARGS[@]}
 }
 
 clean () {
@@ -55,7 +59,7 @@ rebuild_all () {
 
 watch () {
   build
-  stack exec site watch
+  stack exec site watch -- ${ARGS[@]}
 }
 
 publish () {

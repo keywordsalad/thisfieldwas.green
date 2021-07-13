@@ -4,12 +4,12 @@ h1, h2, h3, h4, h5, h6 {
   @include segment;
   line-height: 1.2;
   padding: 0;
-  color: $color-text-em;
+  color: $color-emphasize;
   a {
     color: inherit;
     text-decoration: none;
     &:hover {
-      color: dodgerblue;
+      color: $color-hyperlink;
     }
   }
 }

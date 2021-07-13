@@ -5,7 +5,7 @@ import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Green.Common
-import Green.Lens.Hakyll
+import Green.Lens
 import Hakyll.Core.Configuration as HC
 
 data SiteDebug = SiteDebug

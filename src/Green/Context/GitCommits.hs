@@ -1,22 +1,40 @@
 module Green.Context.GitCommits (gitCommits) where
 
+import Data.Binary
+import GHC.Generics (Generic)
 import Green.Common
+import Green.Config
 import System.Exit
 import System.Process
 
-gitCommits :: String -> Context String
-gitCommits gitWebUrl =
+data SourceFile = SourceFile
+  { _sourceFilePath :: String,
+    _sourceFileIsFromSource :: Bool,
+    _sourceFileIsChanged :: Bool
+  }
+  deriving stock (Generic)
+
+makeLenses ''SourceFile
+
+instance Binary SourceFile where
+  get = SourceFile <$> get <*> get <*> get
+  put sourceFile =
+    put (sourceFile ^. sourceFilePath)
+      >> put (sourceFile ^. sourceFileIsFromSource)
+      >> put (sourceFile ^. sourceFileIsChanged)
+
+gitCommits :: SiteConfig -> Context String
+gitCommits config =
   mconcat
-    [ constField "gitWebUrl" gitWebUrl,
+    [ constField "gitWebUrl" (config ^. siteGitWebUrl),
       field "gitSha1" gitSha1Compiler,
       field "gitMessage" gitMessageCompiler,
-      field "isChanged" isChangedCompiler,
-      field "isGenerated" isGeneratedCompiler,
-      field "gitBranch" gitBranchCompiler
+      field "gitBranch" gitBranchCompiler,
+      sourceFileField (config ^. siteProviderDirectory)
     ]
 
-itemSourcePath :: Item a -> FilePath
-itemSourcePath item = toFilePath (itemIdentifier item)
+itemFilePath :: Item a -> FilePath
+itemFilePath = toFilePath . itemIdentifier
 
 gitSha1Compiler :: Item a -> Compiler String
 gitSha1Compiler = gitLogField "%h"
@@ -24,42 +42,48 @@ gitSha1Compiler = gitLogField "%h"
 gitMessageCompiler :: Item a -> Compiler String
 gitMessageCompiler = gitLogField "%s"
 
+type LogFormat = String
+
 gitLogField :: LogFormat -> Item a -> Compiler String
 gitLogField format item =
   unsafeCompiler do
-    maybeResult <- gitLog format (Just $ itemSourcePath item)
+    maybeResult <- gitLog format (Just $ itemFilePath item)
     case maybeResult of
       Just result -> return result
       Nothing -> fromJust <$> gitLog format Nothing
 
-isGeneratedCompiler :: Item a -> Compiler String
-isGeneratedCompiler item = do
-  generated <- unsafeCompiler $ isGenerated filePath
-  if generated
-    then return "generated"
-    else noResult $ "Was not generated: " ++ filePath
+sourceFileField :: FilePath -> Context String
+sourceFileField providerDirectory = Context \k _ i ->
+  if k `elem` [filePathKey, fileNameKey]
+    then getField k =<< sourceFileCompiler providerDirectory i
+    else unmappedKey k
   where
-    filePath = itemSourcePath item
+    getField key sourceFile
+      | key == filePathKey = return $ StringField $ sourceFile ^. sourceFilePath
+      | key == fileNameKey = return $ StringField $ takeFileName $ sourceFile ^. sourceFilePath
+      | key == isFromSourceKey = boolField' key $ sourceFile ^. sourceFileIsFromSource
+      | key == isChangedKey = boolField' key $ sourceFile ^. sourceFileIsChanged
+      | otherwise = unmappedKey key
+    boolField' _ True = return EmptyField
+    boolField' key False = noResult $ "Field " ++ key ++ " is false"
+    unmappedKey key = noResult $ "Tried sourceFileField with unmapped key " ++ key
+    filePathKey = "sourceFilePath"
+    fileNameKey = "sourceFileName"
+    isFromSourceKey = "isFromSource"
+    isChangedKey = "isChanged"
 
-isGenerated :: FilePath -> IO Bool
-isGenerated = fmap not . doesFileExist
-
-isChangedCompiler :: Item a -> Compiler String
-isChangedCompiler item = do
-  changed <- unsafeCompiler do isChanged filePath
-  if changed
-    then return "changed"
-    else noResult $ "Was not changed: " ++ filePath
+sourceFileCompiler :: FilePath -> Item a -> Compiler SourceFile
+sourceFileCompiler providerDirectory item = cached cacheKey do
+  SourceFile itemFilePath'
+    <$> unsafeCompiler (doesFileExist itemFilePath')
+    <*> unsafeCompiler (isChanged itemFilePath')
   where
-    filePath = itemSourcePath item
-
-isChanged :: FilePath -> IO Bool
-isChanged filePath = do
-  let args = ["diff", "HEAD", filePath]
-  (exitCode, stdout, _stderr) <- readProcessWithExitCode "git" args ""
-  return $ not (exitCode == ExitSuccess && null stdout)
-
-type LogFormat = String
+    itemFilePath' = providerDirectory </> itemFilePath item
+    cacheKey = toFilePath (itemIdentifier item) ++ ":sourceFileField"
+    isChanged filePath = do
+      let args = ["diff", "HEAD", filePath]
+      (exitCode, stdout, _stderr) <- readProcessWithExitCode "git" args ""
+      return $ not (exitCode == ExitSuccess && null stdout)
 
 gitLog :: LogFormat -> Maybe FilePath -> IO (Maybe String)
 gitLog format filePath = do

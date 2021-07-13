@@ -74,7 +74,7 @@ also have permissions configured in order to view or modify files.
 The `setup_example.rb` script creates three test users to demonstrate branch
 permissions:
 
-```
+```markdown
 Username        Password   Write     Read
 -------------------------------------------------
 sally-runtime   bananas    prod      staging, dev
@@ -98,7 +98,7 @@ as the SCM backend rather than Git.
 The `setup_example.rb` script also sets up three application users to
 demonstrate how an application would consume configuration:
 
-```
+```markdown
 Username   Password   Read
 -----------------------------
 dev-app    s3cret1    dev

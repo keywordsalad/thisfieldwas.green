@@ -18,7 +18,7 @@ pageRules baseCtx =
       ]
 
 pageCompiler :: SiteConfig -> Compiler (Item String)
-pageCompiler localConfig =
-  interpolateResourceBody localConfig
-    >>= applyLayoutFromMetadata localConfig
+pageCompiler config =
+  interpolateResourceBody config
+    >>= applyLayout config
     >>= relativizeUrls

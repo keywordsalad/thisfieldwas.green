@@ -15,34 +15,27 @@ import Green.Rule.Sitemap
 
 rules :: SiteConfig -> Rules ()
 rules config = do
-  configDep <- configRules
-  rulesExtraDependencies [configDep] do
+  brokenLinks
+  imageRules
+  jsRules
+  cssRules config
+  downloadRules
+  codeDep <- codeRules
+  rulesExtraDependencies [codeDep] do
+    templateRules
+    blogRules config
+    feedRules config
+    indexRules config
+    pageRules config
+    robotsTxtRules config
+    archiveRules config
+    sitemapRules config
     brokenLinks
-    imageRules
-    jsRules
-    cssRules config
-    downloadRules
-    codeDep <- codeRules
-    rulesExtraDependencies [codeDep] do
-      templateRules
-      blogRules config
-      feedRules config
-      indexRules config
-      pageRules config
-      robotsTxtRules config
-      archiveRules config
-      sitemapRules config
-      brokenLinks
-
-configRules :: Rules Dependency
-configRules = do
-  let configFile = "../config.ini"
-  makePatternDependency configFile
 
 downloadRules :: Rules ()
 downloadRules = do
   match "downloads/**" do
-    route idRoute
+    route $ setExtension ".txt"
     compile copyFileCompiler
 
 codeRules :: Rules Dependency
@@ -50,9 +43,7 @@ codeRules = do
   let path = "code/**"
   match path do
     route idRoute
-    compile do
-      _ <- getResourceBody >>= saveSnapshot "code"
-      copyFileCompiler >>= saveSnapshot "_final"
+    compile getResourceBody
   makePatternDependency path
 
 imageRules :: Rules ()

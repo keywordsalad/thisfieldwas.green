@@ -7,6 +7,7 @@ module Green.Common
     module Data.Bool,
     module Data.Foldable,
     module Data.Functor,
+    module Data.List,
     module Data.Maybe,
     module Data.Time,
     module Data.Time.Format,
@@ -26,11 +27,12 @@ import Data.Bifunctor (bimap, first, second)
 import Data.Bool (bool)
 import Data.Foldable (sequenceA_)
 import Data.Functor ((<&>))
-import Data.Maybe (fromJust, fromMaybe, isJust, isNothing, maybe)
+import Data.List (intercalate)
+import Data.Maybe (fromJust, fromMaybe, isJust, isNothing, maybe, maybeToList)
 import Data.Time (LocalTime)
 import Data.Time.Format
 import Hakyll hiding (dateField)
 import Lens.Micro hiding ((<&>))
 import Lens.Micro.TH
 import System.Directory (copyFile, createDirectoryIfMissing, doesFileExist)
-import System.FilePath (dropExtension, splitDirectories, takeDirectory, takeFileName, (</>))
+import System.FilePath (dropExtension, splitDirectories, splitFileName, takeDirectory, takeFileName, (</>))

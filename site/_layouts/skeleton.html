@@ -1,3 +1,7 @@
+---
+stylesheet: /css/main.css
+script: /js/main.js
+---
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,22 +10,16 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-$if(siteTitle)$
-  <title>This Field Was Green - $siteTitle$</title>
-$else$
-  <title>This Field Was Green - $title$</title>
-$endif$
+<title>$siteTitle$$if(title)$ - $title$$endif$</title>
 
 $if(author)$<link rel="author" content="$author$">$endif$
-
 <link rel="icon" href="/images/grass.svg">
-<link rel="stylesheet" href="/css/main.css">
-<script src="/js/main.js"></script>
+
+$for(stylesheets)$<link rel="stylesheet" href="$href$">$endfor$
+$for(scripts)$<script src="$src$"></script>$endfor$
 
 </head>
-<body class="$if(body-class)$$body-class$$endif$">
-
-  $body$
-
+<body class="$bodyClass$">
+$body$
 </body>
 </html>

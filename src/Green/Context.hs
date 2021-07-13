@@ -11,18 +11,18 @@ import Green.Config
 import Green.Context.DateFields
 import Green.Context.FieldError
 import Green.Context.GitCommits
-import Green.Util (dropIndex, firstMaybe, stripSuffix)
+import Green.Util (dropIndex, stripSuffix)
 
 baseContext :: SiteConfig -> Context String
 baseContext config = do
   let context =
         mconcat
-          [ siteRootField (config ^. siteRoot),
+          [ constField "siteTitle" (config ^. siteTitle),
+            siteRootField (config ^. siteRoot),
             linkedInProfileField (config ^. siteLinkedInProfile),
             authorEmailField (config ^. siteAuthorEmail),
             dateFields config,
-            gitCommits (config ^. siteGitWebUrl),
-            bodyClassField "default",
+            gitCommits config,
             trimmedUrlField,
             imgField,
             youtubeField,
@@ -35,17 +35,6 @@ baseContext config = do
           linkedTitleField
         ]
    in mconcat (dependentContexts <*> pure context) <> context
-
-bodyClassField :: String -> Context String
-bodyClassField defaultValue =
-  mconcat $ functionField <$> keys <*> pure f
-  where
-    keys = ["bodyClass", "body-class"]
-    f [] item = do
-      metadata <- getMetadata (itemIdentifier item)
-      let maybeValue = firstMaybe $ lookupString <$> keys <*> pure metadata
-      return $ fromMaybe defaultValue maybeValue
-    f args item = fieldError (show keys) [] args item
 
 authorEmailField :: String -> Context String
 authorEmailField = constField "authorEmail"
@@ -64,15 +53,14 @@ getCodeField :: Context String -> Context String
 getCodeField siteContext' = functionField key f
   where
     key = "getCode"
-    f [lexer, contentsPath] _ =
-      let localContext = constField "lexer" lexer <> siteContext'
-       in loadSnapshot codeId "code"
-            >>= loadAndApplyTemplate templateId localContext
-            <&> itemBody
+    f [contentsPath] _ = trimStartEndLines <$> (tryLoad codeId <|> tryLoad fileId)
       where
         codeId = fromFilePath $ "code/" ++ contentsPath
+        fileId = fromFilePath contentsPath
         templateId = fromFilePath "_templates/code.md"
-    f args item = fieldError key ["lexer, contentsPath"] args item
+        tryLoad = load >=> fmap itemBody . loadAndApplyTemplate templateId siteContext'
+        trimStartEndLines = unlines . reverse . dropWhile null . reverse . dropWhile null . lines
+    f args item = fieldError key ["contentsPath"] args item
 
 imgField :: Context String
 imgField = functionField key f

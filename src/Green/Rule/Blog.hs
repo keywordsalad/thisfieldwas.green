@@ -113,7 +113,7 @@ postSnapshotCompiler :: SiteConfig -> String -> Compiler (Item String)
 postSnapshotCompiler localConfig snapshot = do
   interpolateResourceBody localConfig
     >>= saveSnapshot (contentOnly snapshot)
-    >>= applyLayoutFromMetadata localConfig
+    >>= applyLayout localConfig
     >>= relativizeUrls
 
 blogCompiler :: SiteConfig -> Compiler (Item String)
@@ -123,7 +123,7 @@ blogCompiler config = do
   let recentPosts = take 5 . drop 1 $ allPostsByRecent
   localConfig <- forOf siteContext config (buildBlogContext latestPost recentPosts)
   interpolateResourceBody localConfig
-    >>= applyLayoutFromMetadata localConfig
+    >>= applyLayout localConfig
     >>= relativizeUrls
 
 archivesCompiler :: SiteConfig -> Compiler (Item String)
@@ -131,7 +131,7 @@ archivesCompiler config = do
   posts <- recentFirst =<< loadPostsContent
   let localConfig = config & siteContext %~ archivesContext posts
   interpolateResourceBody localConfig
-    >>= applyLayoutFromMetadata localConfig
+    >>= applyLayout localConfig
     >>= relativizeUrls
 
 draftArchivesCompiler :: SiteConfig -> Compiler (Item String)
@@ -139,7 +139,7 @@ draftArchivesCompiler config = do
   drafts <- recentFirst =<< loadDraftsContent
   let localConfig = config & siteContext %~ draftArchivesContext drafts
   interpolateResourceBody localConfig
-    >>= applyLayoutFromMetadata localConfig
+    >>= applyLayout localConfig
     >>= relativizeUrls
 
 {-----------------------------------------------------------------------------}

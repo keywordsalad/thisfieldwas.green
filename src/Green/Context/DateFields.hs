@@ -1,6 +1,6 @@
 module Green.Context.DateFields where
 
-import Data.List (intercalate, tails)
+import Data.List (tails)
 import Green.Common
 import Green.Config
 import Green.Context.FieldError

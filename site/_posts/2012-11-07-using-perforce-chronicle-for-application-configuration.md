@@ -48,7 +48,7 @@ Plain Text" content type with the fields _title_ and _content_:
 1. Click "Add Content Type"
 1. Enter the following information:
 
-```ini
+```{.ini .numberLines}
 Id:       plaintext
 Label:    Plain Text
 Group:    Assets
@@ -82,12 +82,16 @@ with PHP.
 
 The source JSON configuration is the same, albeit sorted:
 
-$getCode("json", "app-config/stack_configuration.json")$
+```{.json .numberLines}
+$getCode("app-config/stack_configuration.json")$
+```
 
 The `index.html` page has been modified from the original to support only the
 basic _commit_ and _diffs_ functionality:
 
-$getCode("html", "app-config/index.html")$
+```{.html .numberLines}
+$getCode("app-config/index.html")$
+```
 
 Both of these assets were added by performing:
 
@@ -125,22 +129,30 @@ To create the module, the following paths need to be added:
 
 Declare the module with `INSTALL/application/appconfig/module.ini`:
 
-$getCode("ini", "app-config/module/module.ini")$
+```{.ini .numberLines}
+$getCode("app-config/module/module.ini")$
+```
 
 Add a view script for displaying plaintext
 assets, `INSTALL/application/appconfig/views/scripts/index/index.phtml`:
 
-$getCode("php", "app-config/module/views/scripts/index/index.phtml")$
+```{.php .numberLines}
+$getCode("app-config/module/views/scripts/index/index.phtml")$
+```
 
 Add a view script for displaying
 diffs, `INSTALL/application/appconfig/views/scripts/index/diffs.phtml`:
 
-$getCode("php", "app-config/module/views/scripts/index/diffs.phtml")$
+```{.php .numberLines}
+$getCode("app-config/module/views/scripts/index/diffs.phtml")$
+```
 
 And a controller
 at `INSTALL/application/appconfig/controllers/IndexController.phtml`:
 
-$getCode("php", "app-config/module/controllers/IndexController.php")$
+```{.php .numberLines}
+$getCode("app-config/module/controllers/IndexController.php")$
+```
 
 ## AngularJS
 

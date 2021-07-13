@@ -1,93 +1,134 @@
 module Green.Compiler.Layout where
 
 import Data.Binary as B
-import Data.ByteString.Lazy as LBS
-import GHC.Generics hiding (to)
+import qualified Data.ByteString.Lazy as LBS
+import GHC.Generics
 import Green.Common
 import Green.Config
+import Green.Util
 
-data Layout = Layout
-  { _layoutStack :: [Item Template],
-    _layoutScripts :: [Item String],
-    _layoutStylesheets :: [Item String]
-  }
-  deriving stock (Generic)
+layoutCompiler :: Compiler (Item Layout)
+layoutCompiler = do
+  template <- templateBodyCompiler
+  fields <- layoutMetadataCompiler =<< getUnderlying
+  makeItem $ Layout template fields
 
-makeLenses ''Layout
-
-instance Binary Layout where
-  get = Layout <$> get <*> get <*> get
-  put layout =
-    put (layout ^. layoutStack)
-      >> put (layout ^. layoutScripts)
-      >> put (layout ^. layoutStylesheets)
-
-instance Writable Layout where
-  write p = LBS.writeFile p . B.encode . itemBody
-
-layoutKey :: String
-layoutKey = "layout"
-
-layoutScriptsKey :: String
-layoutScriptsKey = "scripts"
-
-layoutStylesheetsKey :: String
-layoutStylesheetsKey = "stylesheets"
-
-layoutContext :: SimpleGetter Layout (Context String)
-layoutContext = to \layout ->
-  listField layoutScriptsKey context (return $ layout ^. layoutScripts)
-    <> listField layoutStylesheetsKey context (return $ layout ^. layoutStylesheets)
+applyLayout :: SiteConfig -> Item String -> Compiler (Item String)
+applyLayout config item = do
+  metadata <- layoutMetadataCompiler (itemIdentifier item)
+  stack <- buildStack (metadataParent metadata) (stackFromMetadata metadata)
+  let context = stackContext stack <> config ^. siteContext
+  debugCompiler $
+    "[LayoutStack " ++ toFilePath (itemIdentifier item) ++ "]\n"
+      ++ unlines
+        [ "templates   => " ++ commas (toFilePath . itemIdentifier <$> stackTemplates stack),
+          "body-class  => " ++ commas (stackBodyClasses stack),
+          "scripts     => " ++ commas (itemBody <$> stackScripts stack),
+          "stylesheets => " ++ commas (itemBody <$> stackStylesheets stack)
+        ]
+  go (itemBody <$> stackTemplates stack) context item
   where
-    context = bodyField "src"
-
-loadLayoutFromMetadata :: Metadata -> Compiler (Maybe (Item Layout))
-loadLayoutFromMetadata metadata =
-  mapM (loadLayout . fromLayoutName) (lookupString layoutKey metadata)
-
-applyLayoutFromMetadata :: SiteConfig -> Item String -> Compiler (Item String)
-applyLayoutFromMetadata config item = do
-  metadata <- getMetadata $ itemIdentifier item
-  maybeLayout <- loadLayoutFromMetadata metadata
-  let f layout = applyLayout config layout item
-  maybe (return item) f maybeLayout
-
-applyLayout :: SiteConfig -> Item Layout -> Item String -> Compiler (Item String)
-applyLayout config layout = go templates
-  where
-    templates = itemBody <$> layout ^. to itemBody . layoutStack
-    context = bodyField "body" <> config ^. siteContext
-    go (t : ts) = go ts <=< applyTemplate t context
-    go [] = return
+    go (template : rest) context body = go rest context =<< applyTemplate template context body
+    go [] _ body = return body
+    buildStack Nothing stack = return stack
+    buildStack (Just parentId) stack = do
+      layout <- itemBody <$> loadLayout parentId
+      buildStack (layoutParent layout) (stackAppendLayout layout stack)
+    layoutParent = metadataParent . layoutMetadata
 
 loadLayout :: Identifier -> Compiler (Item Layout)
 loadLayout = load
 
-layoutCompiler :: Compiler (Item Layout)
-layoutCompiler = do
-  metadata <- getMetadata =<< getUnderlying
-  template <- makeItem =<< compileTemplateItem =<< getResourceBody
-  parent <- loadLayoutFromMetadata metadata
+data Layout = Layout
+  { layoutTemplate :: Item Template,
+    layoutMetadata :: LayoutMetadata
+  }
+  deriving stock (Show, Generic)
 
-  let parentScripts = parentItems layoutScripts parent
-      scripts = parentScripts ++ toUrlItems (lookupStringList layoutScriptsKey metadata)
+instance Binary Layout where
+  get = Layout <$> get <*> get
+  put layout =
+    put (layoutTemplate layout)
+      >> put (layoutMetadata layout)
 
-      parentStylesheets = parentItems layoutStylesheets parent
-      stylesheets = parentStylesheets ++ toUrlItems (lookupStringList layoutStylesheetsKey metadata)
+instance Writable Layout where
+  write p = LBS.writeFile p . B.encode . itemBody
 
-      parentStack = parentItems layoutStack parent
-      stack = template : parentStack
+data LayoutMetadata = LayoutMetadata
+  { metadataParent :: Maybe Identifier,
+    metadataBodyClasses :: [String],
+    metadataScripts :: [Item String],
+    metadataStylesheets :: [Item String]
+  }
+  deriving stock (Show, Generic)
 
-  makeItem
-    Layout
-      { _layoutStack = stack,
-        _layoutScripts = scripts,
-        _layoutStylesheets = stylesheets
-      }
+instance Binary LayoutMetadata where
+  get = LayoutMetadata <$> get <*> get <*> get <*> get
+  put metadata =
+    put (metadataParent metadata)
+      >> put (metadataBodyClasses metadata)
+      >> put (metadataScripts metadata)
+      >> put (metadataStylesheets metadata)
+
+layoutMetadataCompiler :: Identifier -> Compiler LayoutMetadata
+layoutMetadataCompiler id' = do
+  metadata <- getMetadata id'
+  let listFromKeys keys = fromMaybe [] $ firstMaybe $ [flip lookupStringList metadata, fmap pure . flip lookupString metadata] <*> keys
+      scripts = toUrlItems $ listFromKeys ["scripts", "script"]
+      stylesheets = toUrlItems $ listFromKeys ["stylesheets", "stylesheet"]
+      bodyClasses = listFromKeys ["body-classes", "body-class"]
+      parentId = fromLayoutName <$> lookupString "layout" metadata
+      fields =
+        LayoutMetadata
+          { metadataParent = parentId,
+            metadataBodyClasses = bodyClasses,
+            metadataScripts = scripts,
+            metadataStylesheets = stylesheets
+          }
+  debugCompiler $
+    "[LayoutMetadata " ++ toFilePath id' ++ "]\n"
+      ++ unlines
+        [ "layout       => " ++ maybe "ROOT" show parentId,
+          "body-class   => " ++ commas bodyClasses,
+          "scripts      => " ++ commas (itemBody <$> scripts),
+          "stylesheets  => " ++ commas (itemBody <$> stylesheets)
+        ]
+  return fields
   where
-    toUrlItems = maybe [] (fmap toUrlItem)
+    toUrlItems = fmap toUrlItem
     toUrlItem filePath = Item (fromFilePath filePath) (toUrl filePath)
-    parentItems lens' = maybe [] (^. to itemBody . lens')
+    fromLayoutName name = fromFilePath $ "_layouts/" ++ name ++ ".html"
 
-fromLayoutName :: String -> Identifier
-fromLayoutName name = fromFilePath ("_layouts/" ++ name ++ ".html")
+data LayoutStack = LayoutStack
+  { stackTemplates :: [Item Template],
+    stackBodyClasses :: [String],
+    stackScripts :: [Item String],
+    stackStylesheets :: [Item String]
+  }
+
+stackFromMetadata :: LayoutMetadata -> LayoutStack
+stackFromMetadata metadata =
+  LayoutStack
+    { stackTemplates = mempty,
+      stackBodyClasses = metadataBodyClasses metadata,
+      stackScripts = metadataScripts metadata,
+      stackStylesheets = metadataStylesheets metadata
+    }
+
+stackAppendLayout :: Layout -> LayoutStack -> LayoutStack
+stackAppendLayout layout stack =
+  let LayoutStack templates bodyClasses scripts stylesheets = stack
+      Layout template (LayoutMetadata _ mdBodyClasses mdScripts mdStylesheets) = layout
+   in LayoutStack
+        (templates <> pure template)
+        (bodyClasses <> mdBodyClasses)
+        (scripts <> mdScripts)
+        (stylesheets <> mdStylesheets)
+
+stackContext :: LayoutStack -> Context String
+stackContext (LayoutStack _ bodyClasses scripts stylesheets) =
+  mconcat
+    [ constField "bodyClass" (unwords bodyClasses),
+      listField "scripts" (bodyField "src") (return scripts),
+      listField "stylesheets" (bodyField "href") (return stylesheets)
+    ]

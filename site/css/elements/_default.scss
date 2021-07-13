@@ -22,12 +22,12 @@ body {
   margin: 0;
   padding: 0;
   color: $color-text;
-  background-color: $bg-content;
+  background-color: $color-background;
   overflow: scroll;
 }
 
 strong, em, b, i {
-  color: $color-text-em
+  color: $color-emphasize
 }
 
 p {
@@ -38,12 +38,12 @@ p {
 }
 
 blockquote {
-  background-color: $color-green-light;
+  background-color: $color-aside;
   margin: 1rem;
   padding: 0.5rem 1rem;
   border-left: $border-regular;
   border-right: $border-thin;
-  color: $color-text-em;
+  color: $color-emphasize;
   font-style: italic;
   & > *:first-child {
     margin-top: 0;
@@ -64,7 +64,7 @@ nav {
 }
 
 a {
-  color: dodgerblue;
+  color: $color-hyperlink;
   text-decoration: underline;
 }
 

@@ -1,12 +1,8 @@
 module Green.Util where
 
-import Control.Applicative ((<|>))
 import Data.Char
-import Data.Foldable (sequenceA_)
 import Data.String.Utils as S
-import Hakyll
-import Lens.Micro
-import System.FilePath (splitFileName, takeDirectory)
+import Green.Common
 
 dropIndex :: FilePath -> FilePath
 dropIndex url = case splitFileName url of
@@ -46,16 +42,16 @@ infixr 4 ~<>
 
 kebabCase :: String -> String
 kebabCase [] = []
-kebabCase (first : rest)
-  | notAllowed first = go rest
-  | otherwise = toLower first : go rest
+kebabCase (x : xs)
+  | notAllowed x = go xs
+  | otherwise = toLower x : go xs
   where
     go [] = []
-    go (x : xs)
-      | isUpper x = '-' : toLower x : kebabCase xs
-      | notAllowed x = '-' : kebabCase xs
-      | otherwise = x : kebabCase xs
-    notAllowed x = not (isAlphaNum x || x `elem` ("_." :: [Char]))
+    go (y : ys)
+      | isUpper y = '-' : toLower y : kebabCase ys
+      | notAllowed y = '-' : kebabCase ys
+      | otherwise = y : kebabCase ys
+    notAllowed c = not (isAlphaNum c || c `elem` ("_." :: [Char]))
 
 firstMaybe :: (Foldable m) => m (Maybe a) -> Maybe a
 firstMaybe = foldl (<|>) Nothing
@@ -65,3 +61,10 @@ uncurry3 f (x, y, z) = f x y z
 
 curry3 :: ((a, b, c) -> d) -> a -> b -> c -> d
 curry3 f x y z = f (x, y, z)
+
+maybeHead :: [a] -> Maybe a
+maybeHead (x : _) = Just x
+maybeHead _ = Nothing
+
+commas :: [String] -> String
+commas xs = "[" ++ intercalate ", " xs ++ "]"

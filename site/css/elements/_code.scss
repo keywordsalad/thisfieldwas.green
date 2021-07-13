@@ -1,5 +1,5 @@
 code {
-  color: $color-text-em;
+  color: $color-emphasize;
   font-family: $code-font-family;
   font-size: $code-font-size;
   font-variant-ligatures: none;
@@ -51,47 +51,68 @@ code {
   }
 }
 
-pre.sourceCode {
+div.sourceCode > div.sourceCode {
   @include scrollable;
-  margin: 1rem;
+}
 
-  code.sourceCode {
-    background-color: lighten($color-green, 78%);
-    border-top: $border-regular;
-    border-bottom: $border-thin;
-    display: table;
-    white-space: pre;
-    word-wrap: initial;
+code.sourceCode {
+  font-size: 0;
+  display: block;
+  position: relative;
+  margin: 0 1rem;
+  counter-reset: line-number;
 
-    .line {
-      display: table-row;
+  .numberLines & {
+    padding-left: 3rem;
+  }
+
+  > span {
+    background-color: beige;
+    display: block;
+    width: 100%;
+    padding: 0 0.5rem;
+    font-size: $code-font-size;
+
+    &:first-child {
+      padding-top: 0.5rem;
+      border-top: $border-regular;
+    }
+    &:last-child {
+      padding-bottom: 0.5rem;
+      border-bottom: $border-thin;
+    }
+
+    > a:first-child {
+      color: $color-emphasize;
+    }
+
+    > *:not(a:first-child) {
+      width: auto;
+    }
+
+    .numberLines & {
+      counter-increment: line-number;
+
+      &:hover {
+        background-color: $color-hover;
+        > a:first-child {
+          color: $color-hyperlink;
+        }
+      }
+
       &:target {
         background-color: $color-highlight;
       }
-      &:hover {
-        background-color: $color-hover;
-      }
-      &:first-child > * {
-        padding-top: 0.3rem;
-      }
-      &:last-child > * {
-        padding-bottom: 0.3rem;
-      }
-    }
 
-    .line-number {
-      display: table-cell;
-      padding: 0 0.5rem 0 0.5rem;
-      border-right: $border-thin;
-      text-align: right;
-      user-select: none;
-      text-decoration: none;
-    }
-
-    .line-content {
-      display: table-cell;
-      padding: 0 0.5rem;
-      width: 100%;
+      > a:first-child::before {
+        display: inline-block;
+        width: 2rem;
+        margin-left: -3rem;
+        margin-right: 1rem;
+        text-align: right;
+        content: counter(line-number);
+        user-select: none;
+      }
     }
   }
 }
