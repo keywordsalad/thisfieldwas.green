@@ -52,15 +52,26 @@ code {
 }
 
 div.sourceCode {
-  &::not(div.sourceCode &) {
+  &:not(div.sourceCode &) {
     @include scrollable;
+    margin: 0 2rem 0 0;
+    padding-left: 2rem;
   }
 }
 
+pre.sourceCode {
+  width: fit-content;
+}
+
 code.sourceCode {
+  width: fit-content;
   font-size: 0;
   display: block;
-  margin: 0 3rem;
+  white-space: pre;
+  border-top: $border-regular;
+  border-bottom: $border-thin;
+  background-color: beige;
+  margin-left: 2rem;
 
   .numberLines & {
     padding-left: 0;
@@ -68,19 +79,15 @@ code.sourceCode {
   }
 
   > span {
-    background-color: beige;
+    width: fit-content;
     display: flex;
-    width: 100%;
-    padding: 0 0.5rem;
     font-size: $code-font-size;
 
     &:first-child {
       padding-top: 0.5rem;
-      border-top: $border-regular;
     }
     &:last-child {
       padding-bottom: 0.5rem;
-      border-bottom: $border-thin;
     }
 
     > a:first-child {
@@ -108,7 +115,7 @@ code.sourceCode {
       > a:first-child::before {
         display: inline-block;
         width: 2rem;
-        margin-left: -3rem;
+        margin-left: -2.5rem;
         margin-right: 1rem;
         text-align: right;
         content: counter(line-number);
