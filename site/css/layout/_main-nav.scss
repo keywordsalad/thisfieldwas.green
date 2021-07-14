@@ -1,0 +1,19 @@
+.main-nav {
+  font-size: 0;
+  margin: 0;
+  a {
+    font-size: 0.9rem;
+    line-height: 1.2;
+    display: inline-block;
+    & + a {
+      margin-left: 0.5rem;
+      padding-left: 0.5rem;
+      border-left: $border-thin;
+      @include media("<tablet") {
+        margin-left: 0.2rem;
+        padding-left: 0.2rem;
+        border-left: none
+      }
+    }
+  }
+}
