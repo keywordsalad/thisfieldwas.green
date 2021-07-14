@@ -51,8 +51,10 @@ code {
   }
 }
 
-div.sourceCode > div.sourceCode {
-  @include scrollable;
+div.sourceCode {
+  &::not(div.sourceCode &) {
+    @include scrollable;
+  }
 }
 
 code.sourceCode {
