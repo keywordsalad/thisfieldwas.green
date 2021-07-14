@@ -33,7 +33,7 @@
     width: 0.5rem;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: cadetblue;
+    background-color: $color-scrollbar;
     border-radius: 0.5rem;
   }
 }

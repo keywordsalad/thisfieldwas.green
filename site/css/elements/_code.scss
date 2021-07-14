@@ -60,17 +60,16 @@ div.sourceCode {
 code.sourceCode {
   font-size: 0;
   display: block;
-  position: relative;
-  margin: 0 1rem;
+  margin: 0 3rem;
 
   .numberLines & {
-    padding-left: 3rem;
+    padding-left: 0;
     counter-reset: line-number;
   }
 
   > span {
     background-color: beige;
-    display: block;
+    display: flex;
     width: 100%;
     padding: 0 0.5rem;
     font-size: $code-font-size;
