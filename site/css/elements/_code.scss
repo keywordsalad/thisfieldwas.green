@@ -62,10 +62,10 @@ code.sourceCode {
   display: block;
   position: relative;
   margin: 0 1rem;
-  counter-reset: line-number;
 
   .numberLines & {
     padding-left: 3rem;
+    counter-reset: line-number;
   }
 
   > span {
