@@ -1,7 +1,7 @@
 @import "../elements/containers";
 
 body > main {
-  @include body-segment;
+  @include layout-section;
   margin: 0 auto;
   padding-bottom: 1rem;
   max-width: 75rem;

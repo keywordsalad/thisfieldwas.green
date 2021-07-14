@@ -51,16 +51,22 @@ code {
   }
 }
 
-div.sourceCode {
-  &::not(div.sourceCode &) {
-    @include scrollable;
-  }
+div.sourceCode:not(div.sourceCode >) {
+}
+
+pre.sourceCode {
+  @include scrollable;
+  padding-left: 2rem;
 }
 
 code.sourceCode {
   font-size: 0;
   display: block;
-  margin: 0 3rem;
+  white-space: pre;
+  border-top: $border-regular;
+  border-bottom: $border-thin;
+  background-color: beige;
+  margin: 0 2rem;
 
   .numberLines & {
     padding-left: 0;
@@ -68,19 +74,14 @@ code.sourceCode {
   }
 
   > span {
-    background-color: beige;
-    display: flex;
-    width: 100%;
-    padding: 0 0.5rem;
+    display: block;
     font-size: $code-font-size;
 
     &:first-child {
       padding-top: 0.5rem;
-      border-top: $border-regular;
     }
     &:last-child {
       padding-bottom: 0.5rem;
-      border-bottom: $border-thin;
     }
 
     > a:first-child {
@@ -105,14 +106,17 @@ code.sourceCode {
         background-color: $color-highlight;
       }
 
-      > a:first-child::before {
-        display: inline-block;
-        width: 2rem;
-        margin-left: -3rem;
-        margin-right: 1rem;
-        text-align: right;
-        content: counter(line-number);
-        user-select: none;
+      > a:first-child {
+        &::before {
+          background-color: $color-background;
+          display: inline-block;
+          width: 2rem;
+          padding-right: 0.5rem;
+          margin-right: 0.5rem;
+          text-align: right;
+          content: counter(line-number);
+          user-select: none;
+        }
       }
     }
   }

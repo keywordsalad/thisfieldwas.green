@@ -1,7 +1,7 @@
 @import "../elements/containers";
 
 body > footer {
-  @include body-segment;
+  @include layout-section;
   margin: 0 auto;
   padding: 1rem;
   border-top: $border-regular;

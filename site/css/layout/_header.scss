@@ -2,23 +2,27 @@
 @import "../vendor/include-media";
 
 body > header {
-  $logo-icon-width: 3.5rem;
+  $logo-icon-width: 2.5rem;
 
-  @include body-segment {
+  @include layout-section {
     display: grid;
-    grid-template-columns: auto $logo-icon-width;
+    grid-template: "logo-nav icon" auto / auto $logo-icon-width;
   }
 
   padding: 0.5rem 1rem;
   border-top: $border-ginormous;
   border-bottom: $border-regular;
 
+  .logo-nav {
+    grid-area: logo-nav;
+  }
+
   .logo {
-    grid-column: 1 / span 1;
-    margin: 0;
+    margin: 0 0 0.25rem;
     padding: 0;
     font-weight: bold;
     font-size: 1.1rem;
+    text-align: left;
     a {
       color: $color-green;
       text-decoration: none;
@@ -26,19 +30,14 @@ body > header {
   }
 
   .logo-icon {
-    grid-column: 2 / span 1;
-    grid-row: 1 / span 2;
+    grid-area: icon;
     display: block;
     background-image: url("/images/grass.svg");
-    background-size: 3.5rem;
+    background-size: $logo-icon-width;
     &, & > a {
       width: $logo-icon-width;
       height: $logo-icon-width;
       display: block;
     }
-  }
-
-  .main-nav {
-    grid-column: 1 / span 1;
   }
 }
