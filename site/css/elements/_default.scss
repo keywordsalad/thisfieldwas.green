@@ -1,10 +1,6 @@
 @import "variables";
 @import "containers";
 
-* {
-  line-height: 1.6
-}
-
 html {
   width: 100%;
   height: 100%;
@@ -15,6 +11,7 @@ html {
   font-size: $text-font-size;
   font-variant: discretionary-ligatures;
   text-align: $text-align-default;
+  line-height: 1.6;
   hyphens: $text-hyphens;
 }
 
@@ -30,16 +27,18 @@ strong, em, b, i {
   color: $color-emphasize
 }
 
+section {
+  margin: 0;
+  padding: 0;
+}
+
 p {
-  @include segment;
-  &.youtube {
-    text-align: center;
-  }
+  @include block;
 }
 
 blockquote {
   background-color: $color-aside;
-  margin: 1rem;
+  margin: 1rem 2rem;
   padding: 0.5rem 1rem;
   border-left: $border-regular;
   border-right: $border-thin;
@@ -70,4 +69,8 @@ a {
 
 .image-link {
   text-decoration: none;
+}
+
+.youtube {
+  text-align: center;
 }

@@ -1,4 +1,5 @@
 code {
+  background-color: beige;
   color: $color-emphasize;
   font-family: $code-font-family;
   font-size: $code-font-size;
@@ -51,75 +52,46 @@ code {
   }
 }
 
-div.sourceCode {
-  &:not(div.sourceCode &) {
-    @include scrollable;
-    margin: 0 2rem 0 0;
-    padding-left: 2rem;
-  }
-}
-
-pre.sourceCode {
-  width: fit-content;
+*:not(div.sourceCode) > div.sourceCode {
+  @include scrollable;
 }
 
 code.sourceCode {
-  width: fit-content;
-  font-size: 0;
   display: block;
+  margin: 0 2rem;
+  padding: 0;
+  font-size: 0;
   white-space: pre;
-  border-top: $border-regular;
-  border-bottom: $border-thin;
-  background-color: beige;
-  margin-left: 2rem;
+  overflow: scroll;
 
   .numberLines & {
-    padding-left: 0;
     counter-reset: line-number;
   }
 
   > span {
-    width: fit-content;
-    display: flex;
-    font-size: $code-font-size;
-
-    &:first-child {
-      padding-top: 0.5rem;
-    }
-    &:last-child {
-      padding-bottom: 0.5rem;
-    }
-
-    > a:first-child {
-      color: $color-emphasize;
-    }
-
-    > *:not(a:first-child) {
-      width: auto;
-    }
+    display: block;
 
     .numberLines & {
       counter-increment: line-number;
-
       &:hover {
         background-color: $color-hover;
-        > a:first-child {
-          color: $color-hyperlink;
-        }
       }
-
       &:target {
         background-color: $color-highlight;
       }
 
-      > a:first-child::before {
-        display: inline-block;
-        width: 2rem;
-        margin-left: -2.5rem;
-        margin-right: 1rem;
-        text-align: right;
-        content: counter(line-number);
-        user-select: none;
+      > a:first-child {
+        &::before {
+          display: block;
+          position: absolute;
+          z-index: 1;
+          left: -3rem;
+          top: 0;
+          width: 3rem;
+          text-align: right;
+          content: counter(line-number);
+          user-select: none;
+        }
       }
     }
   }

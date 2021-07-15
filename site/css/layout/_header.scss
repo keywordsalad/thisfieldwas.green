@@ -1,44 +1,45 @@
 @import "../variables";
 @import "../vendor/include-media";
 
-body > header {
-  $logo-icon-width: 3.5rem;
-
-  @include body-segment {
-    display: grid;
-    grid-template-columns: auto $logo-icon-width;
-  }
-
-  padding: 0.5rem 1rem;
+.page-header {
+  $logo-icon-width: 2.5rem;
   border-top: $border-ginormous;
   border-bottom: $border-regular;
 
-  .logo {
-    grid-column: 1 / span 1;
-    margin: 0;
-    padding: 0;
-    font-weight: bold;
-    font-size: 1.1rem;
-    a {
-      color: $color-green;
-      text-decoration: none;
-    }
-  }
+  @include layout-section {
+    display: grid;
+    grid-template-areas: "logo-nav logo-icon";
+    grid-template-columns: auto $logo-icon-width;
+    padding: 0.5rem;
 
-  .logo-icon {
-    grid-column: 2 / span 1;
-    grid-row: 1 / span 2;
-    display: block;
-    background-image: url("/images/grass.svg");
-    background-size: 3.5rem;
-    &, & > a {
-      width: $logo-icon-width;
-      height: $logo-icon-width;
+    .logo-nav {
+      grid-area: logo-nav;
+      grid-column: 1 / auto;
+    }
+
+    .logo-icon {
+      grid-area: logo-icon;
+      grid-column: 2 / rem($logo-icon-width);
       display: block;
+      background-image: url("/images/grass.svg");
+      background-size: $logo-icon-width;
+      &, & > a {
+        width: $logo-icon-width;
+        height: $logo-icon-width;
+        display: block;
+      }
     }
-  }
 
-  .main-nav {
-    grid-column: 1 / span 1;
+    .logo {
+      margin: 0 0 0.25rem;
+      padding: 0;
+      font-weight: bold;
+      font-size: 1.1rem;
+      text-align: left;
+      a {
+        color: $color-green;
+        text-decoration: none;
+      }
+    }
   }
 }

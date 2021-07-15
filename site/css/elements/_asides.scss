@@ -1,79 +1,53 @@
 @import "../variables";
 @import "containers";
 
-aside {
+aside, figure {
+  @include contain-floats;
+  background-color: $color-aside;
   display: flex;
+  width: min-content;
+  margin: 0;
+  padding: 0.75rem 1.5rem;
+  border-top: $border-regular;
+  border-bottom: $border-thin;
   flex-direction: column;
   align-items: center;
 
-  > * {
-    flex-basis: 0;
-  }
-
-  figure {
-    background-color: $color-aside;
-    margin: 1rem 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-top: $border-regular;
-    border-bottom: $border-thin;
-    text-align: center;
-
-    .image-link {
-      display: inline-block;
+  @include media('<tablet') {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    margin: 1rem 0;
+    img {
+      height: auto;
       margin: 0 auto;
-    }
-
-    figcaption {
-      color: $color-text-dark;
-      font-size: 1rem;
-      text-align: center;
-      padding: 0.5rem;
-      margin: 0.5rem 0 0;
-    }
-
-    @include media('<tablet') {
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
-      margin: 0;
-      img {
-        height: auto;
-        margin: 0 auto;
-      }
-    }
-
-    @include media('>=tablet') {
-      display: grid;
-      grid-auto-columns: min-content;
-      img {
-        margin: 0 1rem;
-      }
     }
   }
 
   &.image {
-    figure {
-      border-top: none;
-      img {
-        margin: 0;
-        padding: 0;
-      }
+    border-top: none;
+    img {
+      margin: 0;
+      padding: 0;
     }
-    @include media('>=tablet') {
-      figure {
-        border-top: none;
-        display: block;
-        img {
-          width: 100%;
-        }
-      }
-    }
-    @include media("<tablet") {
-      figure {
-        border-top: none;
-        img {
-          width: 100%;
-        }
-      }
+  }
+}
+
+figcaption {
+  color: $color-text-dark;
+  font-size: 1rem;
+  padding: 0.5rem;
+  margin: 0.5rem 0 0;
+}
+
+@mixin aside($side) {
+  @include media('>=tablet') {
+    float: $side;
+    @if $side == "right" {
+      margin-left: 2rem;
+      margin-right: 0;
+    } @else {
+      margin-right: 2rem;
+      margin-left: 0;
     }
   }
 }

@@ -12,7 +12,9 @@ script: /js/main.js
 
 <title>$siteTitle$$if(title)$ - $title$$endif$</title>
 
-$if(author)$<link rel="author" content="$author$">$endif$
+$if(author)$
+<link rel="author" href='/' content="$author$">
+$endif$
 <link rel="icon" href="/images/grass.svg">
 
 $for(stylesheets)$<link rel="stylesheet" href="$href$">$endfor$

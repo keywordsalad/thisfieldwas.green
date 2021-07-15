@@ -1,7 +1,7 @@
 @import "containers";
 
-h1, h2, h3, h4, h5, h6 {
-  @include segment;
+h1, h2, h3 {
+  @include block;
   line-height: 1.2;
   padding: 0;
   color: $color-emphasize;
@@ -22,32 +22,15 @@ section h1 {
 
 h1 {
   font-size: 1.4rem;
-  &.logo {
-    border: none;
-  }
-  &.page-title {
-    border-bottom: $border-thin;
-    padding: 0 0 0.5rem;
-  }
+  font-weight: 700;
 }
 h2 {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
+  font-style: italic;
+  font-weight: 500;
 }
 h3 {
-  font-size: 1.2rem;
-}
-h4 {
-  font-size: 1.1rem;
-}
-h5 {
-  font-size: 1rem;
-}
-h6 {
-  font-size: 0.9rem;
-}
-
-@include media("<tablet") {
-  section > h1, section > header h1 {
-    text-align: center;
-  }
+  font-size: 1.0rem;
+  font-style: italic;
+  font-weight: 500;
 }

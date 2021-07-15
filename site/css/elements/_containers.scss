@@ -1,33 +1,32 @@
+@mixin contain-floats {
+  &::after {
+    clear: both;
+    display: block;
+  }
+}
 
-
-@mixin body-segment {
+@mixin layout-section {
+  @include contain-floats;
   margin: 0;
   padding: 0 1rem;
-
   .content-bound {
     max-width: 75rem;
+    padding: 0 0.5rem;
     margin: 0 auto;
     text-align: $text-align-default;
     @content
   }
 }
 
-@mixin segment {
+@mixin block {
   margin: 1rem 0;
-}
-
-@mixin container {
-  @include segment;
-  padding: 1rem 0.5rem;
 }
 
 @mixin scrollable {
   overflow: hidden;
-
   & > * {
     overflow-x: scroll;
   }
-
   &::-webkit-scrollbar {
     height: 0.5rem;
     width: 0.5rem;
@@ -36,9 +35,4 @@
     background-color: $color-scrollbar;
     border-radius: 0.5rem;
   }
-}
-
-@mixin grid-container {
-  display: grid;
-  grid-gap: 1rem;
 }
