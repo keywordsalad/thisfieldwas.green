@@ -46,6 +46,8 @@ library
       Green.Rule.Page
       Green.Rule.Robot
       Green.Rule.Sitemap
+      Green.Template
+      Green.Template.Parser
       Green.Util
   other-modules:
       Paths_green
@@ -99,6 +101,7 @@ library
     , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring ==0.*
+    , comonad ==5.0.*
     , config-ini ==0.2.*
     , containers ==0.6.*
     , directory ==1.3.*
@@ -218,6 +221,7 @@ executable author
     , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring ==0.*
+    , comonad ==5.0.*
     , config-ini ==0.2.*
     , containers ==0.6.*
     , directory ==1.3.*
@@ -338,6 +342,7 @@ executable site
     , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring ==0.*
+    , comonad ==5.0.*
     , config-ini ==0.2.*
     , containers ==0.6.*
     , directory ==1.3.*
@@ -468,6 +473,7 @@ test-suite test
     , base >=4.7 && <5
     , binary ==0.8.*
     , bytestring ==0.*
+    , comonad ==5.0.*
     , config-ini ==0.2.*
     , containers ==0.6.*
     , directory ==1.3.*

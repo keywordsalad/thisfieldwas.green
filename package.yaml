@@ -16,6 +16,7 @@ dependencies:
   - aeson == 1.5.*
   - binary == 0.8.*
   - bytestring == 0.*
+  - comonad == 5.0.*
   - config-ini == 0.2.*
   - containers == 0.6.*
   - directory == 1.3.*
