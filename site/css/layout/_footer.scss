@@ -1,6 +1,6 @@
 @import "../elements/containers";
 
-body > footer {
+.page-footer {
   @include layout-section {
     margin: 1rem auto;
   }
@@ -14,12 +14,7 @@ body > footer {
   .copyright {
     font-size: 0.9rem;
   }
-  .generated-by-hakyll {
+  .generated {
     font-size: 0.8rem;
-  }
-  .source-commit {
-    color: $color-text-light;
-    font-size: 0.8rem;
-    font-style: italic;
   }
 }

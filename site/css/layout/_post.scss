@@ -1,50 +1,20 @@
-.blog {
-  .page-title {
-    color: $color-text-light;
-    font-style: italic;
-    font-weight: normal;
-    margin-bottom: 0;
-  }
-}
-
 .post {
-  .post-header {
-    .post-title {
-      margin: 0.5rem 0 0;
-      padding: 0;
+  .post-title {
+    margin-bottom: 0.25rem;
+  }
 
-      &.page-title {
-        margin-bottom: 0.5rem;
-      }
-    }
-
-    .post-published {
-      margin: 0 0 0.5rem;
-      font-size: 0.95rem;
-      font-style: italic;
-      color: $color-text-light;
-    }
+  .post-published p {
+    margin-top: 0.25rem;
+    font-size: 0.90rem;
+    color: $color-text-light;
   }
 }
 
 .teaser-list {
-  .post-title {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-  }
   .teaser-item {
-    > *:nth-last-child(2) {
-      margin-bottom: 0.5rem;
-    }
-  }
-  .teaser-item + .teaser-item {
     border-top: $border-thin;
   }
   header + * {
     margin-top: 0.5rem;
-  }
-  .read-more {
-    margin-top: 0;
-    margin-bottom: 1rem;
   }
 }

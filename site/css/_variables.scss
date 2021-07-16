@@ -1,5 +1,5 @@
 $text-font-family: "EB Garamond", "Georgia", serif;
-$text-font-size: 1rem;
+$text-font-size: 1.2rem;
 $text-hyphens: none;
 $text-align-default: left;
 
@@ -31,3 +31,5 @@ $border-very-thick: $border-very-thick-width $border-style;
 $border-thick: $border-thick-width $border-style;
 $border-regular: $border-regular-width $border-style;
 $border-thin: $border-thin-width $border-style;
+
+$content-max-width: 65rem;

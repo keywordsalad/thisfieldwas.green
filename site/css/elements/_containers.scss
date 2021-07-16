@@ -10,7 +10,7 @@
   margin: 0;
   padding: 0 1rem;
   .content-bound {
-    max-width: 75rem;
+    max-width: $content-max-width;
     padding: 0 0.5rem;
     margin: 0 auto;
     text-align: $text-align-default;

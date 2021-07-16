@@ -9,7 +9,7 @@ import Green.Lens
 import Hakyll.Core.Configuration as HC
 
 data SiteDebug = SiteDebug
-  { _debugPrintItem :: Bool,
+  { _debugPrintItem :: Maybe Identifier,
     _debugRawCss :: Bool
     -- new fields should be appended, do not rearrange
   }
@@ -19,7 +19,7 @@ makeLenses ''SiteDebug
 defaultSiteDebug :: SiteDebug
 defaultSiteDebug =
   SiteDebug
-    { _debugPrintItem = False,
+    { _debugPrintItem = Nothing,
       _debugRawCss = False
     }
 
@@ -94,8 +94,8 @@ parseConfigIni env timeLocale time iniText = parseIniFile iniText do
 
   debugSettings <- sectionDef "Debug" defaultSiteDebug do
     SiteDebug
-      <$> configFlag "printItems" "SITE_PREVIEW" False env
-      <*> configFlag "rawCss" "SITE_RAW_CSS" False env
+      <$> configEnvMbOf "printItems" "SITE_PREVIEW" string env
+      <*> configEnvFlag "rawCss" "SITE_RAW_CSS" False env
 
   displayFormat <- section "DisplayFormats" do
     SiteDisplayFormat
@@ -126,8 +126,16 @@ parseConfigIni env timeLocale time iniText = parseIniFile iniText do
 fieldOfStrings :: IsString a => Text -> SectionParser [a]
 fieldOfStrings k = fieldDefOf k (listWithSeparator "," string) []
 
-configFlag :: String -> String -> Bool -> [(String, String)] -> SectionParser Bool
-configFlag configKey envKey defaultValue env =
+configEnvFlag :: String -> String -> Bool -> [(String, String)] -> SectionParser Bool
+configEnvFlag configKey envKey defaultValue env =
   case lookup envKey env of
     Just _ -> return True
     Nothing -> fieldFlagDef (T.pack configKey) defaultValue
+
+configEnvMbOf :: String -> String -> (Text -> Either String a) -> [(String, String)] -> SectionParser (Maybe a)
+configEnvMbOf configKey envKey parse env =
+  fieldFromEnv <|> fieldMbOf (T.pack configKey) parse
+  where
+    fieldFromEnv = sequence $ getValue . parse . T.pack <$> lookup envKey env
+    getValue (Left e) = error e
+    getValue (Right v) = return v

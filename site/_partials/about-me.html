@@ -1,15 +1,15 @@
 <section class="intro">
-  <div class="meatball-headshot">
-    <figure>
+  <aside class="meatball-headshot">
+    <picture>
       <img width="288" height="384"
         src='$getRoute("images/about-me/headshot-w-meatball-doge_400w.png")$'
         title="Myself and Meatball. He's cute cuz he's little."
         alt="Mysql and Meatball">
-      <figcaption>
-        Myself and Meatball, who is a very good boy and wearing his very best treat face.
-      </figcaption>
-    </figure>
-  </div>
+    </picture>
+    <figcaption>
+      Myself and Meatball, who is a very good boy and wearing his very best treat face.
+    </figcaption>
+  </figure>
   <h2>Hello!</h2>
   <p>
     I'm Logan McGrath, I'm a senior software engineer, and I specialize in a segment of software applications engineering that sits between the framework and the business logic. In my day job at <a href="https://creditkarma.com">Credit Karma</a> I work with a team to provide building blocks with which my fellow product engineers can write less code and more quickly deliver valuable features to members. By night I dabble in esoteric programming languages, theories, and tools to better hone my craft. It's what I like to do when my husband isn't encouraging me to go play outside.
@@ -22,16 +22,14 @@
 <section class="life-itself">
   <h2>My Life Away from Work</h2>
   <p>
-    Every few months I try looping some electronic music, but I'm really bad at
-    it and I intend one day to share and self-deprecate.
-  </p>
-  <p>
     When I'm away from the computer I'm spending time with my husband Dr. Corey Blanchette and our two dogs, Jellybean and Meatball. Corey cooks and I do the dishes if I can beat him to them. Most evenings we can be found on the patio enjoying my latest mixology attempt while he tries to teach me ways to remember different parts of human anatomy. For the most part all I can retain are the acronyms that sound inappropriate, and I'm happy to share them over a drink. One of my favorites is a mnemonic he was taught in school to name the "carpals", which I'm pretty sure is a kind of bone.
   </p>
   <p>
-    Sometimes I make bad drinks, but fortunately we have a reliable backup. We call it <em>The Bunny</em>, consisting of your choice of liquor, ginger beer, carrot juice, fresh lime, and a little bit of orange liqueur over the top. Adjust to taste and best served in a copper mug. Very refreshing, and it might even count as a serving of vegetables!
+    Sometimes I make bad drinks, but fortunately we have a reliable backup. We call it <em>The Bunny</em>, consisting of your choice of liquor, ginger beer, carrot juice, fresh lime, and a little bit of orange liqueur over the top. Adjust to taste and best served in a copper mug. Very refreshing, and as my liquor of choice is <code>void</code> it practically counts a serving of vegetables!
   </p>
 </section>
+
+$partial("_partials/employment.html")$
 
 <section class="personal-stuff">
   <div class="meatball-jellybean">
@@ -57,10 +55,10 @@
   </p>
 </section>
 
-<section class="professional-offering">
+<section class="professional-offering clear">
   <h2>My Professional Offering</h2>
   <div class="professional-toolbox">
-    <h2>Tools of the Trade</h2>
+    <h3>Tools of the Trade</h3>
     <section class="skills foundations">
       <h3>Foundations and Practices</h3>
       <ul>
@@ -124,7 +122,7 @@
       </ul>
     </section>
     <div class="applied">
-      <h2>Putting Technology to Work</h2>
+      <h3>Putting Technology to Work</h3>
       <p>
         My primary customers are technical teams looking to accelerate time to market for new features and changes. Product teams need solid building blocks to deliver these features and I work as a force multiplier by providing the low code frameworks, tools, and infrastructure required to ship quickly and be nimble to change. My goal as a professional is to craft systems that reduce the number of teams and organizations, and more importantly <em>time and cost</em>, required to ship work in order to maximize value to the business and better serve customers.
       </p>
@@ -132,7 +130,6 @@
       <p>
         Engineers are too expensive to be putting together bespoke content with high rates of churn. Low code allows engineers to focus on the hard problems and enables more opportunities for businesses to better harness the value they bring. I mentor engineers to help them realize their full potential as technologists and become drivers in better engineering with less code.
       </p>
-      $partial("_partials/employment.html")$
     </div>
   </div>
 </section>

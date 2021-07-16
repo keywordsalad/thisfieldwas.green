@@ -1,24 +1,28 @@
-<section class="teaser-list">
-  <h1>Latest Blog Posts</h1>
+<article class="teaser-list">
+  <header>
+    <h2>Latest Blog Posts</h2>
+  </header>
   $for(recentPosts)$
   <section class="teaser-item post">
     <header class="post-header">
-      <h2 class="post-title"><a href="$url$">$title$</a></h2>
-      <div class="post-published">
-        <p>
-          $if(published)$
-            Posted on $published(shortDate)$
-          $else$
-            Drafted on $date(shortDate)$
-          $endif$
-          $if(author)$
-            by $author$
-          $endif$
-        </p>
-      </div>
+      <hgroup>
+        <h3 class="post-title"><a href="$url$">$title$</a></h3>
+        <div class="post-published">
+          <p>
+            $if(published)$
+              Posted on $published(shortDate)$
+            $else$
+              Drafted on $date(shortDate)$
+            $endif$
+            $if(author)$
+              by $author$
+            $endif$
+          </p>
+        </div>
+      </hgroup>
     </header>
     $if(teaser)$$teaser$$endif$
     <p class="read-more"><a href="$url$">Read more...</a></p>
   </section>
   $endfor$
-</section>
+</article>

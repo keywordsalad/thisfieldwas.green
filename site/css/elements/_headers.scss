@@ -5,6 +5,7 @@ h1, h2, h3 {
   line-height: 1.2;
   padding: 0;
   color: $color-emphasize;
+  font-weight: 500;
   a {
     color: inherit;
     text-decoration: none;
@@ -16,21 +17,17 @@ h1, h2, h3 {
 
 section h1 {
   border-top: $border-regular;
-  border-bottom: $border-thin;
   padding: 0.5rem 0;
 }
 
 h1 {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.5rem;
 }
 h2 {
   font-size: 1.25rem;
   font-style: italic;
-  font-weight: 500;
 }
 h3 {
   font-size: 1.0rem;
   font-style: italic;
-  font-weight: 500;
 }

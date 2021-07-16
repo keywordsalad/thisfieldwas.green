@@ -30,6 +30,10 @@ aside, figure {
       padding: 0;
     }
   }
+
+  > * {
+    margin: 0 1.5rem;
+  }
 }
 
 figcaption {
@@ -40,6 +44,7 @@ figcaption {
 }
 
 @mixin aside($side) {
+  margin: 0 0 1rem;
   @include media('>=tablet') {
     float: $side;
     @if $side == "right" {

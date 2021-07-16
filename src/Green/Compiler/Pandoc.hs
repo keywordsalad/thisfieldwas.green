@@ -50,10 +50,11 @@ writerOpts =
 
 printDebugItem :: SiteConfig -> Item String -> Item String
 printDebugItem config item =
-  if config ^. siteDebug . debugPrintItem
+  if debugItem
     then trace (sep ++ y ++ z) item
     else item
   where
+    debugItem = config ^. siteDebug . debugPrintItem == Just (itemIdentifier item)
     sep = "=================================================\n"
     y = toFilePath (itemIdentifier item) ++ sep
     z = itemBody item ++ sep
