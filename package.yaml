@@ -1,7 +1,7 @@
 name: green
 version: 0.1.0.0
 git: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green
-license: bsd-3-clause
+license: BSD3
 author: Logan McGrath
 maintainer: "website@thisfieldwas.green"
 copyright: "Copyright (C) 2012-2021 Logan McGrath"

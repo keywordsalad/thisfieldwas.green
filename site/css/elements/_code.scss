@@ -58,9 +58,14 @@ div.sourceCode {
 }
 
 code.sourceCode {
-  font-size: 0;
   display: block;
-  margin: 0 3rem;
+  margin: 1rem 0;
+  padding: 0;
+  font-size: 0;
+  white-space: pre;
+  overflow: scroll;
+  border-top: $border-regular;
+  border-bottom: $border-thin;
 
   .numberLines & {
     padding-left: 0;
@@ -68,27 +73,15 @@ code.sourceCode {
   }
 
   > span {
-    background-color: beige;
-    display: flex;
-    width: 100%;
-    padding: 0 0.5rem;
+    display: block;
+    white-space: pre;
     font-size: $code-font-size;
 
     &:first-child {
-      padding-top: 0.5rem;
-      border-top: $border-regular;
+      padding-top: 0.3rem;
     }
     &:last-child {
-      padding-bottom: 0.5rem;
-      border-bottom: $border-thin;
-    }
-
-    > a:first-child {
-      color: $color-emphasize;
-    }
-
-    > *:not(a:first-child) {
-      width: auto;
+      padding-bottom: 0.3rem;
     }
 
     .numberLines & {
@@ -105,14 +98,17 @@ code.sourceCode {
         background-color: $color-highlight;
       }
 
-      > a:first-child::before {
-        display: inline-block;
-        width: 2rem;
-        margin-left: -3rem;
-        margin-right: 1rem;
-        text-align: right;
-        content: counter(line-number);
-        user-select: none;
+      > a:first-child {
+        &::before {
+          display: inline-block;
+          width: 2rem;
+          padding: 0 0.5rem 0 0;
+          margin: 0 0.5rem 0 0;
+          border-right: $border-thin;
+          text-align: right;
+          content: counter(line-number);
+          user-select: none;
+        }
       }
     }
   }
