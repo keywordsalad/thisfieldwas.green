@@ -63,8 +63,6 @@ code.sourceCode {
   font-size: 0;
   white-space: pre;
   overflow: scroll;
-  border-top: $border-regular;
-  border-bottom: $border-thin;
 
   .numberLines & {
     counter-reset: line-number;

@@ -46,7 +46,6 @@ library
       Green.Rule.Page
       Green.Rule.Robot
       Green.Rule.Sitemap
-      Green.Template
       Green.Util
   other-modules:
       Paths_green
