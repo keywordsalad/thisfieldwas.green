@@ -10,7 +10,7 @@ description:    Please see the README at <https://bitsof.thisfieldwas.green/keyw
 author:         Logan McGrath
 maintainer:     website@thisfieldwas.green
 copyright:      Copyright (C) 2012-2021 Logan McGrath
-license:        bsd-3-clause
+license:        BSD3
 build-type:     Simple
 extra-source-files:
     README.md

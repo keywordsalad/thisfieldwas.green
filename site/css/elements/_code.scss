@@ -58,11 +58,13 @@ code {
 
 code.sourceCode {
   display: block;
-  margin: 0 2rem;
+  margin: 1rem 0;
   padding: 0;
   font-size: 0;
   white-space: pre;
   overflow: scroll;
+  border-top: $border-regular;
+  border-bottom: $border-thin;
 
   .numberLines & {
     counter-reset: line-number;
@@ -70,6 +72,15 @@ code.sourceCode {
 
   > span {
     display: block;
+    white-space: pre;
+    font-size: $code-font-size;
+
+    &:first-child {
+      padding-top: 0.3rem;
+    }
+    &:last-child {
+      padding-bottom: 0.3rem;
+    }
 
     .numberLines & {
       counter-increment: line-number;
@@ -82,12 +93,11 @@ code.sourceCode {
 
       > a:first-child {
         &::before {
-          display: block;
-          position: absolute;
-          z-index: 1;
-          left: -3rem;
-          top: 0;
-          width: 3rem;
+          display: inline-block;
+          width: 2rem;
+          padding: 0 0.5rem 0 0;
+          margin: 0 0.5rem 0 0;
+          border-right: $border-thin;
           text-align: right;
           content: counter(line-number);
           user-select: none;
