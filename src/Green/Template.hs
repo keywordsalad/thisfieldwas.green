@@ -1,18 +1,12 @@
-module Green.Template where
+module Green.Template
+  ( module Green.Template.Compiler,
+    module Green.Template.Data,
+    module Green.Template.Parser,
+    module Green.Template.Interpolator,
+  )
+where
 
-import qualified Data.Text as T
-
-newtype Template = Template [Block]
-
-data Block
-  = TextBlock T.Text
-  | ExpressionBlock Expression
-
-data Expression
-  = VarExpression T.Text
-  | CallExpresion T.Text [Expression]
-  | FilterExpression Expression Expression
-  | StringExpression T.Text
-  | IntegerExpression Integer
-  | DoubleExpression Double
-  | BoolExpression Bool
+import Green.Template.Compiler
+import Green.Template.Data
+import Green.Template.Interpolator
+import Green.Template.Parser
