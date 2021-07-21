@@ -11,7 +11,6 @@ import Hakyll.Core.Configuration as HC
 data SiteDebug = SiteDebug
   { _debugPrintItem :: Maybe Identifier,
     _debugRawCss :: Bool
-    -- new fields should be appended, do not rearrange
   }
 
 makeLenses ''SiteDebug
@@ -27,7 +26,6 @@ data SiteDisplayFormat = SiteDisplayFormat
   { _displayDateLongFormat :: String,
     _displayDateShortFormat :: String,
     _displayTimeFormat :: String
-    -- new fields should be appended, do not rearrange
   }
 
 makeLenses ''SiteDisplayFormat
@@ -47,7 +45,6 @@ data SiteConfig = SiteConfig
     _siteContext :: Context String,
     _siteTimeLocale :: TimeLocale,
     _siteDisplayFormat :: SiteDisplayFormat
-    -- new fields should be appended, do not rearrange
   }
 
 makeLenses ''SiteConfig

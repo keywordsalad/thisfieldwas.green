@@ -1,10 +1,11 @@
 module Green.Template.Parser where
 
 import Control.Applicative
-import Data.Attoparsec.Text as A
-import Data.Char (isAlpha, isDigit)
+import Data.Attoparsec.Text
+import Data.Char (isDigit, isLower, isUpper)
 import Data.Functor
 import Data.List.NonEmpty as NEL hiding (reverse)
+import Data.Scientific hiding (scientific)
 import qualified Data.Text as T
 import Green.Template.Data
 import Prelude hiding (takeWhile)
@@ -65,41 +66,45 @@ import Prelude hiding (takeWhile)
 {{# end }}
 -}
 
-parseTemplate :: String -> Either String Template
-parseTemplate = parseOnly (template <* endOfInput) . T.pack
+parseTemplate :: String -> String -> Either String Template
+parseTemplate origin = parseOnly (template origin <* endOfInput) . T.pack
 
-template :: Parser Template
-template = Template <$> blocks
+template :: String -> Parser Template
+template origin = Template origin <$> blocks origin
 
-blocks :: Parser [Block]
-blocks = many block
+blocks :: String -> Parser [Block]
+blocks origin = many (block origin)
 
-block :: Parser Block
-block =
+block :: String -> Parser Block
+block origin =
   commentBlock
-    <|> templateBlock
+    <|> templateBlock origin
     <|> expressionBlock
     <|> textBlock
 
-templateBlock :: Parser Block
-templateBlock = do
-  (startGuard, startTemplate') <- startTemplate
-  altTemplates <- many altTemplate
-  defaultTemplate' <- option (Template []) defaultTemplate
+commentBlock :: Parser Block
+commentBlock = CommentBlock <$> (openWith "!" *> text <* close)
+
+templateBlock :: String -> Parser Block
+templateBlock origin = do
+  startTemplate' <- startTemplate
+  altTemplates' <- many altTemplate
+  defaultTemplate' <- optional defaultTemplate
   endTemplate
-  return $ TemplateBlock (guard, template') elseCases else''
+  return $ TemplateBlock (startTemplate' :| altTemplates') defaultTemplate'
   where
-    openTemplate = openWith "#"
+    templateTag = "#"
+    openTemplate = openWith templateTag
     startTemplate = do
       guard <- openTemplate *> expression <* close
-      template' <- template
+      template' <- template origin
       return (guard, template')
     altTemplate = do
       guard <- openTemplate *> keyword "else" *> expression <* close
-      template' <- template
+      template' <- template origin
       return (guard, template')
-    defaultTemplate = openTemplate *> keyword "else" *> close *> template
-    endTemplate = endWith "#"
+    defaultTemplate = openTemplate *> keyword "else" *> close *> template origin
+    endTemplate = endWith templateTag
 
 textBlock :: Parser Block
 textBlock = TextBlock <$> text
@@ -108,10 +113,7 @@ text :: Parser String
 text = many $ char' <|> escapeChar'
   where
     char' = satisfy (notInClass "{}\\")
-    escapeChar' = skip (== '\\') *> satisfy (inClass "{}\\")
-
-commentBlock :: Parser Block
-commentBlock = CommentBlock <$> (openWith "!" *> text <* close)
+    escapeChar' = char '\\' *> satisfy (inClass "{}\\")
 
 expressionBlock :: Parser Block
 expressionBlock = ExpressionBlock <$> (open *> expression <* close)
@@ -127,7 +129,7 @@ filterExpression =
 applyExpression :: Parser Expression
 applyExpression =
   applyOperands ApplyExpression . NEL.fromList
-    <$> simpleExpression `sepBy1` spaces
+    <$> accessExpression `sepBy1` spaces
 
 accessExpression :: Parser Expression
 accessExpression =
@@ -142,26 +144,25 @@ applyOperands apply (start :| rest) = go start rest
 
 simpleExpression :: Parser Expression
 simpleExpression =
-  nameExpression
-    <|> stringExpression
-    <|> doubleExpression
-    <|> intExpression
+  subexpression
     <|> boolExpression
-    <|> subexpression
+    <|> nameExpression
+    <|> stringExpression
+    <|> scientificExpression
 
 nameExpression :: Parser Expression
 nameExpression = NameExpression <$> name
 
 stringExpression :: Parser Expression
 stringExpression = do
-  dquote
+  dquote $> ()
   value <- many (normalChar <|> escapeChar)
-  dquote
+  dquote $> ()
   return $ StringExpression value
   where
-    dquote = skip (== '"')
+    dquote = char '"'
     normalChar = satisfy (notInClass "\\\n\"")
-    escapeChar = skip (== '\\') *> escapeChar'
+    escapeChar = char '\\' *> escapeChar'
     escapeChar' =
       char 'n' $> '\n'
         <|> char 't' $> '\t'
@@ -169,18 +170,28 @@ stringExpression = do
         <|> char '"' $> '"'
         <|> char '\'' $> '\''
 
-doubleExpression :: Parser Expression
-doubleExpression = DoubleExpression <$> signed double
-
-intExpression :: Parser Expression
-intExpression = IntExpression <$> signed decimal
+scientificExpression :: Parser Expression
+scientificExpression = convert =<< scientific
+  where
+    convert n
+      | isInteger n =
+        maybe
+          (fail $ "Could not convert scientific " ++ show n ++ " to int")
+          (return . IntExpression)
+          (toBoundedInteger n)
+      | isFloating n =
+        either
+          (\_ -> fail $ "Could not convert scientific " ++ show n ++ " to double")
+          (return . DoubleExpression)
+          (toBoundedRealFloat n)
+      | otherwise = fail $ "Unhandled scientific " ++ show n
 
 boolExpression :: Parser Expression
 boolExpression =
   BoolExpression <$> (true <|> false)
   where
-    true = "true" $> True
-    false = "false" $> False
+    true = keyword "true" $> True
+    false = keyword "false" $> False
 
 subexpression :: Parser Expression
 subexpression = keyword "(" *> expression <* keyword ")"
@@ -188,36 +199,37 @@ subexpression = keyword "(" *> expression <* keyword ")"
 contextExpression :: Parser Expression
 contextExpression = ContextExpression <$> (keyword "{" *> keyValues <* keyword "}")
   where
-    keyValues = keyValue `sepBy` keyword ","
+    comma = keyword ","
+    keyValues = do
+      pairs <- keyValue `sepBy` comma
+      comma <|> pure ()
+      return pairs
     keyValue = do
-      key <- name <* skipSpace
+      key <- name
       keyword ":"
-      value <- expression <* skipSpace
+      value <- expression
       return (key, value)
 
 name :: Parser String
-name = (:) <$> satisfy isNameStart <*> many (satisfy isNameRest)
+name = (:) <$> nameStart <*> many nameRest <?> "name"
   where
-    isNameStart c = isAlpha c || c == '_'
-    isNameRest c = isNameStart c || isDigit c || c == '-'
+    nameStart = satisfy isLower <|> char '_'
+    nameRest = nameStart <|> satisfy isUpper <|> satisfy isDigit <|> char '-'
 
 spaces :: Parser ()
 spaces = many1 space $> ()
 
-braces :: String
-braces = "{}"
-
 keyword :: String -> Parser ()
-keyword x = skipSpace *> string (T.pack x) *> skipSpace
+keyword x = skipSpace *> string (T.pack x) *> skipSpace <?> "keyword " ++ show x
 
 open :: Parser ()
-open = "{{" *> skipSpace
-
-openWith :: String -> Parser ()
-openWith prefix = "{{" *> string (T.pack prefix) *> skipSpace
+open = openWith ""
 
 close :: Parser ()
-close = skipSpace *> "}}" $> ()
+close = keyword "}}"
+
+openWith :: String -> Parser ()
+openWith tag = keyword ("{{" ++ tag)
 
 endWith :: String -> Parser ()
-endWith prefix = openWith prefix *> keyword "end" *> close
+endWith tag = openWith tag *> keyword "end" *> close

@@ -1,15 +1,15 @@
 module Green.Rule.Page (pageRules) where
 
-import Green.Common
-import Green.Compiler
+import Green.Common hiding (applyAsTemplate, defaultContext)
 import Green.Config
 import Green.Route
+import Green.Template
 
 pageRules :: SiteConfig -> Rules ()
-pageRules baseCtx =
+pageRules config =
   match (fromList pageList) do
     route $ setExtension "html" `composeRoutes` indexRoute
-    compile $ pageCompiler baseCtx
+    compile $ pageCompiler config
   where
     pageList =
       [ "contact.md",
@@ -18,7 +18,8 @@ pageRules baseCtx =
       ]
 
 pageCompiler :: SiteConfig -> Compiler (Item String)
-pageCompiler config =
-  interpolateResourceBody config
-    >>= applyLayout config
-    >>= relativizeUrls
+pageCompiler _ = do
+  id' <- getUnderlying
+  debugCompiler $ "Compiling page " ++ show id'
+  getResourceBody
+    >>= applyAsTemplate defaultContext

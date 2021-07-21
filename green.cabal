@@ -50,7 +50,6 @@ library
       Green.Template.Compiler
       Green.Template.Context
       Green.Template.Data
-      Green.Template.Layout
       Green.Template.Parser
       Green.Util
   other-modules:
@@ -107,7 +106,6 @@ library
     , binary ==0.8.*
     , bytestring ==0.11.*
     , config-ini ==0.2.*
-    , containers ==0.6.*
     , directory ==1.3.*
     , filepath ==1.4.*
     , hakyll ==4.14.*
@@ -237,9 +235,9 @@ test-suite test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Green.Compiler.LayoutSpec
       Green.RouteSpec
       Green.Rule.BlogSpec
+      Green.Template.ParserSpec
       Green.TestSupport
       Green.TestSupport.Compiler
       Green.TestSupport.Config
@@ -292,8 +290,13 @@ test-suite test
       ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.14 && <5
+      attoparsec
+    , base >=4.14 && <5
+    , containers
     , green
+    , hakyll
     , hspec ==2.7.*
     , hspec-core ==2.7.*
+    , text
+    , time
   default-language: Haskell2010

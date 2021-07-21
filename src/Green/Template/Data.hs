@@ -1,34 +1,39 @@
 module Green.Template.Data where
 
 import Data.Binary
+import Data.List.NonEmpty (NonEmpty)
 import Prelude hiding (lookup)
 
-newtype Template = Template [Block] deriving stock (Show)
+data Template = Template
+  { templateOrigin :: String,
+    templateBlocks :: [Block]
+  }
+  deriving stock (Eq, Show)
 
 instance Binary Template where
-  get = Template <$> get
-  put (Template blocks) = put blocks
+  get = Template <$> get <*> get
+  put (Template blocks origin) = put blocks >> put origin
 
 data Block
   = TextBlock String
   | CommentBlock String
-  | TemplateBlock (Expression, Template) [(Expression, Template)] Template
+  | TemplateBlock (NonEmpty (Expression, Template)) (Maybe Template)
   | ExpressionBlock Expression
-  deriving stock (Show)
+  deriving stock (Eq, Show)
 
 instance Binary Block where
   get =
     (get :: Get Int) >>= \case
       1 -> TextBlock <$> get
       2 -> CommentBlock <$> get
-      3 -> TemplateBlock <$> get <*> get <*> get
+      3 -> TemplateBlock <$> get <*> get
       4 -> ExpressionBlock <$> get
       n -> error $ "Failed to get block from tag " ++ show n
   put block =
     put (blockTag block) >> case block of
       TextBlock text -> put text
       CommentBlock text -> put text
-      TemplateBlock expression apply unapply -> put expression >> put apply >> put unapply
+      TemplateBlock altTemplates defaultTemplate -> put altTemplates >> put defaultTemplate
       ExpressionBlock expression -> put expression
 
 blockTag :: Block -> Int
@@ -47,7 +52,7 @@ data Expression
   | ApplyExpression Expression Expression
   | AccessExpression Expression Expression
   | ContextExpression [(String, Expression)]
-  deriving stock (Show)
+  deriving stock (Eq, Show)
 
 instance Binary Expression where
   get =

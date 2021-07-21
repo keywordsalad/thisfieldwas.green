@@ -2,6 +2,7 @@ module Green.TestSupport.TestEnv where
 
 import Data.Time
 import Green.Common
+import Green.Config
 import Green.TestSupport.Config
 import Hakyll as H
 import qualified Hakyll.Core.Provider as HP

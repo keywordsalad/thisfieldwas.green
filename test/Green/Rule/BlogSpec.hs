@@ -8,10 +8,10 @@ spec = do
   around (withDefaultTestEnv `providing` runRouteSpec) do
     describe "dateRoute" do
       runRouteExamples dateRoute $
-        [ ("_drafts/2012-11-07-this-one.md", Just "posts/2012/11/07/this-one.md"),
-          ("_drafts/2012-11-16-that-one.md", Just "posts/2012/11/16/that-one.md"),
-          ("_drafts/not-this-one.md", Just "posts/not-this-one.md"),
-          ("_drafts/underwater-basketry/2012-11-07-this-one.md", Just "posts/underwater-basketry/2012/11/07/this-one.md")
+        [ ("2012-11-07-this-one.md", Just "2012/11/07/this-one.md"),
+          ("2012-11-16-that-one.md", Just "2012/11/16/that-one.md"),
+          ("not-this-one.md", Just "not-this-one.md"),
+          ("underwater-basketry/2012-11-07-this-one.md", Just "underwater-basketry/2012/11/07/this-one.md")
         ]
     describe "postRoute" do
       runRouteExamples postRoute $

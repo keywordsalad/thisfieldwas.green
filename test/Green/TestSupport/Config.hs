@@ -2,6 +2,7 @@ module Green.TestSupport.Config where
 
 import Data.Time
 import Green.Common
+import Green.Config
 import Hakyll as H
 
 defaultTestTimeString :: String
@@ -12,16 +13,6 @@ defaultTestTime = timeFromString defaultTestTimeString
 
 timeFromString :: (MonadFail m) => String -> m LocalTime
 timeFromString = parseTimeM True defaultTimeLocale "%FT%T%EZ"
-
-defaultFeedConfig :: H.FeedConfiguration
-defaultFeedConfig =
-  H.FeedConfiguration
-    { feedTitle = "This Old Feed",
-      feedDescription = "Feeding the old worm the good stuff",
-      feedAuthorName = "Slurms McKenzie",
-      feedAuthorEmail = "slurms@thisold.blog",
-      feedRoot = "https://thisold.blog"
-    }
 
 defaultHakyllConfig :: H.Configuration
 defaultHakyllConfig =
@@ -38,16 +29,23 @@ defaultSiteConfig = defaultSiteConfigWith defaultHakyllConfig
 defaultSiteConfigWith :: H.Configuration -> SiteConfig
 defaultSiteConfigWith hakyllConfig =
   SiteConfig
-    { _siteEnv = [],
+    { _siteHakyllConfiguration = hakyllConfig,
+      _siteEnv = [],
       _siteRoot = "/",
       _siteTitle = "This Old Blog",
-      _siteAuthorName = "Slurms McKenzie",
-      _siteAuthorEmail = "slurms@thisold.blog",
-      _siteLinkedInProfile = "https://linkedin.com/in/the-secret-ingredient",
-      _siteGitWebUrl = "https://bitsof.thisold.blog/slurms/blog",
-      _siteHakyllConfiguration = hakyllConfig,
-      _siteFeedConfiguration = defaultFeedConfig,
+      _siteDescription = "An old blog full of stuff",
+      _siteAuthorName = "Old Blogger",
+      _siteAuthorEmail = "blogger@thisold.blog",
+      _siteLinkedInProfile = "https://linkedin.com/in/xyz1abc2def3ghi4jkl5mno6pqr7stu8vw",
+      _siteGitWebUrl = "https://bitsof.thisold.blog/blogger/blog",
       _siteTime = fromJust defaultTestTime,
+      _siteTimeLocale = defaultTimeLocale,
+      _siteDisplayFormat =
+        SiteDisplayFormat
+          { _displayDateLongFormat = "%B %e, %Y %l:%M %P %EZ",
+            _displayDateShortFormat = "%B %e, %Y",
+            _displayTimeFormat = "%l:%M %p %EZ"
+          },
       _siteContext = mempty,
       _siteDebug = defaultSiteDebug
     }

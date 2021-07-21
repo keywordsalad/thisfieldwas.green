@@ -14,19 +14,8 @@ indexRoute = customRoute appendIndexHtml
       | ".html" `isSuffixOf` x = (head (split "." x) ++ "/index.html") : xs
       | otherwise = a
 
-pageRoute :: Routes
-pageRoute =
-  mconcat
-    [ stripPrefixRoute "^pages/",
-      setExtension "html",
-      indexRoute
-    ]
-
 subPrefixRoute :: String -> String -> Routes
 subPrefixRoute srcPrefix = subRoute ("^" ++ srcPrefix)
-
-stripPrefixRoute :: String -> Routes
-stripPrefixRoute prefix = subPrefixRoute prefix ""
 
 subRoute :: String -> String -> Routes
 subRoute findPattern replacement =
