@@ -17,9 +17,7 @@ dependencies:
 library:
   source-dirs: src
   dependencies:
-    - base >= 4.14 && < 5
     - aeson == 1.5.*
-    - attoparsec == 0.14.*
     - binary == 0.8.*
     - bytestring == 0.11.*
     - config-ini == 0.2.*
@@ -34,6 +32,7 @@ library:
     - optparse-applicative >= 0.16 && < 0.17
     - pandoc == 2.14.*
     - pandoc-types == 1.22.*
+    - parsec == 3.1.*
     - process == 1.6.*
     - scientific == 0.3.*
     - template-haskell == 2.16.*
@@ -71,13 +70,11 @@ tests:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - attoparsec
       - containers
       - green
       - hakyll
       - hspec == 2.7.*
       - hspec-core == 2.7.*
-      - text
       - time
 
 default-extensions:

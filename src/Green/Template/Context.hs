@@ -9,7 +9,7 @@ import Data.Maybe
 import qualified Data.Scientific as Scientific
 import qualified Data.Text as T
 import qualified Data.Vector as Vector
-import Green.Template.Data
+import Green.Template.Ast
 import Hakyll (Compiler, Item (..), Metadata)
 import Prelude hiding (lookup)
 

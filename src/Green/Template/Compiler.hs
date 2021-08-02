@@ -1,8 +1,8 @@
 module Green.Template.Compiler where
 
 import Control.Monad.Except
+import Green.Template.Ast
 import Green.Template.Context
-import Green.Template.Data
 import Green.Template.Parser (parseTemplate)
 import Hakyll
   ( Compiler,
@@ -17,6 +17,7 @@ import Hakyll
     toFilePath,
     withItemBody,
   )
+import Text.Parsec
 import Prelude hiding (exp, filter, lookup)
 
 templateCompiler :: Compiler (Item Template)
@@ -27,18 +28,17 @@ templateCompiler = cached "Green.Template.Compiler.templateCompiler" do
   withItemBody (compileTemplateFile id') item
 
 applyTemplate :: Template -> Context -> Item String -> Compiler (Item String)
-applyTemplate (Template origin blocks) _context item = do
-  debugCompiler $ "Applying template " ++ show origin ++ " to " ++ show (itemIdentifier item)
+applyTemplate (Template blocks pos) _context item = do
+  debugCompiler $ "Applying template " ++ show (sourceName pos) ++ " to " ++ show (itemIdentifier item)
   sequence (goBlock <$> blocks)
     >>= fmap mconcat . mapM render
     >>= makeItem
   where
     goBlock block =
       case block of
-        CommentBlock _ -> return $ StringValue ""
-        TextBlock value -> return $ StringValue value
-        TemplateBlock {} -> undefined
-        ExpressionBlock {} -> undefined
+        CommentBlock _ _ -> return $ StringValue ""
+        TextBlock value _ -> return $ StringValue value
+        _ -> undefined
 
 applyAsTemplate :: Context -> Item String -> Compiler (Item String)
 applyAsTemplate context item = do
@@ -55,7 +55,7 @@ compileTemplateFile id' input = do
       return template
     Left e -> do
       debugCompiler $ "Failed to parse template file " ++ show id' ++ ": " ++ show e
-      fail e
+      fail (show e)
 
 render :: (MonadFail m) => ContextValue -> m String
 render = \case
@@ -66,7 +66,7 @@ render = \case
   ListValue values -> mconcat <$> sequence (render <$> values)
   ErrorValue message -> fail message
   UndefinedValue name -> fail $ "Tried to render undefined value identified by " ++ show name
-  TemplateValue template -> fail $ "Tried to render template value " ++ show (templateOrigin template)
+  TemplateValue template -> fail $ "Tried to render template value " ++ show (sourceName (getTemplatePos template))
   NameValue name -> fail $ "Tried to render unresolved name value " ++ show name
   ContextValue {} -> fail "Tried to render context value"
   FunctionValue {} -> fail "Tried to render function value"
