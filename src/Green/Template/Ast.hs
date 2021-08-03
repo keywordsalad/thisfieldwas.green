@@ -32,7 +32,7 @@ data Block
   | TemplateElseBlock SourcePos -- {{# else }}
   | TemplateEndBlock SourcePos -- {{# end }}
   | LayoutApplyBlock Expression Template SourcePos
-  | TemplateBlock (NonEmpty TemplateApplyBlock) TemplateDefaultBlock SourcePos
+  | TemplateBlock (NonEmpty TemplateApplyBlock) (Maybe TemplateDefaultBlock) SourcePos
   deriving stock (Show, Generic)
 
 getBlockPos :: Block -> SourcePos

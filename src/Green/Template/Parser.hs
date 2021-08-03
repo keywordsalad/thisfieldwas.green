@@ -1,12 +1,13 @@
 module Green.Template.Parser where
 
-import Control.Monad ((>=>))
+import Control.Monad.Identity
+import Data.Default
 import Data.Functor
 import Data.List.NonEmpty as NEL
 import Data.Maybe
 import Data.Scientific
 import Green.Template.Ast
-import Text.Parsec hiding (token)
+import Text.Parsec hiding (runParser, runParserT, token, tokens, (<?>))
 import qualified Text.Parsec as P
 import Text.Parsec.Pos
 
@@ -38,145 +39,161 @@ import Text.Parsec.Pos
   {{# if expression }}
     An if-statement is simply a function that renders the
     body if the expression is truthy.
-  {{# else }}
+  {{ else }}
     The else-case is optional, and will be shown if the
     expression above is falsy.
-  {{# end }}
+  {{ end }}
 
   {{# each expression }}
     An each-statement is simply a function that renders the
     body for each item in the expression, using it as the
     context for the body.
-  {{# else }}
+  {{ else }}
     The else-case is optional, and will be shown if there
     are no items in the expression above.
-  {{# end }}
+  {{ end }}
 
   {{# if expression }}
     Sometimes you want more than one case...
-  {{# else each expression }}
+  {{ else each expression }}
     For example, this will show if the above expression is
     falsy and this expression has items.
-  {{# else }}
+  {{ else }}
     And this will be shown if the above two cases are falsy.
     Any number of cases may be chained together, however feels
     appropriate. The keywords `else` and `end` are reserved
     here, but everything else is free to use!
-  {{# end }}
-{{# end }}
+  {{ end }}
+{{ end }}
 -}
 
-type Lexer = Parsec String () (Token, SourcePos)
+data ParserState = ParserState
+  { parserStateLexerMode :: LexerMode,
+    parserStateIsDebugging :: Bool
+  }
 
-type Parser a = Parsec [(Token, SourcePos)] () a
+instance Default ParserState where
+  def =
+    ParserState
+      { parserStateLexerMode = TextMode,
+        parserStateIsDebugging = False
+      }
 
-type TemplateParser a = Parsec [Block] () a
+data LexerMode = TextMode | BlockMode | CommentMode Int
+  deriving stock (Show)
 
-data Token
-  = OpenBlockToken -- "{{"
-  | CloseBlockToken -- "}}"
-  | OpenLayoutToken -- "@"
-  | OpenTemplateToken -- "#"
-  | OpenCommentToken -- "!"
-  | OpenBraceToken -- "{"
-  | CloseBraceToken -- "}"
-  | OpenParenToken -- '('
-  | CloseParenToken -- ')'
-  | PipeToken -- "|"
-  | CommaToken -- ","
-  | DotToken -- "."
-  | ColonToken -- ":"
-  | EndToken -- "end"
-  | ElseToken -- "else"
-  | BoolToken Bool -- "true" | "false"
-  | NameToken String -- ([_a-z])([_\-a-zA-Z0-9])*
-  | StringToken String -- '"' [^"]* '"'
-  | IntToken Int -- 0|[1-9][0-9]*
-  | DoubleToken Double -- 0|[1-9][0-9]*\.[0-9]+
-  | TextToken String
-  deriving stock (Eq, Show)
+type BlockParser a = Parsec [Block] ParserState a
 
-parseTemplate :: String -> String -> Either ParseError Template
-parseTemplate origin =
-  parseTokens origin
-    >=> parseBlocks origin
-    >=> fmap intoTemplate . parseStructure origin
+type TokenParser a = Parsec [Token] ParserState a
+
+type Lexer a = Parsec String ParserState a
+
+debugRunParser :: (Stream s Identity t) => Parsec s ParserState a -> SourceName -> s -> Either ParseError a
+debugRunParser p = P.runParser p state
   where
-    intoTemplate blocks = Template blocks (initialPos origin)
+    state = def {parserStateIsDebugging = True}
 
-parseStructure :: String -> [Block] -> Either ParseError [Block]
-parseStructure = parse (many structure <* eof)
+runParser :: (Stream s Identity t) => Parsec s ParserState a -> SourceName -> s -> Either ParseError a
+runParser p = P.runParser p state
+  where
+    state = def
 
-parseBlocks :: String -> [(Token, SourcePos)] -> Either ParseError [Block]
-parseBlocks = parse (many block <* eof)
+parseTemplate :: SourceName -> String -> Either ParseError Template
+parseTemplate origin =
+  runParser tokens origin
+    >=> runParser blocks origin
+    >=> fmap intoTemplate . runParser (structures <* eof) origin
+  where
+    intoTemplate blocks' = Template blocks' (initialPos origin)
 
-parseTokens :: String -> String -> Either ParseError [(Token, SourcePos)]
-parseTokens = parse (many token <* eof)
+debugParseTemplate :: SourceName -> String -> Either ParseError Template
+debugParseTemplate origin =
+  runParser tokens origin
+    >=> runParser blocks origin
+    >=> fmap intoTemplate . debugRunParser (structures <* eof) origin
+  where
+    intoTemplate blocks' = Template blocks' (initialPos origin)
 
-structure :: TemplateParser Block
+structures :: BlockParser [Block]
+structures = many structure
+
+structure :: BlockParser Block
 structure =
   tryOne
-    [ appliedLayout,
-      appliedTemplate,
-      withBlock \case
-        b@ExpressionBlock {} -> Just b
-        b@CommentBlock {} -> Just b
-        b@TextBlock {} -> Just b
-        _ -> Nothing
+    [ blockStructure,
+      appliedLayout,
+      appliedTemplate
     ]
 
-appliedLayout :: TemplateParser Block
-appliedLayout = do
-  (expression', pos) <- withBlock \case
-    LayoutBlock expression' pos -> Just (expression', pos)
-    _ -> Nothing
-  structure' <- Template <$> many structure <*> pure pos
-  return $ LayoutApplyBlock expression' structure' pos
-
-appliedTemplate :: TemplateParser Block
-appliedTemplate = do
-  templates' <- (:|) <$> startTemplate <*> many nextTemplate
-  elseTemplate' <- elseTemplate
-  endBlock
-  return $
-    TemplateBlock
-      templates'
-      elseTemplate'
-      (getTemplateApplyPos (NEL.head templates'))
-
-startTemplate :: TemplateParser TemplateApplyBlock
-startTemplate = do
-  uncurry applyTemplate =<< withBlock \case
-    TemplateStartBlock expression' pos -> Just (expression', pos)
-    _ -> Nothing
-
-nextTemplate :: TemplateParser TemplateApplyBlock
-nextTemplate = do
-  uncurry applyTemplate =<< withBlock \case
-    TemplateNextBlock expression' pos -> Just (expression', pos)
-    _ -> Nothing
-
-applyTemplate :: Expression -> SourcePos -> TemplateParser TemplateApplyBlock
-applyTemplate expression' pos = do
-  structure' <- Template <$> manyTill structure (try nonStartBlock) <*> pure pos
-  return $ TemplateApplyBlock expression' structure' pos
-
-elseTemplate :: TemplateParser TemplateDefaultBlock
-elseTemplate = do
-  pos <- withBlock \case
-    TemplateElseBlock pos -> Just pos
-    _ -> Nothing
-  structure' <- Template <$> manyTill structure (try endBlock) <*> pure pos
-  return $ TemplateDefaultBlock structure' pos
-
-nonStartBlock :: TemplateParser ()
-nonStartBlock = withBlock \case
-  TemplateNextBlock {} -> Just ()
-  TemplateElseBlock {} -> Just ()
-  TemplateEndBlock {} -> Just ()
+blockStructure :: BlockParser Block
+blockStructure = withBlock \b -> case b of
+  TextBlock {} -> Just b
+  CommentBlock {} -> Just b
+  ExpressionBlock {} -> Just b
   _ -> Nothing
 
-endBlock :: TemplateParser ()
+appliedLayout :: BlockParser Block
+appliedLayout = p <?> "AppliedLayoutStructure"
+  where
+    p = withPosition do
+      expression' <- withBlock \case
+        LayoutBlock e _ -> Just e
+        _ -> Nothing
+      structure' <- Template <$> structures
+      return \pos -> LayoutApplyBlock expression' (structure' pos) pos
+
+appliedTemplate :: BlockParser Block
+appliedTemplate = p <?> "AppliedTemplateStructure"
+  where
+    p = withPosition do
+      templates' <- (:|) <$> startTemplate <*> many (try nextTemplate)
+      defaultTemplate' <- optionMaybe (try defaultTemplate)
+      endBlock
+      trace' "ALL DONE!"
+      return $ TemplateBlock templates' defaultTemplate'
+
+startTemplate :: BlockParser TemplateApplyBlock
+startTemplate = p <?> "StartTemplateStructure"
+  where
+    p = withPosition do
+      applyTemplate =<< withBlock \case
+        TemplateStartBlock e _ -> Just e
+        _ -> Nothing
+
+nextTemplate :: BlockParser TemplateApplyBlock
+nextTemplate = p <?> "NextTemplateStructure"
+  where
+    p = withPosition do
+      applyTemplate =<< withBlock \case
+        TemplateNextBlock e _ -> Just e
+        _ -> Nothing
+
+applyTemplate :: Expression -> BlockParser (SourcePos -> TemplateApplyBlock)
+applyTemplate expression' = do
+  structures' <- manyTill structure (lookAhead thisTemplateEnds)
+  return \pos -> TemplateApplyBlock expression' (Template structures' pos) pos
+  where
+    thisTemplateEnds = try $ withBlock \case
+      TemplateNextBlock {} -> Just ()
+      TemplateElseBlock {} -> Just ()
+      TemplateEndBlock {} -> Just ()
+      _ -> Nothing
+
+defaultTemplate :: BlockParser TemplateDefaultBlock
+defaultTemplate = p <?> "DefaultTemplateStructure"
+  where
+    p = withPosition do
+      trace' "GET BLOCK HERE"
+      withBlock \case
+        TemplateElseBlock {} -> Just ()
+        _ -> Nothing
+      trace' "GET STRUCTURES HERE"
+      structure' <- Template <$> manyTill structure (lookAhead thisTemplateEnds)
+      trace' "END THE TEMPLATE"
+      return \pos -> TemplateDefaultBlock (structure' pos) pos
+    thisTemplateEnds = try endBlock
+
+endBlock :: BlockParser ()
 endBlock = withBlock \case
   TemplateEndBlock {} -> Just ()
   _ -> Nothing
@@ -187,85 +204,155 @@ withBlock = P.token showToken tokenPos
     showToken = show
     tokenPos = getBlockPos
 
-block :: Parser Block
+blocks :: TokenParser [Block]
+blocks = many block <* eof
+
+block :: TokenParser Block
 block = tryOne [templateBlock, textBlock]
 
-templateBlock :: Parser Block
-templateBlock = do
-  (_, position) <- eq OpenBlockToken
-  f <-
-    tryOne
-      [ layoutBlock',
-        commentBlock',
-        templateBlock',
-        interpolatedBlock'
-      ]
-  eq_ CloseBlockToken
-  return $ f position
+templateBlock :: TokenParser Block
+templateBlock = p <?> "TemplateBlock"
   where
-    commentBlock' = do
-      CommentBlock . fst <$> requireText
-
-    interpolatedBlock' = do
-      ExpressionBlock <$> expression
-
-    layoutBlock' = do
-      eq_ OpenLayoutToken
-      LayoutBlock <$> expression
-
-    templateBlock' = do
-      eq_ OpenTemplateToken
+    p =
       tryOne
-        [ templateEndBlock',
-          templateElseBlock',
-          templateStartBlock'
+        [ layoutBlock,
+          commentBlock,
+          templateEndBlock,
+          templateDefaultBlock,
+          templateNextBlock,
+          templateStartBlock,
+          expressionBlock
         ]
 
-    templateEndBlock' = do
-      eq_ EndToken
+openBlock :: TokenParser ()
+openBlock = withToken \case
+  OpenBlockToken {} -> Just ()
+  _ -> Nothing
+
+closeBlock :: TokenParser ()
+closeBlock = withToken \case
+  CloseBlockToken {} -> Just ()
+  _ -> Nothing
+
+commentBlock :: TokenParser Block
+commentBlock = p <?> "CommentBlock"
+  where
+    p = withPosition do
+      openBlock
+      withToken \case
+        OpenCommentToken {} -> Just ()
+        _ -> Nothing
+      value <- withToken \case
+        TextToken value _ -> Just value
+        _ -> Nothing
+      closeBlock
+      return $ CommentBlock value
+
+expressionBlock :: TokenParser Block
+expressionBlock = p <?> "ExpressionBlock"
+  where
+    p = withPosition do
+      openBlock
+      expression' <- expression
+      closeBlock
+      return $ ExpressionBlock expression'
+
+layoutBlock :: TokenParser Block
+layoutBlock = p <?> "LayoutBlock"
+  where
+    p = withPosition do
+      openBlock
+      withToken \case
+        OpenLayoutToken {} -> Just ()
+        _ -> Nothing
+      expression' <- expression
+      closeBlock
+      return $ LayoutBlock expression'
+
+templateEndBlock :: TokenParser Block
+templateEndBlock = p <?> "EndTemplateBlock"
+  where
+    p = withPosition do
+      openBlock
+      withToken \case
+        EndToken {} -> Just ()
+        _ -> Nothing
+      closeBlock
       return TemplateEndBlock
 
-    templateElseBlock' = do
-      eq_ ElseToken
-      default' <|> else'
-      where
-        default' = TemplateElseBlock <$ lookAhead (try (eq_ CloseBlockToken))
-        else' = TemplateNextBlock <$> expression
+templateDefaultBlock :: TokenParser Block
+templateDefaultBlock = p <?> "DefaultTemplateBlock"
+  where
+    p = withPosition do
+      openBlock
+      else'
+      closeBlock
+      return TemplateElseBlock
 
-    templateStartBlock' = do
-      TemplateStartBlock <$> expression
+templateNextBlock :: TokenParser Block
+templateNextBlock = p <?> "NextTemplateBlock"
+  where
+    p = withPosition do
+      openBlock
+      else'
+      expression' <- expression
+      closeBlock
+      return $ TemplateNextBlock expression'
 
-textBlock :: Parser Block
-textBlock = uncurry TextBlock <$> requireText
+else' :: TokenParser ()
+else' = withToken \case
+  ElseToken {} -> Just ()
+  _ -> Nothing
 
-expression :: Parser Expression
-expression = filterExpression
+templateStartBlock :: TokenParser Block
+templateStartBlock = p <?> "StartTemplateBlock"
+  where
+    p = withPosition do
+      openBlock
+      withToken \case
+        OpenTemplateToken {} -> Just ()
+        _ -> Nothing
+      expression' <- expression
+      closeBlock
+      return $ TemplateStartBlock expression'
+
+textBlock :: TokenParser Block
+textBlock = p <?> "TextBlock"
+  where
+    p = uncurry TextBlock <$> requireText
+
+expression :: TokenParser Expression
+expression = filterExpression <?> "Expression"
 {-# INLINE expression #-}
 
-filterExpression :: Parser Expression
-filterExpression = applyExpression `chainl1` filtered
+filterExpression :: TokenParser Expression
+filterExpression = applyExpression `chainl1` filtered <?> "FilterExpression"
   where
     filtered = do
-      (_, position) <- eq PipeToken
-      return $ f position
-    f position x y = FilterExpression x y position
+      pos <- withToken \case
+        PipeToken pos -> Just pos
+        _ -> Nothing
+      return $ f pos
+    f pos x y = FilterExpression x y pos
 
-applyExpression :: Parser Expression
-applyExpression = chain . NEL.fromList <$> many1 accessExpression
+applyExpression :: TokenParser Expression
+applyExpression = chain . NEL.fromList <$> many1 accessExpression <?> "ApplyExpression"
   where
     chain (fn :| args) = chain' fn args
     chain' fn (arg : rest) = chain' (ApplyExpression fn arg (getExpressionPos arg)) rest
     chain' done [] = done
 
-accessExpression :: Parser Expression
-accessExpression = simpleExpression `chainl1` accessed
+accessExpression :: TokenParser Expression
+accessExpression = simpleExpression `chainl1` accessed <?> "AccessExpression"
   where
     accessed = do
-      (_, position) <- eq DotToken
-      return $ f position
-    f position x y = AccessExpression x y position
+      pos <- withToken \case
+        DotToken pos -> Just pos
+        _ -> Nothing
+      return $ f pos
+    f pos x y = AccessExpression x y pos
 
-simpleExpression :: Parser Expression
+simpleExpression :: TokenParser Expression
 simpleExpression =
   tryOne
     [ stringExpression,
@@ -277,89 +364,134 @@ simpleExpression =
       contextExpression
     ]
 
-stringExpression :: Parser Expression
-stringExpression = withToken \case
-  (StringToken value, p) -> Just (StringExpression value p)
-  _ -> Nothing
-
-intExpression :: Parser Expression
-intExpression = withToken \case
-  (IntToken value, p) -> Just (IntExpression value p)
-  _ -> Nothing
-
-doubleExpression :: Parser Expression
-doubleExpression = withToken \case
-  (DoubleToken value, p) -> Just (DoubleExpression value p)
-  _ -> Nothing
-
-boolExpression :: Parser Expression
-boolExpression = withToken \case
-  (BoolToken value, p) -> Just (BoolExpression value p)
-  _ -> Nothing
-
-nameExpression :: Parser Expression
-nameExpression = withToken \case
-  (NameToken value, p) -> Just (NameExpression value p)
-  _ -> Nothing
-
-parensExpression :: Parser Expression
-parensExpression = do
-  eq_ OpenParenToken
-  expression' <- expression
-  eq_ CloseParenToken
-  return expression'
-
-contextExpression :: Parser Expression
-contextExpression = do
-  (_, position) <- eq OpenBraceToken
-  pairs <- contextPair `sepBy` eq_ CommaToken
-  eq_ CloseBraceToken
-  return $ ContextExpression pairs position
-
-contextPair :: Parser (String, Expression)
-contextPair = do
-  key <- withToken \case
-    (NameToken value, _) -> Just value
-    _ -> Nothing
-  eq_ ColonToken
-  value <- expression
-  return (key, value)
-
-eq :: Token -> Parser (Token, SourcePos)
-eq t = expect (== t)
-
-eq_ :: Token -> Parser ()
-eq_ t = expect_ (== t)
-
-expect :: (Token -> Bool) -> Parser (Token, SourcePos)
-expect f = withToken \case
-  tokenPos | f (fst tokenPos) -> Just tokenPos
-  _ -> Nothing
-
-expect_ :: (Token -> Bool) -> Parser ()
-expect_ f = () <$ expect f
-
-requireText :: Parser (String, SourcePos)
-requireText = withToken f
+stringExpression :: TokenParser Expression
+stringExpression = p <?> "StringLiteral"
   where
-    f = \case
-      (TextToken text, position) -> Just (text, position)
+    p = withToken \case
+      StringToken value pos -> Just (StringExpression value pos)
       _ -> Nothing
 
-withToken :: ((Token, SourcePos) -> Maybe a) -> Parsec [(Token, SourcePos)] u a
-withToken = P.token showToken tokenPos
+intExpression :: TokenParser Expression
+intExpression = p <?> "IntLiteral"
   where
-    showToken = show . fst
-    tokenPos = snd
+    p = withToken \case
+      IntToken value pos -> Just (IntExpression value pos)
+      _ -> Nothing
 
-withPosition :: Parsec String () Token -> Lexer
-withPosition p = do
-  position <- P.getPosition
-  token' <- p
-  return (token', position)
+doubleExpression :: TokenParser Expression
+doubleExpression = p <?> "DoubleLiteral"
+  where
+    p = withToken \case
+      DoubleToken value pos -> Just (DoubleExpression value pos)
+      _ -> Nothing
 
-token :: Lexer
+boolExpression :: TokenParser Expression
+boolExpression = p <?> "BoolLiteral"
+  where
+    p = withToken \case
+      BoolToken value pos -> Just (BoolExpression value pos)
+      _ -> Nothing
+
+nameExpression :: TokenParser Expression
+nameExpression = p <?> "Name"
+  where
+    p = withToken \case
+      NameToken value pos -> Just (NameExpression value pos)
+      _ -> Nothing
+
+parensExpression :: TokenParser Expression
+parensExpression = p <?> "ParensExpression"
+  where
+    p = do
+      withToken \case
+        OpenParenToken {} -> Just ()
+        _ -> Nothing
+      expression' <- expression
+      withToken \case
+        CloseParenToken {} -> Just ()
+        _ -> Nothing
+      return expression'
+
+contextExpression :: TokenParser Expression
+contextExpression = p <?> "ContextLiteral"
+  where
+    p = do
+      pos <- withToken \case
+        OpenBraceToken pos -> Just pos
+        _ -> Nothing
+      pairs <- contextKeyValue `sepBy` comma
+      withToken \case
+        CloseBraceToken {} -> Just ()
+        _ -> Nothing
+      return $ ContextExpression pairs pos
+      where
+        comma = withToken \case
+          CommaToken {} -> Just ()
+          _ -> Nothing
+
+contextKeyValue :: TokenParser (String, Expression)
+contextKeyValue = p <?> "Pair"
+  where
+    p = do
+      key <- withToken \case
+        NameToken key _ -> Just key
+        _ -> Nothing
+      withToken \case
+        ColonToken {} -> Just ()
+        _ -> Nothing
+      value <- expression
+      return (key, value)
+
+requireText :: TokenParser (String, SourcePos)
+requireText = withToken f <?> "Text"
+  where
+    f = \case
+      TextToken value pos -> Just (value, pos)
+      _ -> Nothing
+
+withToken :: (Token -> Maybe a) -> Parsec [Token] u a
+withToken = P.token show getTokenPos
+
+tokens :: Parsec String ParserState [Token]
+tokens = many token <* eof <?> "Tokens"
+
+token :: Lexer Token
 token =
+  getLexerMode >>= \case
+    BlockMode ->
+      blockToken >>= \case
+        t@CloseBlockToken {} -> do
+          startText
+          return t
+        t@OpenCommentToken {} -> do
+          startComment
+          return t
+        t -> return t
+    TextMode ->
+      choice
+        [ expectBlockOpen >> startBlock >> token,
+          textToken <* startBlock
+        ]
+    CommentMode {} -> commentText
+
+startText :: (Show t, Stream s m t) => ParsecT s ParserState m ()
+startText = putLexerMode TextMode <?> "StartText"
+
+startBlock :: (Show t, Stream s m t) => ParsecT s ParserState m ()
+startBlock = putLexerMode BlockMode <?> "StartBlock"
+
+startComment :: (Show t, Stream s m t) => ParsecT s ParserState m ()
+startComment = putLexerMode (CommentMode 0) <?> "StartComment"
+
+illegalState :: (Show t, Stream s m t) => ParsecT s ParserState m a
+illegalState = p <?> "IllegalState"
+  where
+    p = do
+      mode <- getLexerMode
+      fail $ "Illegal lexer mode: " ++ show mode
+
+blockToken :: Lexer Token
+blockToken =
   tryOne
     [ symbolToken,
       numberToken,
@@ -367,103 +499,141 @@ token =
       endKeyword,
       elseKeyword,
       nameToken,
-      stringToken,
-      textToken
+      stringToken
     ]
 
-textToken :: Lexer
-textToken =
-  withPosition (TextToken <$> textToken') <?> "textToken"
-  where
-    textToken' = mconcat <$> many1 (many1 chars <|> braceEscape)
-    chars =
-      tryOne
-        [ textChar,
-          openBraceChar,
-          closeBraceChar,
-          justBackslash,
-          braceChar
-        ]
-    textChar = noneOf "{}\\"
-    justBackslash = char '\\' <* notFollowedBy braceChar
-    braceEscape = do
-      _ <- char '\\'
-      string "{{" <|> string "}}"
+textToken :: Lexer Token
+textToken = withPosition (TextToken <$> text) <?> "TextToken"
 
-symbolToken :: Lexer
+commentText :: Lexer Token
+commentText = withPosition (TextToken <$> p "") <?> "CommentToken"
+  where
+    p acc =
+      choice
+        [ downComment acc,
+          upComment acc,
+          text >>= p . (acc ++)
+        ]
+
+    downComment acc = do
+      expectBlockOpen
+      n <- commentLevel
+      putLexerMode $ CommentMode (n + 1)
+      string "{{" >>= p . (acc ++)
+
+    upComment acc = do
+      expectBlockClose
+      commentLevel >>= \case
+        0 -> do
+          startBlock
+          return acc
+        n -> do
+          putLexerMode $ CommentMode (n - 1)
+          string "}}" >>= p . (acc ++)
+
+    commentLevel = do
+      getLexerMode >>= \case
+        CommentMode n -> return n
+        _ -> illegalState
+
+text :: Lexer String
+text = p <?> "TextBody"
+  where
+    p = mconcat <$> many1 (tryOne [blockEscape, chars])
+    chars =
+      many1 $
+        tryOne
+          [ textChar,
+            justBackslash,
+            justBrace
+          ]
+    textChar = noneOf "{}\\" <?> "CommentChar"
+    justBackslash = char '\\' <* notFollowedBy (try (oneOf "{}")) <?> "Backslash '\\'"
+    justBrace = tryOne [openBraceChar, closeBraceChar] <?> "Brace"
+    blockEscape = char '\\' *> (string "{{" <|> string "}}") <?> "BlockEscape"
+
+symbolToken :: Lexer Token
 symbolToken =
   withPosition $
     tryOne
-      [ ws (OpenBraceToken <$ openBraceChar <?> "OpenBrace '{'"),
-        ws (CloseBraceToken <$ closeBraceChar <?> "CloseBrace '}'"),
-        ws (OpenParenToken <$ char '(' <?> "OpenParen '('"),
-        ws (CloseParenToken <$ char ')' <?> "CloseParen ')'"),
-        ws (OpenBlockToken <$ string "{{" <?> "OpenBlock '{{'"),
-        CloseBlockToken <$ string "}}" <?> "CloseBlock '}}'",
-        ws (OpenTemplateToken <$ char '#' <?> "TemplateBlock '#'"),
-        ws (OpenLayoutToken <$ char '@' <?> "LayoutBlock '@'"),
-        OpenCommentToken <$ char '!' <?> "CommentBlock '!'",
-        ws (PipeToken <$ char '|' <?> "Pipe '|'"),
-        ws (ColonToken <$ char ':' <?> "Colon ':'"),
-        ws (DotToken <$ char '.' <?> "Dot '.'"),
-        ws (CommaToken <$ char ',' <?> "Comma ','")
+      [ ws (OpenBraceToken <$ openBraceChar <?> "OpenBraceToken '{'"),
+        ws (CloseBraceToken <$ closeBraceChar <?> "CloseBraceToken '}'"),
+        ws (OpenParenToken <$ char '(' <?> "OpenParenToken '('"),
+        ws (CloseParenToken <$ char ')' <?> "CloseParenToken ')'"),
+        ws (OpenBlockToken <$ string "{{" <?> "OpenBlockToken '{{'"),
+        CloseBlockToken <$ string "}}" <?> "CloseBlockToken '}}'",
+        ws (OpenTemplateToken <$ char '#' <?> "TemplateBlockToken '#'"),
+        ws (OpenLayoutToken <$ char '@' <?> "LayoutBlockToken '@'"),
+        OpenCommentToken <$ char '!' <?> "CommentBlockToken '!'",
+        ws (PipeToken <$ char '|' <?> "PipeToken '|'"),
+        ws (ColonToken <$ char ':' <?> "ColonToken ':'"),
+        ws (DotToken <$ char '.' <?> "DotToken '.'"),
+        ws (CommaToken <$ char ',' <?> "CommaToken ','")
       ]
 
-boolToken :: Lexer
-boolToken = withPosition (BoolToken <$> value <?> "Bool")
+expectBlockOpen :: Lexer ()
+expectBlockOpen = () <$ lookAhead (try (string "{{"))
+
+expectBlockClose :: Lexer ()
+expectBlockClose = () <$ lookAhead (try (string "}}"))
+
+boolToken :: Lexer Token
+boolToken = withPosition (BoolToken <$> value) <?> "BoolToken"
   where
     value =
       True <$ keyword "true"
         <|> False <$ keyword "false"
 
-stringToken :: Lexer
-stringToken = withPosition $ ws (StringToken <$> stringChars <?> "String")
+stringToken :: Lexer Token
+stringToken = withPosition $ ws (StringToken <$> stringChars <?> "StringToken")
   where
-    stringChars = between dquote dquote (many (stringChar <|> escapeChar))
-    dquote = char '"'
-    stringChar = noneOf "\\\"\n"
-    escapeChar =
-      char '\\'
-        *> tryOne
-          [ char '\\',
-            char '\'',
-            char '"',
-            char 'n' $> '\n',
-            char 't' $> '\t'
-          ]
+    stringChars = between dquote dquote (many (stringChar <|> escapeChar)) <?> "StringChars"
+    dquote = char '"' <?> "DoubleQuote '\"'"
+    stringChar = noneOf "\\\"\n" <?> "StringChar"
+    escapeChar = p <?> "EscapeChar"
+      where
+        p =
+          char '\\'
+            *> tryOne
+              [ char '\\',
+                char '\'',
+                char '"',
+                char 'n' $> '\n',
+                char 't' $> '\t'
+              ]
 
-numberToken :: Lexer
-numberToken = withPosition $ ws (token' <?> "Number")
+numberToken :: Lexer Token
+numberToken = withPosition (ws numberToken')
   where
-    token' = convert <$> (ints <> option "" doubles) <* notFollowedBy badChars
-    ints = (string "0" <* notFollowedBy nonZero) <|> ((:) <$> nonZero <*> many digit)
-    doubles = string "." <> many1 digit
-    nonZero = oneOf ['1' .. '9']
+    numberToken' = do
+      value <- ints <> option "" doubles
+      notFollowedBy badChars
+      case (read value :: Scientific) of
+        n | isInteger n -> return (IntToken (fromJust (toBoundedInteger n))) <?> "IntToken"
+        n | otherwise -> return (DoubleToken (toRealFloat n)) <?> "DoubleToken"
+
+    ints = justZero <|> ((:) <$> nonZero <*> many digit) <?> "IntegerDigits"
+    justZero = string "0" <* notFollowedBy nonZero <?> "JustZero"
+    nonZero = oneOf ['1' .. '9'] <?> "NonZeroDigit"
+    doubles = string "." <> many1 digit <?> "DoubleDigits"
     badChars = oneOf "_." <|> alphaNum
-    convert s =
-      case (read s :: Scientific) of
-        n | isInteger n -> IntToken (fromJust (toBoundedInteger n))
-        n | otherwise -> DoubleToken (toRealFloat n)
 
-nameToken :: Lexer
-nameToken = withPosition $ ws (NameToken <$> name <?> "Name")
+nameToken :: Lexer Token
+nameToken = withPosition $ ws (NameToken <$> name <?> "NameToken")
 
-braceChar :: Parsec String () Char
-braceChar = openBraceChar <|> closeBraceChar
+openBraceChar :: Lexer Char
+openBraceChar = char '{' <* notFollowedBy (char '{') <?> "JustOpenBrace '{'"
 
-openBraceChar :: Parsec String () Char
-openBraceChar = char '{' <* notFollowedBy (char '{')
+closeBraceChar :: Lexer Char
+closeBraceChar = char '}' <* notFollowedBy (char '}') <?> "JustCloseBrace '}'"
 
-closeBraceChar :: Parsec String () Char
-closeBraceChar = char '}' <* notFollowedBy (char '}')
-
-endKeyword :: Lexer
+endKeyword :: Lexer Token
 endKeyword = withPosition (EndToken <$ keyword "end")
 
-elseKeyword :: Lexer
+elseKeyword :: Lexer Token
 elseKeyword = withPosition (ElseToken <$ keyword "else")
 
-keyword :: String -> Parsec String u ()
+keyword :: String -> Lexer ()
 keyword s = ws p
   where
     p = do
@@ -471,20 +641,107 @@ keyword s = ws p
       notFollowedBy nameRest
       return ()
 
-name :: Parsec String u String
-name = ws do
-  start <- nameStart
-  rest <- many nameRest
-  return (start : rest)
+name :: Lexer String
+name = p <?> "NameValue"
+  where
+    p = ws do
+      start <- nameStart
+      rest <- many nameRest
+      return (start : rest)
 
-nameStart :: Parsec String u Char
-nameStart = oneOf ('_' : ['a' .. 'z'])
+nameStart :: Lexer Char
+nameStart = oneOf ('_' : ['a' .. 'z']) <?> "NameStart"
 
-nameRest :: Parsec String u Char
-nameRest = tryOne [nameStart, alphaNum, char '-']
+nameRest :: Lexer Char
+nameRest = tryOne [nameStart, alphaNum, char '-'] <?> "NameRest"
 
-ws :: Parsec String u a -> Parsec String u a
+ws :: Lexer a -> Lexer a
 ws = (<* spaces)
 
 tryOne :: (Stream s m t) => [ParsecT s u m a] -> ParsecT s u m a
 tryOne = choice . fmap try
+
+withPosition :: (Stream s m t) => ParsecT s u m (SourcePos -> a) -> ParsecT s u m a
+withPosition p = do
+  pos <- getPosition
+  f <- p
+  return $ f pos
+
+getIsDebugging :: (Monad m) => ParsecT s ParserState m Bool
+getIsDebugging = parserStateIsDebugging <$> getState
+
+getLexerMode :: (Monad m) => ParsecT s ParserState m LexerMode
+getLexerMode = parserStateLexerMode <$> getState
+
+putLexerMode :: (Monad m) => LexerMode -> ParsecT s ParserState m ()
+putLexerMode mode = do
+  state <- getState
+  putState state {parserStateLexerMode = mode}
+
+(<?>) :: (Show t, Stream s m t) => ParsecT s ParserState m a -> String -> ParsecT s ParserState m a
+p <?> label' = traced' label' (p P.<?> label')
+
+infix 0 <?>
+
+whenDebugging :: (Stream s m t) => ParsecT s ParserState m () -> ParsecT s ParserState m ()
+whenDebugging p = do
+  isDebugging <- getIsDebugging
+  when isDebugging p
+
+trace' :: (Show t, Stream s m t) => String -> ParsecT s ParserState m ()
+trace' label' = whenDebugging $ parserTrace label'
+
+traced' :: (Show t, Stream s m t) => String -> ParsecT s ParserState m a -> ParsecT s ParserState m a
+traced' label' p = do
+  isDebugging <- getIsDebugging
+  if isDebugging
+    then parserTraced label' p
+    else p
+
+data Token
+  = OpenBlockToken SourcePos -- "{{"
+  | CloseBlockToken SourcePos -- "}}"
+  | OpenLayoutToken SourcePos -- "@"
+  | OpenTemplateToken SourcePos -- "#"
+  | OpenCommentToken SourcePos -- "!"
+  | OpenBraceToken SourcePos -- "{"
+  | CloseBraceToken SourcePos -- "}"
+  | OpenParenToken SourcePos -- '('
+  | CloseParenToken SourcePos -- ')'
+  | PipeToken SourcePos -- "|"
+  | CommaToken SourcePos -- ","
+  | DotToken SourcePos -- "."
+  | ColonToken SourcePos -- ":"
+  | EndToken SourcePos -- "end"
+  | ElseToken SourcePos -- "else"
+  | BoolToken Bool SourcePos -- "true" | "false"
+  | NameToken String SourcePos -- ([_a-z])([_\-a-zA-Z0-9])*
+  | StringToken String SourcePos -- '"' [^"]* '"'
+  | IntToken Int SourcePos -- 0|[1-9][0-9]*
+  | DoubleToken Double SourcePos -- 0|[1-9][0-9]*\.[0-9]+
+  | TextToken String SourcePos
+  deriving stock (Eq, Show)
+
+getTokenPos :: Token -> SourcePos
+getTokenPos = \case
+  OpenBlockToken pos -> pos
+  CloseBlockToken pos -> pos
+  OpenLayoutToken pos -> pos
+  OpenTemplateToken pos -> pos
+  OpenCommentToken pos -> pos
+  OpenBraceToken pos -> pos
+  CloseBraceToken pos -> pos
+  OpenParenToken pos -> pos
+  CloseParenToken pos -> pos
+  PipeToken pos -> pos
+  CommaToken pos -> pos
+  DotToken pos -> pos
+  ColonToken pos -> pos
+  EndToken pos -> pos
+  ElseToken pos -> pos
+  BoolToken _ pos -> pos
+  NameToken _ pos -> pos
+  StringToken _ pos -> pos
+  IntToken _ pos -> pos
+  DoubleToken _ pos -> pos
+  TextToken _ pos -> pos

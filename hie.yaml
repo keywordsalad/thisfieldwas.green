@@ -10,4 +10,4 @@ cradle:
       component: "green:exe:site"
 
     - path: "test"
-      component: "green:test:green-test"
+      component: "green:test:test"

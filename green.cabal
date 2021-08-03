@@ -99,30 +99,31 @@ library
       ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns
   build-depends:
-      MissingH ==1.4.*
-    , aeson ==1.5.*
+      MissingH
+    , aeson
     , base >=4.14 && <5
-    , binary ==0.8.*
-    , bytestring ==0.11.*
-    , config-ini ==0.2.*
-    , directory ==1.3.*
-    , filepath ==1.4.*
-    , hakyll ==4.14.*
-    , hjsmin ==0.2.*
-    , microlens ==0.4.*
-    , microlens-th ==0.4.*
-    , mtl ==2.2.*
-    , optparse-applicative ==0.16.*
-    , pandoc ==2.14.*
-    , pandoc-types ==1.22.*
-    , parsec ==3.1.*
-    , process ==1.6.*
-    , scientific ==0.3.*
-    , template-haskell ==2.16.*
-    , text ==1.2.*
-    , time ==1.9.*
-    , unordered-containers ==0.2.*
-    , vector ==0.12.*
+    , binary
+    , bytestring
+    , config-ini
+    , data-default
+    , directory
+    , filepath
+    , hakyll
+    , hjsmin
+    , microlens
+    , microlens-th
+    , mtl
+    , optparse-applicative
+    , pandoc
+    , pandoc-types
+    , parsec
+    , process
+    , scientific
+    , template-haskell
+    , text
+    , time
+    , unordered-containers
+    , vector
   default-language: Haskell2010
 
 executable author
@@ -237,7 +238,7 @@ test-suite test
   other-modules:
       Green.RouteSpec
       Green.Rule.BlogSpec
-      Green.Template.AstMatcher
+      Green.Template.ApproxAst
       Green.Template.ParserSpec
       Green.TestSupport
       Green.TestSupport.Compiler
@@ -295,7 +296,8 @@ test-suite test
     , containers
     , green
     , hakyll
-    , hspec ==2.7.*
-    , hspec-core ==2.7.*
+    , hspec
+    , hspec-core
+    , parsec
     , time
   default-language: Haskell2010
