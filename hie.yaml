@@ -1,13 +1,13 @@
 cradle:
   stack:
-    - path: "src"
+    - path: "./src"
       component: "green:lib"
 
-    - path: "app/author"
+    - path: "./app/author/Main.hs"
       component: "green:exe:author"
 
-    - path: "app/site"
+    - path: "./app/site/Main.hs"
       component: "green:exe:site"
 
-    - path: "test"
+    - path: "./test"
       component: "green:test:test"

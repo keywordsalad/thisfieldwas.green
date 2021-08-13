@@ -4,7 +4,7 @@ import Data.List.NonEmpty as NEL
 import Green.Template
 import Green.Template.Structural
 import Green.TestSupport
-import Text.Parsec hiding (runParser, runParserT, tokens)
+import Text.Parsec hiding (runParser, runParserT, token, tokens)
 
 spec :: Spec
 spec = do
@@ -178,6 +178,17 @@ spec = do
                            )
                        )
                    ]
+      "{{ [1, 2, 3] }}"
+        `produces` [ ExpressionBlock'
+                       ( ListExpression'
+                           [ IntExpression' 1,
+                             IntExpression' 2,
+                             IntExpression' 3
+                           ]
+                       )
+                   ]
+      "{{ [] }}"
+        `produces` [ExpressionBlock' (ListExpression' [])]
 
     context "comment blocks" do
       "{{! this is a comment }}"
@@ -370,6 +381,15 @@ spec = do
                      TextBlock' "\n"
                    ]
 
+tokens :: Lexer [Token]
+tokens = many token <* eof
+
+blocks :: TokenParser [Block]
+blocks = many block <* eof
+
+structures :: BlockParser [Block]
+structures = many structure <* eof
+
 type TestParser s a = s -> Either ParseError a
 
 withParser :: String -> (String -> TestParser s a) -> SpecWith (TestParser s a) -> Spec
@@ -385,6 +405,11 @@ readingFromTokens :: TokenParser a -> String -> TestParser String a
 readingFromTokens p source =
   runParser tokens source
     >=> runParser p source
+
+debugReadingFromTokens :: TokenParser a -> String -> TestParser String a
+debugReadingFromTokens p source =
+  runParser tokens source
+    >=> debugRunParser p source
 
 readingFromBlocks :: BlockParser a -> String -> TestParser String a
 readingFromBlocks p source =

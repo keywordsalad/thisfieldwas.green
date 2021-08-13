@@ -28,9 +28,9 @@ data Block
   | CommentBlock String SourcePos -- {{! this comment }}
   | LayoutBlock Expression SourcePos -- {{@ include "this/file.md" }}
   | TemplateStartBlock Expression SourcePos -- {{# expression }}
-  | TemplateNextBlock Expression SourcePos -- {{# else expression }}
-  | TemplateElseBlock SourcePos -- {{# else }}
-  | TemplateEndBlock SourcePos -- {{# end }}
+  | TemplateNextBlock Expression SourcePos -- {{ else expression }}
+  | TemplateElseBlock SourcePos -- {{ else }}
+  | TemplateEndBlock SourcePos -- {{ end }}
   | LayoutApplyBlock Expression Template SourcePos
   | TemplateBlock (NonEmpty TemplateApplyBlock) (Maybe TemplateDefaultBlock) SourcePos
   deriving stock (Show, Generic)
@@ -151,6 +151,7 @@ data Expression
   | AccessExpression Expression Expression SourcePos -- target.field
   | FilterExpression Expression Expression SourcePos -- arg | fn
   | ContextExpression [(String, Expression)] SourcePos -- { name0: value0, name1: value1 }
+  | ListExpression [Expression] SourcePos -- [a, b, c]
   deriving stock (Show, Generic)
 
 getExpressionPos :: Expression -> SourcePos
@@ -164,6 +165,7 @@ getExpressionPos = \case
   AccessExpression _ _ pos -> pos
   FilterExpression _ _ pos -> pos
   ContextExpression _ pos -> pos
+  ListExpression _ pos -> pos
 
 getExpressionTag :: Expression -> Int
 getExpressionTag = \case
@@ -176,6 +178,7 @@ getExpressionTag = \case
   AccessExpression {} -> 7
   FilterExpression {} -> 8
   ContextExpression {} -> 9
+  ListExpression {} -> 10
 
 instance Binary Expression where
   get = do
@@ -190,6 +193,7 @@ instance Binary Expression where
       7 -> AccessExpression <$> get <*> get
       8 -> FilterExpression <$> get <*> get
       9 -> ContextExpression <$> get
+      10 -> ListExpression <$> get
       _ -> error $ "Unrecognized expression tag " ++ show tag
     binaryPos <- get :: Get BinaryPos
     return $ f (unBinaryPos binaryPos)
@@ -206,4 +210,5 @@ instance Binary Expression where
       AccessExpression target field _ -> put target >> put field
       FilterExpression arg fn _ -> put arg >> put fn
       ContextExpression pairs _ -> put pairs
+      ListExpression values _ -> put values
     put $ BinaryPos (getExpressionPos expression)

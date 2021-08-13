@@ -7,7 +7,7 @@ import Data.List.NonEmpty as NEL
 import Data.Maybe
 import Data.Scientific
 import Green.Template.Ast
-import Text.Parsec hiding (runParser, runParserT, token, tokens, (<?>))
+import Text.Parsec hiding (runParser, token, (<?>))
 import qualified Text.Parsec as P
 import Text.Parsec.Pos
 
@@ -88,34 +88,26 @@ type TokenParser a = Parsec [Token] ParserState a
 
 type Lexer a = Parsec String ParserState a
 
-debugRunParser :: (Stream s Identity t) => Parsec s ParserState a -> SourceName -> s -> Either ParseError a
-debugRunParser p = P.runParser p state
-  where
-    state = def {parserStateIsDebugging = True}
-
 runParser :: (Stream s Identity t) => Parsec s ParserState a -> SourceName -> s -> Either ParseError a
-runParser p = P.runParser p state
+runParser = runParserWith state
   where
     state = def
 
+debugRunParser :: (Stream s Identity t) => Parsec s ParserState a -> SourceName -> s -> Either ParseError a
+debugRunParser = runParserWith state
+  where
+    state = def {parserStateIsDebugging = True}
+
+runParserWith :: (Stream s Identity t) => ParserState -> Parsec s ParserState a -> SourceName -> s -> Either ParseError a
+runParserWith state p = P.runParser p state
+
 parseTemplate :: SourceName -> String -> Either ParseError Template
 parseTemplate origin =
-  runParser tokens origin
-    >=> runParser blocks origin
-    >=> fmap intoTemplate . runParser (structures <* eof) origin
+  runParser (many token <* eof) origin
+    >=> runParser (many block <* eof) origin
+    >=> fmap intoTemplate . runParser (many structure <* eof) origin
   where
-    intoTemplate blocks' = Template blocks' (initialPos origin)
-
-debugParseTemplate :: SourceName -> String -> Either ParseError Template
-debugParseTemplate origin =
-  runParser tokens origin
-    >=> runParser blocks origin
-    >=> fmap intoTemplate . debugRunParser (structures <* eof) origin
-  where
-    intoTemplate blocks' = Template blocks' (initialPos origin)
-
-structures :: BlockParser [Block]
-structures = many structure
+    intoTemplate blocks = Template blocks (initialPos origin)
 
 structure :: BlockParser Block
 structure =
@@ -139,7 +131,7 @@ appliedLayout = p <?> "AppliedLayoutStructure"
       expression' <- withBlock \case
         LayoutBlock e _ -> Just e
         _ -> Nothing
-      structure' <- Template <$> structures
+      structure' <- Template <$> many structure
       return \pos -> LayoutApplyBlock expression' (structure' pos) pos
 
 appliedTemplate :: BlockParser Block
@@ -203,9 +195,6 @@ withBlock = P.token showToken tokenPos
   where
     showToken = show
     tokenPos = getBlockPos
-
-blocks :: TokenParser [Block]
-blocks = many block <* eof
 
 block :: TokenParser Block
 block = tryOne [templateBlock, textBlock]
@@ -361,7 +350,8 @@ simpleExpression =
       boolExpression,
       nameExpression,
       parensExpression,
-      contextExpression
+      contextExpression,
+      listExpression
     ]
 
 stringExpression :: TokenParser Expression
@@ -400,34 +390,28 @@ nameExpression = p <?> "Name"
       _ -> Nothing
 
 parensExpression :: TokenParser Expression
-parensExpression = p <?> "ParensExpression"
-  where
-    p = do
-      withToken \case
-        OpenParenToken {} -> Just ()
-        _ -> Nothing
-      expression' <- expression
-      withToken \case
-        CloseParenToken {} -> Just ()
-        _ -> Nothing
-      return expression'
+parensExpression = do
+  withToken \case
+    OpenParenToken {} -> Just ()
+    _ -> Nothing
+  expression' <- expression
+  withToken \case
+    CloseParenToken {} -> Just ()
+    _ -> Nothing
+  return expression'
 
 contextExpression :: TokenParser Expression
 contextExpression = p <?> "ContextLiteral"
   where
-    p = do
-      pos <- withToken \case
-        OpenBraceToken pos -> Just pos
+    p = withPosition do
+      withToken \case
+        OpenBraceToken {} -> Just ()
         _ -> Nothing
       pairs <- contextKeyValue `sepBy` comma
       withToken \case
         CloseBraceToken {} -> Just ()
         _ -> Nothing
-      return $ ContextExpression pairs pos
-      where
-        comma = withToken \case
-          CommaToken {} -> Just ()
-          _ -> Nothing
+      return $ ContextExpression pairs
 
 contextKeyValue :: TokenParser (String, Expression)
 contextKeyValue = p <?> "Pair"
@@ -442,6 +426,25 @@ contextKeyValue = p <?> "Pair"
       value <- expression
       return (key, value)
 
+listExpression :: TokenParser Expression
+listExpression = p <?> "ListLiteral"
+  where
+    p = withPosition do
+      withToken \case
+        OpenBracketToken {} -> Just ()
+        _ -> Nothing
+      values <- expression `sepEndBy` comma
+      withToken \case
+        CloseBracketToken {} -> Just ()
+        _ -> Nothing
+      return $ ListExpression values
+
+comma :: TokenParser ()
+comma =
+  () <$ withToken \case
+    CommaToken {} -> Just ()
+    _ -> Nothing
+
 requireText :: TokenParser (String, SourcePos)
 requireText = withToken f <?> "Text"
   where
@@ -451,9 +454,6 @@ requireText = withToken f <?> "Text"
 
 withToken :: (Token -> Maybe a) -> Parsec [Token] u a
 withToken = P.token show getTokenPos
-
-tokens :: Parsec String ParserState [Token]
-tokens = many token <* eof <?> "Tokens"
 
 token :: Lexer Token
 token =
@@ -554,21 +554,26 @@ text = p <?> "TextBody"
 
 symbolToken :: Lexer Token
 symbolToken =
-  withPosition $
-    tryOne
-      [ ws (OpenBraceToken <$ openBraceChar <?> "OpenBraceToken '{'"),
-        ws (CloseBraceToken <$ closeBraceChar <?> "CloseBraceToken '}'"),
-        ws (OpenParenToken <$ char '(' <?> "OpenParenToken '('"),
-        ws (CloseParenToken <$ char ')' <?> "CloseParenToken ')'"),
-        ws (OpenBlockToken <$ string "{{" <?> "OpenBlockToken '{{'"),
-        CloseBlockToken <$ string "}}" <?> "CloseBlockToken '}}'",
-        ws (OpenTemplateToken <$ char '#' <?> "TemplateBlockToken '#'"),
-        ws (OpenLayoutToken <$ char '@' <?> "LayoutBlockToken '@'"),
-        OpenCommentToken <$ char '!' <?> "CommentBlockToken '!'",
-        ws (PipeToken <$ char '|' <?> "PipeToken '|'"),
-        ws (ColonToken <$ char ':' <?> "ColonToken ':'"),
-        ws (DotToken <$ char '.' <?> "DotToken '.'"),
-        ws (CommaToken <$ char ',' <?> "CommaToken ','")
+  withPosition $ tryOne (fmap ws trimmed ++ untrimmed)
+  where
+    untrimmed =
+      [ CloseBlockToken <$ string "}}" <?> "CloseBlockToken '}}'",
+        OpenCommentToken <$ char '!' <?> "CommentBlockToken '!'"
+      ]
+    trimmed =
+      [ OpenParenToken <$ char '(' <?> "OpenParenToken '('",
+        CloseParenToken <$ char ')' <?> "CloseParenToken ')'",
+        OpenBraceToken <$ openBraceChar <?> "OpenBraceToken '{'",
+        CloseBraceToken <$ closeBraceChar <?> "CloseBraceToken '}'",
+        OpenBracketToken <$ char '[' <?> "OpenBracketToken '['",
+        CloseBracketToken <$ char ']' <?> "OpenBracketToken ']'",
+        OpenBlockToken <$ string "{{" <?> "OpenBlockToken '{{'",
+        OpenTemplateToken <$ char '#' <?> "TemplateBlockToken '#'",
+        OpenLayoutToken <$ char '@' <?> "LayoutBlockToken '@'",
+        PipeToken <$ char '|' <?> "PipeToken '|'",
+        ColonToken <$ char ':' <?> "ColonToken ':'",
+        DotToken <$ char '.' <?> "DotToken '.'",
+        CommaToken <$ char ',' <?> "CommaToken ','"
       ]
 
 expectBlockOpen :: Lexer ()
@@ -704,10 +709,12 @@ data Token
   | OpenLayoutToken SourcePos -- "@"
   | OpenTemplateToken SourcePos -- "#"
   | OpenCommentToken SourcePos -- "!"
+  | OpenParenToken SourcePos -- "("
+  | CloseParenToken SourcePos -- ")"
+  | OpenBracketToken SourcePos -- "["
+  | CloseBracketToken SourcePos -- "]"
   | OpenBraceToken SourcePos -- "{"
   | CloseBraceToken SourcePos -- "}"
-  | OpenParenToken SourcePos -- '('
-  | CloseParenToken SourcePos -- ')'
   | PipeToken SourcePos -- "|"
   | CommaToken SourcePos -- ","
   | DotToken SourcePos -- "."
@@ -729,10 +736,12 @@ getTokenPos = \case
   OpenLayoutToken pos -> pos
   OpenTemplateToken pos -> pos
   OpenCommentToken pos -> pos
-  OpenBraceToken pos -> pos
-  CloseBraceToken pos -> pos
   OpenParenToken pos -> pos
   CloseParenToken pos -> pos
+  OpenBracketToken pos -> pos
+  CloseBracketToken pos -> pos
+  OpenBraceToken pos -> pos
+  CloseBraceToken pos -> pos
   PipeToken pos -> pos
   CommaToken pos -> pos
   DotToken pos -> pos

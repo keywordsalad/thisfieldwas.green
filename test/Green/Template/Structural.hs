@@ -70,6 +70,7 @@ data Expression'
   | AccessExpression' Expression' Expression'
   | FilterExpression' Expression' Expression'
   | ContextExpression' [(String, Expression')]
+  | ListExpression' [Expression']
   deriving stock (Eq, Show)
 
 instance Structural Expression Expression' where
@@ -83,6 +84,7 @@ instance Structural Expression Expression' where
     AccessExpression t f _ -> AccessExpression' (toStructure t) (toStructure f)
     FilterExpression x f _ -> FilterExpression' (toStructure x) (toStructure f)
     ContextExpression xs _ -> ContextExpression' (second toStructure <$> xs)
+    ListExpression xs _ -> ListExpression' (toStructure <$> xs)
 
 data Token'
   = OpenBlockToken'
@@ -92,6 +94,8 @@ data Token'
   | OpenCommentToken'
   | OpenBraceToken'
   | CloseBraceToken'
+  | OpenBracketToken'
+  | CloseBracketToken'
   | OpenParenToken'
   | CloseParenToken'
   | PipeToken'
@@ -117,6 +121,8 @@ instance Structural Token Token' where
     OpenCommentToken _ -> OpenCommentToken'
     OpenBraceToken _ -> OpenBraceToken'
     CloseBraceToken _ -> CloseBraceToken'
+    OpenBracketToken _ -> OpenBracketToken'
+    CloseBracketToken _ -> CloseBracketToken'
     OpenParenToken _ -> OpenParenToken'
     CloseParenToken _ -> CloseParenToken'
     PipeToken _ -> PipeToken'
