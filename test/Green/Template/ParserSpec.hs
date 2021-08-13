@@ -2,7 +2,7 @@ module Green.Template.ParserSpec where
 
 import Data.List.NonEmpty as NEL
 import Green.Template
-import Green.Template.ApproxAst
+import Green.Template.Structural
 import Green.TestSupport
 import Text.Parsec hiding (runParser, runParserT, tokens)
 
@@ -398,11 +398,11 @@ debugReadingFromBlocks p source =
     >=> runParser blocks source
     >=> debugRunParser p source
 
-produces :: (Show s, Eq b, Show b, ApproxAst a b) => s -> b -> SpecWith (TestParser s a)
+produces :: (Show s, Eq b, Show b, Structural a b) => s -> b -> SpecWith (TestParser s a)
 produces input expected =
   describe (show input) do
     it ("produces " ++ show expected) \p -> do
-      second toApprox (p input) `shouldBe` Right expected
+      second toStructure (p input) `shouldBe` Right expected
 
 rejectsWith :: (Show s, Eq a, Show a) => s -> String -> SpecWith (TestParser s a)
 rejectsWith input expected =

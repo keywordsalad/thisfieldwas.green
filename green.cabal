@@ -238,8 +238,8 @@ test-suite test
   other-modules:
       Green.RouteSpec
       Green.Rule.BlogSpec
-      Green.Template.ApproxAst
       Green.Template.ParserSpec
+      Green.Template.Structural
       Green.TestSupport
       Green.TestSupport.Compiler
       Green.TestSupport.Config
