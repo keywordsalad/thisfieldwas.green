@@ -4,6 +4,12 @@ import Data.Bifunctor
 import Data.List.NonEmpty
 import Green.Template
 
+-- | Converts type @a@ into a type @b@ which is _approximately_ equivalent to
+-- type @a@.
+--
+-- Specifically this class is used to convert from the concrete AST emitted by
+-- parsers into an AST omitting meta and source information so that asserting
+-- equivalence in tests against structures emitted by parsers is a lot easier.
 class ApproxAst a b where
   toApprox :: a -> b
 
