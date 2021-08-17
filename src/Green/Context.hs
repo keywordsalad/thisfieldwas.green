@@ -9,137 +9,95 @@ import Data.String.Utils (endswith)
 import Green.Common
 import Green.Config
 import Green.Context.DateFields
-import Green.Context.FieldError
 import Green.Context.GitCommits
+import Green.Template
 import Green.Util (dropIndex, stripSuffix)
+import Hakyll.Web.Html (escapeHtml)
 
 baseContext :: SiteConfig -> Context String
-baseContext config = do
-  let context =
-        mconcat
-          [ constField "siteTitle" (config ^. siteTitle),
-            siteRootField (config ^. siteRoot),
-            linkedInProfileField (config ^. siteLinkedInProfile),
-            authorEmailField (config ^. siteAuthorEmail),
-            dateFields config,
-            gitCommits config,
-            trimmedUrlField,
-            imgField,
-            youtubeField,
-            getRouteField,
-            commentField,
-            defaultContext
-          ]
-      dependentContexts =
-        [ getCodeField,
-          linkedTitleField
-        ]
-   in mconcat (dependentContexts <*> pure context) <> context
-
-authorEmailField :: String -> Context String
-authorEmailField = constField "authorEmail"
-
-linkedInProfileField :: String -> Context String
-linkedInProfileField = constField "linkedInProfile"
+baseContext config =
+  mconcat
+    [ constField "siteTitle" (config ^. siteTitle),
+      constField "siteRoot" (config ^. siteRoot),
+      constField "linkedInProfile" (config ^. siteLinkedInProfile),
+      constField "authorEmail" (config ^. siteAuthorEmail),
+      trimmedUrlField "url",
+      dateFields config,
+      gitCommits config,
+      imgField,
+      youtubeField,
+      getRouteField,
+      defaultContext,
+      linkedTitleField,
+      getCodeField
+    ]
 
 -- | Trims @index.html@ from @$url$@'s
-trimmedUrlField :: Context String
-trimmedUrlField = mapContext dropIndex (urlField "url")
+trimmedUrlField :: String -> Context String
+trimmedUrlField = mapField dropIndex . urlField
 
 siteRootField :: String -> Context String
 siteRootField = constField "siteRoot"
 
-getCodeField :: Context String -> Context String
-getCodeField siteContext' = functionField key f
+getCodeField :: Context String
+getCodeField = constField "getCode" f
   where
-    key = "getCode"
-    f [contentsPath] _ = trimStartEndLines <$> (tryLoad codeId <|> tryLoad fileId)
+    f :: FunctionValue String String String
+    f contentsPath _ _ = trimStartEndLines <$> (tryLoad codeId <|> tryLoad fileId)
       where
         codeId = fromFilePath $ "code/" ++ contentsPath
         fileId = fromFilePath contentsPath
-        templateId = fromFilePath "_templates/code.md"
-        tryLoad = load >=> fmap itemBody . loadAndApplyTemplate templateId siteContext'
-        trimStartEndLines = unlines . reverse . dropWhile null . reverse . dropWhile null . lines
-    f args item = fieldError key ["contentsPath"] args item
+        tryLoad = fmap itemBody . compilePandoc <=< load
+        trimStartEndLines =
+          unlines
+            . reverse
+            . dropWhile null
+            . reverse
+            . dropWhile null
+            . lines
 
 imgField :: Context String
-imgField = functionField key f
+imgField = constField "img" f
   where
-    key = "img"
-    f [imgId, src] = f [imgId, src, ""]
-    f [imgId, src, title] = f [imgId, src, title, ""]
-    f [imgId, src, title, alt] =
-      return . itemBody
-        <=< relativizeUrls
-        <=< loadAndApplyTemplate
-          "_templates/image.html"
-          ( mconcat
-              [ constField "imgId" imgId,
-                constField "imgSrc" src,
-                constField "imgTitle" title,
-                constField "imgAlt" alt
-              ]
-          )
-    f args = fieldError key expectedArgs args
-      where
-        expectedArgs = ["imgId", "imgSrc", "imgTitle", "imgAlt"]
+    templatePath = "_templates/image.html"
+    f :: FunctionValue String String String
+    f src context _ = do
+      let context' = constField "src" src <> context
+      template <- load templatePath
+      applied <- applyAsTemplate context' template
+      return $ itemBody applied
 
 youtubeField :: Context String
-youtubeField = functionField key f
+youtubeField = constField "youtube" f
   where
-    key = "youtube"
-    f [videoId] = f [videoId, ""]
-    f [videoId, asideId] = f [videoId, asideId, ""]
-    f [videoId, asideId, title] =
-      return . itemBody
-        <=< relativizeUrls
-        <=< loadAndApplyTemplate
-          "_templates/youtube.html"
-          ( mconcat
-              [ constField "youtubeAsideId" asideId,
-                constField "youtubeVideoId" videoId,
-                constField "youtubeVideoTitle" title
-              ]
-          )
-    f args = fieldError key expectedArgs args
-      where
-        expectedArgs = ["youtubeAsideId", "youtubeVideoId", "youtubeVideoTitle"]
-
-commentField :: Context String
-commentField = functionField "comment" \_ _ -> return ""
+    templatePath = "_templates/youtube.html"
+    f :: FunctionValue String String String
+    f videoId context _ = do
+      let context' = constField "videoId" videoId <> context
+      template <- load templatePath
+      rendered <- applyAsTemplate context' template
+      return $ itemBody rendered
 
 getRouteField :: Context String
-getRouteField = functionField key f
+getRouteField = constField "route" f
   where
-    key = "getRoute"
-    f [filePath] _ = do
+    f :: FunctionValue String String String
+    f filePath _ _ = do
       let id' = fromFilePath filePath
       getRoute id' >>= \case
         Just r -> return $ "/" ++ stripSuffix "index.html" r
         Nothing -> error $ "no route to " ++ show id'
-    f args item = fieldError key ["filePath"] args item
 
-unContextString :: Context String -> String -> [String] -> Item String -> Compiler String
-unContextString context key args item =
-  unContext context key args item >>= \case
-    StringField s -> return s
-    _ -> error $ "Got a non-string value in field " ++ key
-
-linkedTitleField :: Context String -> Context String
-linkedTitleField context = functionField targetKey f
+linkedTitleField :: Context String
+linkedTitleField = constField "linkedTitle" f
   where
-    targetKey = "linkedTitle"
-    f [filePath] _ = do
+    f :: FunctionValue String String String
+    f filePath context _ = do
       linkedItem <- load (fromFilePath filePath)
-      makeLink <$> getTitle linkedItem <*> getUrl linkedItem
+      makeLink <$> getField "title" linkedItem <*> getField "url" linkedItem
       where
+        getField key = intoString <=< unContext context key
         makeLink title url
-          | isHtml = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
-          | isMarkdown = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
+          | endswith ".html" filePath = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
+          | endswith ".md" filePath = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
           | otherwise = title ++ " <" ++ url ++ ">"
-        getTitle = getField "title"
-        getUrl = getField "url"
-        isHtml = endswith ".html" filePath
-        isMarkdown = endswith ".md" filePath || endswith ".markdown" filePath
-        getField key = unContextString context key []
-    f args item = fieldError targetKey ["filePath"] args item

@@ -1,7 +1,6 @@
 module Green.Rule where
 
 import Green.Common
-import Green.Compiler.Layout
 import Green.Config
 import Green.Rule.Blog
 import Green.Rule.BrokenLinks
@@ -12,6 +11,8 @@ import Green.Rule.Js
 import Green.Rule.Page
 import Green.Rule.Robot
 import Green.Rule.Sitemap
+import Green.Template
+import qualified Hakyll as H
 
 rules :: SiteConfig -> Rules ()
 rules config = do
@@ -36,7 +37,7 @@ downloadRules :: Rules ()
 downloadRules = do
   match "downloads/**" do
     route $ setExtension ".txt"
-    compile copyFileCompiler
+    compile H.copyFileCompiler
 
 codeRules :: Rules Dependency
 codeRules = do
@@ -50,10 +51,10 @@ imageRules :: Rules ()
 imageRules =
   match "images/**" do
     route idRoute
-    compile copyFileCompiler
+    compile H.copyFileCompiler
 
 templateRules :: Rules ()
 templateRules = do
-  match "_layouts/**" $ compile layoutCompiler
+  match "_layouts/**" $ compile templateCompiler
   match "_partials/**" $ compile templateCompiler
   match "_templates/**" $ compile templateCompiler

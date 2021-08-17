@@ -1,53 +1,55 @@
-module Green.Context.DateFields where
+module Green.Context.DateFields (dateFields) where
 
 import Data.List (tails)
+import Data.String.Utils
 import Green.Common
 import Green.Config
-import Green.Context.FieldError
+import Green.Template.Context
 import Green.Util
+import qualified Hakyll as H
 
-dateFields :: SiteConfig -> Context String
+dateFields :: SiteConfig -> Context a
 dateFields config =
   mconcat fields
+    <> longDateFormatField
     <> shortDateFormatField
     <> timeFormatField
   where
-    timeLocale = config ^. siteTimeLocale
-    displayFormat = config ^. siteDisplayFormat
-    longDateFormat = displayFormat ^. displayDateLongFormat
-    shortDateFormatField = constField "shortDate" $ displayFormat ^. displayDateShortFormat
-    timeFormatField = constField "timeOnly" $ displayFormat ^. displayTimeFormat
     fields = uncurry mkFields <$> fieldKeys
-    mkFields f k = f longDateFormat timeLocale k
+    mkFields f k = f timeLocale k
     fieldKeys =
       [ (dateField, "date"),
         (publishedField, "published"),
         (updatedField, "updated")
       ]
+    timeLocale = config ^. siteTimeLocale
+    longDateFormatField = constField "longDate" $ displayFormat ^. displayDateLongFormat
+    shortDateFormatField = constField "shortDate" $ displayFormat ^. displayDateShortFormat
+    timeFormatField = constField "timeOnly" $ displayFormat ^. displayTimeFormat
+    displayFormat = config ^. siteDisplayFormat
 
-dateField :: String -> TimeLocale -> String -> Context String
+dateField :: TimeLocale -> String -> Context a
 dateField = mconcat . (fns <*>) . pure
   where
     fns = [dateField' ["published", "date"], dateFromFilePathField]
 
-publishedField :: String -> TimeLocale -> String -> Context String
+publishedField :: TimeLocale -> String -> Context a
 publishedField = dateField' ["published"]
 
-updatedField :: String -> TimeLocale -> String -> Context String
+updatedField :: TimeLocale -> String -> Context a
 updatedField = dateField' ["updated"]
 
-dateField' :: [String] -> String -> TimeLocale -> String -> Context String
-dateField' sourceKeys defaultFormat timeLocale targetKey = functionField targetKey f
+dateField' :: forall a. [String] -> TimeLocale -> String -> Context a
+dateField' sourceKeys timeLocale targetKey = constField targetKey f
   where
-    notFound = noResult $ "Could not find $" ++ targetKey ++ "$ from metadata keys " ++ show sourceKeys
-    f [] item = f [defaultFormat] item
-    f [dateFormat] item = do
-      maybeDate :: Maybe LocalTime <- dateFromMetadata sourceKeys timeLocale item
+    f :: FunctionValue String String a
+    f dateFormat _ item = do
+      maybeDate <- dateFromMetadata sourceKeys timeLocale item
       let maybeFormatted = formatTime timeLocale dateFormat <$> maybeDate
       maybe notFound return maybeFormatted
-    f args item = fieldError targetKey ["dateFormat"] args item
+    notFound = noResult $ "Could not find date field field " ++ show targetKey ++ " from metadata keys " ++ show sourceKeys
 
-dateFromMetadata :: (ParseTime a) => [String] -> TimeLocale -> Item String -> Compiler (Maybe a)
+dateFromMetadata :: [String] -> TimeLocale -> Item a -> Compiler (Maybe LocalTime)
 dateFromMetadata sourceKeys timeLocale item = do
   maybeDates <- mapM findDate sourceKeys
   return $ firstMaybe maybeDates
@@ -55,28 +57,26 @@ dateFromMetadata sourceKeys timeLocale item = do
     id' = itemIdentifier item
     tryParseDate' = tryParseDate timeLocale metadataDateFormats
     findDate sourceKey = do
-      maybeString <- lookupString sourceKey <$> getMetadata id'
+      maybeString <- H.lookupString sourceKey <$> H.getMetadata id'
       return (tryParseDate' =<< maybeString)
 
-dateFromFilePathField :: String -> TimeLocale -> String -> Context String
-dateFromFilePathField defaultFormat timeLocale targetKey = functionField targetKey f
+dateFromFilePathField :: forall a. TimeLocale -> String -> Context a
+dateFromFilePathField timeLocale targetKey = constField targetKey f
   where
-    f [] item = f [defaultFormat] item
-    f [dateFormat] item =
-      let maybeFormatted = formatTime timeLocale dateFormat <$> maybeDate
-       in maybe notFound return maybeFormatted
+    f :: FunctionValue String String a
+    f dateFormat _ item = maybe notFound return maybeFormatted
       where
-        maybeDate :: Maybe LocalTime = resolveDateFromFilePath timeLocale item
-        notFound = noResult $ "Could not find $" ++ targetKey ++ "$ from file path " ++ filePath
+        maybeDate = resolveDateFromFilePath timeLocale item
+        maybeFormatted = formatTime timeLocale dateFormat <$> maybeDate
+        notFound = noResult $ "Could not find " ++ show targetKey ++ " from file path " ++ show filePath
         filePath = toFilePath (itemIdentifier item)
-    f args item = fieldError targetKey ["defaultFormat"] args item
 
-resolveDateFromFilePath :: (ParseTime a) => TimeLocale -> Item String -> Maybe a
+resolveDateFromFilePath :: TimeLocale -> Item a -> Maybe LocalTime
 resolveDateFromFilePath timeLocale item =
   let paths = splitDirectories $ dropExtension $ toFilePath $ itemIdentifier item
    in firstMaybe $
         dateFromPath
-          <$> [take 3 $ splitAll "-" fnCand | fnCand <- reverse paths]
+          <$> [take 3 $ split "-" fnCand | fnCand <- reverse paths]
           ++ [fnCand | fnCand <- map (take 3) $ reverse $ tails paths]
   where
     dateFromPath = tryParseDate timeLocale ["%Y-%m-%d"] . intercalate "-"

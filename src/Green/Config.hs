@@ -6,6 +6,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Green.Common
 import Green.Lens
+import Green.Template
 import Hakyll.Core.Configuration as HC
 
 data SiteDebug = SiteDebug

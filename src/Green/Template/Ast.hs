@@ -3,6 +3,7 @@ module Green.Template.Ast where
 import Data.Binary
 import Data.List.NonEmpty
 import GHC.Generics
+import qualified Hakyll as H
 import Text.Parsec hiding (getPosition)
 import Text.Parsec.Pos
 
@@ -21,6 +22,9 @@ instance Binary Template where
   put (Template blocks pos) = do
     put blocks
     put $ BinaryPos pos
+
+instance H.Writable Template where
+  write _ _ = return ()
 
 data Block
   = TextBlock String SourcePos -- Any text, like this.

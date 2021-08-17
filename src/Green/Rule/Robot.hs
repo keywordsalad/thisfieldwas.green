@@ -2,6 +2,7 @@ module Green.Rule.Robot where
 
 import Green.Common
 import Green.Config
+import Green.Template
 
 robotsTxtRules :: SiteConfig -> Rules ()
 robotsTxtRules config = do

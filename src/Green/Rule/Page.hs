@@ -1,6 +1,6 @@
 module Green.Rule.Page (pageRules) where
 
-import Green.Common hiding (applyAsTemplate, defaultContext)
+import Green.Common
 import Green.Config
 import Green.Route
 import Green.Template

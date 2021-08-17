@@ -1,13 +1,7 @@
-module Green.Compiler
-  ( module Green.Compiler,
-    module Green.Compiler.Pandoc,
-    module Green.Compiler.Layout,
-  )
-where
+module Green.Compiler where
 
 import Green.Common
-import Green.Compiler.Layout
-import Green.Compiler.Pandoc
+import Hakyll.Core.Metadata
 
 -- | Load an item snapshot if it exists.
 maybeLoadSnapshot :: Identifier -> Snapshot -> Compiler (Maybe (Item String))

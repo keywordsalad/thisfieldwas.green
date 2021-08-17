@@ -4,37 +4,33 @@ import Data.Binary
 import GHC.Generics (Generic)
 import Green.Common
 import Green.Config
+import Green.Template.Context
 import System.Exit
 import System.Process
 
-data SourceFile = SourceFile
-  { _sourceFilePath :: String,
-    _sourceFileIsFromSource :: Bool,
-    _sourceFileIsChanged :: Bool
+data GitFile = GitFile
+  { gitFilePath :: String,
+    gitFileIsFromSource :: Bool,
+    gitFileIsChanged :: Bool
   }
   deriving stock (Generic)
 
-makeLenses ''SourceFile
+instance Binary GitFile where
+  get = GitFile <$> get <*> get <*> get
+  put (GitFile x y z) = put x >> put y >> put z
 
-instance Binary SourceFile where
-  get = SourceFile <$> get <*> get <*> get
-  put sourceFile =
-    put (sourceFile ^. sourceFilePath)
-      >> put (sourceFile ^. sourceFileIsFromSource)
-      >> put (sourceFile ^. sourceFileIsChanged)
-
-gitCommits :: SiteConfig -> Context String
+gitCommits :: SiteConfig -> Context a
 gitCommits config =
   mconcat
     [ constField "gitWebUrl" (config ^. siteGitWebUrl),
       field "gitSha1" gitSha1Compiler,
       field "gitMessage" gitMessageCompiler,
       field "gitBranch" gitBranchCompiler,
-      sourceFileField (config ^. siteProviderDirectory)
+      gitFileField "gitFilePath" gitFilePath,
+      gitFileField "gitFileName" (takeFileName . gitFilePath),
+      gitFileField "isFromSource" gitFileIsFromSource,
+      gitFileField "isChanged" gitFileIsChanged
     ]
-
-itemFilePath :: Item a -> FilePath
-itemFilePath = toFilePath . itemIdentifier
 
 gitSha1Compiler :: Item a -> Compiler String
 gitSha1Compiler = gitLogField "%h"
@@ -46,40 +42,23 @@ type LogFormat = String
 
 gitLogField :: LogFormat -> Item a -> Compiler String
 gitLogField format item =
-  unsafeCompiler do
-    maybeResult <- gitLog format (Just $ itemFilePath item)
-    case maybeResult of
-      Just result -> return result
-      Nothing -> fromJust <$> gitLog format Nothing
+  cached ("Green.Context.GitCommits.gitLogField:" ++ format) do
+    unsafeCompiler do
+      maybeResult <- gitLog format (Just $ toFilePath (itemIdentifier item))
+      case maybeResult of
+        Just result -> return result
+        Nothing -> fromJust <$> gitLog format Nothing
 
-sourceFileField :: FilePath -> Context String
-sourceFileField providerDirectory = Context \k _ i ->
-  if k `elem` [filePathKey, fileNameKey]
-    then getField k =<< sourceFileCompiler providerDirectory i
-    else unmappedKey k
-  where
-    getField key sourceFile
-      | key == filePathKey = return $ StringField $ sourceFile ^. sourceFilePath
-      | key == fileNameKey = return $ StringField $ takeFileName $ sourceFile ^. sourceFilePath
-      | key == isFromSourceKey = boolField' key $ sourceFile ^. sourceFileIsFromSource
-      | key == isChangedKey = boolField' key $ sourceFile ^. sourceFileIsChanged
-      | otherwise = unmappedKey key
-    boolField' _ True = return EmptyField
-    boolField' key False = noResult $ "Field " ++ key ++ " is false"
-    unmappedKey key = noResult $ "Tried sourceFileField with unmapped key " ++ key
-    filePathKey = "sourceFilePath"
-    fileNameKey = "sourceFileName"
-    isFromSourceKey = "isFromSource"
-    isChangedKey = "isChanged"
+gitFileField :: (IntoValue v a) => String -> (GitFile -> v) -> Context a
+gitFileField key f = field key $ fmap f . gitFileCompiler
 
-sourceFileCompiler :: FilePath -> Item a -> Compiler SourceFile
-sourceFileCompiler providerDirectory item = cached cacheKey do
-  SourceFile itemFilePath'
-    <$> unsafeCompiler (doesFileExist itemFilePath')
-    <*> unsafeCompiler (isChanged itemFilePath')
+gitFileCompiler :: Item a -> Compiler GitFile
+gitFileCompiler item = cached "Green.Context.GitCommits.gitFileCompiler" do
+  GitFile itemFilePath
+    <$> unsafeCompiler (doesFileExist itemFilePath)
+    <*> unsafeCompiler (isChanged itemFilePath)
   where
-    itemFilePath' = providerDirectory </> itemFilePath item
-    cacheKey = toFilePath (itemIdentifier item) ++ ":sourceFileField"
+    itemFilePath = toFilePath (itemIdentifier item)
     isChanged filePath = do
       let args = ["diff", "HEAD", filePath]
       (exitCode, stdout, _stderr) <- readProcessWithExitCode "git" args ""

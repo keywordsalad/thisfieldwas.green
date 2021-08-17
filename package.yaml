@@ -119,6 +119,7 @@ default-extensions:
   - TupleSections
   - TypeFamilies
   - TypeSynonymInstances
+  - UndecidableInstances
   - ViewPatterns
 
 ghc-options:

@@ -25,12 +25,9 @@ library
       Green.Command
       Green.Common
       Green.Compiler
-      Green.Compiler.Layout
-      Green.Compiler.Pandoc
       Green.Config
       Green.Context
       Green.Context.DateFields
-      Green.Context.FieldError
       Green.Context.GitCommits
       Green.Lens
       Green.Lens.Hakyll
@@ -50,6 +47,8 @@ library
       Green.Template.Ast
       Green.Template.Compiler
       Green.Template.Context
+      Green.Template.Functions
+      Green.Template.Pandoc
       Green.Template.Parser
       Green.Util
   other-modules:
@@ -96,6 +95,7 @@ library
       TupleSections
       TypeFamilies
       TypeSynonymInstances
+      UndecidableInstances
       ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns
   build-depends:
@@ -172,6 +172,7 @@ executable author
       TupleSections
       TypeFamilies
       TypeSynonymInstances
+      UndecidableInstances
       ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
@@ -225,6 +226,7 @@ executable site
       TupleSections
       TypeFamilies
       TypeSynonymInstances
+      UndecidableInstances
       ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
@@ -289,6 +291,7 @@ test-suite test
       TupleSections
       TypeFamilies
       TypeSynonymInstances
+      UndecidableInstances
       ViewPatterns
   ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:

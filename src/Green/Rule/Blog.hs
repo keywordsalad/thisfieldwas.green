@@ -1,10 +1,10 @@
 module Green.Rule.Blog where
 
 import Green.Common
-import Green.Compiler
 import Green.Config
-import Green.Context
 import Green.Route
+import Green.Template
+import qualified Hakyll as H
 
 {-----------------------------------------------------------------------------}
 {- Rules -}
@@ -52,27 +52,6 @@ draftRules localConfig = do
     compile $ draftCompiler localConfig
 
 {-----------------------------------------------------------------------------}
-{- Snapshots -}
-{-----------------------------------------------------------------------------}
-
-type PostSnapshot = String
-
-postSnapshot :: PostSnapshot
-postSnapshot = "_post"
-
-draftSnapshot :: PostSnapshot
-draftSnapshot = "_draft"
-
-contentOnly :: PostSnapshot -> PostSnapshot
-contentOnly = (++ "_contentOnly")
-
-loadPostsContent :: Compiler [Item String]
-loadPostsContent = loadExistingSnapshots "_posts/**" (contentOnly postSnapshot)
-
-loadDraftsContent :: Compiler [Item String]
-loadDraftsContent = loadExistingSnapshots "_drafts/**" (contentOnly draftSnapshot)
-
-{-----------------------------------------------------------------------------}
 {- Routes -}
 {-----------------------------------------------------------------------------}
 
@@ -82,111 +61,39 @@ datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}-"
 postPattern :: String
 postPattern = "^_posts/([^/]+/)?" ++ datePattern
 
+dateRoute :: Routes
+dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))
+
 postRoute :: Routes
 postRoute =
   matchRoute (fromRegex postPattern) $
-    dateRoute
+    subPrefixRoute "_posts/" "blog/"
+      `composeRoutes` dateRoute
       `composeRoutes` setExtension "html"
       `composeRoutes` indexRoute
-      `composeRoutes` subPrefixRoute "_posts/" "blog/"
 
 draftRoute :: Routes
 draftRoute =
-  setExtension "html"
+  subPrefixRoute "_drafts/" "blog/drafts/"
+    `composeRoutes` dateRoute
+    `composeRoutes` setExtension "html"
     `composeRoutes` indexRoute
-    `composeRoutes` subPrefixRoute "_drafts/" "blog/drafts/"
-
-dateRoute :: Routes
-dateRoute = gsubRoute datePattern (replaceAll "-" (const "/"))
 
 {-----------------------------------------------------------------------------}
 {- Compilers -}
 {-----------------------------------------------------------------------------}
 
 postCompiler :: SiteConfig -> Compiler (Item String)
-postCompiler localConfig = postSnapshotCompiler localConfig postSnapshot
+postCompiler localConfig = applyAsTemplate (localConfig ^. siteContext) =<< getResourceBody
 
 draftCompiler :: SiteConfig -> Compiler (Item String)
-draftCompiler localConfig = postSnapshotCompiler localConfig draftSnapshot
-
-postSnapshotCompiler :: SiteConfig -> String -> Compiler (Item String)
-postSnapshotCompiler localConfig snapshot = do
-  interpolateResourceBody localConfig
-    >>= saveSnapshot (contentOnly snapshot)
-    >>= applyLayout localConfig
-    >>= relativizeUrls
+draftCompiler localConfig = applyAsTemplate (localConfig ^. siteContext) =<< getResourceBody
 
 blogCompiler :: SiteConfig -> Compiler (Item String)
-blogCompiler config = do
-  allPostsByRecent <- recentFirst =<< loadPostsContent
-  let latestPost = head allPostsByRecent
-  let recentPosts = take 5 . drop 1 $ allPostsByRecent
-  localConfig <- forOf siteContext config (buildBlogContext latestPost recentPosts)
-  interpolateResourceBody localConfig
-    >>= applyLayout localConfig
-    >>= relativizeUrls
+blogCompiler _ = makeItem "blog"
 
 archivesCompiler :: SiteConfig -> Compiler (Item String)
-archivesCompiler config = do
-  posts <- recentFirst =<< loadPostsContent
-  let localConfig = config & siteContext %~ archivesContext posts
-  interpolateResourceBody localConfig
-    >>= applyLayout localConfig
-    >>= relativizeUrls
+archivesCompiler _ = makeItem "archives"
 
 draftArchivesCompiler :: SiteConfig -> Compiler (Item String)
-draftArchivesCompiler config = do
-  drafts <- recentFirst =<< loadDraftsContent
-  let localConfig = config & siteContext %~ draftArchivesContext drafts
-  interpolateResourceBody localConfig
-    >>= applyLayout localConfig
-    >>= relativizeUrls
-
-{-----------------------------------------------------------------------------}
-{- Contexts -}
-{-----------------------------------------------------------------------------}
-
-buildBlogContext :: Item String -> [Item String] -> Context String -> Compiler (Context String)
-buildBlogContext latestPost recentPosts siteContext' = do
-  -- TODO find a less sucky way to get this info
-  let f k = unContextString siteContext' k [] latestPost
-  [published, date, title, author, url] <-
-    mapM
-      f
-      [ "published",
-        "date",
-        "title",
-        "author",
-        "url"
-      ]
-
-  let latestPostFields =
-        uncurry constField
-          <$> [ ("latestPostPublished", published),
-                ("latestPostDate", date),
-                ("latestPostTitle", title),
-                ("latestPostAuthor", author),
-                ("latestPostUrl", url),
-                ("latestPostBody", itemBody latestPost)
-              ]
-
-  return $ mconcat latestPostFields <> recentPostsField <> siteContext'
-  where
-    recentPostsField =
-      listField
-        "recentPosts"
-        (teaserField' <> siteContext')
-        (return recentPosts)
-    teaserField' = teaserField "teaser" (contentOnly postSnapshot)
-
-archivesContext :: [Item String] -> Context String -> Context String
-archivesContext posts siteContext' =
-  constField "title" "Archives"
-    <> listField "posts" siteContext' (return posts)
-    <> siteContext'
-
-draftArchivesContext :: [Item String] -> Context String -> Context String
-draftArchivesContext drafts siteContext' =
-  constField "title" "Draft Archive"
-    <> listField "posts" siteContext' (return drafts)
-    <> siteContext'
+draftArchivesCompiler _ = makeItem "draft archives"
