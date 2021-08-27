@@ -3,7 +3,7 @@ module Green.Rule.Page (pageRules) where
 import Green.Common
 import Green.Config
 import Green.Route
-import Green.Template
+import Green.Template.Custom
 
 pageRules :: SiteConfig -> Rules ()
 pageRules config =
@@ -16,10 +16,3 @@ pageRules config =
         "resume.md",
         "404.md"
       ]
-
-pageCompiler :: SiteConfig -> Compiler (Item String)
-pageCompiler _ = do
-  id' <- getUnderlying
-  debugCompiler $ "Compiling page " ++ show id'
-  getResourceBody
-    >>= applyAsTemplate defaultContext

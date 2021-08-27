@@ -1,9 +1,9 @@
 ---
-layout: post
 title: "Sterling Benchmarks"
 date: 2013-06-16T21:12:00-07:00
 comments: false
 tags: Functional Programming, Sterling, Language Design
+layout: post
 ---
 
 Since [mid January][], I’ve been developing a functional scripting language I

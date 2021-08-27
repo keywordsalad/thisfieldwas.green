@@ -3,6 +3,7 @@ module Green.Rule.Robot where
 import Green.Common
 import Green.Config
 import Green.Template
+import Green.Template.Custom
 
 robotsTxtRules :: SiteConfig -> Rules ()
 robotsTxtRules config = do
@@ -15,4 +16,4 @@ robotsTxtCompiler config = do
   makeItem ""
     >>= loadAndApplyTemplate
       (fromFilePath "_templates/robots.txt")
-      (config ^. siteContext)
+      (customContext config)

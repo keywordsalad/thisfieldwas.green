@@ -2,7 +2,7 @@
   <aside class="meatball-headshot">
     <picture>
       <img width="288" height="384"
-        src='$getRoute("images/about-me/headshot-w-meatball-doge_400w.png")$'
+        src="{{route 'images/about-me/headshot-w-meatball-doge_400w.png'}}"
         title="Myself and Meatball. He's cute cuz he's little."
         alt="Mysql and Meatball">
       <figcaption>
@@ -40,13 +40,13 @@
   </p>
 </section>
 
-$partial("_partials/employment.html")$
+{{partial "employment"}}
 
 <section class="personal-stuff">
   <div class="meatball-jellybean">
     <figure>
       <img width="200" height="266"
-        src='$getRoute("images/about-me/meatball-n-jelly-doges_400w.png")$'
+        src="{{route 'images/about-me/meatball-n-jelly-doges_400w.png'}}"
         title="Meatball is the little one, Jellybean is the big one."
         alt="Meatball and Jellybean">
       <figcaption>

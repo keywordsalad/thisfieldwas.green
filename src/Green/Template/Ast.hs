@@ -1,69 +1,72 @@
-module Green.Template.Ast where
+module Green.Template.Ast
+  ( Template (..),
+    Block (..),
+    getBlockName,
+    getBlockPos,
+    ApplyBlock (..),
+    DefaultBlock (..),
+    Expression (..),
+    getExpressionPos,
+    PrettyPrint (prettyPrint),
+  )
+where
 
 import Data.Binary
-import Data.List.NonEmpty
+import Data.List (intercalate)
+import Data.List.NonEmpty (NonEmpty)
+import qualified Data.List.NonEmpty as NonEmpty
 import GHC.Generics
 import qualified Hakyll as H
 import Text.Parsec hiding (getPosition)
 import Text.Parsec.Pos
 
-data Template = Template [Block] SourcePos
+data Template = Template [Block] FilePath
   deriving stock (Show, Generic)
 
-getTemplatePos :: Template -> SourcePos
-getTemplatePos (Template _ pos) = pos
-
 instance Binary Template where
-  get = do
-    f <- Template <$> get
-    binaryPos <- get :: Get BinaryPos
-    return $ f (unBinaryPos binaryPos)
+  get = Template <$> get <*> get
 
   put (Template blocks pos) = do
     put blocks
-    put $ BinaryPos pos
+    put pos
 
 instance H.Writable Template where
   write _ _ = return ()
 
 data Block
-  = TextBlock String SourcePos -- Any text, like this.
-  | ExpressionBlock Expression SourcePos -- {{ interpolated thing }}
-  | CommentBlock String SourcePos -- {{! this comment }}
-  | LayoutBlock Expression SourcePos -- {{@ include "this/file.md" }}
-  | TemplateStartBlock Expression SourcePos -- {{# expression }}
-  | TemplateNextBlock Expression SourcePos -- {{ else expression }}
-  | TemplateElseBlock SourcePos -- {{ else }}
-  | TemplateEndBlock SourcePos -- {{ end }}
-  | LayoutApplyBlock Expression Template SourcePos
-  | TemplateBlock (NonEmpty TemplateApplyBlock) (Maybe TemplateDefaultBlock) SourcePos
+  = TextBlock String SourcePos
+  | ExpressionBlock Expression SourcePos
+  | CommentBlock String SourcePos
+  | ChromeBlock Expression [Block] SourcePos
+  | AltBlock
+      (NonEmpty ApplyBlock)
+      (Maybe DefaultBlock)
+      SourcePos
   deriving stock (Show, Generic)
+
+getBlockName :: Block -> String
+getBlockName = \case
+  TextBlock {} -> "TextBlock"
+  ExpressionBlock {} -> "ExpressionBlock"
+  CommentBlock {} -> "CommentBlock"
+  ChromeBlock {} -> "ApplyBlock"
+  AltBlock {} -> "AltBlock"
 
 getBlockPos :: Block -> SourcePos
 getBlockPos = \case
   TextBlock _ pos -> pos
   ExpressionBlock _ pos -> pos
   CommentBlock _ pos -> pos
-  LayoutBlock _ pos -> pos
-  TemplateStartBlock _ pos -> pos
-  TemplateNextBlock _ pos -> pos
-  TemplateElseBlock pos -> pos
-  TemplateEndBlock pos -> pos
-  LayoutApplyBlock _ _ pos -> pos
-  TemplateBlock _ _ pos -> pos
+  ChromeBlock _ _ pos -> pos
+  AltBlock _ _ pos -> pos
 
 getBlockTag :: Block -> Int
 getBlockTag = \case
   TextBlock {} -> 1
   ExpressionBlock {} -> 2
   CommentBlock {} -> 3
-  LayoutBlock {} -> 4
-  TemplateStartBlock {} -> 5
-  TemplateNextBlock {} -> 6
-  TemplateElseBlock {} -> 7
-  TemplateEndBlock {} -> 8
-  LayoutApplyBlock {} -> 9
-  TemplateBlock {} -> 10
+  ChromeBlock {} -> 4
+  AltBlock {} -> 5
 
 instance Binary Block where
   get = do
@@ -72,13 +75,8 @@ instance Binary Block where
       1 -> TextBlock <$> get
       2 -> ExpressionBlock <$> get
       3 -> CommentBlock <$> get
-      4 -> LayoutBlock <$> get
-      5 -> TemplateStartBlock <$> get
-      6 -> TemplateNextBlock <$> get
-      7 -> pure TemplateElseBlock
-      8 -> pure TemplateEndBlock
-      9 -> LayoutApplyBlock <$> get <*> get
-      10 -> TemplateBlock <$> get <*> get
+      4 -> ChromeBlock <$> get <*> get
+      5 -> AltBlock <$> get <*> get
       _ -> error $ "Unrecognized block tag " ++ show tag
     binaryPos <- get :: Get BinaryPos
     return $ f (unBinaryPos binaryPos)
@@ -89,13 +87,8 @@ instance Binary Block where
       TextBlock text _ -> put text
       ExpressionBlock expression _ -> put expression
       CommentBlock text _ -> put text
-      LayoutBlock expression _ -> put expression
-      TemplateStartBlock expression _ -> put expression
-      TemplateNextBlock expression _ -> put expression
-      TemplateElseBlock _ -> return ()
-      TemplateEndBlock _ -> return ()
-      LayoutApplyBlock expression blocks _ -> put expression >> put blocks
-      TemplateBlock blocks default' _ -> put blocks >> put default'
+      ChromeBlock expression blocks _ -> put expression >> put blocks
+      AltBlock blocks default' _ -> put blocks >> put default'
     put $ BinaryPos (getBlockPos block)
 
 newtype BinaryPos = BinaryPos SourcePos
@@ -112,36 +105,30 @@ instance Binary BinaryPos where
     put $ sourceLine pos
     put $ sourceColumn pos
 
-data TemplateApplyBlock = TemplateApplyBlock Expression Template SourcePos
+data ApplyBlock = ApplyBlock Expression [Block] SourcePos
   deriving stock (Show, Generic)
 
-getTemplateApplyPos :: TemplateApplyBlock -> SourcePos
-getTemplateApplyPos (TemplateApplyBlock _ _ pos) = pos
-
-instance Binary TemplateApplyBlock where
+instance Binary ApplyBlock where
   get = do
-    f <- TemplateApplyBlock <$> get <*> get
+    f <- ApplyBlock <$> get <*> get
     binaryPos <- get :: Get BinaryPos
     return $ f (unBinaryPos binaryPos)
 
-  put (TemplateApplyBlock expression blocks pos) = do
+  put (ApplyBlock expression blocks pos) = do
     put expression
     put blocks
     put $ BinaryPos pos
 
-data TemplateDefaultBlock = TemplateDefaultBlock Template SourcePos
+data DefaultBlock = DefaultBlock [Block] SourcePos
   deriving stock (Show, Generic)
 
-getTemplateDefaultPos :: TemplateDefaultBlock -> SourcePos
-getTemplateDefaultPos (TemplateDefaultBlock _ pos) = pos
-
-instance Binary TemplateDefaultBlock where
+instance Binary DefaultBlock where
   get = do
-    f <- TemplateDefaultBlock <$> get
+    f <- DefaultBlock <$> get
     binaryPos <- get :: Get BinaryPos
     return $ f (unBinaryPos binaryPos)
 
-  put (TemplateDefaultBlock blocks pos) = do
+  put (DefaultBlock blocks pos) = do
     put blocks
     put $ BinaryPos pos
 
@@ -216,3 +203,170 @@ instance Binary Expression where
       ContextExpression pairs _ -> put pairs
       ListExpression values _ -> put values
     put $ BinaryPos (getExpressionPos expression)
+
+indent :: Int -> String
+indent level = mconcat $ replicate level "  "
+
+class PrettyPrint a where
+  prettyPrint :: a -> String
+  prettyPrint item =
+    prettyPrint' 0 item ++ "\n"
+
+  prettyPrint' :: Int -> a -> String
+  prettyPrint' level item =
+    indent level ++ prettyIndented' (level + 1) item
+
+  prettyLabel' :: Int -> String -> a -> String
+  prettyLabel' level label' item =
+    indent level ++ label' ++ ": " ++ prettyIndented' (level + 1) item
+
+  prettyIndented' :: Int -> a -> String
+
+instance PrettyPrint SourcePos where
+  prettyIndented' _ pos = "in " ++ show pos
+
+instance (PrettyPrint a) => PrettyPrint (String, a) where
+  prettyIndented' level (label', item) =
+    show label' ++ " -> " ++ prettyIndented' level item
+
+instance (PrettyPrint a) => PrettyPrint (Maybe a) where
+  prettyIndented' level = \case
+    Just item -> prettyIndented' level item
+    Nothing -> "Undefined"
+
+instance (PrettyPrint a) => PrettyPrint [a] where
+  prettyIndented' level items
+    | null items = "[]"
+    | otherwise =
+      "[\n"
+        ++ (intercalate ",\n" (prettyPrint' (level + 1) <$> items) ++ "\n")
+        ++ (indent level ++ "]")
+
+instance PrettyPrint Template where
+  prettyIndented' level (Template blocks pos) =
+    intercalate "\n" $
+      [ "Template in " ++ show pos,
+        prettyLabel' level "blocks" blocks
+      ]
+
+instance PrettyPrint Block where
+  prettyIndented' level = \case
+    ExpressionBlock expression pos ->
+      intercalate "\n" $
+        [ "ExpressionBlock",
+          pl "expression" expression,
+          pp pos
+        ]
+    TextBlock text pos ->
+      intercalate "\n" $
+        [ "TextBlock",
+          prettyText text,
+          pp pos
+        ]
+    CommentBlock comment pos ->
+      intercalate "\n" $
+        [ "CommentBlock",
+          prettyText comment,
+          pp pos
+        ]
+    ChromeBlock expression blocks pos ->
+      intercalate "\n" $
+        [ "ChromeBlock",
+          pl "expression" expression,
+          pl "blocks" blocks,
+          pp pos
+        ]
+    AltBlock blocks defaultBlock pos ->
+      intercalate "\n" $
+        [ "AltBlock",
+          pl "blocks" (NonEmpty.toList blocks),
+          pl "default" defaultBlock,
+          pp pos
+        ]
+    where
+      prettyText text = unlines $ (indent level ++) <$> lines text
+      pp = prettyPrint' level
+      pl :: (PrettyPrint a) => String -> a -> String
+      pl = prettyLabel' level
+
+instance PrettyPrint ApplyBlock where
+  prettyIndented' level (ApplyBlock expression blocks pos) =
+    intercalate "\n" $
+      [ "ApplyBlock",
+        prettyLabel' level "guard" expression,
+        prettyLabel' level "blocks" blocks,
+        prettyPrint' level pos
+      ]
+
+instance PrettyPrint DefaultBlock where
+  prettyIndented' level (DefaultBlock blocks pos) =
+    intercalate "\n" $
+      [ "DefaultBlock",
+        prettyLabel' level "blocks" blocks,
+        prettyPrint' level pos
+      ]
+
+instance PrettyPrint Expression where
+  prettyIndented' level = \case
+    NameExpression name pos ->
+      intercalate "\n" $
+        [ "NameExpression " ++ show name,
+          pp pos
+        ]
+    StringExpression value pos ->
+      intercalate "\n" $
+        [ "StringExpression " ++ show value,
+          pp pos
+        ]
+    IntExpression value pos ->
+      intercalate "\n" $
+        [ "IntExpression " ++ show value,
+          pp pos
+        ]
+    DoubleExpression value pos ->
+      intercalate "\n" $
+        [ "DoubleExpression " ++ show value,
+          pp pos
+        ]
+    BoolExpression value pos ->
+      intercalate "\n" $
+        [ "BoolExpression " ++ show value,
+          pp pos
+        ]
+    ApplyExpression f x pos ->
+      intercalate "\n" $
+        [ "ApplyExpression",
+          pl "fn" f,
+          pl "arg" x,
+          pp pos
+        ]
+    AccessExpression target field pos ->
+      intercalate "\n" $
+        [ "AccessExpression",
+          pl "target" target,
+          pl "field" field,
+          pp pos
+        ]
+    FilterExpression x f pos ->
+      intercalate "\n" $
+        [ "FilterExpression",
+          pl "arg" x,
+          pl "filter" f,
+          pp pos
+        ]
+    ContextExpression context pos ->
+      intercalate "\n" $
+        [ "ContextExpression",
+          pp context,
+          pp pos
+        ]
+    ListExpression values pos ->
+      intercalate "\n" $
+        [ "ListExpression",
+          pp values,
+          pp pos
+        ]
+    where
+      pp :: (PrettyPrint a) => a -> String
+      pp = prettyPrint' level
+      pl = prettyLabel' level

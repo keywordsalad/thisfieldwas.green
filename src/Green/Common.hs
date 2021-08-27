@@ -41,7 +41,7 @@ import Data.Foldable (sequenceA_)
 import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Maybe (fromJust, fromMaybe, isJust, isNothing, maybe, maybeToList)
-import Data.Time (LocalTime)
+import Data.Time (ZonedTime)
 import Data.Time.Format
 import Hakyll.Core.Compiler
 import Hakyll.Core.Dependencies

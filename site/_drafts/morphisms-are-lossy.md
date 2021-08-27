@@ -1,5 +1,4 @@
 ---
-layout: post
 title: "Morphisms are Lossy"
 author: "Logan McGrath"
 date: 2021-06-18T18:02:00-07:00
@@ -9,6 +8,7 @@ tags:
   - Category Theory
   - Scala
   - Cats
+layout: post
 ---
 
 Outline:

@@ -1,11 +1,11 @@
 ---
-layout: post
 title: "App-Config-App in Action"
 author: "Logan McGrath"
 date: 2012-11-20T17:00:00-06:00
 published: 2012-11-20T17:00:00-06:00
 comments: false
 tags: AngularJS, Perforce, SCM, Sinatra, Configuration Management
+layout: post
 ---
 
 Paul Hammant found this cool [Server-Side Piano][] and I've modified it to be
@@ -15,7 +15,7 @@ configuration without reloading the UI.
 
 <!--more-->
 
-$youtube("hZbQhF6fsEo", "app-config-demo")$
+{{youtube video: "hZbQhF6fsEo", id: "app-config-demo"}}
 
 ## Making it work for yourself
 

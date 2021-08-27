@@ -1,10 +1,12 @@
-<aside id="$imgId$-aside" class="image">
+<aside {{#if id}}id="{{id}}-aside" {{#end}}class="image">
   <figure>
-    <a href="$imgSrc$" class="image-link">
-      <img id="$imgId$" src="$imgSrc$" title="$imgTitle$" alt="$imgAlt$">
+    <a href="{{src}}" class="image-link">
+      <img src="{{src}}" {{#if id}}id="{{id}}"{{#end}}
+        {{#if title}}title="{{title}}"{{#end}}
+        {{#if alt}}alt="{{alt}}"{{#end}}>
     </a>
   </figure>
-  $if(imgTitle)$
-  <figcaption>$imgTitle$</figcaption>
-  $endif$
+  {{#if title}}
+  <figcaption>{{title}}</figcaption>
+  {{#end}}
 </aside>

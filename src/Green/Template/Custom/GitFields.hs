@@ -1,4 +1,4 @@
-module Green.Context.GitCommits (gitCommits) where
+module Green.Template.Custom.GitFields (gitCommits) where
 
 import Data.Binary
 import GHC.Generics (Generic)
@@ -42,18 +42,17 @@ type LogFormat = String
 
 gitLogField :: LogFormat -> Item a -> Compiler String
 gitLogField format item =
-  cached ("Green.Context.GitCommits.gitLogField:" ++ format) do
-    unsafeCompiler do
-      maybeResult <- gitLog format (Just $ toFilePath (itemIdentifier item))
-      case maybeResult of
-        Just result -> return result
-        Nothing -> fromJust <$> gitLog format Nothing
+  unsafeCompiler do
+    maybeResult <- gitLog format (Just $ toFilePath (itemIdentifier item))
+    case maybeResult of
+      Just result -> return result
+      Nothing -> fromJust <$> gitLog format Nothing
 
 gitFileField :: (IntoValue v a) => String -> (GitFile -> v) -> Context a
 gitFileField key f = field key $ fmap f . gitFileCompiler
 
 gitFileCompiler :: Item a -> Compiler GitFile
-gitFileCompiler item = cached "Green.Context.GitCommits.gitFileCompiler" do
+gitFileCompiler item =
   GitFile itemFilePath
     <$> unsafeCompiler (doesFileExist itemFilePath)
     <*> unsafeCompiler (isChanged itemFilePath)

@@ -1,5 +1,6 @@
 module Green.Util where
 
+import Control.Applicative (Alternative, empty)
 import Data.Char
 import Data.String.Utils as S
 import Green.Common
@@ -53,8 +54,8 @@ kebabCase (x : xs)
       | otherwise = y : kebabCase ys
     notAllowed c = not (isAlphaNum c || c `elem` ("_." :: [Char]))
 
-firstMaybe :: (Foldable m) => m (Maybe a) -> Maybe a
-firstMaybe = foldl (<|>) Nothing
+firstAlt :: (Foldable m, Alternative n) => m (n a) -> n a
+firstAlt = foldl (<|>) empty
 
 uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
 uncurry3 f (x, y, z) = f x y z

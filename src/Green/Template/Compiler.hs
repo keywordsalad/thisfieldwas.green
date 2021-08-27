@@ -1,36 +1,15 @@
-module Green.Template.Compiler
-  ( applyAsTemplate,
-    applyTemplate,
-    compileTemplateItem,
-    loadAndApplyTemplate,
-    templateCompiler,
-  )
-where
+module Green.Template.Compiler where
 
-import Data.Foldable (foldlM)
-import Data.List (intercalate)
-import Data.Maybe
+import Data.Bifunctor
+import Data.List.NonEmpty (NonEmpty ((:|)))
 import Green.Template.Ast
-import Green.Template.Context
-import Green.Template.Parser (parseTemplate)
+import Green.Template.Context hiding (field)
+import Green.Template.Source.Parser (parse)
 import Hakyll (Compiler, Item)
 import qualified Hakyll as H
-import Text.Parsec (SourcePos, sourceName)
 import Prelude hiding (lookup)
 
-isTruthy :: (MonadFail m) => ContextValue a -> m Bool
-isTruthy = \case
-  ContextValue {} -> return True
-  ListValue values -> return $ not (null values)
-  BoolValue value -> return value
-  StringValue value -> return $ not (null value)
-  DoubleValue value -> return $ value /= 0
-  IntValue value -> return $ value /= 0
-  NameValue name -> fail $ "Unevaluated name " ++ show name
-  FunctionValue {} -> return True
-  TemplateValue (Template blocks _) -> return $ not (null blocks)
-  EmptyValue {} -> return False
-
+-- | Compiles an item as a template.
 templateCompiler :: Compiler (Item Template)
 templateCompiler =
   H.cached "Green.Template.Compiler.templateCompiler" $
@@ -38,121 +17,131 @@ templateCompiler =
       >>= compileTemplateItem
       >>= H.makeItem
 
+-- | Takes an item and compiles a template from it.
 compileTemplateItem :: Item String -> Compiler Template
 compileTemplateItem item = do
-  filePath <- H.getResourceFilePath
-  H.debugCompiler $ "Compiling template from " ++ show filePath
-  either (fail . show) return (parseTemplate filePath (H.itemBody item))
+  let filePath = H.toFilePath $ H.itemIdentifier item
+  either (fail . show) return $ parse filePath (H.itemBody item)
 
+loadTemplate :: H.Identifier -> Compiler (Item Template)
+loadTemplate = H.load
+
+loadTemplateBody :: H.Identifier -> Compiler Template
+loadTemplateBody id' = H.itemBody <$> loadTemplate id'
+
+-- | Applies an item as a template to itself.
 applyAsTemplate :: Context String -> Item String -> Compiler (Item String)
 applyAsTemplate context item = do
   template <- compileTemplateItem item
   applyTemplate template context item
 
-applyTemplate :: Template -> Context a -> Item a -> Compiler (Item String)
-applyTemplate template context item = do
-  let (Template blocks pos) = template
-  let id' = H.itemIdentifier item
-  H.debugCompiler $ "Applying template " ++ show (sourceName pos) ++ " to item " ++ show id'
-  context' <- (context <>) <$> getContext (H.itemIdentifier item)
-  H.makeItem =<< applyBlocks context' blocks item
-
-loadAndApplyTemplate :: H.Identifier -> Context a -> Item a -> Compiler (Item String)
+loadAndApplyTemplate :: H.Identifier -> Context String -> Item String -> Compiler (Item String)
 loadAndApplyTemplate id' context item = do
-  template <- H.loadBody id'
+  template <- loadTemplateBody id'
   applyTemplate template context item
 
-applyBlocks :: Context a -> [Block] -> Item a -> Compiler String
-applyBlocks context (block : rest) item = do
-  thisResult <- applyBlock context block item
-  restResults <- applyBlocks context rest item
-  return (thisResult ++ restResults)
-applyBlocks _ [] _ = return ""
+-- | Applies a template with context to an item
+applyTemplate :: Template -> Context String -> Item String -> Compiler (Item String)
+applyTemplate (Template bs _) context item = do
+  result <- reduceBlocks context bs item
+  return $ H.itemSetBody result item
 
-applyBlock :: Context a -> Block -> Item a -> Compiler String
-applyBlock context block item = case block of
-  TextBlock value _ -> return value
-  ExpressionBlock expression _ -> stringify <$> eval context expression item
-  CommentBlock _ _ -> return ""
-  LayoutApplyBlock expression template _ -> snd <$> applyGuard expression template
-  TemplateBlock blocks defaultBlocks _ ->
-    foldlM applyTemplateBlocks (False, "") blocks >>= \case
-      (True, result) -> return result
-      _ -> applyDefaultBlocks
-    where
-      applyTemplateBlocks result@(stop, _) (TemplateApplyBlock expression template _)
-        | stop = return result
-        | otherwise = applyGuard expression template
-      applyDefaultBlocks =
-        case defaultBlocks of
-          Just (TemplateDefaultBlock (Template blocks' _) _) -> applyBlocks context blocks' item
-          Nothing -> return ""
-  _ -> fail $ "Unexpected block in " ++ show (getBlockPos block)
+reduceBlocks :: Context String -> [Block] -> Item String -> Compiler String
+reduceBlocks context bs item = do
+  values <- applyBlocks context bs item
+  stringify context item . intoValue $ values
+
+applyBlocks :: Context String -> [Block] -> Item String -> Compiler [ContextValue String]
+applyBlocks context bs item = mapM applyBlock' bs
   where
-    stringify = \case
-      StringValue value -> value
-      IntValue value -> show value
-      DoubleValue value -> show value
-      BoolValue value -> show value
-      ListValue values -> intercalate "" (stringify <$> values)
-      x -> show x
-    applyGuard guardExp template@(Template blocks _) =
-      eval context guardExp item >>= \case
-        FunctionValue f -> do
-          result <- f (TemplateValue template) context item
-          truthy <- isTruthy result
-          return (truthy, stringify result)
-        guard@(ContextValue context') ->
-          isTruthy guard >>= \case
-            True -> (True,) <$> applyBlocks (context' <> context) blocks item
-            False -> return (False, "")
-        guard ->
-          isTruthy guard >>= \case
-            True -> (True,) <$> applyBlocks context blocks item
-            False -> return (False, "")
+    applyBlock' block = applyBlock context block item
 
-eval :: Context a -> Expression -> Item a -> Compiler (ContextValue a)
-eval context expression item = case expression of
-  StringExpression value _ -> return $ StringValue value
-  IntExpression value _ -> return $ IntValue value
-  DoubleExpression value _ -> return $ DoubleValue value
-  BoolExpression value _ -> return $ BoolValue value
-  --
-  ApplyExpression f x pos -> apply f x pos context item
-  FilterExpression x f pos -> apply f x pos context item
-  --
-  ListExpression values _ -> do
-    let eval' e = eval context e item
-    ListValue <$> mapM eval' values
-  --
-  ContextExpression expKeyVals _ -> do
-    let evalKV k v = (k,) <$> eval context v item
-    keyVals <- mapM (uncurry evalKV) expKeyVals
-    return $ ContextValue (intoContext keyVals)
-  --
-  NameExpression name _ -> unContext context name item
-  --
-  AccessExpression targetExp fieldExp pos ->
-    eval context targetExp item >>= \case
-      ContextValue target ->
-        case fieldExp of
-          NameExpression field' _ -> unContext target field' item
-          _ ->
-            eval context fieldExp item >>= \case
-              StringValue field' -> unContext target field' item
-              field' -> fail $ "Can't access field from context via " ++ getValueType field' ++ " in " ++ show pos
-      ListValue list ->
-        eval context fieldExp item >>= \case
-          IntValue index
-            | index < length list -> return $ list !! index
-            | otherwise -> fail $ "Index " ++ show index ++ " out of bounds 0-" ++ show (length list) ++ " in " ++ show pos
-          val -> fail $ "Can't index into list with " ++ getValueType val ++ " in " ++ show pos
-      target -> fail $ "Can't access field from " ++ getValueType target ++ " in " ++ show pos
+applyBlock :: Context String -> Block -> Item String -> Compiler (ContextValue String)
+applyBlock context block item = case block of
+  TextBlock t _ -> return $ intoValue t
+  ExpressionBlock e _ -> eval context e item
+  CommentBlock {} -> return EmptyValue
+  ChromeBlock e bs _ -> intoValue <$> applyGuard e bs [] Nothing
+  AltBlock (ApplyBlock e bs _ :| alts) mdef _ -> intoValue <$> applyGuard e bs alts mdef
+  where
+    applyGuard e bs alts mdef =
+      eval context e item >>= \case
+        FunctionValue f ->
+          pure <$> f (intoValue bs) context item
+        x -> do
+          truthy <- isTruthy x
+          if truthy
+            then applyBlocks context bs item
+            else applyAlt alts mdef
+    --
+    applyAlt (ApplyBlock e bs _ : alts) mdef = applyGuard e bs alts mdef
+    applyAlt _ (Just (DefaultBlock bs _)) = applyBlocks context bs item
+    applyAlt _ Nothing = return []
 
-apply :: Expression -> Expression -> SourcePos -> Context a -> Item a -> Compiler (ContextValue a)
-apply fExp xExp pos context item =
-  eval context fExp item >>= \case
-    FunctionValue f' -> do
-      x <- eval context xExp item
-      f' x context item
-    x -> fail $ "Can't apply " ++ show x ++ " as function in " ++ show pos
+eval :: Context String -> Expression -> Item String -> Compiler (ContextValue String)
+eval context e item = case e of
+  NameExpression key _ -> unContext context key item
+  StringExpression s _ -> return $ intoValue s
+  IntExpression n _ -> return $ intoValue n
+  DoubleExpression x _ -> return $ intoValue x
+  BoolExpression b _ -> return $ intoValue b
+  ApplyExpression f x _ -> apply f x
+  AccessExpression target field pos ->
+    eval context target item >>= \case
+      ContextValue target' -> do
+        field' <-
+          eval context field item >>= \case
+            StringValue name -> return name
+            x -> fail $ "Invalid field " ++ show x ++ " near " ++ show (getExpressionPos field)
+        unContext target' field' item
+      x -> fail $ "Invalid context " ++ show x ++ " near " ++ show pos
+  FilterExpression x f _ -> apply f x
+  ContextExpression pairs _ -> do
+    pairs' <- sequence (sequence . second (\x -> eval context x item) <$> pairs)
+    return $ ContextValue (intoContext pairs')
+  ListExpression xs _ -> intoValue <$> mapM (\x -> eval context x item) xs
+  where
+    apply f x =
+      eval context f item >>= \case
+        FunctionValue f' -> f' (ThunkValue (eval context x item)) context item
+        x' -> fail $ "Invalid function " ++ show x' ++ " in " ++ show (getExpressionPos f)
+
+stringify :: Context String -> Item String -> ContextValue String -> Compiler String
+stringify context item value = case value of
+  EmptyValue -> return ""
+  UndefinedValue name -> fail $ "Undefined name: " ++ show name
+  ContextValue {} -> fail "Can't stringify context"
+  ListValue xs -> mconcat <$> mapM (stringify context item) xs
+  BoolValue b -> return $ show b
+  StringValue s -> return s
+  DoubleValue x -> return $ show x
+  IntValue n -> return $ show n
+  FunctionValue {} -> fail "Can't stringify function"
+  BlockValue block -> case block of
+    TextBlock t _ -> return t
+    ExpressionBlock e _ -> stringify context item =<< eval context e item
+    CommentBlock {} -> return ""
+    ChromeBlock e _ pos -> fail $ "Can't stringify unevaluated chrome block at " ++ show pos ++ ": " ++ show e
+    AltBlock (ApplyBlock e _ pos :| _) _ _ -> fail $ "Can't stringify unevaluated alt block at " ++ show pos ++ ": " ++ show e
+  ItemValue i -> return $ H.itemBody i
+  ThunkValue fx -> stringify context item =<< force =<< fx
+
+isTruthy :: ContextValue a -> Compiler Bool
+isTruthy = \case
+  EmptyValue -> return False
+  UndefinedValue {} -> return False
+  ContextValue {} -> return True
+  ListValue xs -> return $ not (null xs)
+  BoolValue x -> return x
+  StringValue x -> return $ not (null x)
+  DoubleValue x -> return $ x /= 0
+  IntValue x -> return $ x /= 0
+  FunctionValue {} -> return True
+  BlockValue {} -> return True
+  ItemValue {} -> return True
+  ThunkValue fx -> isTruthy =<< force =<< fx
+
+force :: ContextValue a -> Compiler (ContextValue a)
+force = \case
+  ThunkValue fx -> force =<< fx
+  x -> return x

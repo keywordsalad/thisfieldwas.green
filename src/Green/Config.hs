@@ -1,12 +1,10 @@
 module Green.Config where
 
 import Data.Ini.Config
-import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Green.Common
 import Green.Lens
-import Green.Template
 import Hakyll.Core.Configuration as HC
 
 data SiteDebug = SiteDebug
@@ -42,8 +40,7 @@ data SiteConfig = SiteConfig
     _siteGitWebUrl :: String,
     _siteDebug :: SiteDebug,
     _siteHakyllConfiguration :: Configuration,
-    _siteTime :: LocalTime,
-    _siteContext :: Context String,
+    _siteTime :: ZonedTime,
     _siteTimeLocale :: TimeLocale,
     _siteDisplayFormat :: SiteDisplayFormat
   }
@@ -77,7 +74,7 @@ siteInMemoryCache = siteHakyllConfiguration . inMemoryCacheL
 hasEnvFlag :: String -> [(String, String)] -> Bool
 hasEnvFlag f e = isJust (lookup f e)
 
-parseConfigIni :: [(String, String)] -> TimeLocale -> LocalTime -> Text -> Either String SiteConfig
+parseConfigIni :: [(String, String)] -> TimeLocale -> ZonedTime -> Text -> Either String SiteConfig
 parseConfigIni env timeLocale time iniText = parseIniFile iniText do
   hakyllConfiguration <- section "Hakyll" do
     providerDirectory' <- fieldOf "providerDirectory" string
@@ -113,7 +110,6 @@ parseConfigIni env timeLocale time iniText = parseIniFile iniText do
       <*> pure debugSettings
       <*> pure hakyllConfiguration
       <*> pure time
-      <*> pure mempty
       <*> pure timeLocale
       <*> pure displayFormat
   where
@@ -121,7 +117,7 @@ parseConfigIni env timeLocale time iniText = parseIniFile iniText do
       ignoreFile defaultConfiguration path
         && takeFileName path `notElem` allowedFiles
 
-fieldOfStrings :: IsString a => Text -> SectionParser [a]
+fieldOfStrings :: Text -> SectionParser [String]
 fieldOfStrings k = fieldDefOf k (listWithSeparator "," string) []
 
 configEnvFlag :: String -> String -> Bool -> [(String, String)] -> SectionParser Bool
@@ -131,9 +127,9 @@ configEnvFlag configKey envKey defaultValue env =
     Nothing -> fieldFlagDef (T.pack configKey) defaultValue
 
 configEnvMbOf :: String -> String -> (Text -> Either String a) -> [(String, String)] -> SectionParser (Maybe a)
-configEnvMbOf configKey envKey parse env =
-  fieldFromEnv <|> fieldMbOf (T.pack configKey) parse
+configEnvMbOf configKey envKey parseFn env =
+  fieldFromEnv <|> fieldMbOf (T.pack configKey) parseFn
   where
-    fieldFromEnv = sequence $ getValue . parse . T.pack <$> lookup envKey env
+    fieldFromEnv = sequence $ getValue . parseFn . T.pack <$> lookup envKey env
     getValue (Left e) = error e
     getValue (Right v) = return v

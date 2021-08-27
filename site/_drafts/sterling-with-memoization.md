@@ -1,10 +1,10 @@
 ---
-layout: post
 title: "Sterling With Memoization"
 author: "Logan McGrath"
 date: 2013-06-17T04:26:00-07:00
 comments: false
 tags: Sterling, Functional Programming, Language Design
+layout: post
 ---
 
 In my [last post][] I wrote about performance in the [Sterling][] programming
@@ -133,7 +133,7 @@ function should not leverage memoization.
 * [Commit containing memoization changes][]
 * [Benchmark showing O(1) complexity][]
 
-[last post]: $getRoute("_drafts/sterling-benchmarks.md")$
+[last post]: {{route '_drafts/sterling-benchmarks.md'}}
 [Sterling]: https://github.com/lmcgrath/sterling
 [Memoization]: https://en.wikipedia.org/wiki/Memoization
 [Commit containing memoization changes]: https://github.com/lmcgrath/sterling/commit/7d69d49a911d2d916701fa973e02ffabe82afe9d

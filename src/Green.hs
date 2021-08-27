@@ -5,7 +5,6 @@ import Data.Time
 import Green.Command
 import Green.Common
 import Green.Config
-import Green.Context
 import Green.Rule
 import qualified Hakyll as H
 import Options.Applicative
@@ -27,8 +26,7 @@ author = do
 loadSiteConfig :: IO SiteConfig
 loadSiteConfig = do
   env <- getEnvironment
-  time <- utcToLocalTime <$> getCurrentTimeZone <*> getCurrentTime
+  time <- utcToZonedTime <$> getCurrentTimeZone <*> getCurrentTime
   configIniText <- TIO.readFile "config.ini"
-  case parseConfigIni env defaultTimeLocale time configIniText of
-    Left e -> fail e
-    Right config -> return $ config & siteContext .~ baseContext config
+  let result = parseConfigIni env defaultTimeLocale time configIniText
+  either fail return result

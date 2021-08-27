@@ -1,10 +1,10 @@
 ---
-layout: post
 title: "Using Perforce Chronicle for application configuration"
 author: "Logan McGrath"
 date: 2012-11-07T13:54:00-06:00
 published: 2012-11-07T13:54:00-06:00
 tags: Perforce, Configuration Management
+layout: post
 ---
 
 Following Paul Hammant's post [App-config workflow using SCM][] and subsequent
@@ -83,14 +83,14 @@ with PHP.
 The source JSON configuration is the same, albeit sorted:
 
 ```{.json .numberLines}
-$getCode("app-config/stack_configuration.json")$
+{{code "app-config/stack_configuration.json"}}
 ```
 
 The `index.html` page has been modified from the original to support only the
 basic _commit_ and _diffs_ functionality:
 
 ```{.html .numberLines}
-$getCode("app-config/index.html")$
+{{code "app-config/index.html"}}
 ```
 
 Both of these assets were added by performing:
@@ -130,28 +130,28 @@ To create the module, the following paths need to be added:
 Declare the module with `INSTALL/application/appconfig/module.ini`:
 
 ```{.ini .numberLines}
-$getCode("app-config/module/module.ini")$
+{{code "app-config/module/module.ini"}}
 ```
 
 Add a view script for displaying plaintext
 assets, `INSTALL/application/appconfig/views/scripts/index/index.phtml`:
 
 ```{.php .numberLines}
-$getCode("app-config/module/views/scripts/index/index.phtml")$
+{{code "app-config/module/views/scripts/index/index.phtml"}}
 ```
 
 Add a view script for displaying
 diffs, `INSTALL/application/appconfig/views/scripts/index/diffs.phtml`:
 
 ```{.php .numberLines}
-$getCode("app-config/module/views/scripts/index/diffs.phtml")$
+{{code "app-config/module/views/scripts/index/diffs.phtml"}}
 ```
 
 And a controller
 at `INSTALL/application/appconfig/controllers/IndexController.phtml`:
 
 ```{.php .numberLines}
-$getCode("app-config/module/controllers/IndexController.php")$
+{{code "app-config/module/controllers/IndexController.php"}}
 ```
 
 ## AngularJS
@@ -167,27 +167,27 @@ stack_configuration.json and post changes back.
 From `http://localhost/appconfig/index.html`, the data from
 stack_configuration.json is loaded into the form:
 
-$img("img-config-form", "/images/app-config/start.png")$
+{{img id: "img-config-form", src: "/images/app-config/start.png"}}
 
 Edits to stack_configuration.json can be made using the form, and the diffs
 viewed by clicking on "View Diffs":
 
-$img("img-config-diffs", "/images/app-config/diffs.png")$
+{{img id: "img-config-diffs", src: "/images/app-config/diffs.png"}}
 
 The changes can be saved by entering a commit message and clicking "Commit
 Changes". After which, clicking "View Diffs" will show no changes:
 
-$img("img-config-commit", "/images/app-config/diffs-after-commit.png")$
+{{img id: "img-config-commit", src: "/images/app-config/diffs-after-commit.png"}}
 
 To show that edits have in fact been made to stack_configuration.json, go
 to `http://localhost/stack_configuration.json`, select "History" and click on "
 History List":
 
-$img("img-config-history", "/images/app-config/history.png")$
+{{img id: "img-config-history", src: "/images/app-config/history.png"}}
 
 Chronicle also provides an interface for viewing diffs between revisions:
 
-$img("img-config-revisions", "/images/app-config/history-diffs.png")$
+{{img id: "img-config-revisions", src: "/images/app-config/history-diffs.png"}}
 
 ## Disk Usage
 
@@ -277,9 +277,9 @@ I had never written professionally before or been aware of configuration managem
 
 The other posts in this series were also written with guidance from Paul:
 
-- $linkedTitle("_posts/2012-11-16-scm-backed-application-configuration-with-perforce.md")$
-- $linkedTitle("_posts/2012-11-20-app-config-app-in-action.md")$
-- $linkedTitle("_posts/2012-11-28-promoting-changes-with-app-config-app.md")$
+- {{linkedTitle "_posts/2012-11-16-scm-backed-application-configuration-with-perforce.md"}}
+- {{linkedTitle "_posts/2012-11-20-app-config-app-in-action.md"}}
+- {{linkedTitle "_posts/2012-11-28-promoting-changes-with-app-config-app.md"}}
 
 The subject of configuration as described in these posts is still fresh even after nearly ten years. Even now configuration as code still doesn't have a perfect solution, though products have become available that make managing configuration easier. Changing configuration in a running process as a general solution remains elusive, as supporting it imposes a lot of constraints on design.
 

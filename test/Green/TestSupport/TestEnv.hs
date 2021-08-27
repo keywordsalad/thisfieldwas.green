@@ -9,7 +9,7 @@ import qualified Hakyll.Core.Provider as HP
 import qualified Hakyll.Core.Store as HS
 
 data TestEnv = TestEnv
-  { testTime :: LocalTime,
+  { testTime :: ZonedTime,
     testHakyllConfig :: H.Configuration,
     testStore :: HS.Store,
     testProvider :: HP.Provider,

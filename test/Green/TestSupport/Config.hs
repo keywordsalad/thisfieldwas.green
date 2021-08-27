@@ -8,10 +8,10 @@ import Hakyll as H
 defaultTestTimeString :: String
 defaultTestTimeString = "2013-06-16T21:12:00-07:00"
 
-defaultTestTime :: (MonadFail m) => m LocalTime
+defaultTestTime :: (MonadFail m) => m ZonedTime
 defaultTestTime = timeFromString defaultTestTimeString
 
-timeFromString :: (MonadFail m) => String -> m LocalTime
+timeFromString :: (MonadFail m) => String -> m ZonedTime
 timeFromString = parseTimeM True defaultTimeLocale "%FT%T%EZ"
 
 defaultHakyllConfig :: H.Configuration
@@ -46,6 +46,5 @@ defaultSiteConfigWith hakyllConfig =
             _displayDateShortFormat = "%B %e, %Y",
             _displayTimeFormat = "%l:%M %p %EZ"
           },
-      _siteContext = mempty,
       _siteDebug = defaultSiteDebug
     }

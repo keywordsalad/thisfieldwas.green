@@ -18,7 +18,7 @@
         this.svrMessage;
         this.message;
         this.cfg = $resource("/appconfig/stack_configuration.json").get({});
-        
+
         this.save = function() {
             self.cfg.$save({message: self.message}, function() {
                 alert("Config saved to server");
@@ -27,18 +27,18 @@
             });
             self.message = "";
         };
-        
+
         this.newNick = function() {
             self.cfg.bannedNicks.push(self.newNickname);
             self.newNickname = "";
         };
-        
+
         this.diffs = function() {
             $xhr("post", "/appconfig/diffs/stack_configuration.json", angular.toJson(self.cfg), function(code, svrMessage) {
                 self.svrMessage = svrMessage;
             });
         };
-        
+
         this.deleteNick = function(nick) {
             var oldBannedNicks = self.cfg.bannedNicks;
             self.cfg.bannedNicks = [];
@@ -49,25 +49,25 @@
             });
         };
     }
-    
+
     AppCfg.$inject = ["$resource", "$xhr"];
 </script>
   Light is on:  <input type="checkbox" name="cfg.lighton"/> <br/>
   Default Error Reciever (email): <input name="cfg.defaultErrorReciever" ng:validate="email"/> <br/>
   Max Load Percentage: <input name="cfg.loadMaxPercent" ng:validate="number:0:100"/> <br/>
   Next Shutdown Date: <input name="cfg.nextShutdownDate" ng:validate="date"/> <br/>
-  Banned nicks: 
+  Banned nicks:
       <ol>
         <li ng:repeat="nick in cfg.bannedNicks"><span>{{nick}} &nbsp;&nbsp;<a ng:click="deleteNick(nick)">[X]</a></span></li>
     </ol>
   <form ng:submit="newNick()">
     <input type="text" name="newNickname" size="20"/>
     <input type="submit" value="&lt;-- Add Nick"/><br/>
-  </form>   
+  </form>
   <hr/>
   <button ng:click="diffs()">View Diffs</button><br/>
-  <button ng:disabled="{{!message}}" ng:click="save()">Commit Changes</button> Commit Message: <input name="message"></input><br/> 
-  Last Server operation: <br/>  
+  <button ng:disabled="{{!message}}" ng:click="save()">Commit Changes</button> Commit Message: <input name="message"></button><br/>
+  Last Server operation: <br/>
   <div ng:bind="svrMessage | html:'unsafe'">
   </div>
 </body>

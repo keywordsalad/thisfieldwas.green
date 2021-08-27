@@ -3,7 +3,7 @@ module Green.Rule.Blog where
 import Green.Common
 import Green.Config
 import Green.Route
-import Green.Template
+import Green.Template.Custom
 import qualified Hakyll as H
 
 {-----------------------------------------------------------------------------}
@@ -84,10 +84,10 @@ draftRoute =
 {-----------------------------------------------------------------------------}
 
 postCompiler :: SiteConfig -> Compiler (Item String)
-postCompiler localConfig = applyAsTemplate (localConfig ^. siteContext) =<< getResourceBody
+postCompiler = pageCompiler
 
 draftCompiler :: SiteConfig -> Compiler (Item String)
-draftCompiler localConfig = applyAsTemplate (localConfig ^. siteContext) =<< getResourceBody
+draftCompiler = pageCompiler
 
 blogCompiler :: SiteConfig -> Compiler (Item String)
 blogCompiler _ = makeItem "blog"

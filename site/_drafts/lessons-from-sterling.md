@@ -1,10 +1,10 @@
 ---
-layout: post
 title: "Lessons from Sterling"
 author: "Logan McGrath"
 date: 2013-08-05T09:37:00-07:00
 comments: false
 tags: Sterling, Functional Programming, Language Design
+layout: post
 ---
 
 I've spent the last seven months developing a language called [Sterling][].
@@ -113,7 +113,7 @@ apply = (x y) -> x y
 selectFirst = (x y) -> x
 selectSecond = (x y) -> y
 conditional = (condition) -> if condition.true? then selectFirst else selectSecond end
-friday? = say $$ conditional (today.is :friday) 'Yay Friday!' 'Awww...'
+friday? = say $ conditional (today.is :friday) 'Yay Friday!' 'Awww...'
 ```
 
 Because Sterling was intended to be immutable, objects would be used to
@@ -155,8 +155,8 @@ metaprogramming and eventually dependency injection.
 @component { uses: [ :productionDb ] }
 @useWhen (runtime -> runtime.env is :production)
 Inventory = (db) -> object {
-    numberOfItems: db.asInt $$ db.scalarQuery "SELECT COUNT(*) FROM thingies",
-    priceCheck: (thingy) -> db.asMoney $$ db.scalarQuery "SELECT price FROM
+    numberOfItems: db.asInt $ db.scalarQuery "SELECT COUNT(*) FROM thingies",
+    priceCheck: (thingy) -> db.asMoney $ db.scalarQuery "SELECT price FROM
     thingies WHERE id = :id" { id: thingy.id },
 }
 
@@ -405,6 +405,6 @@ memoization becomes a near requirement in order to make lazy evaluation useful.
 [virtually anywhere for anything]: http://brandonbyars.com/2008/07/21/orthogonality/
 [directly into a language]: http://paulhammant.com/blog/crazy-bob-and-type-safety-for-dependency-injection.html/
 [open/closed principle]: http://en.wikipedia.org/wiki/Open/closed_principle
-[memoization]: $getRoute("_drafts/sterling-with-memoization.md")$
+[memoization]: {{route '_drafts/sterling-with-memoization.md'}}
 [visitor pattern]: http://en.wikipedia.org/wiki/Visitor_pattern#Java_example
 [single dispatch]: http://en.wikipedia.org/wiki/Multiple_dispatch#Java

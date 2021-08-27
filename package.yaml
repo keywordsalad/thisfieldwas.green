@@ -123,6 +123,7 @@ default-extensions:
   - ViewPatterns
 
 ghc-options:
+  - -fprint-potential-instances
   - -Wall
   - -Werror
   - -Wcompat

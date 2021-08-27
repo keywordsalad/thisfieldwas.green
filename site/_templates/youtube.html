@@ -1,14 +1,14 @@
-<aside $if(youtubeAsideId)$id="$youtubeAsideId$"$endif$ class="youtube">
+<aside class="youtube"{{#if id}} id="{{id}}"{{#end}}>
   <figure>
-    <iframe src="https://www.youtube.com/embed/$youtubeVideoId$"
-            $if(youtubeVideoTitle)$title="$youtubeVideoTitle$"$endif$
+    <iframe src="https://www.youtube.com/embed/{{video}}"
+            {{#if title}}title="{{video}}"{{#end}}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen>
     </iframe>
   </figure>
-  $if(youtubeVideoTitle)$
+  {{#if title}}
   <figcaption>
-    $youtubeVideoTitle$
+    {{title}}
   </figcaption>
-  $endif$
+  {{#end}}
 </aside>

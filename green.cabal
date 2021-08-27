@@ -26,9 +26,6 @@ library
       Green.Common
       Green.Compiler
       Green.Config
-      Green.Context
-      Green.Context.DateFields
-      Green.Context.GitCommits
       Green.Lens
       Green.Lens.Hakyll
       Green.Lens.TH
@@ -47,9 +44,18 @@ library
       Green.Template.Ast
       Green.Template.Compiler
       Green.Template.Context
-      Green.Template.Functions
+      Green.Template.Custom
+      Green.Template.Custom.Compiler
+      Green.Template.Custom.Context
+      Green.Template.Custom.DateFields
+      Green.Template.Custom.GitFields
+      Green.Template.Custom.HtmlFields
+      Green.Template.Fields
       Green.Template.Pandoc
-      Green.Template.Parser
+      Green.Template.Source
+      Green.Template.Source.Lexer
+      Green.Template.Source.Parser
+      Green.Template.Source.Util
       Green.Util
   other-modules:
       Paths_green
@@ -97,7 +103,7 @@ library
       TypeSynonymInstances
       UndecidableInstances
       ViewPatterns
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns
+  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns
   build-depends:
       MissingH
     , aeson
@@ -174,7 +180,7 @@ executable author
       TypeSynonymInstances
       UndecidableInstances
       ViewPatterns
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14 && <5
     , green
@@ -228,7 +234,7 @@ executable site
       TypeSynonymInstances
       UndecidableInstances
       ViewPatterns
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14 && <5
     , green
@@ -240,8 +246,10 @@ test-suite test
   other-modules:
       Green.RouteSpec
       Green.Rule.BlogSpec
+      Green.Template.AstStructure
       Green.Template.ParserSpec
-      Green.Template.Structural
+      Green.Template.Source.LexerSpec
+      Green.Template.Source.TestSupport
       Green.TestSupport
       Green.TestSupport.Compiler
       Green.TestSupport.Config
@@ -293,7 +301,7 @@ test-suite test
       TypeSynonymInstances
       UndecidableInstances
       ViewPatterns
-  ghc-options: -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14 && <5
     , containers
