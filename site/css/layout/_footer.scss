@@ -6,15 +6,34 @@
   }
   border-top: $border-regular;
   border-bottom: $border-ginormous;
-  text-align: center;
-  p {
-    text-align: left;
-    margin: 0.3rem 0;
+  line-height: 1.2;
+
+  $margin: 0.3rem 0;
+
+  .main-nav {
+    margin: $margin;
   }
-  .copyright {
-    font-size: 0.9rem;
+
+  .acks {
+    font-size: $text-font-size-tiny;
+    list-style: none;
+    margin: $margin;
+    padding: 0;
+    display: flex;
+
+    li {
+      margin: 0;
+      padding-right: 0.3rem;
+    }
+
+    li + li {
+      border-left: $border-thin;
+      padding-left: 0.3rem;
+    }
   }
+
   .generated {
-    font-size: 0.8rem;
+    font-size: $text-font-size-tiny;
+    margin: $margin;
   }
 }

@@ -1,10 +1,10 @@
-module Green.Rule.Css (cssRules) where
+module Green.Rule.Css (scssRules) where
 
 import Green.Common
 import Green.Config
 
-cssRules :: SiteConfig -> Rules ()
-cssRules siteConfig = do
+scssRules :: SiteConfig -> Rules ()
+scssRules siteConfig = do
   scssDependency <- makePatternDependency "css/**"
   rulesExtraDependencies [scssDependency] $
     match "css/main.scss" do

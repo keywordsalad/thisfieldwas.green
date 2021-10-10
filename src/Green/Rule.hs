@@ -19,7 +19,7 @@ rules config = do
   brokenLinks
   imageRules
   jsRules
-  cssRules config
+  scssRules config
   downloadRules
   codeDep <- codeRules
   rulesExtraDependencies [codeDep] do

@@ -1,13 +1,11 @@
-.post {
-  .post-title {
-    margin-bottom: 0.25rem;
-  }
+.post-title {
+  margin-bottom: 0.25rem;
+}
 
-  .post-published p {
-    margin-top: 0.25rem;
-    font-size: 0.90rem;
-    color: $color-text-light;
-  }
+.post-published {
+  color: $color-text-light;
+  margin-top: 0.25rem;
+  font-size: $text-font-size-small;
 }
 
 .teaser-list {

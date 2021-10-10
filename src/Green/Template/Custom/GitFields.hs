@@ -23,41 +23,43 @@ gitCommits :: SiteConfig -> Context a
 gitCommits config =
   mconcat
     [ constField "gitWebUrl" (config ^. siteGitWebUrl),
-      field "gitSha1" gitSha1Compiler,
-      field "gitMessage" gitMessageCompiler,
+      field "gitSha1" (gitSha1Compiler root),
+      field "gitMessage" (gitMessageCompiler root),
       field "gitBranch" gitBranchCompiler,
-      gitFileField "gitFilePath" gitFilePath,
-      gitFileField "gitFileName" (takeFileName . gitFilePath),
-      gitFileField "isFromSource" gitFileIsFromSource,
-      gitFileField "isChanged" gitFileIsChanged
+      gitFileField root "gitFilePath" gitFilePath,
+      gitFileField root "gitFileName" (takeFileName . gitFilePath),
+      gitFileField root "isFromSource" gitFileIsFromSource,
+      gitFileField root "isChanged" gitFileIsChanged
     ]
+  where
+    root = config ^. siteProviderDirectory
 
-gitSha1Compiler :: Item a -> Compiler String
+gitSha1Compiler :: String -> Item a -> Compiler String
 gitSha1Compiler = gitLogField "%h"
 
-gitMessageCompiler :: Item a -> Compiler String
+gitMessageCompiler :: String -> Item a -> Compiler String
 gitMessageCompiler = gitLogField "%s"
 
 type LogFormat = String
 
-gitLogField :: LogFormat -> Item a -> Compiler String
-gitLogField format item =
+gitLogField :: LogFormat -> String -> Item a -> Compiler String
+gitLogField format root item =
   unsafeCompiler do
-    maybeResult <- gitLog format (Just $ toFilePath (itemIdentifier item))
+    maybeResult <- gitLog format (Just $ root </> toFilePath (itemIdentifier item))
     case maybeResult of
       Just result -> return result
       Nothing -> fromJust <$> gitLog format Nothing
 
-gitFileField :: (IntoValue v a) => String -> (GitFile -> v) -> Context a
-gitFileField key f = field key $ fmap f . gitFileCompiler
+gitFileField :: (IntoValue v a) => String -> String -> (GitFile -> v) -> Context a
+gitFileField root key f = field key $ fmap f . gitFileCompiler root
 
-gitFileCompiler :: Item a -> Compiler GitFile
-gitFileCompiler item =
+gitFileCompiler :: String -> Item a -> Compiler GitFile
+gitFileCompiler root item =
   GitFile itemFilePath
     <$> unsafeCompiler (doesFileExist itemFilePath)
     <*> unsafeCompiler (isChanged itemFilePath)
   where
-    itemFilePath = toFilePath (itemIdentifier item)
+    itemFilePath = root </> toFilePath (itemIdentifier item)
     isChanged filePath = do
       let args = ["diff", "HEAD", filePath]
       (exitCode, stdout, _stderr) <- readProcessWithExitCode "git" args ""
@@ -65,7 +67,7 @@ gitFileCompiler item =
 
 gitLog :: LogFormat -> Maybe FilePath -> IO (Maybe String)
 gitLog format filePath = do
-  let fpArgs = bool [fromJust filePath] [] (isJust filePath)
+  let fpArgs = bool [] [fromJust filePath] (isJust filePath)
   let args = ["log", "-1", "HEAD", "--pretty=format:" ++ format] ++ fpArgs
   (_exitCode, stdout, _stderr) <- readProcessWithExitCode "git" args ""
   return if null stdout then Nothing else Just stdout

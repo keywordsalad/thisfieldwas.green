@@ -1,7 +1,7 @@
 module Green.Command where
 
-import Green.Util
 import Green.Config
+import Green.Util
 import Options.Applicative
 
 data AuthorCommand
@@ -25,9 +25,10 @@ authorCommands progName = authorOptions
     --- draft command
     draftCommand = command "draft" $ info draftOptions (progDesc "Create a new draft post")
     draftOptions = CreateDraft <$> draftOptions'
-    draftOptions' = CreateDraftOpts
-      <$> strOption (long "title" <> short 't')
-      <*> optional (strOption (long "category" <> short 'c'))
+    draftOptions' =
+      CreateDraftOpts
+        <$> strOption (long "title" <> short 't')
+        <*> optional (strOption (long "category" <> short 'c'))
     --- publish command
     publishCommand = command "publish" $ info publishOptions (progDesc "Publish an existing draft")
     publishOptions = PublishPost <$> strOption (long "file" <> short 'f')
