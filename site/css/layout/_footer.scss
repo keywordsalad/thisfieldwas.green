@@ -1,9 +1,9 @@
 @import "../elements/containers";
 
 .page-footer {
-  @include layout-section {
-    margin: 1rem auto;
-  }
+  @include layout-section;
+  padding-top: 0.3rem;
+  padding-bottom: 0.5rem;
   border-top: $border-regular;
   border-bottom: $border-ginormous;
   line-height: 1.2;
@@ -14,12 +14,19 @@
     margin: $margin;
   }
 
-  .acks {
+  .copyright {
     font-size: $text-font-size-tiny;
-    list-style: none;
+    margin: $margin;
+    margin-bottom: 0.6rem;
+  }
+
+  .acks {
+    display: flex;
+    font-size: $text-font-size-miniscule;
+    color: $color-text-light;
     margin: $margin;
     padding: 0;
-    display: flex;
+    list-style: none;
 
     li {
       margin: 0;
@@ -28,12 +35,14 @@
 
     li + li {
       border-left: $border-thin;
+      border-color: $color-text-light;
       padding-left: 0.3rem;
     }
   }
 
   .generated {
-    font-size: $text-font-size-tiny;
+    font-size: $text-font-size-miniscule;
+    color: $color-text-light;
     margin: $margin;
   }
 }
