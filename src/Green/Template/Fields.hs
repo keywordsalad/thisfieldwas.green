@@ -16,16 +16,17 @@ import System.FilePath
 defaultFields :: Context String
 defaultFields =
   mconcat
-    [ routeField,
-      linkedTitleField,
-      bodyField "body",
+    [ bodyField "body",
       urlField "url",
       pathField "path",
+      routeField,
+      linkedTitleField,
       ifField,
       forField,
       defaultField,
-      titleFromFileField "title",
       withField,
+      metadataField,
+      titleFromFileField "title",
       undefinedField
     ]
 
