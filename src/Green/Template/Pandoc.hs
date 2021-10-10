@@ -28,24 +28,37 @@ writers opts =
   where
     f writer = fmap T.unpack . writer opts
 
-compilePandocAs :: String -> Item String -> Compiler (Item String)
-compilePandocAs srcExt item
-  | srcExt == ".html" = return item
-  | otherwise = do
-    let id' = H.itemIdentifier item
-    let readerLookup = HashMap.lookup srcExt (readers def)
-    reader <- maybe (fail $ "Unrecognized read file extension " ++ show srcExt) return readerLookup
+readerOpts :: ReaderOptions
+readerOpts =
+  let defOpts = H.defaultHakyllReaderOptions
+   in defOpts
+        { readerExtensions = enableExtension Ext_raw_html (readerExtensions defOpts)
+        }
 
-    destExt <- maybe (fail $ "No route found for " ++ show id') (return . takeExtension) =<< H.getRoute id'
-    let writerLookup = HashMap.lookup destExt (writers def)
-    writer <- maybe (fail $ "Unrecognized write file extension " ++ show destExt) return writerLookup
-
-    case runPure . writer =<< runPure (reader $ H.itemBody item) of
-      Right x -> H.makeItem x
-      Left e -> fail $ show e
+writerOpts :: WriterOptions
+writerOpts =
+  let defOpts = H.defaultHakyllWriterOptions
+   in defOpts
+        { writerExtensions = enableExtension Ext_raw_html (writerExtensions defOpts)
+        }
 
 compilePandoc :: Item String -> Compiler (Item String)
-compilePandoc item = do
+compilePandoc item =
   let id' = H.itemIdentifier item
       srcExt = takeExtension $ H.toFilePath id'
-  compilePandocAs srcExt item
+   in go id' srcExt
+  where
+    go id' srcExt
+      | srcExt == ".html" = return item
+      | otherwise = do
+        let readerLookup = HashMap.lookup srcExt (readers def)
+        reader <- maybe (fail $ "Unrecognized read file extension " ++ show srcExt) return readerLookup
+
+        route <- H.getRoute id'
+        destExt <- maybe (fail $ "No route found for " ++ show id') (return . takeExtension) route
+        let writerLookup = HashMap.lookup destExt (writers writerOpts)
+        writer <- maybe (fail $ "Unrecognized write file extension " ++ show destExt) return writerLookup
+
+        case runPure . writer =<< runPure (reader $ H.itemBody item) of
+          Right x -> H.makeItem x
+          Left e -> fail $ show e
