@@ -16,7 +16,7 @@ type Parser a = Parsec [Token] ParserState a
 parse :: SourceName -> String -> Either ParseError Template
 parse origin input = do
   tokens <- lex origin input
-  blocks <- runParser (many block <* eof) origin tokens
+  blocks <- debugRunParser (many block <* eof) origin tokens
   return $ Template blocks origin
 
 block :: Parser Block
@@ -34,9 +34,7 @@ commentBlock :: Parser Block
 commentBlock = labeled "CommentBlock" $
   withPosition do
     -- {{!
-    withToken \case
-      CommentBlockToken {} -> Just ()
-      _ -> Nothing
+    withTag CommentBlockToken
     -- ...text...
     value <- withToken \case
       TextToken value _ -> Just value
@@ -49,26 +47,20 @@ offBlock :: Parser Block
 offBlock = labeled "OffBlock" $
   withPosition do
     -- {{*
-    withToken \case
-      TurnOffToken {} -> Just ()
-      _ -> Nothing
+    withTag TurnOffToken
     -- ...text...
     value <- withToken \case
       TextToken value _ -> Just value
       _ -> Nothing
     -- }}
-    withToken \case
-      CloseBlockToken {} -> Just ()
-      _ -> Nothing
+    withTag CloseBlockToken
     return $ TextBlock value
 
 expressionBlock :: Parser Block
 expressionBlock = labeled "ExpressionBlock" $
   withPosition do
     -- {{
-    withToken \case
-      ExpressionBlockToken {} -> Just ()
-      _ -> Nothing
+    withTag ExpressionBlockToken
     -- ...1 + 2...
     e <- expression
     -- }}
@@ -79,9 +71,7 @@ chromeBlock :: Parser Block
 chromeBlock = labeled "ChromeBlock" $
   withPosition do
     -- {{@
-    withToken \case
-      ChromeBlockToken {} -> Just ()
-      _ -> Nothing
+    withTag ChromeBlockToken
     -- ...layout "body"...
     e <- expression
     -- }}
@@ -97,16 +87,19 @@ altBlock = labeled "AltBlock" $ withPosition do
     e <- between altToken closeBlock expression
     bs <- manyTill block closeAlt
     return $ ApplyBlock e bs
+  -- {{#else doThat}} <- zero or more of these
   elseAlts <- flip manyTill closeElses $
     labeled "ElseAlt" $ withPosition do
       e <- between (altToken *> elseToken) closeBlock expression
       bs <- manyTill block closeAlt
       return $ ApplyBlock e bs
+  -- {{#else}} <- zero or one of these
   defaultAlt <- optionMaybe . try $
     labeled "DefaultAlt" $ withPosition do
       defaultBlock
       bs <- manyTill block closeDefault
       return $ DefaultBlock bs
+  -- {{#end}}
   endBlock
   return $ AltBlock (startAlt :| elseAlts) defaultAlt
   where
@@ -118,15 +111,9 @@ altBlock = labeled "AltBlock" $ withPosition do
     defaultBlock = altToken *> elseToken *> closeBlock
     elseBlock = altToken *> elseToken
     --
-    altToken = withToken \case
-      AltBlockToken {} -> Just ()
-      _ -> Nothing
-    elseToken = withToken \case
-      ElseToken {} -> Just ()
-      _ -> Nothing
-    endToken = withToken \case
-      EndToken {} -> Just ()
-      _ -> Nothing
+    altToken = withTag AltBlockToken
+    elseToken = withTag ElseToken
+    endToken = withTag EndToken
 
 textBlock :: Parser Block
 textBlock = labeled "TextBlock" $
@@ -141,10 +128,9 @@ expression = filterExpression <?> "Expression"
 filterExpression :: Parser Expression
 filterExpression = applyExpression `chainl1` filtered <?> "FilterExpression"
   where
-    filtered =
-      f <$> withToken \case
-        PipeToken pos -> Just pos
-        _ -> Nothing
+    filtered = withPosition do
+      withTag PipeToken
+      return f
     f pos x y = FilterExpression x y pos
 
 applyExpression :: Parser Expression
@@ -157,10 +143,9 @@ applyExpression = chain . NEL.fromList <$> many1 accessExpression <?> "ApplyExpr
 accessExpression :: Parser Expression
 accessExpression = simpleExpression `chainl1` try accessed <?> "AccessExpression"
   where
-    accessed =
-      f <$> withToken \case
-        DotToken pos -> Just pos
-        _ -> Nothing
+    accessed = withPosition do
+      withTag DotToken
+      return f
     f pos x y = AccessExpression x y pos
 
 simpleExpression :: Parser Expression
@@ -201,79 +186,68 @@ boolExpression = labeled "BoolLiteral" $
     _ -> Nothing
 
 nameExpression :: Parser Expression
-nameExpression = labeled "Name" do
-  name' <- withToken \case
-    NameToken value pos -> Just (NameExpression value pos)
-    _ -> Nothing
-  try $
-    notFollowedBy $ withToken \case
-      ColonToken {} -> return ()
-      t -> fail $ "Received " ++ show t
-  return name'
+nameExpression = labeled "Name" $ withPosition do
+  n <- NameExpression <$> withName
+  try . notFollowedBy $ withTag ColonToken
+  return n
 
 parensExpression :: Parser Expression
 parensExpression = do
-  withToken \case
-    OpenParenToken {} -> Just ()
-    _ -> Nothing
+  withTag OpenParenToken
   expression' <- expression
-  withToken \case
-    CloseParenToken {} -> Just ()
-    _ -> Nothing
+  withTag CloseParenToken
   return expression'
 
 contextExpression :: Parser Expression
 contextExpression =
-  (braced <?> "BracedContextLiteral")
-    <|> (open <?> "OpenContextLiteral")
+  (braced <?> "BracedContext")
+    <|> (unbraced <?> "UnbracedContext")
   where
     braced = withPosition do
-      withToken \case
-        OpenBraceToken {} -> Just ()
-        _ -> Nothing
+      withTag OpenBraceToken
       pairs <- contextKeyValue `sepEndBy` comma
-      withToken \case
-        CloseBraceToken {} -> Just ()
-        _ -> Nothing
+      withTag CloseBraceToken
       return $ ContextExpression pairs
-    open = withPosition do
+    unbraced = withPosition do
       pairs <- contextKeyValue `sepBy1` comma
       return $ ContextExpression pairs
 
 contextKeyValue :: Parser (String, Expression)
 contextKeyValue = labeled "ContextLiteralPair" do
-  key <- withToken \case
-    NameToken key _ -> Just key
-    _ -> Nothing
-  withToken \case
-    ColonToken {} -> Just ()
-    _ -> Nothing
+  key <- withName
+  withTag ColonToken
   value <- expression
   return (key, value)
 
 listExpression :: Parser Expression
 listExpression = labeled "ListLiteral" do
   withPosition do
-    withToken \case
-      OpenBracketToken {} -> Just ()
-      _ -> Nothing
+    withTag OpenBracketToken
     values <- expression `sepEndBy` comma
-    withToken \case
-      CloseBracketToken {} -> Just ()
-      _ -> Nothing
+    withTag CloseBracketToken
     return $ ListExpression values
 
 comma :: Parser ()
-comma = labeled "Comma" $
-  withToken \case
-    CommaToken {} -> Just ()
-    _ -> Nothing
+comma =
+  labeled "Comma" $
+    withTag CommaToken
 
 closeBlock :: Parser ()
-closeBlock = labeled "CloseBlock" $
-  withToken \case
-    CloseBlockToken {} -> Just ()
-    _ -> Nothing
+closeBlock =
+  labeled "CloseBlock" $
+    withTag CloseBlockToken
 
 withToken :: (Token -> Maybe a) -> Parser a
 withToken = P.token show getTokenPos
+
+withTag :: TokenTag -> Parser ()
+withTag tag = P.token show getTokenPos f
+  where
+    f = \case
+      TaggedToken t _ | t == tag -> Just ()
+      _ -> Nothing
+
+withName :: Parser String
+withName = withToken \case
+  NameToken n _ -> Just n
+  _ -> Nothing

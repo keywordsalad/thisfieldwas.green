@@ -121,7 +121,6 @@ library
     , mtl
     , optparse-applicative
     , pandoc
-    , pandoc-types
     , parsec
     , process
     , scientific

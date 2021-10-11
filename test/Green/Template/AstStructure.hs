@@ -96,40 +96,40 @@ data Token'
   | ColonToken'
   | EndToken'
   | ElseToken'
+  | TurnOffToken'
   | BoolToken' Bool
   | NameToken' String
   | StringToken' String
   | IntToken' Int
   | DoubleToken' Double
   | TextToken' String
-  | TurnOffToken'
-  | TurnOnToken'
   deriving stock (Eq, Show)
 
 instance AstStructure Token Token' where
   intoAstStructure = \case
-    ExpressionBlockToken _ -> ExpressionBlockToken'
-    CommentBlockToken _ -> CommentBlockToken'
-    IncludeBlockToken _ -> IncludeBlockToken'
-    AltBlockToken _ -> AltBlockToken'
-    ChromeBlockToken _ -> ChromeBlockToken'
-    CloseBlockToken _ -> CloseBlockToken'
-    OpenParenToken _ -> OpenParenToken'
-    CloseParenToken _ -> CloseParenToken'
-    OpenBracketToken _ -> OpenBracketToken'
-    CloseBracketToken _ -> CloseBracketToken'
-    OpenBraceToken _ -> OpenBraceToken'
-    CloseBraceToken _ -> CloseBraceToken'
-    PipeToken _ -> PipeToken'
-    CommaToken _ -> CommaToken'
-    DotToken _ -> DotToken'
-    ColonToken _ -> ColonToken'
-    EndToken _ -> EndToken'
-    ElseToken _ -> ElseToken'
+    TaggedToken t _ -> case t of
+      ExpressionBlockToken -> ExpressionBlockToken'
+      CommentBlockToken -> CommentBlockToken'
+      IncludeBlockToken -> IncludeBlockToken'
+      AltBlockToken -> AltBlockToken'
+      ChromeBlockToken -> ChromeBlockToken'
+      CloseBlockToken -> CloseBlockToken'
+      OpenParenToken -> OpenParenToken'
+      CloseParenToken -> CloseParenToken'
+      OpenBracketToken -> OpenBracketToken'
+      CloseBracketToken -> CloseBracketToken'
+      OpenBraceToken -> OpenBraceToken'
+      CloseBraceToken -> CloseBraceToken'
+      PipeToken -> PipeToken'
+      CommaToken -> CommaToken'
+      DotToken -> DotToken'
+      ColonToken -> ColonToken'
+      EndToken -> EndToken'
+      ElseToken -> ElseToken'
+      TurnOffToken -> TurnOffToken'
     BoolToken b _ -> BoolToken' b
     NameToken n _ -> NameToken' n
     StringToken s _ -> StringToken' s
-    IntToken i _ -> IntToken' i
+    IntToken n _ -> IntToken' n
     DoubleToken d _ -> DoubleToken' d
     TextToken t _ -> TextToken' t
-    TurnOffToken _ -> TurnOffToken'

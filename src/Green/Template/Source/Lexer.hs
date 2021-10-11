@@ -18,25 +18,15 @@ token =
   getLexerMode >>= \case
     BlockMode ->
       blockToken >>= \case
-        t@TurnOffToken {} -> do
-          startFenced "{{*"
-          return t
-        --
-        t@CommentBlockToken {} -> do
-          startFenced "{{!"
-          return t
-        --
-        t@CloseBlockToken {} -> do
-          startText
-          return t
-        --
-        t -> do
-          return t
+        t@(TaggedToken TurnOffToken _) -> t <$ startFenced
+        t@(TaggedToken CommentBlockToken _) -> t <$ startFenced
+        t@(TaggedToken CloseBlockToken _) -> t <$ startText
+        t -> return t
     --
     TextMode ->
       tryOne
         [ do
-            _ <- lookAhead $ try (string "{{")
+            _ <- lookAhead $ try (tokenTagParser ExpressionBlockToken)
             startBlock
             token,
           do
@@ -44,7 +34,7 @@ token =
             startBlock
             return t
         ]
-    FencedMode _ open -> fencedText open
+    FencedMode {} -> fencedText
 
 startText :: (Show t, Stream s m t) => ParsecT s ParserState m ()
 startText = putLexerMode TextMode <?> "StartText"
@@ -52,8 +42,8 @@ startText = putLexerMode TextMode <?> "StartText"
 startBlock :: (Show t, Stream s m t) => ParsecT s ParserState m ()
 startBlock = putLexerMode BlockMode <?> "StartBlock"
 
-startFenced :: (Show t, Stream s m t) => String -> ParsecT s ParserState m ()
-startFenced open = putLexerMode (FencedMode 0 open) <?> "StartFenced"
+startFenced :: (Show t, Stream s m t) => ParsecT s ParserState m ()
+startFenced = putLexerMode (FencedMode 0) <?> "StartFenced"
 
 illegalState :: (Show t, Stream s m t) => ParsecT s ParserState m a
 illegalState = p <?> "IllegalState"
@@ -77,25 +67,22 @@ blockToken =
 textToken :: Lexer Token
 textToken = withPosition (TextToken <$> text) <?> "TextToken"
 
-fencedText :: String -> Lexer Token
-fencedText openStr = withPosition (TextToken <$> p "") <?> "FencedText"
+fencedText :: Lexer Token
+fencedText = withPosition (TextToken <$> p "") <?> "FencedText"
   where
-    open = string openStr
-    close = string "}}"
     p acc =
       tryOne
         [ downFence acc,
           upFence acc,
           fenceText acc
         ]
-    -- {{* / {{!
+    -- {{
     downFence acc = labeled "DownFence" do
-      x <- tryOne [open, string "{{"]
+      x <- open
       downFenceLevel
       p (acc ++ x)
     -- }}
     upFence acc = labeled "UpFence" do
-      _ <- lookAhead $ try close
       fenceLevel >>= \case
         0 -> do
           startBlock
@@ -111,65 +98,99 @@ fencedText openStr = withPosition (TextToken <$> p "") <?> "FencedText"
     --
     downFenceLevel = do
       n <- fenceLevel
-      putLexerMode $ FencedMode (n + 1) openStr
+      putLexerMode $ FencedMode (n + 1)
     upFenceLevel = do
       n <- fenceLevel
-      putLexerMode $ FencedMode (n - 1) openStr
+      putLexerMode $ FencedMode (n - 1)
     fenceLevel =
       getLexerMode >>= \case
-        FencedMode n _ -> return n
+        FencedMode n -> return n
         _ -> illegalState
 
 text :: Lexer String
-text = p <?> "TextBody"
+text = p <?> "Text"
   where
-    p = mconcat <$> many1 (tryOne [blockEscape, chars])
-    chars =
-      many1 $
-        tryOne
-          [ textChar,
-            justBackslash,
-            justBrace
-          ]
-    textChar = noneOf "{}\\" <?> "CommentChar"
-    justBackslash = char '\\' <* notFollowedBy (try (oneOf "{}")) <?> "Backslash '\\'"
-    blockEscape = char '\\' *> (string "{{" <|> string "}}") <?> "BlockEscape"
-    justBrace = tryOne [justOpenBrace, justCloseBrace] <?> "Brace"
-      where
-        justOpenBrace = char '{' <* notFollowedBy (try (char '{'))
-        justCloseBrace = char '}' <* notFollowedBy (try (char '}'))
+    p = do
+      cs <-
+        flip manyTill textTerminal $
+          tryOne
+            [ textString,
+              justBrace,
+              justBackslash,
+              blockEscape,
+              spaceString
+            ]
+      return $ mconcat cs
+
+justBrace :: Lexer String
+justBrace = tryOne [justOpenBrace, justCloseBrace]
+  where
+    justOpenBrace = openBrace <* notFollowedBy (try openBrace) <?> "JustOpenBrace"
+    justCloseBrace = closeBrace <* notFollowedBy (try closeBrace) <?> "JustCloseBrace"
+
+justBackslash :: Lexer String
+justBackslash = string "\\" <* notFollowedBy (try $ oneOf "{}-") <?> "JustBackslash"
+
+blockEscape :: Lexer String
+blockEscape = char '\\' *> tryOne [open, close, trimmingClose] <?> "BlockEscape"
+
+textString :: Lexer String
+textString = many1 (noneOf "{}\\\n\t ") <?> "TextString"
+
+spaceString :: Lexer String
+spaceString = many1 space <* notFollowedBy (try trimmingOpen)
+
+textTerminal :: Lexer String
+textTerminal =
+  labeled "TextTerminal" $
+    tryOne
+      [ open,
+        close,
+        spaces *> trimmingOpen,
+        "" <$ eof
+      ]
 
 symbolToken :: Lexer Token
 symbolToken =
   withPosition $
     tryOne
-      [ mkSymbol TurnOffToken "{{*",
-        mkSymbol CommentBlockToken "{{!",
-        mkSymbol IncludeBlockToken "{{>" <* spaces,
-        mkSymbol AltBlockToken "{{#" <* spaces,
-        mkSymbol ChromeBlockToken "{{@" <* spaces,
-        mkSymbol ExpressionBlockToken "{{" <* spaces,
-        mkSymbol CloseBlockToken "}}",
-        mkSymbol OpenBraceToken "{" <* spaces,
-        mkSymbol CloseBraceToken "}" <* spaces,
-        mkSymbol OpenParenToken "(" <* spaces,
-        mkSymbol CloseParenToken ")" <* spaces,
-        mkSymbol OpenBracketToken "[" <* spaces,
-        mkSymbol CloseBracketToken "]" <* spaces,
-        mkSymbol PipeToken "|" <* spaces,
-        mkSymbol ColonToken ":" <* spaces,
-        mkSymbol DotToken "." <* spaces,
-        mkSymbol CommaToken "," <* spaces
+      [ mkTrimmingSymbol TurnOffToken,
+        mkTrimmingSymbol CommentBlockToken,
+        mkTrimmingSymbol IncludeBlockToken <* spaces,
+        mkTrimmingSymbol AltBlockToken <* spaces,
+        mkTrimmingSymbol ChromeBlockToken <* spaces,
+        mkTrimmingSymbol ExpressionBlockToken <* spaces,
+        mkTrimmingSymbol CloseBlockToken <* spaces,
+        --
+        mkSymbol TurnOffToken,
+        mkSymbol CommentBlockToken,
+        mkSymbol IncludeBlockToken <* spaces,
+        mkSymbol AltBlockToken <* spaces,
+        mkSymbol ChromeBlockToken <* spaces,
+        mkSymbol ExpressionBlockToken <* spaces,
+        mkSymbol CloseBlockToken,
+        --
+        mkSymbol OpenBraceToken <* spaces,
+        mkSymbol CloseBraceToken <* spaces,
+        mkSymbol OpenParenToken <* spaces,
+        mkSymbol CloseParenToken <* spaces,
+        mkSymbol OpenBracketToken <* spaces,
+        mkSymbol CloseBracketToken <* spaces,
+        mkSymbol PipeToken <* spaces,
+        mkSymbol ColonToken <* spaces,
+        mkSymbol DotToken <* spaces,
+        mkSymbol CommaToken <* spaces
       ]
   where
-    mkSymbol t s = t <$ string s <?> "Token " ++ show s
+    mkSymbol t = TaggedToken t <$ string (tokenTagValue t) <?> show t
+    mkTrimmingSymbol t = TaggedToken t <$ string (trimmingTokenTagValue t) <?> show t
 
 boolToken :: Lexer Token
 boolToken = withPosition (BoolToken <$> value) <?> "BoolToken"
   where
     value =
-      True <$ (keyword "True" <|> keyword "true")
-        <|> False <$ (keyword "False" <|> keyword "false")
+      True <$ tryOne [keyword "True", keyword "true"]
+        <|> False <$ tryOne [keyword "False", keyword "false"]
 
 stringToken :: Lexer Token
 stringToken = labeled "StringToken" $ withPosition $ (StringToken <$> stringChars) <* spaces
@@ -209,19 +230,25 @@ numberToken = withPosition (numberToken' <* spaces)
     badChars = oneOf "_." <|> alphaNum
 
 nameToken :: Lexer Token
-nameToken = withPosition $ (NameToken <$> name <?> "NameToken") <* spaces
+nameToken =
+  withPosition $
+    (NameToken <$> name <?> "NameToken") <* spaces
 
 endKeyword :: Lexer Token
-endKeyword = withPosition (EndToken <$ keyword "end")
+endKeyword =
+  withPosition $
+    TaggedToken EndToken <$ keyword (tokenTagValue EndToken)
 
 elseKeyword :: Lexer Token
-elseKeyword = withPosition (ElseToken <$ keyword "else")
+elseKeyword =
+  withPosition $
+    TaggedToken ElseToken <$ keyword (tokenTagValue ElseToken)
 
 keyword :: String -> Lexer ()
 keyword s = p <* spaces
   where
     p = do
-      _ <- string s <?> "Keyword '" ++ s ++ "'"
+      _ <- string s <?> "Keyword " ++ show s
       notFollowedBy nameRest
       return ()
 
@@ -241,57 +268,139 @@ nameRest :: Lexer Char
 nameRest = tryOne [nameStart, alphaNum, char '-'] <?> "NameRest"
 
 data Token
-  = ExpressionBlockToken SourcePos -- "{{"
-  | CommentBlockToken SourcePos -- "{{!"
-  | IncludeBlockToken SourcePos -- "{{>"
-  | AltBlockToken SourcePos -- "{{#"
-  | ChromeBlockToken SourcePos -- "{{@"
-  | CloseBlockToken SourcePos -- "}}"
-  | OpenParenToken SourcePos -- "("
-  | CloseParenToken SourcePos -- ")"
-  | OpenBracketToken SourcePos -- "["
-  | CloseBracketToken SourcePos -- "]"
-  | OpenBraceToken SourcePos -- "{"
-  | CloseBraceToken SourcePos -- "}"
-  | PipeToken SourcePos -- "|"
-  | CommaToken SourcePos -- ","
-  | DotToken SourcePos -- "."
-  | ColonToken SourcePos -- ":"
-  | EndToken SourcePos -- "end"
-  | ElseToken SourcePos -- "else"
-  | BoolToken Bool SourcePos -- "true" | "false"
-  | NameToken String SourcePos -- ([_a-z])([_\-a-zA-Z0-9])*
-  | StringToken String SourcePos -- text enclosed by "" or ''
-  | IntToken Int SourcePos -- 0|[1-9][0-9]*
-  | DoubleToken Double SourcePos -- 0|[1-9][0-9]*\.[0-9]+
+  = TaggedToken TokenTag SourcePos
+  | BoolToken Bool SourcePos
+  | NameToken String SourcePos
+  | StringToken String SourcePos
+  | IntToken Int SourcePos
+  | DoubleToken Double SourcePos
   | TextToken String SourcePos
-  | TurnOffToken SourcePos -- "{{*
-  deriving stock (Eq, Show)
+  deriving stock (Eq)
+
+instance Show Token where
+  show t = case t of
+    TaggedToken tt _ -> show tt
+    BoolToken b _ -> "Bool " ++ show b
+    NameToken s _ -> "Name " ++ show s
+    StringToken s _ -> "String " ++ show s
+    IntToken n _ -> "Int " ++ show n
+    DoubleToken x _ -> "Double " ++ show x
+    TextToken s _ -> "Text " ++ show s
 
 getTokenPos :: Token -> SourcePos
 getTokenPos = \case
-  ExpressionBlockToken pos -> pos
-  CommentBlockToken pos -> pos
-  IncludeBlockToken pos -> pos
-  AltBlockToken pos -> pos
-  ChromeBlockToken pos -> pos
-  CloseBlockToken pos -> pos
-  OpenParenToken pos -> pos
-  CloseParenToken pos -> pos
-  OpenBracketToken pos -> pos
-  CloseBracketToken pos -> pos
-  OpenBraceToken pos -> pos
-  CloseBraceToken pos -> pos
-  PipeToken pos -> pos
-  CommaToken pos -> pos
-  DotToken pos -> pos
-  ColonToken pos -> pos
-  EndToken pos -> pos
-  ElseToken pos -> pos
+  TaggedToken _ pos -> pos
   BoolToken _ pos -> pos
   NameToken _ pos -> pos
   StringToken _ pos -> pos
   IntToken _ pos -> pos
   DoubleToken _ pos -> pos
   TextToken _ pos -> pos
-  TurnOffToken pos -> pos
+
+data TokenTag
+  = ExpressionBlockToken
+  | CommentBlockToken
+  | IncludeBlockToken
+  | AltBlockToken
+  | ChromeBlockToken
+  | CloseBlockToken
+  | OpenParenToken
+  | CloseParenToken
+  | OpenBracketToken
+  | CloseBracketToken
+  | OpenBraceToken
+  | CloseBraceToken
+  | PipeToken
+  | CommaToken
+  | DotToken
+  | ColonToken
+  | EndToken
+  | ElseToken
+  | TurnOffToken
+  deriving stock (Eq)
+
+tokenTagName :: TokenTag -> String
+tokenTagName = \case
+  ExpressionBlockToken -> "ExpressionBlock"
+  CommentBlockToken -> "CommentBlock"
+  IncludeBlockToken -> "IncludeBlock"
+  AltBlockToken -> "AltBlock"
+  ChromeBlockToken -> "ChromeBlock"
+  CloseBlockToken -> "CloseBlock"
+  OpenParenToken -> "OpenParen"
+  CloseParenToken -> "CloseParen"
+  OpenBracketToken -> "OpenBracket"
+  CloseBracketToken -> "CloseBracket"
+  OpenBraceToken -> "OpenBrace"
+  CloseBraceToken -> "CloseBrace"
+  PipeToken -> "PipeToken"
+  CommaToken -> "CommaToken"
+  DotToken -> "DotToken"
+  ColonToken -> "ColonToken"
+  EndToken -> "EndToken"
+  ElseToken -> "ElseToken"
+  TurnOffToken -> "TurnOff"
+
+tokenTagValue :: TokenTag -> String
+tokenTagValue = \case
+  ExpressionBlockToken -> "{{"
+  CommentBlockToken -> "{{!"
+  IncludeBlockToken -> "{{>"
+  AltBlockToken -> "{{#"
+  ChromeBlockToken -> "{{@"
+  CloseBlockToken -> "}}"
+  OpenParenToken -> "("
+  CloseParenToken -> ")"
+  OpenBracketToken -> "{"
+  CloseBracketToken -> "}"
+  OpenBraceToken -> "["
+  CloseBraceToken -> "]"
+  PipeToken -> "|"
+  CommaToken -> ","
+  DotToken -> "."
+  ColonToken -> ":"
+  EndToken -> "end"
+  ElseToken -> "else"
+  TurnOffToken -> "{{*"
+
+tokenTagParser :: TokenTag -> Lexer String
+tokenTagParser = string . tokenTagValue
+
+trimmingTokenTagValue :: TokenTag -> String
+trimmingTokenTagValue = \case
+  ExpressionBlockToken -> "{{-"
+  CommentBlockToken -> "{{-!"
+  IncludeBlockToken -> "{{->"
+  AltBlockToken -> "{{-#"
+  ChromeBlockToken -> "{{-@"
+  CloseBlockToken -> "-}}"
+  TurnOffToken -> "{{-*"
+  t -> tokenTagValue t
+
+trimmingTokenTagParser :: TokenTag -> Lexer String
+trimmingTokenTagParser = string . trimmingTokenTagValue
+
+showTrimmingTokenTag :: TokenTag -> String
+showTrimmingTokenTag t =
+  tokenTagName t ++ " " ++ show (trimmingTokenTagValue t)
+
+open :: Lexer String
+open = tokenTagParser ExpressionBlockToken
+
+close :: Lexer String
+close = tokenTagParser CloseBlockToken
+
+trimmingOpen :: Lexer String
+trimmingOpen = trimmingTokenTagParser ExpressionBlockToken
+
+trimmingClose :: Lexer String
+trimmingClose = trimmingTokenTagParser CloseBlockToken
+
+openBrace :: Lexer String
+openBrace = tokenTagParser OpenBraceToken
+
+closeBrace :: Lexer String
+closeBrace = tokenTagParser CloseBraceToken
+
+instance Show TokenTag where
+  show t = tokenTagName t ++ " " ++ show (tokenTagValue t)

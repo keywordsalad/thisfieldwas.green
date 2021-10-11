@@ -20,7 +20,7 @@ instance Default ParserState where
 data LexerMode
   = TextMode
   | BlockMode
-  | FencedMode Int String
+  | FencedMode Int
   deriving stock (Show)
 
 runParser :: (Stream s Identity t) => Parsec s ParserState a -> SourceName -> s -> Either ParseError a
