@@ -82,13 +82,14 @@ fencedText = withPosition (TextToken <$> p "")
       p (acc ++ x)
     -- }}
     upFence acc = do
-      lookAhead (try $ string "}}") *> upFenceLevel >>= \case
-        0 -> do
-          startBlock
-          return acc
-        _ -> do
-          x <- string "}}"
-          p (acc ++ x)
+      lookAhead (tryOne [string "}}", string "-}}"])
+        *> upFenceLevel >>= \case
+          0 -> do
+            startBlock
+            return acc
+          _ -> do
+            x <- tryOne [string "}}", string "-}}"]
+            p (acc ++ x)
     -- ...abc...
     fenceText acc = do
       t <- text
@@ -107,38 +108,26 @@ fencedText = withPosition (TextToken <$> p "")
         _ -> illegalState
 
 text :: Lexer String
-text = do
-  cs <- manyTill text' (lookAhead $ try textTerminator)
-  return $ mconcat cs
+text = mconcat <$> manyTill p (lookAhead $ try end)
   where
-    text' =
+    p =
       tryOne
-        [ justBrace,
-          justBackslash,
-          blockEscape,
-          spaceString,
-          textString
+        [ labeled "TextString" $ many1 (noneOf "-{}\\\n\t "),
+          labeled "Just '{'" $ openBrace <* notFollowedBy (try openBrace),
+          labeled "Just '}'" $ closeBrace <* notFollowedBy (try closeBrace),
+          labeled "Just '-'" $ string "-" <* notFollowedBy braces,
+          labeled "Just '\\'" $ string "\\" <* notFollowedBy (braces <|> try (string "-")),
+          labeled "EscapedBlock" $ char '\\' *> braces,
+          labeled "SpaceString" $ many1 space <* notFollowedBy trimmingClose
         ]
-    justBrace = tryOne [justOpenBrace, justCloseBrace]
-      where
-        justOpenBrace = openBrace' <* notFollowedBy (try openBrace') <?> "just '{'"
-        justCloseBrace = closeBrace' <* notFollowedBy (try closeBrace') <?> "just '}'"
-    justBackslash = string "\\" <* notFollowedBy (try $ oneOf "{}-") <?> "just '\\'"
-    blockEscape = char '\\' *> tryOne [open', close', trimmingClose] <?> "escaped block"
-    textString = many1 (noneOf "{}\\\n\t ") <?> "text string"
-    spaceString = many1 space <* notFollowedBy (try $ string "{{-") <?> "space string"
-    textTerminator =
-      labeled "text terminator" $
-        tryOne
-          [ open',
-            close',
-            spaces *> string "{{-",
-            "" <$ eof
-          ]
-    open' = string open
-    close' = string close
-    openBrace' = string "{"
-    closeBrace' = string "}"
+    braces = tryOne [open, close, trimmingOpen, trimmingClose]
+    end =
+      labeled "text terminator" . tryOne $
+        [ open,
+          close,
+          spaces *> trimmingClose,
+          "" <$ eof
+        ]
 
 symbolToken :: Lexer Token
 symbolToken =
@@ -213,52 +202,41 @@ numberToken = withPosition (numberToken' <* spaces)
       value <- ints <> option "" doubles
       notFollowedBy badChars
       case (read value :: Scientific) of
-        n | isInteger n -> return (IntToken (fromJust (toBoundedInteger n))) <?> "IntToken"
-        n | otherwise -> return (DoubleToken (toRealFloat n)) <?> "DoubleToken"
+        n | isInteger n -> labeled "IntToken" . return . IntToken . fromJust . toBoundedInteger $ n
+        n | otherwise -> labeled "DoubleToken" . return . DoubleToken . toRealFloat $ n
 
-    ints = justZero <|> ((:) <$> nonZero <*> many digit) <?> "IntegerDigits"
-    justZero = string "0" <* notFollowedBy nonZero <?> "JustZero"
-    nonZero = oneOf ['1' .. '9'] <?> "NonZeroDigit"
-    doubles = string "." <> many1 digit <?> "DoubleDigits"
-    badChars = oneOf "_." <|> alphaNum
+    ints = labeled "IntegerDigits" $ justZero <|> ((:) <$> nonZero <*> many digit)
+    justZero = labeled "JustZero" $ string "0" <* notFollowedBy nonZero
+    nonZero = labeled "NonZeroDigit" $ oneOf ['1' .. '9']
+    doubles = labeled "DoubleDigits" $ string "." <> many1 digit
+    badChars = labeled "BadNumberChar" $ oneOf "_." <|> alphaNum
 
 nameToken :: Lexer Token
-nameToken =
-  withPosition $
-    (NameToken <$> name <?> "NameToken") <* spaces
+nameToken = withPosition $ (NameToken <$> name <?> "NameToken") <* spaces
 
 endKeyword :: Lexer Token
-endKeyword =
-  withPosition $
-    TaggedToken EndToken <$ keyword (tokenTagValue EndToken)
+endKeyword = withPosition do
+  keyword (tokenTagValue EndToken)
+  return $ TaggedToken EndToken
 
 elseKeyword :: Lexer Token
-elseKeyword =
-  withPosition $
-    TaggedToken ElseToken <$ keyword (tokenTagValue ElseToken)
+elseKeyword = withPosition do
+  keyword (tokenTagValue ElseToken)
+  return $ TaggedToken ElseToken
 
 keyword :: String -> Lexer ()
-keyword s = p <* spaces
-  where
-    p = do
-      _ <- string s <?> "KeywordToken " ++ show s
-      notFollowedBy nameRest
-      return ()
+keyword s = labeled ("Keyword " ++ show s) do
+  () <$ string s <* notFollowedBy nameRest <* spaces
 
 name :: Lexer String
-name = p <?> "NameValue"
-  where
-    p = do
-      start <- nameStart
-      rest <- many nameRest
-      spaces
-      return (start : rest)
+name = labeled "NameValue" do
+  (:) <$> nameStart <*> many nameRest
 
 nameStart :: Lexer Char
-nameStart = oneOf ('_' : ['a' .. 'z']) <?> "NameStart"
+nameStart = oneOf ('_' : ['a' .. 'z'])
 
 nameRest :: Lexer Char
-nameRest = tryOne [nameStart, alphaNum] <?> "NameRest"
+nameRest = tryOne [nameStart, alphaNum]
 
 data Token
   = TaggedToken TokenTag SourcePos
@@ -336,7 +314,7 @@ tokenTagName = \case
 
 tokenTagValue :: TokenTag -> String
 tokenTagValue = \case
-  ExpressionBlockToken -> open
+  ExpressionBlockToken -> "{{"
   CommentBlockToken -> "{{!"
   IncludeBlockToken -> "{{>"
   AltBlockToken -> "{{#"
@@ -376,11 +354,11 @@ trimmingTokenTagParser tag = string (trimmingTokenTagValue tag) <?> showTrimming
 showTrimmingTokenTag :: TokenTag -> String
 showTrimmingTokenTag t = tokenTagName t ++ " " ++ show (trimmingTokenTagValue t)
 
-open :: String
-open = "{{"
+open :: Lexer String
+open = tokenTagParser ExpressionBlockToken
 
-close :: String
-close = "}}"
+close :: Lexer String
+close = tokenTagParser CloseBlockToken
 
 trimmingOpen :: Lexer String
 trimmingOpen = trimmingTokenTagParser ExpressionBlockToken

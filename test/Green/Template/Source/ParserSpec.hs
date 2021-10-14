@@ -194,3 +194,13 @@ spec = do
               ),
             TextBlock' "\n"
           ]
+
+      unlines
+        [ "{{*",
+          "{{this}} is",
+          "{{!verbatim}}",
+          "and {{@bananana}}",
+          "-}}"
+        ]
+        `produces` Template'
+          [TextBlock' "\n{{this}} is\n{{!verbatim}}\nand {{@bananana}}"]
