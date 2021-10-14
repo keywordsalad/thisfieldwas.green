@@ -119,10 +119,9 @@ stringify context item value = case value of
   FunctionValue {} -> fail "Can't stringify function"
   BlockValue block -> case block of
     TextBlock t _ -> return t
-    ExpressionBlock e _ -> stringify context item =<< eval context e item
     CommentBlock {} -> return ""
-    ChromeBlock e _ pos -> fail $ "Can't stringify unevaluated chrome block at " ++ show pos ++ ": " ++ show e
-    AltBlock (ApplyBlock e _ pos :| _) _ _ -> fail $ "Can't stringify unevaluated alt block at " ++ show pos ++ ": " ++ show e
+    ExpressionBlock e _ -> stringify context item =<< eval context e item
+    _ -> stringify context item =<< applyBlock context block item
   ItemValue i -> return $ H.itemBody i
   ThunkValue fx -> stringify context item =<< force =<< fx
 

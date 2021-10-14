@@ -25,11 +25,11 @@
     </ul>
     <p class="generated">
       This page was rendered from
-      {{-#if gitFileName-}}
+      {{#if gitFileName-}}
       <a href="{{gitWebUrl}}/{{gitSha1}}/{{gitFilePath}}">{{gitFileName}}</a>
-      {{-#else-}}
+      {{#else-}}
       derived data
-      {{-#end-}}
+      {{#end-}}
       at commit <a class="commit-link" href="{{gitWebUrl}}/{{gitSha1}}">[{{gitSha1}}] {{gitMessage}}</a>{{#if isChanged}} with local changes{{#end}}.
     </p>
   </div>

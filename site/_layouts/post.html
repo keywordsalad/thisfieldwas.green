@@ -3,14 +3,12 @@
   <header class="post-header">
     <h1 class="post-title page-title"><a href="{{url}}">{{title}}</a></h1>
     <p class="post-published">
-      {{#if published}}
+      {{#if published-}}
         Posted on {{published | dateAs shortDate}}
-      {{#else}}
+      {{-#else-}}
         Drafted on {{date | dateAs shortDate}}
-      {{#end}}
-      {{#if author}}
-        by {{author}}
-      {{#end}}
+      {{-#end}}
+      {{-#if author}} by {{author}}{{#end}}
     </p>
   </header>
   {{body}}

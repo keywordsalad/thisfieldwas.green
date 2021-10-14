@@ -2,10 +2,9 @@
   <figure>
     <a href="{{src}}" class="image-link">
       <img src="{{src}}"
-        {{#if id}}id="{{id}}"{{#end}}
-        {{#if title}}title="{{title}}"{{#end}}
-        {{#if alt}}alt="{{alt}}"{{#end}}
-      >
+        {{-#if id}} id="{{id}}"{{#end}}
+        {{-#if title}} title="{{title}}"{{#end}}
+        {{-#if alt}} alt="{{alt}}"{{#end}}>
     </a>
   </figure>
   {{#if title-}}
