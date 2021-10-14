@@ -173,7 +173,7 @@ symbolToken =
       ]
   where
     mkSymbol t = TaggedToken t <$ string (tokenTagValue t) <?> show t
-    mkTrimmingSymbol t = TaggedToken t <$ string (trimmingTokenTagValue t) <* spaces <?> showTrimmingTokenTag t
+    mkTrimmingSymbol t = TaggedToken t <$ string (trimmingTokenTagValue t) <?> showTrimmingTokenTag t
 
 boolToken :: Lexer Token
 boolToken = withPosition (BoolToken <$> value) <?> "BoolToken"
