@@ -129,9 +129,17 @@ spec = do
                      ]
 
       context "whitespace-trimmed blocks" do
-        "{{expression-}}     some spaces"
-          `produces` [ ExpressionBlockToken',
-                       NameToken' "expression",
-                       CloseBlockToken',
-                       TextToken' "some spaces"
-                     ]
+        context "end-trimming block" do
+          "{{expression-}}     some spaces"
+            `produces` [ ExpressionBlockToken',
+                         NameToken' "expression",
+                         CloseBlockToken',
+                         TextToken' "some spaces"
+                       ]
+        context "start-trimming block" do
+          "some spaces\n   {{-expression}}"
+            `produces` [ TextToken' "some spaces",
+                         ExpressionBlockToken',
+                         NameToken' "expression",
+                         CloseBlockToken'
+                       ]

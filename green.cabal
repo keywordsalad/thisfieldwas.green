@@ -246,8 +246,8 @@ test-suite test
       Green.RouteSpec
       Green.Rule.BlogSpec
       Green.Template.AstStructure
-      Green.Template.ParserSpec
       Green.Template.Source.LexerSpec
+      Green.Template.Source.ParserSpec
       Green.Template.Source.TestSupport
       Green.TestSupport
       Green.TestSupport.Compiler

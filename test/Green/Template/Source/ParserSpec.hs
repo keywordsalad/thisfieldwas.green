@@ -1,4 +1,4 @@
-module Green.Template.ParserSpec where
+module Green.Template.Source.ParserSpec where
 
 import Green.Template
 import Green.Template.AstStructure

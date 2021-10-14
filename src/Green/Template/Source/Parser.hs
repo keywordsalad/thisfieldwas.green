@@ -16,7 +16,7 @@ type Parser a = Parsec [Token] ParserState a
 parse :: SourceName -> String -> Either ParseError Template
 parse origin input = do
   tokens <- lex origin input
-  blocks <- debugRunParser (many block <* eof) origin tokens
+  blocks <- runParser (many block <* eof) origin tokens
   return $ Template blocks origin
 
 block :: Parser Block

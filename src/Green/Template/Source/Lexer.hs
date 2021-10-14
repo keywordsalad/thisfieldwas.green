@@ -27,7 +27,7 @@ token =
     TextMode ->
       tryOne
         [ do
-            _ <- lookAhead $ try (string "{{")
+            _ <- lookAhead $ tryOne [spaces *> string "{{-", string "{{"]
             startBlock
             token,
           textToken
@@ -144,12 +144,15 @@ symbolToken :: Lexer Token
 symbolToken =
   withPosition $
     tryOne
-      [ mkTrimmingSymbol TurnOffToken,
-        mkTrimmingSymbol CommentBlockToken,
-        mkTrimmingSymbol IncludeBlockToken <* spaces,
-        mkTrimmingSymbol AltBlockToken <* spaces,
-        mkTrimmingSymbol ChromeBlockToken <* spaces,
-        mkTrimmingSymbol ExpressionBlockToken <* spaces,
+      [ spaces
+          *> tryOne
+            [ mkTrimmingSymbol TurnOffToken,
+              mkTrimmingSymbol CommentBlockToken,
+              mkTrimmingSymbol IncludeBlockToken <* spaces,
+              mkTrimmingSymbol AltBlockToken <* spaces,
+              mkTrimmingSymbol ChromeBlockToken <* spaces,
+              mkTrimmingSymbol ExpressionBlockToken <* spaces
+            ],
         mkTrimmingSymbol CloseBlockToken <* spaces,
         --
         mkSymbol TurnOffToken,
