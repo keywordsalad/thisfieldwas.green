@@ -27,7 +27,7 @@ token =
     TextMode ->
       tryOne
         [ do
-            _ <- lookAhead $ tryOne [spaces *> string "{{-", string "{{"]
+            _ <- lookAhead $ tryOne [spaces *> trimmingOpen, open]
             startBlock
             token,
           textToken
@@ -77,18 +77,18 @@ fencedText = withPosition (TextToken <$> p "")
         ]
     -- {{
     downFence acc = do
-      x <- string "{{"
+      x <- open
       downFenceLevel
       p (acc ++ x)
     -- }}
     upFence acc = do
-      lookAhead (tryOne [string "}}", string "-}}"])
+      lookAhead (tryOne [close, trimmingClose])
         *> upFenceLevel >>= \case
           0 -> do
             startBlock
             return acc
           _ -> do
-            x <- tryOne [string "}}", string "-}}"]
+            x <- tryOne [close, trimmingClose]
             p (acc ++ x)
     -- ...abc...
     fenceText acc = do
