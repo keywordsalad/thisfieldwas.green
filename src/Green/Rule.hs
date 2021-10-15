@@ -2,20 +2,24 @@ module Green.Rule where
 
 import Green.Common
 import Green.Config
-import Green.Rule.Blog
-import Green.Rule.BrokenLinks
-import Green.Rule.Css
-import Green.Rule.Feed
-import Green.Rule.Index
-import Green.Rule.Js
-import Green.Rule.Page
-import Green.Rule.Robot
-import Green.Rule.Sitemap
-import Green.Template
-import qualified Hakyll as H
+import Green.Content.Blog
+import Green.Content.BrokenLinks
+import Green.Content.Code
+import Green.Content.Css
+import Green.Content.Download
+import Green.Content.Feed
+import Green.Content.HomePage
+import Green.Content.Image
+import Green.Content.Js
+import Green.Content.Page
+import Green.Content.Robot
+import Green.Content.Sitemap
+import Green.Content.Template
+import Green.Template.Custom
 
 rules :: SiteConfig -> Rules ()
 rules config = do
+  let context = customContext config
   brokenLinks
   imageRules
   jsRules
@@ -24,37 +28,11 @@ rules config = do
   codeDep <- codeRules
   rulesExtraDependencies [codeDep] do
     templateRules
-    blogRules config
-    feedRules config
-    indexRules config
-    pageRules config
-    robotsTxtRules config
-    archiveRules config
-    sitemapRules config
+    blogRules context
+    feedRules
+    homePageRules context
+    pageRules context
+    robotsTxtRules context
+    archiveRules context
+    sitemapRules
     brokenLinks
-
-downloadRules :: Rules ()
-downloadRules = do
-  match "downloads/**" do
-    route $ setExtension ".txt"
-    compile H.copyFileCompiler
-
-codeRules :: Rules Dependency
-codeRules = do
-  let path = "code/**"
-  match path do
-    route idRoute
-    compile getResourceBody
-  makePatternDependency path
-
-imageRules :: Rules ()
-imageRules =
-  match "images/**" do
-    route idRoute
-    compile H.copyFileCompiler
-
-templateRules :: Rules ()
-templateRules = do
-  match "_layouts/**" $ compile templateCompiler
-  match "_partials/**" $ compile templateCompiler
-  match "_templates/**" $ compile templateCompiler

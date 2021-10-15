@@ -1,4 +1,4 @@
-module Green.Rule.Js (jsRules) where
+module Green.Content.Js (jsRules) where
 
 import qualified Data.ByteString.Lazy.Char8 as C
 import Hakyll

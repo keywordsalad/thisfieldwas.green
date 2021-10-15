@@ -24,7 +24,8 @@ defaultSiteDebug =
 data SiteDisplayFormat = SiteDisplayFormat
   { _displayDateLongFormat :: String,
     _displayDateShortFormat :: String,
-    _displayTimeFormat :: String
+    _displayTimeFormat :: String,
+    _displayImageWidths :: [Int]
   }
 
 makeLenses ''SiteDisplayFormat
@@ -79,7 +80,7 @@ parseConfigIni env timeLocale time iniText = parseIniFile iniText do
   hakyllConfiguration <- section "Hakyll" do
     providerDirectory' <- fieldOf "providerDirectory" string
     destinationDirectory' <- fieldOf "destinationDirectory" string
-    allowedFiles <- fieldOfStrings "allowedFiles"
+    allowedFiles <- fieldListOf "allowedFiles" string
     return
       HC.defaultConfiguration
         { providerDirectory = providerDirectory',
@@ -97,6 +98,7 @@ parseConfigIni env timeLocale time iniText = parseIniFile iniText do
       <$> fieldOf "dateLongFormat" string
       <*> fieldOf "dateShortFormat" string
       <*> fieldOf "timeFormat" string
+      <*> fieldListOf "imageWidths" number
 
   section "Site" do
     SiteConfig env
@@ -117,8 +119,8 @@ parseConfigIni env timeLocale time iniText = parseIniFile iniText do
       ignoreFile defaultConfiguration path
         && takeFileName path `notElem` allowedFiles
 
-fieldOfStrings :: Text -> SectionParser [String]
-fieldOfStrings k = fieldDefOf k (listWithSeparator "," string) []
+fieldListOf :: Text -> (Text -> Either String a) -> SectionParser [a]
+fieldListOf k p = fieldDefOf k (listWithSeparator "," p) []
 
 configEnvFlag :: String -> String -> Bool -> [(String, String)] -> SectionParser Bool
 configEnvFlag configKey envKey defaultValue env =

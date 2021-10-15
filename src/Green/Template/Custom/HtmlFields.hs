@@ -2,7 +2,6 @@ module Green.Template.Custom.HtmlFields where
 
 import Green.Common
 import Green.Template
-import Green.Template.Fields
 import Green.Util (dropIndex)
 import qualified Hakyll as H
 

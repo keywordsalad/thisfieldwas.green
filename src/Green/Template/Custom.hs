@@ -1,5 +1,6 @@
 module Green.Template.Custom
-  ( module Green.Template.Custom.Compiler,
+  ( module Green.Template,
+    module Green.Template.Custom.Compiler,
     module Green.Template.Custom.Context,
     module Green.Template.Custom.DateFields,
     module Green.Template.Custom.GitFields,
@@ -7,6 +8,7 @@ module Green.Template.Custom
   )
 where
 
+import Green.Template
 import Green.Template.Custom.Compiler
 import Green.Template.Custom.Context
 import Green.Template.Custom.DateFields

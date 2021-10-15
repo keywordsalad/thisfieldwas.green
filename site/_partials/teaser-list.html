@@ -2,25 +2,23 @@
   <header>
     <h2>Latest Blog Posts</h2>
   </header>
-  {{#for recentPosts}}
+  {{#for recentPosts-}}
   <section class="teaser-item post">
     <header class="post-header">
       <hgroup>
         <h3 class="post-title"><a href="{{url}}">{{title}}</a></h3>
         <p class="post-published">
-          {{#if published}}
-            Posted on {{published | with format: shortDate}}
-          {{#else}}
-            Drafted on {{date | with format: shortDate}}
-          {{#end}}
-          {{#if author}}
-            by {{author}}
-          {{#end}}
+          {{-#if published-}}
+            Posted on {{published | dateAs shortDate}}
+          {{-#else-}}
+            Drafted on {{date | dateAs shortDate}}
+          {{-#end}}
+          {{-#if author}} by {{author}}{{#end}}
         </p>
       </hgroup>
     </header>
     {{#if teaser}}{{teaser}}{{#end}}
     <p class="read-more"><a href="{{url}}">Read more...</a></p>
   </section>
-  {{#end}}
+  {{-#end}}
 </article>

@@ -3,7 +3,7 @@ version: 0.1.0.0
 git: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green
 license: BSD3
 author: Logan McGrath
-maintainer: "website@thisfieldwas.green"
+maintainer: "logan.mcgrath@thisfieldwas.green"
 copyright: "Copyright (C) 2012-2021 Logan McGrath"
 
 extra-source-files:
@@ -26,9 +26,10 @@ library:
     - filepath
     - hakyll
     - hjsmin
+    # - JuicyPixels
+    - MissingH
     - microlens
     - microlens-th
-    - MissingH
     - mtl
     - optparse-applicative
     - pandoc

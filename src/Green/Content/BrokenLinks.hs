@@ -1,4 +1,4 @@
-module Green.Rule.BrokenLinks (brokenLinks) where
+module Green.Content.BrokenLinks (brokenLinks) where
 
 import Green.Common
 

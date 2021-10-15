@@ -7,7 +7,9 @@ import Data.Functor ((<&>))
 import qualified Data.HashMap.Strict as HashMap
 import Data.String.Utils (endswith)
 import qualified Data.Text as T
-import Green.Template
+import Green.Template.Ast
+import Green.Template.Compiler
+import Green.Template.Context
 import Green.Util (stripSuffix)
 import Hakyll (Compiler, Item (..))
 import qualified Hakyll as H

@@ -1,4 +1,4 @@
-module Green.Rule.Css (scssRules) where
+module Green.Content.Css (scssRules) where
 
 import Green.Common
 import Green.Config
@@ -13,7 +13,7 @@ scssRules siteConfig = do
 
 scssCompiler :: SiteConfig -> Compiler (Item String)
 scssCompiler siteConfig = do
-  css <- getResourceString >>= withItemBody compileSass
+  css <- withItemBody compileSass =<< getResourceString
   if siteConfig ^. siteDebug . debugRawCss
     then return css
     else return $ compressCss <$> css

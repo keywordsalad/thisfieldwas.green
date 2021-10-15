@@ -11,6 +11,39 @@
     clear: both;
   }
 
+  .professional-toolbox {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+
+    > * {
+      min-width: 15%;
+      & + * {
+        margin-left: 1rem;
+      }
+    }
+
+    ul {
+      padding: 0;
+      font-size: 0;
+    }
+
+    li {
+      font-size: $text-font-size;
+      list-style: none;
+      display: inline-block;
+      margin: 0;
+      padding: 0;
+
+      &::before, &:last-child::after {
+        content: "∗";
+        color: $color-green;
+        display: inline-block;
+        margin: 0 0.2rem;
+      }
+    }
+  }
+
   @include media('<tablet') {
   }
 

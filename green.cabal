@@ -8,7 +8,7 @@ name:           green
 version:        0.1.0.0
 description:    Please see the README at <https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green#readme>
 author:         Logan McGrath
-maintainer:     website@thisfieldwas.green
+maintainer:     logan.mcgrath@thisfieldwas.green
 copyright:      Copyright (C) 2012-2021 Logan McGrath
 license:        BSD3
 build-type:     Simple
@@ -26,20 +26,28 @@ library
       Green.Common
       Green.Compiler
       Green.Config
+      Green.Content.Blog
+      Green.Content.Blog.Compiler
+      Green.Content.Blog.Context
+      Green.Content.Blog.Route
+      Green.Content.Blog.Rule
+      Green.Content.BrokenLinks
+      Green.Content.Code
+      Green.Content.Css
+      Green.Content.Download
+      Green.Content.Feed
+      Green.Content.HomePage
+      Green.Content.Image
+      Green.Content.Js
+      Green.Content.Page
+      Green.Content.Robot
+      Green.Content.Sitemap
+      Green.Content.Template
       Green.Lens
       Green.Lens.Hakyll
       Green.Lens.TH
       Green.Route
       Green.Rule
-      Green.Rule.Blog
-      Green.Rule.BrokenLinks
-      Green.Rule.Css
-      Green.Rule.Feed
-      Green.Rule.Index
-      Green.Rule.Js
-      Green.Rule.Page
-      Green.Rule.Robot
-      Green.Rule.Sitemap
       Green.Template
       Green.Template.Ast
       Green.Template.Compiler

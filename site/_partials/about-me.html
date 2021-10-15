@@ -5,10 +5,8 @@
         src="{{route 'images/about-me/headshot-w-meatball-doge_400w.png'}}"
         title="Myself and Meatball. He's cute cuz he's little."
         alt="Mysql and Meatball">
-      <figcaption>
-        Myself and Meatball, who is a very good boy and wearing his very best treat face.
-      </figcaption>
-    </figure>
+    </picture>
+    <p>Myself and Meatball, who is a very good boy and wearing his very best treat face.</p>
   </aside>
   <div class="myself">
     <h2>Hello!</h2>
@@ -43,17 +41,15 @@
 {{partial "employment"}}
 
 <section class="personal-stuff">
-  <div class="meatball-jellybean">
-    <figure>
+  <aside class="meatball-jellybean">
+    <picture>
       <img width="200" height="266"
         src="{{route 'images/about-me/meatball-n-jelly-doges_400w.png'}}"
         title="Meatball is the little one, Jellybean is the big one."
         alt="Meatball and Jellybean">
-      <figcaption>
-        The little one is Meatball, the big one is Jellybean. Both are very good boys, <em>and they both know I have a treat in my hand.</em>
-      </figcaption>
-    </figure>
-  </div>
+    </picture>
+    <p>The little one is Meatball, the big one is Jellybean. Both are very good boys, <em>and they both know I have a treat in my hand.</em></p>
+  </aside>
   <h2>My Life as It Relates to My Site</h2>
   <p>
     <em>As this is my site and my life, all opinions I express here are my own. Opinions being what they are, I recognize that I might be wrong and openly invite learning opportunities.</em>
@@ -69,14 +65,13 @@
 <section class="professional-offering clear">
   <h2>My Professional Offering</h2>
   <div class="professional-toolbox">
-    <h3>Tools of the Trade</h3>
     <section class="skills foundations">
       <h3>Foundations and Practices</h3>
       <ul>
-        <li>Low Code</li>
         <li>Frameworks and Platforms</li>
+        <li>Low Code</li>
         <li>Technical Enablement</li>
-        <li>Agile, Scrum, Kanban</li>
+        <li>Scrum, Agile, Kanban, Post-it's</li>
         <li>Source Control</li>
         <li>Test Automation</li>
         <li>Experimentation</li>
@@ -114,14 +109,6 @@
         <li>Thumb Drive</li>
       </ul>
     </section>
-    <section class="skills interfaces">
-      <h3>Interfaces</h3>
-      <ul>
-        <li>React</li>
-        <li>Angular</li>
-        <li>HTML, <em>by hand!</em></li>
-      </ul>
-    </section>
     <section class="skills integrations">
       <h3>Integrations</h3>
       <ul>
@@ -132,15 +119,27 @@
         <li>REST</li>
       </ul>
     </section>
-    <div class="applied">
+    <section class="skills interfaces">
+      <h3>Interfaces</h3>
+      <ul>
+        <li>React</li>
+        <li>Angular</li>
+        <li>HTML, <em>by hand!</em></li>
+      </ul>
+    </section>
+  </div>
+  <section class="applied">
+    <section>
       <h3>Putting Technology to Work</h3>
       <p>
         My primary customers are technical teams looking to accelerate time to market for new features and changes. Product teams need solid building blocks to deliver these features and I work as a force multiplier by providing the low code frameworks, tools, and infrastructure required to ship quickly and be nimble to change. My goal as a professional is to craft systems that reduce the number of teams and organizations, and more importantly <em>time and cost</em>, required to ship work in order to maximize value to the business and better serve customers.
       </p>
+    </section>
+    <section>
       <h3>Making the Hard Work Matter</h3>
       <p>
         Engineers are too expensive to be putting together bespoke content with high rates of churn. Low code allows engineers to focus on the hard problems and enables more opportunities for businesses to better harness the value they bring. I mentor engineers to help them realize their full potential as technologists and become drivers in better engineering with less code.
       </p>
-    </div>
-  </div>
+    </section>
+  </section>
 </section>

@@ -36,6 +36,10 @@ p {
   @include block;
 }
 
+ul {
+  @include block;
+}
+
 blockquote {
   background-color: $color-aside;
   margin: 1rem 2rem;

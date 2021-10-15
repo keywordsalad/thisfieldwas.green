@@ -12,12 +12,14 @@ $text-align-default: left;
 $header-font-family: "Times New Roman", serif;
 $header-font-fudge-factor: 1.1;
 
+$aside-font-family: $header-font-family;
+
 $code-font-family: "Andale Mono", Monaco, "Courier New", monospace;
 $code-font-size: 0.75rem;
 
 $color-green: darkgreen;
 $color-text: darkslategray;
-$color-text-dark: color.adjust($color-green, $lightness: 90%);
+$color-text-dark: color.adjust($color-green, $lightness: 1%);
 $color-text-light: slategray;
 $color-emphasize: $color-green;
 $color-highlight: gold;

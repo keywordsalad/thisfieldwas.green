@@ -1,14 +1,12 @@
-<aside class="youtube"{{#if id}} id="{{id}}"{{#end}}>
-  <figure>
-    <iframe src="https://www.youtube.com/embed/{{video}}"
-            {{#if title}}title="{{video}}"{{#end}}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen>
-    </iframe>
-  </figure>
-  {{#if title}}
+<figure>
+  <iframe src="https://www.youtube.com/embed/{{video}}"
+          {{-#if title}} title="{{title}}"{{#end}}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+  </iframe>
+  {{#if title-}}
   <figcaption>
-    {{title}}
+    {{-title-}}
   </figcaption>
-  {{#end}}
-</aside>
+  {{-#end}}
+</figure>

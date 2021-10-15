@@ -1,26 +1,36 @@
 module Green.Template.Custom.Compiler where
 
+import Data.List (nub)
 import Green.Common
-import Green.Config
 import Green.Template
-import Green.Template.Custom.Context
 import qualified Hakyll as H
 import System.FilePath
 
-pageCompiler :: SiteConfig -> Compiler (Item String)
-pageCompiler config =
-  H.getResourceBody
-    >>= applyAsTemplate context
-    >>= compilePandoc
-    >>= \item -> do
-      metadataContext <- getContext $ H.itemIdentifier item
-      unContext metadataContext "layout" item >>= \case
-        StringValue layoutName -> do
-          let layoutPath = "_layouts" </> layoutName <.> "html"
-          layoutTemplate <- loadTemplateBody $ H.fromFilePath layoutPath
-          applyTemplate layoutTemplate context item
-        _ -> do
-          H.debugCompiler $ "Did not receive String layout key for " ++ show (H.itemIdentifier item)
-          return item
+pageCompiler :: Context String -> Item String -> Compiler (Item String)
+pageCompiler = pageCompilerWithSnapshots []
+
+pageCompilerWithSnapshots :: [String] -> Context String -> Item String -> Compiler (Item String)
+pageCompilerWithSnapshots snapshots context =
+  applyAsTemplate context
+    >=> compilePandoc
+    >=> (\x -> foldM (flip H.saveSnapshot) x snapshots')
+    >=> applyLayout context
+    >=> H.relativizeUrls
   where
-    context = customContext config
+    snapshots' =
+      nub
+        if "_content" `elem` snapshots
+          then snapshots
+          else "_content" : snapshots
+
+applyLayout :: Context String -> Item String -> Compiler (Item String)
+applyLayout context item = do
+  metadataContext <- getContext $ H.itemIdentifier item
+  unContext metadataContext "layout" item >>= \case
+    StringValue layoutName -> do
+      let layoutPath = "_layouts" </> layoutName <.> "html"
+      layoutTemplate <- loadTemplateBody $ H.fromFilePath layoutPath
+      applyTemplate layoutTemplate context item
+    _ -> do
+      H.debugCompiler $ "Did not receive String layout key for " ++ show (H.itemIdentifier item)
+      return item
