@@ -2,6 +2,7 @@ module Green.Content.Css (scssRules) where
 
 import Green.Common
 import Green.Config
+import Hakyll (compressCss, unixFilter)
 
 scssRules :: SiteConfig -> Rules ()
 scssRules siteConfig = do

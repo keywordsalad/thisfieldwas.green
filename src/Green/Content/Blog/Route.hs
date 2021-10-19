@@ -2,7 +2,7 @@ module Green.Content.Blog.Route where
 
 import Green.Common
 import Green.Route
-import qualified Hakyll as H
+import Hakyll (replaceAll)
 
 datePattern :: String
 datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}-"
@@ -11,7 +11,7 @@ postPattern :: String
 postPattern = "^_posts/([^/]+/)?" ++ datePattern
 
 dateRoute :: Routes
-dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))
+dateRoute = gsubRoute datePattern (replaceAll "-" (const "/"))
 
 postRoute :: Routes
 postRoute =

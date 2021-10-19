@@ -2,7 +2,7 @@
   <header>
     <h2>Latest Blog Posts</h2>
   </header>
-  {{#for recentPosts-}}
+  {{#for previousPosts-}}
   <section class="teaser-item post">
     <header class="post-header">
       <hgroup>
@@ -17,7 +17,7 @@
         </p>
       </hgroup>
     </header>
-    {{#if teaser}}{{teaser}}{{#end}}
+    {{#if teaser}}{{teaser}}{{#end-}}
     <p class="read-more"><a href="{{url}}">Read more...</a></p>
   </section>
   {{-#end}}

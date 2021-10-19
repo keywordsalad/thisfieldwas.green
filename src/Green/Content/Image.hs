@@ -1,13 +1,12 @@
 module Green.Content.Image where
 
 import Green.Common
-import qualified Hakyll as H
 
 imageRules :: Rules ()
 imageRules =
   match "images/**" do
     route idRoute
-    compile H.copyFileCompiler
+    compile copyFileCompiler
 
 -- imageRules :: SiteConfig -> Rules ()
 -- imageRules config = do

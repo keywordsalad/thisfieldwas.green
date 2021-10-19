@@ -1,7 +1,7 @@
 module Green.Compiler where
 
+import Data.Maybe (catMaybes)
 import Green.Common
-import Hakyll.Core.Metadata
 
 -- | Load an item snapshot if it exists.
 maybeLoadSnapshot :: Identifier -> Snapshot -> Compiler (Maybe (Item String))
@@ -16,4 +16,4 @@ loadExistingSnapshots :: Pattern -> Snapshot -> Compiler [Item String]
 loadExistingSnapshots pat snapshot = do
   matching <- getMatches pat
   results <- mapM (`maybeLoadSnapshot` snapshot) matching
-  return [x | Just x <- results]
+  return $ catMaybes results

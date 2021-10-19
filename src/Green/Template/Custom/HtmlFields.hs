@@ -3,7 +3,6 @@ module Green.Template.Custom.HtmlFields where
 import Green.Common
 import Green.Template
 import Green.Util (dropIndex)
-import qualified Hakyll as H
 
 -- | Trims @index.html@ from @$url$@'s
 trimmedUrlField :: String -> Context String
@@ -35,7 +34,7 @@ imgField = functionField "img" f
     defaults = defaultKeys ["id", "src", "title", "alt"]
     f (imgFields :: Context String) context item = do
       let fields = imgFields <> defaults <> context
-      itemBody <$> loadAndApplyTemplate (H.fromFilePath "_templates/image.html") fields item
+      itemBody <$> loadAndApplyTemplate (fromFilePath "_templates/image.html") fields item
 
 youtubeField :: Context String
 youtubeField = functionField "youtube" f

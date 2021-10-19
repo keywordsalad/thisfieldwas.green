@@ -12,11 +12,10 @@ module Green.Template.Ast
 where
 
 import Data.Binary
-import Data.List (intercalate)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import GHC.Generics
-import qualified Hakyll as H
+import Green.Common
 import Text.Parsec hiding (getPosition)
 import Text.Parsec.Pos
 
@@ -30,7 +29,7 @@ instance Binary Template where
     put blocks
     put pos
 
-instance H.Writable Template where
+instance Writable Template where
   write _ _ = return ()
 
 data Block

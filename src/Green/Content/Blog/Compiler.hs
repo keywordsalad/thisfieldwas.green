@@ -2,41 +2,40 @@ module Green.Content.Blog.Compiler where
 
 import Data.Maybe (listToMaybe)
 import Green.Common
-import qualified Green.Common as H
 import Green.Compiler (loadExistingSnapshots)
 import Green.Template.Custom
-import qualified Hakyll as H
+import Hakyll (recentFirst)
 
 postCompiler :: Context String -> Compiler (Item String)
 postCompiler context =
-  pageCompilerWithSnapshots [publishedPostsSnapshot] context =<< H.getResourceBody
+  pageCompilerWithSnapshots [publishedPostsSnapshot] context =<< getResourceBody
 
 draftCompiler :: Context String -> Compiler (Item String)
 draftCompiler context =
-  pageCompilerWithSnapshots [draftPostsSnapshot] context =<< H.getResourceBody
+  pageCompilerWithSnapshots [draftPostsSnapshot] context =<< getResourceBody
 
 blogCompiler :: Context String -> Compiler (Item String)
 blogCompiler context = do
-  posts <- fmap (take 5) . H.recentFirst =<< loadPublishedPosts
+  posts <- fmap (take 5) . recentFirst =<< loadPublishedPosts
   let latestPost = listToMaybe posts
       previousPosts = drop 1 posts
       context' =
-        constField "latestPost" latestPost
-          <> constField "previousPosts" previousPosts
+        constField "latestPost" (itemValue context <$> latestPost)
+          <> constField "previousPosts" (itemsValue context previousPosts)
           <> context
-  pageCompiler context' =<< H.getResourceBody
+  pageCompiler context' =<< getResourceBody
 
 archivesCompiler :: Context String -> Compiler (Item String)
 archivesCompiler context = do
-  posts <- H.recentFirst =<< loadPublishedPosts
-  let context' = constField "posts" posts <> context
-  pageCompiler context' =<< H.getResourceBody
+  posts <- recentFirst =<< loadPublishedPosts
+  let context' = constField "posts" (itemsValue context posts) <> context
+  pageCompiler context' =<< getResourceBody
 
 draftArchivesCompiler :: Context String -> Compiler (Item String)
 draftArchivesCompiler context = do
-  drafts <- H.recentFirst =<< loadDraftPosts
-  let context' = constField "drafts" drafts <> context
-  pageCompiler context' =<< H.getResourceBody
+  drafts <- recentFirst =<< loadDraftPosts
+  let context' = constField "drafts" (itemsValue context drafts) <> context
+  pageCompiler context' =<< getResourceBody
 
 loadDraftPosts :: Compiler [Item String]
 loadDraftPosts = loadExistingSnapshots "_drafts/**" draftPostsSnapshot

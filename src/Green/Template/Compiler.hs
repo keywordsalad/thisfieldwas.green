@@ -2,32 +2,31 @@ module Green.Template.Compiler where
 
 import Data.Bifunctor
 import Data.List.NonEmpty (NonEmpty ((:|)))
+import Green.Common
 import Green.Template.Ast
 import Green.Template.Context hiding (field)
 import Green.Template.Source.Parser (parse)
-import Hakyll (Compiler, Item)
-import qualified Hakyll as H
 import Prelude hiding (lookup)
 
 -- | Compiles an item as a template.
 templateCompiler :: Compiler (Item Template)
 templateCompiler =
-  H.cached "Green.Template.Compiler.templateCompiler" $
-    H.getResourceBody
+  cached "Green.Template.Compiler.templateCompiler" $
+    getResourceBody
       >>= compileTemplateItem
-      >>= H.makeItem
+      >>= makeItem
 
 -- | Takes an item and compiles a template from it.
 compileTemplateItem :: Item String -> Compiler Template
 compileTemplateItem item = do
-  let filePath = H.toFilePath $ H.itemIdentifier item
-  either (fail . show) return $ parse filePath (H.itemBody item)
+  let filePath = toFilePath $ itemIdentifier item
+  either (fail . show) return $ parse filePath (itemBody item)
 
-loadTemplate :: H.Identifier -> Compiler (Item Template)
-loadTemplate = H.load
+loadTemplate :: Identifier -> Compiler (Item Template)
+loadTemplate = load
 
-loadTemplateBody :: H.Identifier -> Compiler Template
-loadTemplateBody id' = H.itemBody <$> loadTemplate id'
+loadTemplateBody :: Identifier -> Compiler Template
+loadTemplateBody id' = itemBody <$> loadTemplate id'
 
 -- | Applies an item as a template to itself.
 applyAsTemplate :: Context String -> Item String -> Compiler (Item String)
@@ -35,7 +34,7 @@ applyAsTemplate context item = do
   template <- compileTemplateItem item
   applyTemplate template context item
 
-loadAndApplyTemplate :: H.Identifier -> Context String -> Item String -> Compiler (Item String)
+loadAndApplyTemplate :: Identifier -> Context String -> Item String -> Compiler (Item String)
 loadAndApplyTemplate id' context item = do
   template <- loadTemplateBody id'
   applyTemplate template context item
@@ -44,7 +43,7 @@ loadAndApplyTemplate id' context item = do
 applyTemplate :: Template -> Context String -> Item String -> Compiler (Item String)
 applyTemplate (Template bs _) context item = do
   result <- reduceBlocks context bs item
-  return $ H.itemSetBody result item
+  return $ itemSetBody result item
 
 reduceBlocks :: Context String -> [Block] -> Item String -> Compiler String
 reduceBlocks context bs item = do
@@ -122,7 +121,7 @@ stringify context item value = case value of
     CommentBlock {} -> return ""
     ExpressionBlock e _ -> stringify context item =<< eval context e item
     _ -> stringify context item =<< applyBlock context block item
-  ItemValue i -> return $ H.itemBody i
+  ItemsValue _ items -> return $ mconcat $ itemBody <$> items
   ThunkValue fx -> stringify context item =<< force =<< fx
 
 isTruthy :: ContextValue a -> Compiler Bool
@@ -137,7 +136,7 @@ isTruthy = \case
   IntValue x -> return $ x /= 0
   FunctionValue {} -> return True
   BlockValue {} -> return True
-  ItemValue {} -> return True
+  ItemsValue _ xs -> return $ not (null xs)
   ThunkValue fx -> isTruthy =<< force =<< fx
 
 force :: ContextValue a -> Compiler (ContextValue a)

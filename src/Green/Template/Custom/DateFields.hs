@@ -6,7 +6,6 @@ import Green.Common
 import Green.Config
 import Green.Template.Context
 import Green.Util
-import qualified Hakyll as H
 
 dateFields :: SiteConfig -> Context a
 dateFields config =
@@ -40,23 +39,23 @@ dateField key timeLocale = field key f
 publishedField :: String -> TimeLocale -> Context a
 publishedField key timeLocale = field key f
   where
-    f item = dateFromMetadata timeLocale ["published"] item
+    f = dateFromMetadata timeLocale ["published"]
 
 updatedField :: String -> TimeLocale -> Context a
 updatedField key timeLocale = field key f
   where
-    f item = dateFromMetadata timeLocale ["updated"] item
+    f = dateFromMetadata timeLocale ["updated"]
 
 dateFromMetadata :: TimeLocale -> [String] -> Item a -> Compiler String
 dateFromMetadata timeLocale sourceKeys item =
-  H.cached cacheKey do
+  cached cacheKey do
     firstAlt $ findDate <$> sourceKeys
   where
     cacheKey = "Green.Template.Custom.DateFields.dateFromMetadata:" ++ show sourceKeys
     id' = itemIdentifier item
     findDate sourceKey = do
-      metadata <- H.getMetadata id' :: Compiler H.Metadata
-      let maybeDate = H.lookupString sourceKey metadata
+      metadata <- getMetadata id' :: Compiler Metadata
+      let maybeDate = lookupString sourceKey metadata
       debugCompiler $ "Source key " ++ show sourceKey ++ " returned " ++ show maybeDate ++ " for date from metadata"
       let notFound = noResult $ "Could not find metadata date using key " ++ show sourceKey
       let maybeFrozenDate = freezeTime timeLocale metadataDateFormats =<< maybeDate
@@ -64,16 +63,16 @@ dateFromMetadata timeLocale sourceKeys item =
 
 dateFromFilePath :: TimeLocale -> Item a -> Compiler String
 dateFromFilePath timeLocale item =
-  H.cached cacheKey do
+  cached cacheKey do
     dateFromPath
-      <|> noResult ("Could not find file path date from " ++ show (H.toFilePath $ H.itemIdentifier item))
+      <|> noResult ("Could not find file path date from " ++ show (toFilePath $ itemIdentifier item))
   where
     cacheKey = "Green.Template.Custom.DateFields.dateFromFilePath"
     dateFromPath =
       firstAlt $
         dateFromPath' . intercalate "-"
           <$> ( [take 3 $ split "-" fnCand | fnCand <- reverse paths]
-                  ++ [fnCand | fnCand <- map (take 3) $ reverse $ tails paths]
+                  ++ (fmap (take 3) <$> reverse (tails paths))
               )
     paths = splitDirectories $ dropExtension $ toFilePath $ itemIdentifier item
     dateFromPath' path = do

@@ -1,15 +1,15 @@
 module Green.TestSupport.Routes where
 
 import Data.Foldable (traverse_)
-import Hakyll as H
 import Green.Common
 import Green.TestSupport.TestEnv
+import Hakyll (UsedMetadata, runRoutes)
 import Test.Hspec
 
 type RunRoutes = Routes -> Identifier -> IO (Maybe FilePath, UsedMetadata)
 
 runRouteSpec :: TestEnv -> (RunRoutes -> IO a) -> IO a
-runRouteSpec testEnv f = f (`H.runRoutes` testProvider testEnv)
+runRouteSpec testEnv f = f (`runRoutes` testProvider testEnv)
 
 runRouteExamples :: Routes -> [(String, Maybe String)] -> SpecWith RunRoutes
 runRouteExamples routes = traverse_ makeExample

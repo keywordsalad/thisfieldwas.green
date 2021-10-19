@@ -3,7 +3,7 @@ module Green.TestSupport.Config where
 import Data.Time
 import Green.Common
 import Green.Config
-import Hakyll as H
+import Hakyll (Configuration (..))
 
 defaultTestTimeString :: String
 defaultTestTimeString = "2013-06-16T21:12:00-07:00"
@@ -14,7 +14,7 @@ defaultTestTime = timeFromString defaultTestTimeString
 timeFromString :: (MonadFail m) => String -> m ZonedTime
 timeFromString = parseTimeM True defaultTimeLocale "%FT%T%EZ"
 
-defaultHakyllConfig :: H.Configuration
+defaultHakyllConfig :: Configuration
 defaultHakyllConfig =
   defaultConfiguration
     { destinationDirectory = "_test/site",
@@ -26,7 +26,7 @@ defaultHakyllConfig =
 defaultSiteConfig :: SiteConfig
 defaultSiteConfig = defaultSiteConfigWith defaultHakyllConfig
 
-defaultSiteConfigWith :: H.Configuration -> SiteConfig
+defaultSiteConfigWith :: Configuration -> SiteConfig
 defaultSiteConfigWith hakyllConfig =
   SiteConfig
     { _siteHakyllConfiguration = hakyllConfig,

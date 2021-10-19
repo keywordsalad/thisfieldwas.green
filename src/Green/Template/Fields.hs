@@ -2,17 +2,14 @@
 
 module Green.Template.Fields where
 
-import Control.Monad (forM)
-import Data.Functor ((<&>))
 import qualified Data.HashMap.Strict as HashMap
 import Data.String.Utils (endswith)
 import qualified Data.Text as T
+import Green.Common
 import Green.Template.Ast
 import Green.Template.Compiler
 import Green.Template.Context
 import Green.Util (stripSuffix)
-import Hakyll (Compiler, Item (..))
-import qualified Hakyll as H
 import System.FilePath
 
 defaultFields :: Context String
@@ -55,18 +52,18 @@ withField = functionField2 "with" f
 includeField :: String -> FilePath -> Context String
 includeField key basePath = functionField key f
   where
-    f (filePath :: String) =
-      loadAndApplyTemplate $
-        H.fromFilePath (basePath </> filePath <.> "html")
+    f (filePath :: String) context item =
+      let id' = fromFilePath (basePath </> filePath <.> "html")
+       in itemValue context <$> loadAndApplyTemplate id' context item
 
 layoutField :: String -> FilePath -> Context String
 layoutField key basePath = functionField2 key f
   where
     f (filePath :: FilePath) (blocks :: [Block]) context item = do
-      let layoutId = H.fromFilePath $ basePath </> filePath <.> "html"
+      let layoutId = fromFilePath $ basePath </> filePath <.> "html"
       reduced <- reduceBlocks context blocks item
       template <- loadTemplateBody layoutId
-      applyTemplate template context (H.itemSetBody reduced item)
+      itemValue context <$> applyTemplate template context (itemSetBody reduced item)
 
 ifField :: forall a. Context a
 ifField = functionField2 "if" f
@@ -84,15 +81,13 @@ forField = functionField2 "for" f
       isTruthy arg' >>= \case
         True ->
           case arg' of
-            ListValue xs -> do
-              ctxs <- sequence $ fromValue <$> xs :: Compiler [Context String]
-              Just . mconcat <$> forM ctxs reduce
-            ContextValue ctx -> do
-              Just <$> reduce ctx
+            ItemsValue ctx xs -> Just . mconcat <$> mapM (reduce ctx) xs
+            ContextValue ctx -> Just <$> reduce ctx item
             x -> fail $ "Unexpected " ++ show x ++ " in {{#for}}"
+        --
         False -> return Nothing
       where
-        reduce x = reduceBlocks (x <> context) blocks item
+        reduce ctx = reduceBlocks (ctx <> context) blocks
 
 defaultField :: forall a. Context a
 defaultField = functionField2 "default" f
@@ -106,8 +101,8 @@ routeField :: Context String
 routeField = functionField "route" f
   where
     f (filePath :: String) _ _ = do
-      let id' = H.fromFilePath filePath
-      H.getRoute id' >>= \case
+      let id' = fromFilePath filePath
+      getRoute id' >>= \case
         Just r -> return $ "/" ++ stripSuffix "index.html" r
         Nothing -> error $ "no route to " ++ show id'
 
@@ -116,13 +111,13 @@ linkedTitleField = constField "linkedTitle" f
   where
     f :: FunctionValue String String String
     f filePath context item = do
-      linkedItem <- H.load (H.fromFilePath filePath)
+      linkedItem <- load (fromFilePath filePath)
       makeLink <$> getField "title" linkedItem <*> getField "url" linkedItem
       where
         getField key linkedItem = tryWithError key item $ fromValue =<< unContext context key linkedItem
         makeLink title url
-          | endswith ".html" filePath = "<a href=\"" ++ url ++ "\">" ++ H.escapeHtml title ++ "</a>"
-          | endswith ".md" filePath = "[" ++ H.escapeHtml title ++ "](" ++ url ++ ")"
+          | endswith ".html" filePath = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
+          | endswith ".md" filePath = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
           | otherwise = title ++ " <" ++ url ++ ">"
 
 metadataField :: forall a. Context a
@@ -130,7 +125,7 @@ metadataField = Context f
   where
     f :: ContextFunction a
     f key item = do
-      m <- H.getMetadata (itemIdentifier item)
+      m <- getMetadata (itemIdentifier item)
       maybe
         (fail $ "Key " ++ show key ++ " not found in metadata")
         (return . intoValue)
@@ -145,21 +140,21 @@ urlField key = field key f
     f item =
       let id' = itemIdentifier item
           empty' = fail $ "No route url found for item " ++ show id'
-       in maybe empty' H.toUrl <$> H.getRoute id'
+       in maybe empty' toUrl <$> getRoute id'
 
 pathField :: String -> Context a
-pathField key = field key $ return . H.toFilePath . itemIdentifier
+pathField key = field key $ return . toFilePath . itemIdentifier
 
 titleFromFileField :: String -> Context a
 titleFromFileField = bindField titleFromPath . pathField
   where
     titleFromPath = return . takeBaseName
 
-teaserField :: String -> H.Snapshot -> Context String
+teaserField :: String -> Snapshot -> Context String
 teaserField key snapshot = field key f
   where
     f item =
-      takeTeaser "" <$> H.loadSnapshotBody (itemIdentifier item) snapshot
+      takeTeaser "" <$> loadSnapshotBody (itemIdentifier item) snapshot
 
     teaserComment = "<!-- teaser -->"
     takeTeaser acc body@(x : rest)

@@ -1,6 +1,5 @@
 module Green.Template.Context where
 
-import Control.Applicative ((<|>))
 import Data.Aeson
 import Data.Bifunctor
 import Data.Either
@@ -11,17 +10,16 @@ import Data.Proxy
 import Data.Scientific (isInteger, toBoundedInteger, toBoundedRealFloat)
 import qualified Data.Text as T
 import qualified Data.Vector as Vector
+import Green.Common
 import Green.Template.Ast
-import Hakyll (Compiler, Item (..))
-import qualified Hakyll as H
 import Prelude hiding (lookup)
 
 newtype Context a = Context {unContext :: ContextFunction a}
 
 type ContextFunction a = String -> Item a -> Compiler (ContextValue a)
 
-getContext :: H.Identifier -> Compiler (Context a)
-getContext id' = intoContext <$> H.getMetadata id'
+getContext :: Identifier -> Compiler (Context a)
+getContext id' = intoContext <$> getMetadata id'
 
 -- | Apply @f@ to an item if @key@ is requested.
 field :: (IntoValue v a) => String -> (Item a -> Compiler v) -> Context a
@@ -29,14 +27,14 @@ field key f = Context f'
   where
     f' k i
       | k == key = tryWithError k i (intoValue <$> f i)
-      | otherwise = H.noResult $ "Tried field key " ++ show key
+      | otherwise = noResult $ "Tried field key " ++ show key
 
 tryWithError :: String -> Item a -> Compiler b -> Compiler b
 tryWithError key item =
-  H.withErrorMessage $
+  withErrorMessage $
     "Error getting field " ++ show key
       ++ " for item "
-      ++ show (H.itemIdentifier item)
+      ++ show (itemIdentifier item)
 
 -- | Reports missing field.
 missingField :: Context a
@@ -44,7 +42,7 @@ missingField = Context f
   where
     f key item =
       tryWithError key item $
-        H.noResult $ "Missing field " ++ show key ++ " in context"
+        noResult $ "Missing field " ++ show key ++ " in context"
 
 -- | Const-valued field, returns the same @val@ per @key@.
 constField :: (IntoValue v a) => String -> v -> Context a
@@ -76,7 +74,7 @@ hashMapField m = Context f
   where
     m' = intoValue <$> m
     f k _ = maybe (tried k) return (HashMap.lookup k m')
-    tried k = H.noResult $ "Tried field in map " ++ k
+    tried k = noResult $ "Tried field in map " ++ k
 
 functionField :: (FromValue v a, IntoValue w a) => String -> (v -> Context a -> Item a -> Compiler w) -> Context a
 functionField = constField
@@ -122,7 +120,7 @@ data ContextValue a
   | IntValue Int
   | FunctionValue (ContextValue a -> Context a -> Item a -> Compiler (ContextValue a))
   | BlockValue Block
-  | ItemValue (Item a)
+  | ItemsValue (Context a) [Item a]
   | ThunkValue (Compiler (ContextValue a))
 
 type FunctionValue v w a = v -> Context a -> Item a -> Compiler w
@@ -145,8 +143,14 @@ instance Show (ContextValue a) where
     IntValue i -> "IntValue " ++ show i
     FunctionValue {} -> "FunctionValue"
     BlockValue {} -> "BlockValue"
-    ItemValue item -> "Item " ++ show (itemIdentifier item)
+    ItemsValue _ items -> "ItemsValue (contains " ++ show (length items) ++ " items)"
     ThunkValue {} -> "ThunkValue"
+
+itemValue :: Context a -> Item a -> ContextValue a
+itemValue context item = intoValue (context, [item])
+
+itemsValue :: Context a -> [Item a] -> ContextValue a
+itemsValue context items = intoValue (context, items)
 
 class IntoValue' (flag :: Bool) v a where
   intoValue' :: Proxy flag -> v -> ContextValue a
@@ -197,8 +201,8 @@ instance IntoValue Double a where
 instance IntoValue Int a where
   intoValue = IntValue
 
-instance IntoValue (Item a) a where
-  intoValue = ItemValue
+instance IntoValue (Context a, [Item a]) a where
+  intoValue = uncurry ItemsValue
 
 instance (IntoValue v a) => IntoValue (Maybe v) a where
   intoValue (Just v) = intoValue v
@@ -283,9 +287,9 @@ instance FromValue Int a where
     ThunkValue fx -> fromValue =<< fx
     x -> fail $ "Tried to get " ++ show x ++ " as Int"
 
-instance FromValue (Item a) a where
+instance FromValue (Context a, [Item a]) a where
   fromValue = \case
-    ItemValue item -> return item
+    ItemsValue context item -> return (context, item)
     ThunkValue fx -> fromValue =<< fx
     x -> fail $ "Tried to get " ++ show x ++ " as Item"
 
