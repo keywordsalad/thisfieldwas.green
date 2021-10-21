@@ -27,7 +27,7 @@ token =
     TextMode ->
       tryOne
         [ do
-            _ <- lookAhead $ tryOne [spaces *> trimmingOpen, open]
+            void . lookAhead $ tryOne [spaces *> trimmingOpen, open]
             startBlock
             token,
           textToken

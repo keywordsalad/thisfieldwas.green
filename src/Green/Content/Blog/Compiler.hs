@@ -1,6 +1,5 @@
 module Green.Content.Blog.Compiler where
 
-import Data.Maybe (listToMaybe)
 import Green.Common
 import Green.Compiler (loadExistingSnapshots)
 import Green.Template.Custom
@@ -16,32 +15,47 @@ draftCompiler context =
 
 blogCompiler :: Context String -> Compiler (Item String)
 blogCompiler context = do
-  posts <- fmap (take 5) . recentFirst =<< loadPublishedPosts
-  let latestPost = listToMaybe posts
-      previousPosts = drop 1 posts
-      context' =
-        constField "latestPost" (itemValue context <$> latestPost)
-          <> constField "previousPosts" (itemsValue context previousPosts)
-          <> context
-  pageCompiler context' =<< getResourceBody
+  blogContext <- (<> context) <$> recentPostsContext
+  pageCompiler blogContext =<< getResourceBody
 
 archivesCompiler :: Context String -> Compiler (Item String)
 archivesCompiler context = do
   posts <- recentFirst =<< loadPublishedPosts
-  let context' = constField "posts" (itemsValue context posts) <> context
-  pageCompiler context' =<< getResourceBody
+  let archivesContext =
+        constField "posts" (itemListValue context posts)
+          <> context
+  pageCompiler archivesContext =<< getResourceBody
 
 draftArchivesCompiler :: Context String -> Compiler (Item String)
 draftArchivesCompiler context = do
   drafts <- recentFirst =<< loadDraftPosts
-  let context' = constField "drafts" (itemsValue context drafts) <> context
-  pageCompiler context' =<< getResourceBody
+  let draftsContext =
+        constField "posts" (itemListValue context drafts)
+          <> context
+  pageCompiler draftsContext =<< getResourceBody
+
+recentPostsContext :: Compiler (Context String)
+recentPostsContext =
+  withErrorMessage "Failed to load recent posts context" do
+    posts <- fmap (take 5) . recentFirst =<< loadPublishedPosts
+    let latestPost = take 1 posts
+        previousPosts = drop 1 posts
+        blogContext =
+          constField "latestPost" (itemListValue teaserContext latestPost)
+            <> constField "previousPosts" (itemListValue teaserContext previousPosts)
+    return blogContext
+
+teaserContext :: Context String
+teaserContext = teaserField "teaser" publishedPostsSnapshot
+
+loadPublishedPosts :: Compiler [Item String]
+loadPublishedPosts = withErrorMessage "Failed to load published posts" $ do
+  snapshots <- loadExistingSnapshots "_posts/**" publishedPostsSnapshot
+  debugCompiler $ "Loaded " ++ show (length snapshots) ++ " published posts"
+  return snapshots
 
 loadDraftPosts :: Compiler [Item String]
 loadDraftPosts = loadExistingSnapshots "_drafts/**" draftPostsSnapshot
-
-loadPublishedPosts :: Compiler [Item String]
-loadPublishedPosts = loadExistingSnapshots "_posts/**" publishedPostsSnapshot
 
 publishedPostsSnapshot :: String
 publishedPostsSnapshot = "_publishedPosts"

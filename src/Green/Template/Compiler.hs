@@ -1,12 +1,13 @@
 module Green.Template.Compiler where
 
+import Control.Monad.State.Strict
 import Data.Bifunctor
-import Data.List.NonEmpty (NonEmpty ((:|)))
+import Data.List.NonEmpty
 import Green.Common
 import Green.Template.Ast
 import Green.Template.Context hiding (field)
 import Green.Template.Source.Parser (parse)
-import Prelude hiding (lookup)
+import Hakyll.Core.Compiler.Internal
 
 -- | Compiles an item as a template.
 templateCompiler :: Compiler (Item Template)
@@ -22,11 +23,16 @@ compileTemplateItem item = do
   let filePath = toFilePath $ itemIdentifier item
   either (fail . show) return $ parse filePath (itemBody item)
 
-loadTemplate :: Identifier -> Compiler (Item Template)
-loadTemplate = load
+loadTemplate' :: Identifier -> TemplateRunner a Template
+loadTemplate' = lift . fmap itemBody . load
 
-loadTemplateBody :: Identifier -> Compiler Template
-loadTemplateBody id' = itemBody <$> loadTemplate id'
+loadAndApplyTemplate :: Identifier -> Context String -> Item String -> Compiler (Item String)
+loadAndApplyTemplate id' context item = do
+  let s = templateRunner context item
+  evalStateT (loadAndApplyTemplate' id') s
+
+loadAndApplyTemplate' :: Identifier -> TemplateRunner String (Item String)
+loadAndApplyTemplate' = lift . makeItem <=< applyTemplate' <=< loadTemplate'
 
 -- | Applies an item as a template to itself.
 applyAsTemplate :: Context String -> Item String -> Compiler (Item String)
@@ -34,100 +40,104 @@ applyAsTemplate context item = do
   template <- compileTemplateItem item
   applyTemplate template context item
 
-loadAndApplyTemplate :: Identifier -> Context String -> Item String -> Compiler (Item String)
-loadAndApplyTemplate id' context item = do
-  template <- loadTemplateBody id'
-  applyTemplate template context item
-
 -- | Applies a template with context to an item
 applyTemplate :: Template -> Context String -> Item String -> Compiler (Item String)
-applyTemplate (Template bs _) context item = do
-  result <- reduceBlocks context bs item
-  return $ itemSetBody result item
+applyTemplate template context item = do
+  let s = templateRunner context item
+  makeItem =<< evalStateT (applyTemplate' template) s
 
-reduceBlocks :: Context String -> [Block] -> Item String -> Compiler String
-reduceBlocks context bs item = do
-  values <- applyBlocks context bs item
-  stringify context item . intoValue $ values
+applyTemplate' :: Template -> TemplateRunner String String
+applyTemplate' (Template bs src) =
+  tplWithCall ("template " ++ src) (reduceBlocks bs)
 
-applyBlocks :: Context String -> [Block] -> Item String -> Compiler [ContextValue String]
-applyBlocks context bs item = mapM applyBlock' bs
-  where
-    applyBlock' block = applyBlock context block item
+reduceBlocks :: [Block] -> TemplateRunner String String -- Context String -> [Block] -> Item String -> Compiler String
+reduceBlocks = stringify . intoValue <=< applyBlocks
 
-applyBlock :: Context String -> Block -> Item String -> Compiler (ContextValue String)
-applyBlock context block item = case block of
+applyBlocks :: [Block] -> TemplateRunner String [ContextValue String]
+applyBlocks = mapM applyBlock
+
+applyBlock :: Block -> TemplateRunner String (ContextValue String)
+applyBlock = \case
   TextBlock t _ -> return $ intoValue t
-  ExpressionBlock e _ -> eval context e item
+  ExpressionBlock e _ -> eval e
   CommentBlock {} -> return EmptyValue
   ChromeBlock e bs _ -> intoValue <$> applyGuard e bs [] Nothing
   AltBlock (ApplyBlock e bs _ :| alts) mdef _ -> intoValue <$> applyGuard e bs alts mdef
   where
     applyGuard e bs alts mdef =
-      eval context e item >>= \case
+      eval e >>= \case
         FunctionValue f ->
-          pure <$> f (intoValue bs) context item
+          pure <$> f (intoValue bs)
         x -> do
           truthy <- isTruthy x
           if truthy
-            then applyBlocks context bs item
+            then applyBlocks bs
             else applyAlt alts mdef
     --
     applyAlt (ApplyBlock e bs _ : alts) mdef = applyGuard e bs alts mdef
-    applyAlt _ (Just (DefaultBlock bs _)) = applyBlocks context bs item
+    applyAlt _ (Just (DefaultBlock bs _)) = applyBlocks bs
     applyAlt _ Nothing = return []
 
-eval :: Context String -> Expression -> Item String -> Compiler (ContextValue String)
-eval context e item = case e of
-  NameExpression key _ -> unContext context key item
+eval :: Expression -> TemplateRunner a (ContextValue a)
+eval = \case
+  NameExpression name _ -> do
+    context <- tplContext
+    item <- tplItem
+    trace <- tplTrace
+    s <- get
+    (result, s') <-
+      lift $
+        runStateT (unContext context name) s `compilerCatch` \e ->
+          let msg = "Failed to resolve field " ++ show name ++ " from item context for " ++ itemFilePath item ++ ", trace: [" ++ intercalate ", " trace ++ "]"
+           in compilerThrow (msg : compilerErrorMessages e)
+    put s'
+    return result
   StringExpression s _ -> return $ intoValue s
   IntExpression n _ -> return $ intoValue n
   DoubleExpression x _ -> return $ intoValue x
   BoolExpression b _ -> return $ intoValue b
   ApplyExpression f x _ -> apply f x
   AccessExpression target field pos ->
-    eval context target item >>= \case
-      ContextValue target' -> do
-        field' <-
-          eval context field item >>= \case
+    eval target >>= \case
+      ContextValue target' ->
+        eval field
+          >>= \case
             StringValue name -> return name
-            x -> fail $ "Invalid field " ++ show x ++ " near " ++ show (getExpressionPos field)
-        unContext target' field' item
-      x -> fail $ "Invalid context " ++ show x ++ " near " ++ show pos
+            x -> tplFail $ "invalid field " ++ show x ++ " near " ++ show (getExpressionPos field)
+          >>= unContext target'
+      x -> tplFail $ "invalid context " ++ show x ++ " near " ++ show pos
   FilterExpression x f _ -> apply f x
   ContextExpression pairs _ -> do
-    pairs' <- sequence (sequence . second (\x -> eval context x item) <$> pairs)
+    pairs' <- mapM (sequence . second eval) pairs
     return $ ContextValue (intoContext pairs')
-  ListExpression xs _ -> intoValue <$> mapM (\x -> eval context x item) xs
+  ListExpression xs _ -> intoValue <$> mapM eval xs
   where
     apply f x =
-      eval context f item >>= \case
-        FunctionValue f' -> f' (ThunkValue (eval context x item)) context item
-        x' -> fail $ "Invalid function " ++ show x' ++ " in " ++ show (getExpressionPos f)
+      eval f >>= \case
+        FunctionValue f' -> f' (ThunkValue $ eval x)
+        x' -> fail $ "invalid function " ++ show x' ++ " in " ++ show (getExpressionPos f)
 
-stringify :: Context String -> Item String -> ContextValue String -> Compiler String
-stringify context item value = case value of
+stringify :: ContextValue String -> TemplateRunner String String
+stringify = \case
   EmptyValue -> return ""
-  UndefinedValue name -> fail $ "Undefined name: " ++ show name
-  ContextValue {} -> fail "Can't stringify context"
-  ListValue xs -> mconcat <$> mapM (stringify context item) xs
+  ContextValue {} -> tplFail "can't stringify context"
+  ListValue xs -> mconcat <$> mapM stringify xs
   BoolValue b -> return $ show b
   StringValue s -> return s
   DoubleValue x -> return $ show x
   IntValue n -> return $ show n
-  FunctionValue {} -> fail "Can't stringify function"
+  FunctionValue {} -> tplFail "can't stringify function"
   BlockValue block -> case block of
     TextBlock t _ -> return t
     CommentBlock {} -> return ""
-    ExpressionBlock e _ -> stringify context item =<< eval context e item
-    _ -> stringify context item =<< applyBlock context block item
-  ItemsValue _ items -> return $ mconcat $ itemBody <$> items
-  ThunkValue fx -> stringify context item =<< force =<< fx
+    ExpressionBlock e _ -> stringify =<< eval e
+    _ -> stringify =<< applyBlock block
+  ItemValue _ items -> return $ mconcat $ itemBody <$> items
+  ThunkValue fx -> stringify =<< force =<< fx
 
-isTruthy :: ContextValue a -> Compiler Bool
+isTruthy :: ContextValue a -> TemplateRunner a Bool
 isTruthy = \case
   EmptyValue -> return False
-  UndefinedValue {} -> return False
   ContextValue {} -> return True
   ListValue xs -> return $ not (null xs)
   BoolValue x -> return x
@@ -136,10 +146,11 @@ isTruthy = \case
   IntValue x -> return $ x /= 0
   FunctionValue {} -> return True
   BlockValue {} -> return True
-  ItemsValue _ xs -> return $ not (null xs)
+  ItemValue _ xs -> return $ not (null xs)
   ThunkValue fx -> isTruthy =<< force =<< fx
 
-force :: ContextValue a -> Compiler (ContextValue a)
+force :: ContextValue a -> TemplateRunner a (ContextValue a)
 force = \case
-  ThunkValue fx -> force =<< fx
+  ThunkValue fx -> do
+    force =<< fx
   x -> return x

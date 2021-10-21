@@ -231,7 +231,7 @@ instance (PrettyPrint a) => PrettyPrint (String, a) where
 instance (PrettyPrint a) => PrettyPrint (Maybe a) where
   prettyIndented' level = \case
     Just item -> prettyIndented' level item
-    Nothing -> "Undefined"
+    Nothing -> "Nothing"
 
 instance (PrettyPrint a) => PrettyPrint [a] where
   prettyIndented' level items

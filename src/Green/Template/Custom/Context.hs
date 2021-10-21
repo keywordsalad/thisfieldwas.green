@@ -1,11 +1,10 @@
 module Green.Template.Custom.Context where
 
 import Green.Config
-import Green.Template.Context
-import Green.Template.Custom.DateFields
-import Green.Template.Custom.GitFields
-import Green.Template.Custom.HtmlFields
-import Green.Template.Fields
+import Green.Template
+import Green.Template.Custom.DateField
+import Green.Template.Custom.GitField
+import Green.Template.Custom.HtmlField
 import Lens.Micro
 
 customContext :: SiteConfig -> Context String

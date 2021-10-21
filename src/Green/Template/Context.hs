@@ -1,5 +1,6 @@
 module Green.Template.Context where
 
+import Control.Monad.State.Strict
 import Data.Aeson
 import Data.Bifunctor
 import Data.Either
@@ -16,33 +17,94 @@ import Prelude hiding (lookup)
 
 newtype Context a = Context {unContext :: ContextFunction a}
 
-type ContextFunction a = String -> Item a -> Compiler (ContextValue a)
+type ContextFunction a = String -> TemplateRunner a (ContextValue a)
 
 getContext :: Identifier -> Compiler (Context a)
 getContext id' = intoContext <$> getMetadata id'
 
+itemFilePath :: Item a -> FilePath
+itemFilePath = toFilePath . itemIdentifier
+
+data TemplateState a = TemplateState
+  { tplContextStack :: [Context a],
+    tplItemStack :: [Item a],
+    tplCallStack :: [String]
+  }
+
+type TemplateRunner a b = StateT (TemplateState a) Compiler b
+
+templateRunner :: Context a -> Item a -> TemplateState a
+templateRunner context item =
+  TemplateState
+    { tplContextStack = [context],
+      tplItemStack = [item],
+      tplCallStack = ["item " ++ itemFilePath item]
+    }
+
+tplItem :: TemplateRunner a (Item a)
+tplItem = gets $ head . tplItemStack
+
+tplContext :: TemplateRunner a (Context a)
+tplContext = gets $ head . tplContextStack
+
+tplWithItem :: Item a -> TemplateRunner a b -> TemplateRunner a b
+tplWithItem item f = do
+  stack <- gets tplItemStack
+  modify' \s -> s {tplItemStack = item : stack}
+  x <- f
+  modify' \s -> s {tplItemStack = stack}
+  return x
+
+tplWithContext :: Context a -> TemplateRunner a b -> TemplateRunner a b
+tplWithContext context f =
+  gets tplContextStack >>= \stack -> do
+    let head' = case stack of
+          (next : _) -> context <> next
+          [] -> context
+    modify' \s -> s {tplContextStack = head' : stack}
+    x <- f
+    modify' \s -> s {tplContextStack = stack}
+    return x
+
+tplWithCall :: String -> TemplateRunner a b -> TemplateRunner a b
+tplWithCall call f = do
+  stack <- gets tplCallStack
+  modify' \s -> s {tplCallStack = call : stack}
+  x <- f
+  modify' \s -> s {tplCallStack = stack}
+  return x
+
+tplWithField :: String -> TemplateRunner a b -> TemplateRunner a b
+tplWithField field' f = do
+  file <- itemFilePath <$> tplItem
+  tplWithCall (show field' ++ " in " ++ file) f
+
+tplFail :: String -> TemplateRunner a b
+tplFail message = fail =<< tplTraced message
+
+tplTrace :: TemplateRunner a [String]
+tplTrace = gets tplCallStack
+
+tplTraced :: String -> TemplateRunner a String
+tplTraced message = do
+  trace <- tplTrace
+  return $ message ++ ", trace: [" ++ intercalate ", " trace ++ "]"
+
 -- | Apply @f@ to an item if @key@ is requested.
-field :: (IntoValue v a) => String -> (Item a -> Compiler v) -> Context a
+field :: (IntoValue v a) => String -> (Item a -> TemplateRunner a v) -> Context a
 field key f = Context f'
   where
-    f' k i
-      | k == key = tryWithError k i (intoValue <$> f i)
-      | otherwise = noResult $ "Tried field key " ++ show key
-
-tryWithError :: String -> Item a -> Compiler b -> Compiler b
-tryWithError key item =
-  withErrorMessage $
-    "Error getting field " ++ show key
-      ++ " for item "
-      ++ show (itemIdentifier item)
+    f' k
+      | k == key = tplWithField k do
+        i <- tplItem
+        intoValue <$> f i
+      | otherwise = lift . noResult $ "tried " ++ show key
 
 -- | Reports missing field.
 missingField :: Context a
 missingField = Context f
   where
-    f key item =
-      tryWithError key item $
-        noResult $ "Missing field " ++ show key ++ " in context"
+    f key = lift . noResult $ "missing " ++ show key
 
 -- | Const-valued field, returns the same @val@ per @key@.
 constField :: (IntoValue v a) => String -> v -> Context a
@@ -55,37 +117,49 @@ constField key val = field key f
 mapField :: (FromValue v a, IntoValue w a) => (v -> w) -> Context a -> Context a
 mapField g (Context f) = Context h
   where
-    h k i = tryWithError k i $ fmap (intoValue . g) . fromValue =<< f k i
+    h k = tplWithCall ("mapField of " ++ show k) do
+      fmap (intoValue . g) $ fromValue =<< f k
 
-bindField :: (FromValue v a, IntoValue w a) => (v -> Compiler w) -> Context a -> Context a
+-- | Binding of function @g@ after context @f@.
+bindField :: (FromValue v a, IntoValue w a) => (v -> TemplateRunner a w) -> Context a -> Context a
 bindField g (Context f) = Context h
   where
-    h k i = tryWithError k i $ fmap intoValue (g =<< fromValue =<< f k i)
+    h k = do
+      tplWithCall ("bindField of " ++ show k) do
+        fmap intoValue $ g =<< fromValue =<< f k
 
 -- | Alternation of context @g@ after context @f@.
 composeField :: Context a -> Context a -> Context a
 composeField (Context g) (Context f) = Context h
   where
-    h name item = f name item <|> g name item
+    h name = do
+      s <- get
+      lift $ evalStateT (f name) s <|> evalStateT (g name) s
 
 -- | Lookup of @val@ by @key@ into provided @HashMap@.
 hashMapField :: (IntoValue v a) => HashMap String v -> Context a
 hashMapField m = Context f
   where
     m' = intoValue <$> m
-    f k _ = maybe (tried k) return (HashMap.lookup k m')
-    tried k = noResult $ "Tried field in map " ++ k
+    f k = maybe tried return (HashMap.lookup k m')
+    tried = lift . noResult $ "tried hashmap of " ++ show (HashMap.keys m')
 
-functionField :: (FromValue v a, IntoValue w a) => String -> (v -> Context a -> Item a -> Compiler w) -> Context a
+tplWithFunction :: String -> Context a -> Item a -> TemplateRunner a b -> TemplateRunner a b
+tplWithFunction key context item =
+  tplWithField key
+    . tplWithContext context
+    . tplWithItem item
+
+functionField :: (FromValue v a, IntoValue w a) => String -> (v -> TemplateRunner a w) -> Context a
 functionField = constField
 
-functionField2 :: (FromValue v a, FromValue x a, IntoValue w a) => String -> (v -> x -> Context a -> Item a -> Compiler w) -> Context a
+functionField2 :: (FromValue v a, FromValue x a, IntoValue w a) => String -> (v -> x -> TemplateRunner a w) -> Context a
 functionField2 = constField
 
-functionField3 :: (FromValue v a, FromValue x a, FromValue y a, IntoValue w a) => String -> (v -> x -> y -> Context a -> Item a -> Compiler w) -> Context a
+functionField3 :: (FromValue v a, FromValue x a, FromValue y a, IntoValue w a) => String -> (v -> x -> y -> TemplateRunner a w) -> Context a
 functionField3 = constField
 
-functionField4 :: (FromValue v a, FromValue x a, FromValue y a, FromValue z a, IntoValue w a) => String -> (v -> x -> y -> z -> Context a -> Item a -> Compiler w) -> Context a
+functionField4 :: (FromValue v a, FromValue x a, FromValue y a, FromValue z a, IntoValue w a) => String -> (v -> x -> y -> z -> TemplateRunner a w) -> Context a
 functionField4 = constField
 
 instance Semigroup (Context a) where
@@ -111,19 +185,18 @@ instance IntoContext Object a where
 
 data ContextValue a
   = EmptyValue
-  | UndefinedValue String
   | ContextValue (Context a)
   | ListValue [ContextValue a]
   | BoolValue Bool
   | StringValue String
   | DoubleValue Double
   | IntValue Int
-  | FunctionValue (ContextValue a -> Context a -> Item a -> Compiler (ContextValue a))
+  | FunctionValue (ContextValue a -> TemplateRunner a (ContextValue a))
   | BlockValue Block
-  | ItemsValue (Context a) [Item a]
-  | ThunkValue (Compiler (ContextValue a))
+  | ItemValue (Context a) [Item a]
+  | ThunkValue (TemplateRunner a (ContextValue a))
 
-type FunctionValue v w a = v -> Context a -> Item a -> Compiler w
+type FunctionValue v w a = v -> TemplateRunner a w
 
 type FunctionValue2 v x w a = v -> FunctionValue x w a
 
@@ -134,23 +207,22 @@ type FunctionValue4 v x y z w a = v -> FunctionValue3 x y z w a
 instance Show (ContextValue a) where
   show = \case
     EmptyValue -> "EmptyValue"
-    UndefinedValue name -> "UndefinedValue " ++ show name
     ContextValue {} -> "ContextValue"
-    ListValue values -> "ListValue (" ++ show values ++ ")"
-    BoolValue b -> "BoolValue " ++ show b
-    StringValue t -> "StringValue " ++ show t
-    DoubleValue d -> "DoubleValue " ++ show d
-    IntValue i -> "IntValue " ++ show i
+    ListValue values -> "ListValue " ++ show values
+    BoolValue value -> "BoolValue " ++ show value
+    StringValue value -> "StringValue " ++ show value
+    DoubleValue value -> "DoubleValue " ++ show value
+    IntValue value -> "IntValue " ++ show value
     FunctionValue {} -> "FunctionValue"
     BlockValue {} -> "BlockValue"
-    ItemsValue _ items -> "ItemsValue (contains " ++ show (length items) ++ " items)"
+    ItemValue _ items -> "ItemValue " ++ show (itemFilePath <$> items)
     ThunkValue {} -> "ThunkValue"
 
 itemValue :: Context a -> Item a -> ContextValue a
 itemValue context item = intoValue (context, [item])
 
-itemsValue :: Context a -> [Item a] -> ContextValue a
-itemsValue context items = intoValue (context, items)
+itemListValue :: Context a -> [Item a] -> ContextValue a
+itemListValue context items = intoValue (context, items)
 
 class IntoValue' (flag :: Bool) v a where
   intoValue' :: Proxy flag -> v -> ContextValue a
@@ -160,6 +232,7 @@ type family FString a :: Bool where
   FString Char = 'True
   FString _ = 'False
 
+-- | Inject a concrete type @v@ into a @ContextValue a@.
 class IntoValue v a where
   intoValue :: v -> ContextValue a
 
@@ -202,7 +275,7 @@ instance IntoValue Int a where
   intoValue = IntValue
 
 instance IntoValue (Context a, [Item a]) a where
-  intoValue = uncurry ItemsValue
+  intoValue = uncurry ItemValue
 
 instance (IntoValue v a) => IntoValue (Maybe v) a where
   intoValue (Just v) = intoValue v
@@ -211,39 +284,37 @@ instance (IntoValue v a) => IntoValue (Maybe v) a where
 instance (FromValue v a, IntoValue w a) => IntoValue (FunctionValue v w a) a where
   intoValue f = FunctionValue f'
     where
-      f' cv context item = do
-        v <- tryWithError "into function1" item $ fromValue cv
-        intoValue <$> f v context item
+      f' cv = do
+        v <- fromValue cv
+        intoValue <$> f v
 
 instance (FromValue v a, FromValue x a, IntoValue w a) => IntoValue (FunctionValue2 v x w a) a where
   intoValue f = FunctionValue f'
     where
-      f' cv _ item =
-        tryWithError "into function2" item $
-          intoValue . f <$> fromValue cv
+      f' cv =
+        intoValue . f <$> fromValue cv
 
 instance (FromValue v a, FromValue x a, FromValue y a, IntoValue w a) => IntoValue (FunctionValue3 v x y w a) a where
   intoValue f = FunctionValue f'
     where
-      f' cv _ item =
-        tryWithError "into function3" item $
-          intoValue . f <$> fromValue cv
+      f' cv =
+        intoValue . f <$> fromValue cv
 
 instance (FromValue v a, FromValue x a, FromValue y a, FromValue z a, IntoValue w a) => IntoValue (FunctionValue4 v x y z w a) a where
   intoValue f = FunctionValue f'
     where
-      f' cv _ item =
-        tryWithError "into function4" item $
-          intoValue . f <$> fromValue cv
+      f' cv =
+        intoValue . f <$> fromValue cv
 
-instance IntoValue (Compiler (ContextValue a)) a where
+instance IntoValue (TemplateRunner a (ContextValue a)) a where
   intoValue = ThunkValue
 
+-- | Extract a concrete value of type @v@ from a @ContextValue a@.
 class FromValue v a where
-  fromValue :: ContextValue a -> Compiler v
+  fromValue :: ContextValue a -> TemplateRunner a v
 
 class FromValue' (flag :: Bool) v a where
-  fromValue' :: Proxy flag -> ContextValue a -> Compiler v
+  fromValue' :: Proxy flag -> ContextValue a -> TemplateRunner a v
 
 instance (FString v ~ flag, FromValue' flag [v] a) => FromValue [v] a where
   fromValue = fromValue' (Proxy :: Proxy flag)
@@ -289,7 +360,7 @@ instance FromValue Int a where
 
 instance FromValue (Context a, [Item a]) a where
   fromValue = \case
-    ItemsValue context item -> return (context, item)
+    ItemValue context items -> return (context, items)
     ThunkValue fx -> fromValue =<< fx
     x -> fail $ "Tried to get " ++ show x ++ " as Item"
 
@@ -300,50 +371,42 @@ instance FromValue Block a where
     x -> fail $ "Tried to get " ++ show x ++ " as Block"
 
 instance (IntoValue v a, FromValue w a) => FromValue (FunctionValue v w a) a where
-  fromValue = \case
+  fromValue cv = case cv of
     FunctionValue f -> return f'
       where
-        f' v context item = do
-          tryWithError "from function1" item $
-            fromValue =<< f (intoValue v) context item
+        f' v = fromValue =<< f (intoValue v)
     ThunkValue fx -> fromValue =<< fx
     x -> fail $ "Tried to get " ++ show x ++ " as Function"
 
 instance (IntoValue v a, IntoValue x a, FromValue w a) => FromValue (FunctionValue2 v x w a) a where
-  fromValue = \case
+  fromValue cv = case cv of
     FunctionValue f -> return f'
       where
-        f' v x context item = do
-          g <-
-            tryWithError "from function2" item $
-              fromValue =<< f (intoValue v) context item
-          g x context item
+        f' v x = do
+          g <- fromValue =<< f (intoValue v)
+          g x
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Function"
+    x -> fail $ "Tried to get " ++ show x ++ " as Function2"
 
 instance (IntoValue v a, IntoValue x a, IntoValue y a, FromValue w a) => FromValue (FunctionValue3 v x y w a) a where
   fromValue = \case
     FunctionValue f -> return f'
       where
-        f' v x y context item = do
-          g <-
-            tryWithError "from function3" item $
-              fromValue =<< f (intoValue v) context item
-          h <- g x context item
-          h y context item
+        f' v x y = do
+          g <- fromValue =<< f (intoValue v)
+          h <- g x
+          h y
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Function"
+    x -> fail $ "Tried to get " ++ show x ++ " as Function3"
 
 instance (IntoValue v a, IntoValue x a, IntoValue y a, IntoValue z a, FromValue w a) => FromValue (FunctionValue4 v x y z w a) a where
   fromValue = \case
     FunctionValue f -> return f'
       where
-        f' v x y z context item = do
-          g <-
-            tryWithError "from function3" item $
-              fromValue =<< f (intoValue v) context item
-          h <- g x context item
-          i <- h y context item
-          i z context item
+        f' v x y z = do
+          g <- fromValue =<< f (intoValue v)
+          h <- g x
+          i <- h y
+          i z
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Function"
+    x -> fail $ "Tried to get " ++ show x ++ " as Function4"

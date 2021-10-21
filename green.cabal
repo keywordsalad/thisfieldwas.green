@@ -28,7 +28,6 @@ library
       Green.Config
       Green.Content.Blog
       Green.Content.Blog.Compiler
-      Green.Content.Blog.Context
       Green.Content.Blog.Route
       Green.Content.Blog.Rule
       Green.Content.BrokenLinks
@@ -55,10 +54,10 @@ library
       Green.Template.Custom
       Green.Template.Custom.Compiler
       Green.Template.Custom.Context
-      Green.Template.Custom.DateFields
-      Green.Template.Custom.GitFields
-      Green.Template.Custom.HtmlFields
-      Green.Template.Fields
+      Green.Template.Custom.DateField
+      Green.Template.Custom.GitField
+      Green.Template.Custom.HtmlField
+      Green.Template.Field
       Green.Template.Pandoc
       Green.Template.Source
       Green.Template.Source.Lexer

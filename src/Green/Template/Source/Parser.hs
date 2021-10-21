@@ -7,7 +7,7 @@ import Data.String
 import Green.Template.Ast
 import Green.Template.Source.Lexer
 import Green.Template.Source.Util
-import Text.Parsec hiding (runParser, token, tokens, (<?>))
+import Text.Parsec hiding (parse, runParser, token, tokens, (<?>))
 import qualified Text.Parsec as P
 import Prelude hiding (lex)
 

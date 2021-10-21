@@ -1,4 +1,4 @@
-module Green.Template.Custom.DateFields (dateFields) where
+module Green.Template.Custom.DateField (dateFields) where
 
 import Data.List (tails)
 import Data.String.Utils
@@ -25,26 +25,28 @@ dateFields config =
 dateFormatField :: String -> TimeLocale -> Context a
 dateFormatField key timeLocale = functionField2 key f
   where
-    f (dateFormat :: String) (dateString :: String) _ _ = do
-      date <- thawTime timeLocale dateString
+    f (dateFormat :: String) (dateString :: String) = do
+      date <- deserializeTime dateString
       return $ formatTime timeLocale dateFormat date
+    deserializeTime = parseTimeM' timeLocale normalizedFormat
 
 dateField :: String -> TimeLocale -> Context a
 dateField key timeLocale = field key f
   where
     f item =
-      dateFromMetadata timeLocale ["date", "published"] item
-        <|> dateFromFilePath timeLocale item
+      lift $
+        dateFromMetadata timeLocale ["date", "published"] item
+          <|> dateFromFilePath timeLocale item
 
 publishedField :: String -> TimeLocale -> Context a
 publishedField key timeLocale = field key f
   where
-    f = dateFromMetadata timeLocale ["published"]
+    f = lift . dateFromMetadata timeLocale ["published"]
 
 updatedField :: String -> TimeLocale -> Context a
 updatedField key timeLocale = field key f
   where
-    f = dateFromMetadata timeLocale ["updated"]
+    f = lift . dateFromMetadata timeLocale ["updated"]
 
 dateFromMetadata :: TimeLocale -> [String] -> Item a -> Compiler String
 dateFromMetadata timeLocale sourceKeys item =
@@ -54,12 +56,16 @@ dateFromMetadata timeLocale sourceKeys item =
     cacheKey = "Green.Template.Custom.DateFields.dateFromMetadata:" ++ show sourceKeys
     id' = itemIdentifier item
     findDate sourceKey = do
-      metadata <- getMetadata id' :: Compiler Metadata
+      metadata <- getMetadata id'
       let maybeDate = lookupString sourceKey metadata
       debugCompiler $ "Source key " ++ show sourceKey ++ " returned " ++ show maybeDate ++ " for date from metadata"
-      let notFound = noResult $ "Could not find metadata date using key " ++ show sourceKey
-      let maybeFrozenDate = freezeTime timeLocale metadataDateFormats =<< maybeDate
+      let notFound = noResult $ "tried date from metadata key " ++ show sourceKey
+      let maybeFrozenDate = serializeTime =<< maybeDate
       maybe notFound return maybeFrozenDate
+    serializeTime dateString = do
+      date <- firstAlt (parse dateString <$> metadataDateFormats)
+      return $ normalizedTime timeLocale date
+    parse = flip $ parseTimeM True timeLocale
 
 dateFromFilePath :: TimeLocale -> Item a -> Compiler String
 dateFromFilePath timeLocale item =
@@ -77,18 +83,14 @@ dateFromFilePath timeLocale item =
     paths = splitDirectories $ dropExtension $ toFilePath $ itemIdentifier item
     dateFromPath' path = do
       debugCompiler $ "Trying to parse date from path " ++ show path
-      date <- parseTimeM True timeLocale "%Y-%m-%d" path :: Compiler ZonedTime
-      return $ formatTime timeLocale normalizedFormat date
+      date <- parseTimeM' timeLocale "%Y-%m-%d" path
+      return $ normalizedTime timeLocale date
 
-freezeTime :: TimeLocale -> [String] -> String -> Maybe String
-freezeTime timeLocale dateFormats dateString = do
-  date <- firstAlt (parse <$> dateFormats) :: Maybe ZonedTime
-  return $ formatTime timeLocale normalizedFormat date
-  where
-    parse dateFormat = parseTimeM True timeLocale dateFormat dateString
+parseTimeM' :: (MonadFail m) => TimeLocale -> String -> String -> m ZonedTime
+parseTimeM' = parseTimeM True
 
-thawTime :: TimeLocale -> String -> Compiler ZonedTime
-thawTime timeLocale = parseTimeM True timeLocale normalizedFormat
+normalizedTime :: TimeLocale -> ZonedTime -> String
+normalizedTime = flip formatTime normalizedFormat
 
 normalizedFormat :: String
 normalizedFormat = "%Y-%m-%dT%H:%M:%S%EZ"
@@ -96,7 +98,7 @@ normalizedFormat = "%Y-%m-%dT%H:%M:%S%EZ"
 metadataDateFormats :: [String]
 metadataDateFormats =
   [ "%Y-%m-%d",
-    "%Y-%m-%dT%H:%M:%S%EZ",
+    normalizedFormat,
     "%Y-%m-%dT%H:%M:%S",
     "%Y-%m-%d %H:%M:%S%EZ",
     "%Y-%m-%d %H:%M:%S",

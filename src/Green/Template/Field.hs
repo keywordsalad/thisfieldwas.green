@@ -1,6 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 
-module Green.Template.Fields where
+module Green.Template.Field where
 
 import qualified Data.HashMap.Strict as HashMap
 import Data.String.Utils (endswith)
@@ -26,13 +26,8 @@ defaultFields =
       withField,
       metadataField,
       titleFromFileField "title",
-      undefinedField
+      missingField
     ]
-
-undefinedField :: Context a
-undefinedField = Context f
-  where
-    f k _ = return $ UndefinedValue k
 
 defaultKeys :: [String] -> Context a
 defaultKeys keys = intoContext $ (,"" :: String) <$> keys
@@ -43,32 +38,39 @@ withField = functionField2 "with" f
     f ::
       FunctionValue2
         (Context String)
-        (FunctionValue [Block] String String)
-        (FunctionValue [Block] String String)
+        [Block]
         String
-    f context' g _ _ = do
-      return \t context -> g t (context' <> context)
+        String
+    f context blocks =
+      tplWithContext context do
+        reduceBlocks blocks
 
 includeField :: String -> FilePath -> Context String
 includeField key basePath = functionField key f
   where
-    f (filePath :: String) context item =
-      let id' = fromFilePath (basePath </> filePath <.> "html")
-       in itemValue context <$> loadAndApplyTemplate id' context item
+    f (filePath :: String) = do
+      let filePath' = basePath </> filePath <.> "html"
+      tplWithCall (filePath' ++ " included via " ++ show key) do
+        context <- tplContext
+        result <- loadAndApplyTemplate' (fromFilePath filePath')
+        return $ itemValue context result
 
 layoutField :: String -> FilePath -> Context String
 layoutField key basePath = functionField2 key f
   where
-    f (filePath :: FilePath) (blocks :: [Block]) context item = do
-      let layoutId = fromFilePath $ basePath </> filePath <.> "html"
-      reduced <- reduceBlocks context blocks item
-      template <- loadTemplateBody layoutId
-      itemValue context <$> applyTemplate template context (itemSetBody reduced item)
+    f (filePath :: FilePath) (blocks :: [Block]) = do
+      let filePath' = basePath </> filePath <.> "html"
+      tplWithCall (filePath' ++ " applied via " ++ show key) do
+        let layoutId = fromFilePath filePath'
+        (Template bs _) <- loadTemplate' layoutId
+        item <- itemSetBody <$> reduceBlocks blocks <*> tplItem
+        tplWithItem item do
+          reduceBlocks bs
 
 ifField :: forall a. Context a
 ifField = functionField2 "if" f
   where
-    f (arg :: ContextValue a) (blocks :: [Block]) _ _ =
+    f (arg :: ContextValue a) (blocks :: [Block]) =
       isTruthy arg <&> \case
         True -> Just blocks
         False -> Nothing
@@ -76,23 +78,18 @@ ifField = functionField2 "if" f
 forField :: Context String
 forField = functionField2 "for" f
   where
-    f (arg :: ContextValue String) (blocks :: [Block]) context item = do
-      arg' <- force arg
-      isTruthy arg' >>= \case
-        True ->
-          case arg' of
-            ItemsValue ctx xs -> Just . mconcat <$> mapM (reduce ctx) xs
-            ContextValue ctx -> Just <$> reduce ctx item
-            x -> fail $ "Unexpected " ++ show x ++ " in {{#for}}"
-        --
-        False -> return Nothing
-      where
-        reduce ctx = reduceBlocks (ctx <> context) blocks
+    f ((context, items) :: (Context String, [Item String])) (blocks :: [Block])
+      | null items = return Nothing
+      | otherwise =
+        tplWithContext context do
+          Just . mconcat <$> forM items \item ->
+            tplWithItem item do
+              reduceBlocks blocks
 
 defaultField :: forall a. Context a
 defaultField = functionField2 "default" f
   where
-    f (default' :: ContextValue a) (arg :: ContextValue a) _ _ =
+    f (default' :: ContextValue a) (arg :: ContextValue a) =
       isTruthy arg <&> \case
         True -> arg
         False -> default'
@@ -100,21 +97,24 @@ defaultField = functionField2 "default" f
 routeField :: Context String
 routeField = functionField "route" f
   where
-    f (filePath :: String) _ _ = do
+    f (filePath :: String) = lift do
       let id' = fromFilePath filePath
       getRoute id' >>= \case
         Just r -> return $ "/" ++ stripSuffix "index.html" r
-        Nothing -> error $ "no route to " ++ show id'
+        Nothing -> noResult $ "no route to " ++ show id'
 
 linkedTitleField :: Context String
 linkedTitleField = constField "linkedTitle" f
   where
     f :: FunctionValue String String String
-    f filePath context item = do
-      linkedItem <- load (fromFilePath filePath)
-      makeLink <$> getField "title" linkedItem <*> getField "url" linkedItem
+    f filePath = do
+      linkedItem <- lift $ load (fromFilePath filePath)
+      tplWithItem linkedItem do
+        makeLink <$> getField "title" <*> getField "url"
       where
-        getField key linkedItem = tryWithError key item $ fromValue =<< unContext context key linkedItem
+        getField key = do
+          context <- tplContext
+          fromValue =<< unContext context key
         makeLink title url
           | endswith ".html" filePath = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
           | endswith ".md" filePath = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
@@ -123,13 +123,15 @@ linkedTitleField = constField "linkedTitle" f
 metadataField :: forall a. Context a
 metadataField = Context f
   where
-    f :: ContextFunction a
-    f key item = do
-      m <- getMetadata (itemIdentifier item)
-      maybe
-        (fail $ "Key " ++ show key ++ " not found in metadata")
-        (return . intoValue)
-        (HashMap.lookup (T.pack key) m)
+    f key = lift . getMetadataField key =<< tplItem
+
+getMetadataField :: String -> Item a -> Compiler (ContextValue a)
+getMetadataField key item = do
+  m <- getMetadata (itemIdentifier item)
+  maybe
+    (noResult $ "tried metadata key " ++ show key)
+    (return . intoValue)
+    (HashMap.lookup (T.pack key) m)
 
 bodyField :: String -> Context String
 bodyField key = field key $ return . itemBody
@@ -137,10 +139,13 @@ bodyField key = field key $ return . itemBody
 urlField :: String -> Context a
 urlField key = field key f
   where
-    f item =
+    f item = lift do
       let id' = itemIdentifier item
-          empty' = fail $ "No route url found for item " ++ show id'
-       in maybe empty' toUrl <$> getRoute id'
+      maybeRoute <- getRoute id'
+      maybe
+        (fail $ "no url by " ++ show key ++ " found for item " ++ show id')
+        return
+        maybeRoute
 
 pathField :: String -> Context a
 pathField key = field key $ return . toFilePath . itemIdentifier
@@ -154,7 +159,7 @@ teaserField :: String -> Snapshot -> Context String
 teaserField key snapshot = field key f
   where
     f item =
-      takeTeaser "" <$> loadSnapshotBody (itemIdentifier item) snapshot
+      lift $ takeTeaser "" <$> loadSnapshotBody (itemIdentifier item) snapshot
 
     teaserComment = "<!-- teaser -->"
     takeTeaser acc body@(x : rest)

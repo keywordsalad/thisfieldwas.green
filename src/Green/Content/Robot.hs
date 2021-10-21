@@ -10,8 +10,6 @@ robotsTxtRules context = do
     compile $ robotsTxtCompiler context
 
 robotsTxtCompiler :: Context String -> Compiler (Item String)
-robotsTxtCompiler context = do
+robotsTxtCompiler context =
   makeItem ""
-    >>= loadAndApplyTemplate
-      (fromFilePath "_templates/robots.txt")
-      context
+    >>= loadAndApplyTemplate (fromFilePath "_templates/robots.txt") context

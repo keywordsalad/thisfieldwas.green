@@ -1,4 +1,4 @@
-module Green.Template.Custom.GitFields (gitCommits) where
+module Green.Template.Custom.GitField (gitCommits) where
 
 import Data.Binary
 import GHC.Generics (Generic)
@@ -34,17 +34,17 @@ gitCommits config =
   where
     root = config ^. siteProviderDirectory
 
-gitSha1Compiler :: String -> Item a -> Compiler String
+gitSha1Compiler :: String -> Item a -> TemplateRunner a String
 gitSha1Compiler = gitLogField "%h"
 
-gitMessageCompiler :: String -> Item a -> Compiler String
+gitMessageCompiler :: String -> Item a -> TemplateRunner a String
 gitMessageCompiler = gitLogField "%s"
 
 type LogFormat = String
 
-gitLogField :: LogFormat -> String -> Item a -> Compiler String
+gitLogField :: LogFormat -> String -> Item a -> TemplateRunner a String
 gitLogField format root item =
-  unsafeCompiler do
+  lift $ unsafeCompiler do
     maybeResult <- gitLog format (Just $ root </> toFilePath (itemIdentifier item))
     case maybeResult of
       Just result -> return result
@@ -53,13 +53,14 @@ gitLogField format root item =
 gitFileField :: (IntoValue v a) => String -> String -> (GitFile -> v) -> Context a
 gitFileField root key f = field key $ fmap f . gitFileCompiler root
 
-gitFileCompiler :: String -> Item a -> Compiler GitFile
+gitFileCompiler :: String -> Item a -> TemplateRunner a GitFile
 gitFileCompiler root item =
-  GitFile itemFilePath
-    <$> unsafeCompiler (doesFileExist itemFilePath)
-    <*> unsafeCompiler (isChanged itemFilePath)
+  lift $
+    GitFile gitFilePath
+      <$> unsafeCompiler (doesFileExist gitFilePath)
+      <*> unsafeCompiler (isChanged gitFilePath)
   where
-    itemFilePath = root </> toFilePath (itemIdentifier item)
+    gitFilePath = root </> toFilePath (itemIdentifier item)
     isChanged filePath = do
       let args = ["diff", "HEAD", filePath]
       (exitCode, stdout, _stderr) <- readProcessWithExitCode "git" args ""
@@ -72,8 +73,8 @@ gitLog format filePath = do
   (_exitCode, stdout, _stderr) <- readProcessWithExitCode "git" args ""
   return if null stdout then Nothing else Just stdout
 
-gitBranchCompiler :: Item a -> Compiler String
-gitBranchCompiler _ = unsafeCompiler gitBranch
+gitBranchCompiler :: Item a -> TemplateRunner a String
+gitBranchCompiler _ = lift $ unsafeCompiler gitBranch
 
 gitBranch :: IO String
 gitBranch = do

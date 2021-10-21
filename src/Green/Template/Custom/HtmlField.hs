@@ -1,4 +1,4 @@
-module Green.Template.Custom.HtmlFields where
+module Green.Template.Custom.HtmlField where
 
 import Green.Common
 import Green.Template
@@ -14,8 +14,8 @@ siteRootField = constField "siteRoot"
 codeField :: Context String
 codeField = functionField "code" f
   where
-    f (contentsPath :: String) _ _ =
-      trimStartEndLines <$> (tryLoad codeId <|> tryLoad fileId)
+    f (contentsPath :: String) =
+      lift $ trimStartEndLines <$> (tryLoad codeId <|> tryLoad fileId)
       where
         codeId = fromFilePath $ "code/" ++ contentsPath
         fileId = fromFilePath contentsPath
@@ -32,14 +32,15 @@ imgField :: Context String
 imgField = functionField "img" f
   where
     defaults = defaultKeys ["id", "src", "title", "alt"]
-    f (imgFields :: Context String) context item = do
-      let fields = imgFields <> defaults <> context
-      itemBody <$> loadAndApplyTemplate (fromFilePath "_templates/image.html") fields item
+    f (imgFields :: Context String) =
+      tplWithContext (imgFields <> defaults) do
+        template <- loadTemplate' (fromFilePath "_templates/image.html")
+        applyTemplate' template
 
 youtubeField :: Context String
 youtubeField = functionField "youtube" f
   where
     defaults = defaultKeys ["id", "video", "title"]
-    f (ytFields :: Context String) context item = do
-      let fields = ytFields <> defaults <> context
-      itemBody <$> loadAndApplyTemplate "_templates/youtube.html" fields item
+    f (ytFields :: Context String) = do
+      tplWithContext (ytFields <> defaults) do
+        itemBody <$> loadAndApplyTemplate' (fromFilePath "_templates/youtube.html")
