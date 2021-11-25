@@ -15,7 +15,6 @@ pageCompilerWithSnapshots snapshots context =
     >=> compilePandoc
     >=> (\x -> foldM (flip saveSnapshot) x snapshots')
     >=> applyLayout context
-    >=> relativizeUrls
   where
     snapshots' = nub ("_content" : snapshots)
 

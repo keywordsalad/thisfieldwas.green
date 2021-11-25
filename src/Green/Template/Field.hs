@@ -3,7 +3,6 @@
 module Green.Template.Field where
 
 import qualified Data.HashMap.Strict as HashMap
-import Data.String.Utils (endswith)
 import qualified Data.Text as T
 import Green.Common
 import Green.Template.Ast
@@ -116,8 +115,8 @@ linkedTitleField = constField "linkedTitle" f
           context <- tplContext
           fromValue =<< unContext context key
         makeLink title url
-          | endswith ".html" filePath = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
-          | endswith ".md" filePath = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
+          | ".html" `isSuffixOf` filePath = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
+          | ".md" `isSuffixOf` filePath = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
           | otherwise = title ++ " <" ++ url ++ ">"
 
 metadataField :: forall a. Context a
@@ -158,17 +157,14 @@ titleFromFileField = bindField titleFromPath . pathField
 teaserField :: String -> Snapshot -> Context String
 teaserField key snapshot = field key f
   where
-    f item =
-      lift $ takeTeaser "" <$> loadSnapshotBody (itemIdentifier item) snapshot
-
-    teaserComment = "<!-- teaser -->"
-    takeTeaser acc body@(x : rest)
-      | body `startsWith` teaserComment = reverse acc
-      | otherwise = takeTeaser (x : acc) rest
-    takeTeaser _ [] = ""
-
-    startsWith (x : xs) (y : ys)
-      | x == y = startsWith xs ys
-      | otherwise = False
-    startsWith _ [] = True
-    startsWith [] _ = False
+    f item = lift do
+      body <- loadSnapshotBody (itemIdentifier item) snapshot
+      case takeTeaser body of
+        Just teaser -> return teaser
+        Nothing -> fail $ "item " ++ itemFilePath item ++ " has no teaser"
+    takeTeaser = go ""
+      where
+        go acc xss@(x : xs)
+          | "<!--more-->" `isPrefixOf` xss = Just (reverse acc)
+          | otherwise = go (x : acc) xs
+        go _ [] = Nothing

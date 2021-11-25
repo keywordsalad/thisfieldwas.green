@@ -1,10 +1,10 @@
-module Green.Content.Template where
+module Green.Content.Template (templates) where
 
-import Green.Template
 import Green.Common
+import Green.Template
 
-templateRules :: Rules ()
-templateRules = do
+templates :: Rules ()
+templates = do
   match "_layouts/**" $ compile templateCompiler
   match "_partials/**" $ compile templateCompiler
   match "_templates/**" $ compile templateCompiler

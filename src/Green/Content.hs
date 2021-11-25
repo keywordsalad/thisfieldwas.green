@@ -1,4 +1,4 @@
-module Green.Rule where
+module Green.Content (content) where
 
 import Green.Common
 import Green.Config
@@ -17,22 +17,21 @@ import Green.Content.Sitemap
 import Green.Content.Template
 import Green.Template.Custom
 
-rules :: SiteConfig -> Rules ()
-rules config = do
+content :: SiteConfig -> Rules ()
+content config = do
   let context = customContext config
   brokenLinks
-  imageRules
-  jsRules
-  scssRules config
-  downloadRules
-  codeDep <- codeRules
+  images
+  js
+  scss config
+  downloads
+  codeDep <- code
   rulesExtraDependencies [codeDep] do
-    templateRules
-    blogRules context
-    feedRules
-    homePageRules context
-    pageRules context
-    robotsTxtRules context
-    archiveRules context
-    sitemapRules
+    templates
+    blog context
+    feed
+    homePage context
+    pages context
+    robotsTxt context
+    sitemap
     brokenLinks

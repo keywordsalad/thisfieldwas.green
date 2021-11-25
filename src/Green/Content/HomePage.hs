@@ -1,16 +1,15 @@
-module Green.Content.HomePage where
+module Green.Content.HomePage (homePage) where
 
 import Green.Common
-import Green.Content.Blog.Compiler
+import Green.Content.Blog
 import Green.Template.Custom
 
-homePageRules :: Context String -> Rules ()
-homePageRules context =
+homePage :: Context String -> Rules ()
+homePage context =
   match "index.html" do
     route idRoute
-    compile $ homePageCompiler context
-
-homePageCompiler :: Context String -> Compiler (Item String)
-homePageCompiler context = do
-  blogContext <- (<> context) <$> recentPostsContext
-  pageCompiler blogContext =<< getResourceBody
+    compile do
+      blogContext <- (<> context) <$> recentPostsContext
+      getResourceBody
+        >>= pageCompiler blogContext
+        >>= relativizeUrls

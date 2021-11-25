@@ -185,6 +185,7 @@ instance IntoContext Object a where
 
 data ContextValue a
   = EmptyValue
+  | UndefinedValue String (Item a) [String] [String]
   | ContextValue (Context a)
   | ListValue [ContextValue a]
   | BoolValue Bool
@@ -207,6 +208,7 @@ type FunctionValue4 v x y z w a = v -> FunctionValue3 x y z w a
 instance Show (ContextValue a) where
   show = \case
     EmptyValue -> "EmptyValue"
+    UndefinedValue name item trace errors -> "UndefinedValue " ++ show name ++ " in item context for " ++ itemFilePath item ++ ", trace=[" ++ intercalate ", " trace ++ "], suppressed=[" ++ intercalate ", " errors ++ "]"
     ContextValue {} -> "ContextValue"
     ListValue values -> "ListValue " ++ show values
     BoolValue value -> "BoolValue " ++ show value

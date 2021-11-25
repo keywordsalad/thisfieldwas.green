@@ -1,9 +1,9 @@
-module Green.Content.Code where
+module Green.Content.Code (code) where
 
 import Green.Common
 
-codeRules :: Rules Dependency
-codeRules = do
+code :: Rules Dependency
+code = do
   let path = "code/**"
   match path do
     route idRoute

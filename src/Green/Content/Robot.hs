@@ -1,15 +1,12 @@
-module Green.Content.Robot where
+module Green.Content.Robot (robotsTxt) where
 
 import Green.Common
 import Green.Template
 
-robotsTxtRules :: Context String -> Rules ()
-robotsTxtRules context = do
+robotsTxt :: Context String -> Rules ()
+robotsTxt context = do
   create ["robots.txt"] do
     route idRoute
-    compile $ robotsTxtCompiler context
-
-robotsTxtCompiler :: Context String -> Compiler (Item String)
-robotsTxtCompiler context =
-  makeItem ""
-    >>= loadAndApplyTemplate (fromFilePath "_templates/robots.txt") context
+    compile $
+      makeItem ""
+        >>= loadAndApplyTemplate (fromFilePath "_templates/robots.txt") context

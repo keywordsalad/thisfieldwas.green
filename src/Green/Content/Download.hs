@@ -1,9 +1,9 @@
-module Green.Content.Download where
+module Green.Content.Download (downloads) where
 
 import Green.Common
 
-downloadRules :: Rules ()
-downloadRules = do
+downloads :: Rules ()
+downloads = do
   match "downloads/**" do
     route $ setExtension ".txt"
     compile copyFileCompiler

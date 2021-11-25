@@ -5,7 +5,7 @@ import Data.Time
 import Green.Command
 import Green.Common
 import Green.Config
-import Green.Rule
+import Green.Content
 import qualified Hakyll as H
 import Options.Applicative
 import System.Environment
@@ -13,7 +13,7 @@ import System.Environment
 site :: IO ()
 site = do
   siteConfig <- loadSiteConfig
-  H.hakyllWith (siteConfig ^. siteHakyllConfiguration) (rules siteConfig)
+  H.hakyllWith (siteConfig ^. siteHakyllConfiguration) (content siteConfig)
 
 author :: IO ()
 author = do

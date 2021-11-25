@@ -1,17 +1,14 @@
-module Green.Content.Js (jsRules) where
+module Green.Content.Js (js) where
 
 import qualified Data.ByteString.Lazy.Char8 as C
 import Hakyll
 import Text.Jasmine
 
-jsRules :: Rules ()
-jsRules =
+js :: Rules ()
+js =
   match "js/**.js" do
     route idRoute
-    compile compressJsCompiler
-
-compressJsCompiler :: Compiler (Item String)
-compressJsCompiler = do
-  let minifyJS = C.unpack . minify . C.pack . itemBody
-  s <- getResourceString
-  return $ itemSetBody (minifyJS s) s
+    compile do
+      let minifyJS = C.unpack . minify . C.pack . itemBody
+      s <- getResourceString
+      return $ itemSetBody (minifyJS s) s

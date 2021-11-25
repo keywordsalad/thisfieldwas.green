@@ -1,9 +1,9 @@
-module Green.Content.Sitemap (sitemapRules) where
+module Green.Content.Sitemap (sitemap) where
 
 import Green.Common
 
-sitemapRules :: Rules ()
-sitemapRules =
+sitemap :: Rules ()
+sitemap =
   create ["sitemap.xml"] do
     route idRoute
     compile sitemapCompiler

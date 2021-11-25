@@ -1,8 +1,9 @@
 module Green.Template.Compiler where
 
+import Control.Applicative (liftA3)
 import Control.Monad.State.Strict
 import Data.Bifunctor
-import Data.List.NonEmpty
+import Data.List.NonEmpty as NonEmpty
 import Green.Common
 import Green.Template.Ast
 import Green.Template.Context hiding (field)
@@ -80,18 +81,13 @@ applyBlock = \case
 
 eval :: Expression -> TemplateRunner a (ContextValue a)
 eval = \case
-  NameExpression name _ -> do
-    context <- tplContext
-    item <- tplItem
-    trace <- tplTrace
+  NameExpression name pos -> do
+    (context, item, trace) <- liftA3 (,,) tplContext tplItem tplTrace
     s <- get
-    (result, s') <-
-      lift $
-        runStateT (unContext context name) s `compilerCatch` \e ->
-          let msg = "Failed to resolve field " ++ show name ++ " from item context for " ++ itemFilePath item ++ ", trace: [" ++ intercalate ", " trace ++ "]"
-           in compilerThrow (msg : compilerErrorMessages e)
-    put s'
-    return result
+    lift $
+      evalStateT (unContext context name) s `compilerCatch` \case
+        CompilationFailure ne -> compilerThrow (NonEmpty.toList ne)
+        CompilationNoResult ss -> return $ UndefinedValue name item (show pos : trace) ss
   StringExpression s _ -> return $ intoValue s
   IntExpression n _ -> return $ intoValue n
   DoubleExpression x _ -> return $ intoValue x
@@ -120,6 +116,7 @@ eval = \case
 stringify :: ContextValue String -> TemplateRunner String String
 stringify = \case
   EmptyValue -> return ""
+  UndefinedValue name item trace errors -> tplFail $ "can't stringify undefined value " ++ show name ++ " in item context for " ++ itemFilePath item ++ ", trace=[" ++ intercalate ", " trace ++ "], suppressed=[" ++ intercalate ", " errors ++ "]"
   ContextValue {} -> tplFail "can't stringify context"
   ListValue xs -> mconcat <$> mapM stringify xs
   BoolValue b -> return $ show b
@@ -138,6 +135,7 @@ stringify = \case
 isTruthy :: ContextValue a -> TemplateRunner a Bool
 isTruthy = \case
   EmptyValue -> return False
+  UndefinedValue {} -> return False
   ContextValue {} -> return True
   ListValue xs -> return $ not (null xs)
   BoolValue x -> return x

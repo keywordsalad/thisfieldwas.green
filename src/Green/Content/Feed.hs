@@ -1,9 +1,9 @@
-module Green.Content.Feed (feedRules) where
+module Green.Content.Feed (feed) where
 
 import Green.Common
 
-feedRules :: Rules ()
-feedRules = do
+feed :: Rules ()
+feed = do
   create ["atom.xml"] do
     route idRoute
     compile feedCompiler

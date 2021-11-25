@@ -1,14 +1,17 @@
-module Green.Content.Page (pageRules) where
+module Green.Content.Page (pages) where
 
 import Green.Common
 import Green.Route
 import Green.Template.Custom
 
-pageRules :: Context String -> Rules ()
-pageRules context =
+pages :: Context String -> Rules ()
+pages context =
   match (fromList pageList) do
     route $ setExtension "html" `composeRoutes` indexRoute
-    compile $ pageCompiler context =<< getResourceBody
+    compile $
+      getResourceBody
+        >>= pageCompiler context
+        >>= relativizeUrls
   where
     pageList =
       [ "contact.md",

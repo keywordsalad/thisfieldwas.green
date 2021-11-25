@@ -1,15 +1,15 @@
-module Green.Content.Image where
+module Green.Content.Image (images) where
 
 import Green.Common
 
-imageRules :: Rules ()
-imageRules =
+images :: Rules ()
+images =
   match "images/**" do
     route idRoute
     compile copyFileCompiler
 
--- imageRules :: SiteConfig -> Rules ()
--- imageRules config = do
+-- images :: SiteConfig -> Rules ()
+-- images config = do
 --   let x =
 --         config .^ siteDisplayFormat . displayImageWidths <&> \width ->
 --           group ("images-" ++ show width) do
