@@ -143,7 +143,7 @@ urlField key = field key f
       maybeRoute <- getRoute id'
       maybe
         (fail $ "no url by " ++ show key ++ " found for item " ++ show id')
-        return
+        (return . ("/" ++))
         maybeRoute
 
 pathField :: String -> Context a
