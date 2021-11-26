@@ -6,6 +6,7 @@ published: 2012-11-20T17:00:00-06:00
 comments: false
 tags: AngularJS, Perforce, SCM, Sinatra, Configuration Management
 layout: post
+changefreq: yearly
 ---
 
 Paul Hammant found this cool [Server-Side Piano][] and I've modified it to be

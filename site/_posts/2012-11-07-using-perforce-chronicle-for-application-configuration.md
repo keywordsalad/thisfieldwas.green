@@ -5,6 +5,7 @@ date: 2012-11-07T13:54:00-06:00
 published: 2012-11-07T13:54:00-06:00
 tags: Perforce, Configuration Management
 layout: post
+changefreq: yearly
 ---
 
 Following Paul Hammant's post [App-config workflow using SCM][] and subsequent

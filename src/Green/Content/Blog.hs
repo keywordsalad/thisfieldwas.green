@@ -1,4 +1,9 @@
-module Green.Content.Blog (blog, recentPostsContext) where
+module Green.Content.Blog
+  ( blog,
+    loadPublishedPosts,
+    recentPostsContext,
+  )
+where
 
 import Green.Common
 import Green.Compiler (loadExistingSnapshots)
@@ -8,15 +13,15 @@ import Green.Template.Custom.Compiler (pageCompiler, pageCompilerWithSnapshots)
 import Hakyll (recentFirst, replaceAll)
 
 blog :: Context String -> Rules ()
-blog context =
-  let rules =
-        [ blogIndex,
-          archives,
-          draftArchives,
-          posts,
-          drafts
-        ]
-   in sequenceA_ $ rules <*> pure context
+blog context = sequenceA_ $ rules <*> pure context
+  where
+    rules =
+      [ blogIndex,
+        archives,
+        draftArchives,
+        posts,
+        drafts
+      ]
 
 blogIndex :: Context String -> Rules ()
 blogIndex context =
@@ -24,7 +29,7 @@ blogIndex context =
     route idRoute
     compile do
       blogContext <- (<> context) <$> recentPostsContext
-      getResourceBody
+      getResourceString
         >>= pageCompiler blogContext
         >>= relativizeUrls
 
@@ -85,10 +90,9 @@ recentPostsContext = do
   recentPosts <- fmap (take 5) . recentFirst =<< loadPublishedPosts
   let latestPost = take 1 recentPosts
       previousPosts = drop 1 recentPosts
-      blogContext =
-        constField "latestPost" (itemListValue teaserContext latestPost)
-          <> constField "previousPosts" (itemListValue teaserContext previousPosts)
-  return blogContext
+  return $
+    constField "latestPost" (itemListValue teaserContext latestPost)
+      <> constField "previousPosts" (itemListValue teaserContext previousPosts)
 
 teaserContext :: Context String
 teaserContext = teaserField "teaser" publishedPostsSnapshot

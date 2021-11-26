@@ -82,6 +82,9 @@ tplWithField field' f = do
 tplFail :: String -> TemplateRunner a b
 tplFail message = fail =<< tplTraced message
 
+tplTried :: String -> TemplateRunner a b
+tplTried = lift . noResult
+
 tplTrace :: TemplateRunner a [String]
 tplTrace = gets tplCallStack
 
@@ -143,6 +146,13 @@ hashMapField m = Context f
     m' = intoValue <$> m
     f k = maybe tried return (HashMap.lookup k m')
     tried = lift . noResult $ "tried hashmap of " ++ show (HashMap.keys m')
+
+forItemField :: (IntoValue v a) => String -> [Identifier] -> (Item a -> TemplateRunner a v) -> Context a
+forItemField key ids f = field key f'
+  where
+    f' item
+      | itemIdentifier item `elem` ids = f item
+      | otherwise = tplTried $ show key ++ " for items " ++ show (toFilePath <$> ids)
 
 tplWithFunction :: String -> Context a -> Item a -> TemplateRunner a b -> TemplateRunner a b
 tplWithFunction key context item =

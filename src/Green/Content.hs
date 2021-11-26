@@ -33,5 +33,5 @@ content config = do
     homePage context
     pages context
     robotsTxt context
-    sitemap
+    sitemap context
     brokenLinks

@@ -19,6 +19,8 @@ defaultFields =
       pathField "path",
       routeField,
       linkedTitleField,
+      metadataPriorityField "updated" ["updated", "published", "created"],
+      metadataPriorityField "published" ["updated", "created"],
       ifField,
       forField,
       defaultField,
@@ -168,3 +170,8 @@ teaserField key snapshot = field key f
           | "<!--more-->" `isPrefixOf` xss = Just (reverse acc)
           | otherwise = go (x : acc) xs
         go _ [] = Nothing
+
+metadataPriorityField :: String -> [String] -> Context a
+metadataPriorityField key priorityKeys = field key f
+  where
+    f item = lift $ foldl (<|>) (noResult "") (flip getMetadataField item <$> priorityKeys)

@@ -6,6 +6,7 @@ published: 2012-11-28T13:04:00-06:00
 comments: false
 tags: AngularJS, Perforce, SCM, Sinatra, Configuration Management
 layout: post
+changefreq: yearly
 ---
 
 The App-Config-App now lets you promote changes between environments!
