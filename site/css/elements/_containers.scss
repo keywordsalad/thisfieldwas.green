@@ -9,6 +9,7 @@
   @include contain-floats;
   margin: 0;
   padding: 0 1rem;
+  clear: both;
   .content-bound {
     max-width: $content-max-width;
     padding: 0 0.5rem;

@@ -44,12 +44,16 @@
     }
   }
 
+  .personal-stuff {
+    @include contain-floats;
+  }
+
   @include media('>=tablet') {
     .meatball-headshot {
       width: 24rem;
     }
     .meatball-jellybean {
-      width: 24rem;
+      width: 20rem;
     }
   }
 }
