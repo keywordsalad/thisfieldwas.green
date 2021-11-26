@@ -44,12 +44,12 @@
     }
   }
 
-  @include media('<tablet') {
-  }
-
-  @include media('>=tablet', '<desktop') {
-  }
-
-  @include media('>=desktop') {
+  @include media('>=tablet') {
+    .meatball-headshot {
+      width: 24rem;
+    }
+    .meatball-jellybean {
+      width: 24rem;
+    }
   }
 }

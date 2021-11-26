@@ -51,14 +51,14 @@ code {
   }
 }
 
-pre.sourceCode {
-  margin: 1rem 0;
+div.sourceCode, pre.sourceCode {
+  margin: 0;
   padding: 0;
 }
 
 code.sourceCode {
   display: block;
-  margin: 0;
+  margin: 1rem 0;
   padding: 0;
   font-size: 0;
 

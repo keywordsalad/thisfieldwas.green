@@ -1,13 +1,9 @@
 ---
-title: "Blogging About Life and Tech"
+title: Blogging About Life and Tech - Latest Posts
 updated: '{{latestPostDate}}'
 bodyClass: blog
 layout: page
 ---
-
-<header>
-  <h1 class="page-title">{{title}} -- Latest Posts</h1>
-</header>
 
 {{#for latestPost}}{{partial "post"}}{{#end}}
 {{partial "teaser-list"}}
