@@ -1,6 +1,6 @@
 ---
-title: "Promoting changes with App-Config-App"
-author: "Logan McGrath"
+title: Promoting changes with App-Config-App
+author: Logan McGrath
 date: 2012-11-28T13:04:00-06:00
 published: 2012-11-28T13:04:00-06:00
 comments: false

@@ -1,5 +1,4 @@
 code {
-  background-color: $color-aside;
   color: $color-emphasize;
   font-family: $code-font-family;
   font-size: $code-font-size;
@@ -52,17 +51,16 @@ code {
   }
 }
 
-*:not(div.sourceCode) > div.sourceCode {
-  @include scrollable;
+pre.sourceCode {
+  margin: 1rem 0;
+  padding: 0;
 }
 
 code.sourceCode {
   display: block;
-  margin: 1rem 0;
+  margin: 0;
   padding: 0;
   font-size: 0;
-  white-space: pre;
-  overflow: scroll;
 
   .numberLines & {
     counter-reset: line-number;
@@ -70,7 +68,8 @@ code.sourceCode {
 
   > span {
     display: block;
-    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
     font-size: $code-font-size;
 
     &:first-child {

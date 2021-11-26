@@ -27,12 +27,4 @@
   & > * {
     overflow-x: scroll;
   }
-  &::-webkit-scrollbar {
-    height: 0.5rem;
-    width: 0.5rem;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: $color-scrollbar;
-    border-radius: 0.5rem;
-  }
 }

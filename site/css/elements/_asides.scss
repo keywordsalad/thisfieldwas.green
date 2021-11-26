@@ -3,36 +3,16 @@ aside, figure {
   color: $color-text-dark;
   font-family: $aside-font-family;
   font-style: italic;
-  background-color: $color-aside;
-  display: flex;
-  width: min-content;
-  margin: 0;
-  padding: 0.75rem 1.5rem;
+  margin: 1rem 0;
+  padding: 0;
   border-top: $border-regular;
   border-bottom: $border-thin;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
 
-  @include media('<tablet') {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    margin: 1rem 0;
-    img {
-      height: auto;
-      margin: 0 auto;
-    }
-  }
-
-  &.image {
-    border-top: none;
-    picture, img {
-      margin: 0;
-      padding: 0;
-    }
-  }
-
-  > * {
-    margin: 0.5rem 0;
+  .image-link {
+    display: block;
+    overflow-x: auto;
+    margin: 1rem auto;
   }
 }
 
