@@ -15,7 +15,7 @@ import qualified Hakyll as H
 
 blog :: Context String -> Rules ()
 blog context = do
-  tags <- buildTags "_posts/**" (H.fromCapture "blog/tags/*.html")
+  tags <- buildTags "_posts/**" makeTagId
   tagsIndex tags context
   blogIndex tags context
   archives context

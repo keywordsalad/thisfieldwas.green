@@ -15,6 +15,9 @@ import Text.Blaze.Html.Renderer.String (renderHtml)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 
+makeTagId :: String -> Identifier
+makeTagId = Hakyll.fromCapture "blog/tags/*.html"
+
 tagsField :: String -> Context a
 tagsField key = field key $ lift . getTags . itemIdentifier
 
