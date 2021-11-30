@@ -13,6 +13,6 @@ pageCompilerWithSnapshots snapshots context =
   applyAsTemplate context
     >=> compilePandoc
     >=> (\x -> foldM (flip saveSnapshot) x snapshots')
-    >=> loadAndApplyTemplate (fromFilePath "_layouts/from-metadata.html") context
+    >=> loadAndApplyTemplate (fromFilePath "_layouts/from-context.html") context
   where
     snapshots' = nub ("_content" : snapshots)
