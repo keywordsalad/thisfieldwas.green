@@ -6,4 +6,10 @@ changefreq: weekly
 ---
 
 {{#for latestPost}}{{partial "post"}}{{#end}}
+
+<section class="tag-cloud">
+  <h2>Topics</h2>
+  {{tagCloud}}
+</section>
+
 {{partial "teaser-list"}}

@@ -20,7 +20,7 @@ sitemapContext siteContext = do
   pages <- concat <$> mapM (`loadExistingSnapshots` "_content") pagePatterns
   posts <- recentFirst =<< loadPublishedPosts
   let context =
-        forItemField "updated" (fromFilePath <$> ["blog/index.html", "blog/archives.html"]) (\_ -> latestPostUpdated posts)
+        forItemField "updated" latestPostPatterns (\_ -> latestPostUpdated posts)
           <> constField "pages" (itemListValue context (pages <> posts))
           <> siteContext
   return context
@@ -31,5 +31,11 @@ sitemapContext siteContext = do
         "blog/index.html",
         "blog/archives.html"
       ]
+    latestPostPatterns =
+      fromFilePath
+        <$> [ "blog/index.html",
+              "blog/archives.html",
+              "blog/tags.html"
+            ]
     latestPostUpdated (latestPost : _) = tplWithItem latestPost (unContext siteContext "updated")
     latestPostUpdated _ = tplTried "latest post updated"

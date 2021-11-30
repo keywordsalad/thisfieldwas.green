@@ -19,11 +19,13 @@ pageCompilerWithSnapshots snapshots context =
     snapshots' = nub ("_content" : snapshots)
 
 applyLayout :: Context String -> Item String -> Compiler (Item String)
-applyLayout context item = do
-  getMetadataField "layout" item >>= \case
+applyLayout context item =
+  evalStateT (unContext context "layout") tr >>= \case
     StringValue layoutName -> do
       let layoutId = fromFilePath $ "_layouts" </> layoutName <.> "html"
       loadAndApplyTemplate layoutId context item
     _ -> do
       debugCompiler $ "Did not receive String layout key for " ++ show (itemIdentifier item)
       return item
+  where
+    tr = templateRunner context item

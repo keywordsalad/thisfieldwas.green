@@ -11,26 +11,49 @@ import Green.Compiler (loadExistingSnapshots)
 import Green.Route
 import Green.Template
 import Green.Template.Custom.Compiler (pageCompiler, pageCompilerWithSnapshots)
-import Hakyll (recentFirst, replaceAll)
+import qualified Hakyll as H
 
 blog :: Context String -> Rules ()
-blog context = sequenceA_ $ rules <*> pure context
-  where
-    rules =
-      [ blogIndex,
-        archives,
-        draftArchives,
-        posts,
-        drafts
-      ]
+blog context = do
+  tags <- buildTags "_posts/**" (H.fromCapture "blog/tags/*.html")
+  tagsIndex tags context
+  blogIndex tags context
+  archives context
+  draftArchives context
+  posts context
+  drafts context
 
-blogIndex :: Context String -> Rules ()
-blogIndex context =
+tagsIndex :: Tags -> Context String -> Rules ()
+tagsIndex tags context = do
+  match "blog/tag.html" do
+    compile getResourceString
+  H.tagsRules tags \tag pat -> do
+    route indexRoute
+    compile do
+      tagPosts <- H.recentFirst =<< H.loadAll pat
+      let tagsContext =
+            constField "tag" tag
+              <> constField "title" ("Posts tagged \"" ++ tag ++ "\"")
+              <> constField "posts" (itemListValue context tagPosts)
+              <> constField "layout" ("page" :: String)
+              <> context
+      H.loadBody (fromFilePath "blog/tag.html")
+        >>= makeItem
+        >>= pageCompiler tagsContext
+        >>= relativizeUrls
+
+blogIndex :: Tags -> Context String -> Rules ()
+blogIndex tags context =
   match "blog/index.html" do
     route idRoute
     compile do
-      blogContext <- (<> context) <$> recentPostsContext
-      getResourceString
+      tagCloud <- renderTagCloud 0.8 2.0 tags
+      recentPosts <- recentPostsContext
+      let blogContext =
+            constField "tagCloud" tagCloud
+              <> recentPosts
+              <> context
+      getResourceBody
         >>= pageCompiler blogContext
         >>= relativizeUrls
 
@@ -39,7 +62,7 @@ archives context = do
   match "blog/archives.html" do
     route indexRoute
     compile do
-      publishedPosts <- recentFirst =<< loadPublishedPosts
+      publishedPosts <- H.recentFirst =<< loadPublishedPosts
       let archivesContext =
             constField "posts" (itemListValue context publishedPosts)
               <> context
@@ -52,7 +75,7 @@ draftArchives context = do
   match "blog/drafts.html" do
     route indexRoute
     compile do
-      draftPosts <- recentFirst =<< loadDraftPosts
+      draftPosts <- H.recentFirst =<< loadDraftPosts
       let draftsContext =
             constField "posts" (itemListValue context draftPosts)
               <> context
@@ -70,8 +93,12 @@ posts context = do
         `composeRoutes` indexRoute
     compile $
       getResourceBody
-        >>= pageCompilerWithSnapshots [publishedPostsSnapshot] context
+        >>= pageCompilerWithSnapshots [publishedPostsSnapshot] postContext
         >>= relativizeUrls
+  where
+    postContext =
+      tagsField "tags"
+        <> context
 
 drafts :: Context String -> Rules ()
 drafts context = do
@@ -88,7 +115,7 @@ drafts context = do
 
 recentPostsContext :: Compiler (Context String)
 recentPostsContext = do
-  recentPosts <- fmap (take 5) . recentFirst =<< loadPublishedPosts
+  recentPosts <- fmap (take 5) . H.recentFirst =<< loadPublishedPosts
   let latestPost = take 1 recentPosts
       previousPosts = drop 1 recentPosts
   return $
@@ -114,4 +141,4 @@ datePattern :: String
 datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}-"
 
 dateRoute :: Routes
-dateRoute = gsubRoute datePattern (replaceAll "-" (const "/"))
+dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))

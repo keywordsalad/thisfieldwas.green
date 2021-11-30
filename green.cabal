@@ -60,6 +60,7 @@ library
       Green.Template.Source.Lexer
       Green.Template.Source.Parser
       Green.Template.Source.Util
+      Green.Template.Tags
       Green.Util
   other-modules:
       Paths_green
@@ -113,6 +114,7 @@ library
     , aeson
     , base >=4.14 && <5
     , binary
+    , blaze-html
     , bytestring
     , config-ini
     , data-default

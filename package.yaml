@@ -19,6 +19,7 @@ library:
   dependencies:
     - aeson
     - binary
+    - blaze-html
     - bytestring
     - config-ini
     - data-default

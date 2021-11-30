@@ -3,7 +3,7 @@ title: Lessons from Sterling
 author: Logan McGrath
 date: 2013-08-05T09:37:00-07:00
 comments: false
-tags: Sterling, Functional Programming, Language Design
+tags: Sterling, language design
 layout: post
 ---
 

@@ -4,9 +4,8 @@ author: Logan McGrath
 date: 2012-11-16T17:00:00-06:00
 published: 2012-11-16T17:00:00-06:00
 comments: false
-tags: SCM, Perforce, Sinatra, AngularJS
+tags: configuration management, Perforce, Sinatra, AngularJS
 layout: post
-changefreq: yearly
 ---
 
 Continuing from my [last post][], I've [forked][] Paul Hammant's original

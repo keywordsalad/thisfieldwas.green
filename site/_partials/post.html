@@ -9,6 +9,11 @@
       {{-#end}}
       {{-#if author}} by {{author}}{{#end}}
     </p>
+    {{#if tags-}}
+      <p class="post-topics">
+        Topics: {{tags}}
+      </p>
+    {{-#end}}
   </header>
   {{body}}
 </article>

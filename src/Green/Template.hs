@@ -5,6 +5,7 @@ module Green.Template
     module Green.Template.Field,
     module Green.Template.Pandoc,
     module Green.Template.Source.Parser,
+    module Green.Template.Tags,
   )
 where
 
@@ -14,3 +15,4 @@ import Green.Template.Context
 import Green.Template.Field
 import Green.Template.Pandoc
 import Green.Template.Source.Parser
+import Green.Template.Tags
