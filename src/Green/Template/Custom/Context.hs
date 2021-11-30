@@ -29,7 +29,7 @@ customContext config = self
           trimmedUrlField "url",
           includeField "include" "",
           includeField "partial" "_partials",
-          layoutField "layout" "_layouts",
+          layoutField "applyLayout" "_layouts",
           dateFields config,
           gitCommits config,
           constField "siteTitle" (config ^. siteTitle),
