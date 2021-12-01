@@ -21,6 +21,16 @@ makeTagId = Hakyll.fromCapture "blog/tags/*.html"
 tagsField :: String -> Context a
 tagsField key = field key $ lift . getTags . itemIdentifier
 
+tagLinksField :: String -> Context a
+tagLinksField key = field key f
+  where
+    f = lift . (mapM makeLink' <=< getTags . itemIdentifier)
+    makeLink' tag = do
+      url <- ("/" ++) . fromJust <$> getRoute (makeTagId tag)
+      return . renderHtml $
+        H.a ! A.href (toValue url) $
+          toHtml tag
+
 categoryField :: String -> Context a
 categoryField key = field key $ lift . getCategory . itemIdentifier
 
