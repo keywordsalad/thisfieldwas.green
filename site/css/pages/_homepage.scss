@@ -9,19 +9,14 @@
 
   .professional-offering {
     clear: both;
+
+    h2 {
+      text-align: center;
+    }
   }
 
-  .professional-toolbox {
-    display: flex;
-    justify-content: space-around;
+  .skills {
     text-align: center;
-
-    > * {
-      min-width: 15%;
-      & + * {
-        margin-left: 1rem;
-      }
-    }
 
     ul {
       padding: 0;
