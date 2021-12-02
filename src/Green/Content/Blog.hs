@@ -52,6 +52,7 @@ blogIndex tags context =
       let blogContext =
             constField "tagCloud" tagCloud
               <> recentPosts
+              <> postContext
               <> context
       getResourceBody
         >>= pageCompiler blogContext
@@ -65,6 +66,7 @@ archives context = do
       publishedPosts <- H.recentFirst =<< loadPublishedPosts
       let archivesContext =
             constField "posts" (itemListValue context publishedPosts)
+              <> postContext
               <> context
       getResourceBody
         >>= pageCompiler archivesContext
@@ -78,6 +80,7 @@ draftArchives context = do
       draftPosts <- H.recentFirst =<< loadDraftPosts
       let draftsContext =
             constField "posts" (itemListValue context draftPosts)
+              <> postContext
               <> context
       getResourceBody
         >>= pageCompiler draftsContext
@@ -93,12 +96,8 @@ posts context = do
         `composeRoutes` indexRoute
     compile $
       getResourceBody
-        >>= pageCompilerWithSnapshots [publishedPostsSnapshot] postContext
+        >>= pageCompilerWithSnapshots [publishedPostsSnapshot] (postContext <> context)
         >>= relativizeUrls
-  where
-    postContext =
-      tagsField "tags"
-        <> context
 
 drafts :: Context String -> Rules ()
 drafts context = do
@@ -110,8 +109,11 @@ drafts context = do
         `composeRoutes` indexRoute
     compile $
       getResourceBody
-        >>= pageCompilerWithSnapshots [draftPostsSnapshot] context
+        >>= pageCompilerWithSnapshots [draftPostsSnapshot] (postContext <> context)
         >>= relativizeUrls
+
+postContext :: Context a
+postContext = tagLinksField "tagLinks"
 
 recentPostsContext :: Compiler (Context String)
 recentPostsContext = do

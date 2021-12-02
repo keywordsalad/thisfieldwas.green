@@ -9,9 +9,9 @@
       {{-#end}}
       {{-#if author}} by {{author}}{{#end}}
     </p>
-    {{#if tags-}}
-      <p class="post-topics">
-        Topics: {{tags}}
+    {{-#if tagLinks}}
+      <p class="post-tags">
+        Tags: {{tagLinks}}
       </p>
     {{-#end}}
   </header>

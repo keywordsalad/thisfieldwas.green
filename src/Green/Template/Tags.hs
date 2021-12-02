@@ -24,12 +24,18 @@ tagsField key = field key $ lift . getTags . itemIdentifier
 tagLinksField :: String -> Context a
 tagLinksField key = field key f
   where
-    f = lift . (mapM makeLink' <=< getTags . itemIdentifier)
-    makeLink' tag = do
-      url <- ("/" ++) . fromJust <$> getRoute (makeTagId tag)
-      return . renderHtml $
-        H.a ! A.href (toValue url) $
-          toHtml tag
+    f item = lift do
+      tags <- getTags $ itemIdentifier item
+      links <- mapM makeLink' tags
+      return $ unwords links
+    makeLink' tag =
+      getRoute (makeTagId tag) >>= \case
+        Just url ->
+          return . renderHtml $
+            H.a ! A.href (toValue $ "/" ++ url) $
+              toHtml tag
+        Nothing ->
+          return tag
 
 categoryField :: String -> Context a
 categoryField key = field key $ lift . getCategory . itemIdentifier
@@ -37,10 +43,8 @@ categoryField key = field key $ lift . getCategory . itemIdentifier
 getCategory :: (MonadMetadata m) => Identifier -> m [String]
 getCategory = (filter isCategory <$>) . Hakyll.getCategory
   where
-    isCategory = \case
-      "_posts" -> False
-      "_drafts" -> False
-      _ -> True
+    isCategory = not . (`elem` sourceDirs)
+    sourceDirs = ["_posts", "_drafts"]
 
 buildCategories :: (MonadMetadata m) => Pattern -> (String -> Identifier) -> m Tags
 buildCategories = Hakyll.buildTagsWith getCategory
