@@ -10,10 +10,6 @@ import Green.Common
 import Green.Template.Context
 import Hakyll (MonadMetadata, Tags, buildTags, getTags, renderTagCloudWith)
 import qualified Hakyll
-import Text.Blaze.Html (toHtml, toValue, (!))
-import Text.Blaze.Html.Renderer.String (renderHtml)
-import qualified Text.Blaze.Html5 as H
-import qualified Text.Blaze.Html5.Attributes as A
 
 makeTagId :: String -> Identifier
 makeTagId = Hakyll.fromCapture "blog/tags/*.html"
@@ -30,15 +26,14 @@ tagLinksField key = field key f
       return $ unwords links
     makeLink' tag =
       getRoute (makeTagId tag) >>= \case
-        Just url ->
-          return . renderHtml $
-            H.a ! A.href (toValue $ "/" ++ url) $
-              toHtml tag
-        Nothing ->
-          return tag
+        Just url -> return $ "<a href=\"/" ++ url ++ "\">" ++ tag ++ "</a>"
+        Nothing -> return tag
 
-categoryField :: String -> Context a
-categoryField key = field key $ lift . getCategory . itemIdentifier
+makeCategoryId :: String -> Identifier
+makeCategoryId = Hakyll.fromCapture "blog/categories/*.html"
+
+categoriesField :: String -> Context a
+categoriesField key = field key $ lift . getCategory . itemIdentifier
 
 getCategory :: (MonadMetadata m) => Identifier -> m [String]
 getCategory = (filter isCategory <$>) . Hakyll.getCategory
@@ -49,15 +44,25 @@ getCategory = (filter isCategory <$>) . Hakyll.getCategory
 buildCategories :: (MonadMetadata m) => Pattern -> (String -> Identifier) -> m Tags
 buildCategories = Hakyll.buildTagsWith getCategory
 
-renderTagCloud :: Double -> Double -> Tags -> Compiler String
-renderTagCloud = renderTagCloudWith makeLink unwords
+renderTagCloud :: Tags -> Compiler String
+renderTagCloud = renderTagCloudWith makeLink unwords minSize maxSize
+  where
+    minSize = 1.0
+    maxSize = 2.0
 
 makeLink :: Double -> Double -> String -> String -> Int -> Int -> Int -> String
-makeLink minSize maxSize tag url count minCount maxCount =
-  let diff = 1 + fromIntegral maxCount - fromIntegral minCount
-      relative = (fromIntegral count - fromIntegral minCount) / diff
-      size = floor ((minSize + relative * (maxSize - minSize)) * 100) :: Int
-   in renderHtml $
-        H.a ! A.style (toValue $ "font-size: " ++ show size ++ "%")
-          ! A.href (toValue url)
-          $ toHtml (tag ++ " (" ++ show count ++ ")")
+makeLink _minSize _maxSize tag url count minCount maxCount =
+  mconcat
+    [ "<a",
+      " data-count=\"" ++ show count ++ "\"",
+      " class=\"tag\"",
+      " style=\""
+        ++ mconcat
+          [ ";--count:" ++ show count,
+            ";--min-count:" ++ show minCount,
+            ";--max-count:" ++ show maxCount
+          ]
+        ++ "\"",
+      " href=\"" ++ url ++ "\"",
+      ">" ++ tag ++ "</a>"
+    ]

@@ -1,0 +1,32 @@
+.tag-cloud {
+  --min-size: 0.7;
+  --max-size: 1.2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  line-height: 2rem;
+
+  .tag {
+    --norm: calc(
+      (var(--count) - var(--min-count))
+        / (var(--max-count) - var(--min-count))
+    );
+    --size: calc(
+      var(--norm)
+        * (var(--max-size) - var(--min-size))
+        + var(--min-size)
+    );
+    color: #a33;
+    display: block;
+    font-size: calc(var(--size) * 1rem);
+    padding: 0.125em 0.25em;
+    text-decoration: none;
+    position: relative;
+  }
+
+  &[data-show-count] .tag::after {
+    content: " (" attr(data-count) ")";
+    font-size: 1rem;
+  }
+}

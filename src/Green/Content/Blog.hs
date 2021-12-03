@@ -15,13 +15,36 @@ import qualified Hakyll as H
 
 blog :: Context String -> Rules ()
 blog context = do
+  categories <- buildCategories "_categories/**" makeCategoryId
+  categoriesIndex categories context
   tags <- buildTags "_posts/**" makeTagId
   tagsIndex tags context
-  blogIndex tags context
+  blogIndex categories tags context
+
   archives context
   draftArchives context
   posts context
   drafts context
+
+categoriesIndex :: Tags -> Context String -> Rules ()
+categoriesIndex categories context = do
+  match "blog/tag.html" do
+    compile getResourceString
+  H.tagsRules categories \category pat -> do
+    route indexRoute
+    compile do
+      categoryPosts <- H.recentFirst =<< H.loadAll pat
+      let categoryContext =
+            constField "category" category
+              <> constField "title" ("Posts under \"" ++ category ++ "\"")
+              <> constField "posts" (itemListValue context categoryPosts)
+              <> constField "layout" ("page" :: String)
+              <> postContext
+              <> context
+      H.loadBody (fromFilePath "blog/tag.html")
+        >>= makeItem
+        >>= pageCompiler categoryContext
+        >>= relativizeUrls
 
 tagsIndex :: Tags -> Context String -> Rules ()
 tagsIndex tags context = do
@@ -36,21 +59,24 @@ tagsIndex tags context = do
               <> constField "title" ("Posts tagged \"" ++ tag ++ "\"")
               <> constField "posts" (itemListValue context tagPosts)
               <> constField "layout" ("page" :: String)
+              <> postContext
               <> context
       H.loadBody (fromFilePath "blog/tag.html")
         >>= makeItem
         >>= pageCompiler tagsContext
         >>= relativizeUrls
 
-blogIndex :: Tags -> Context String -> Rules ()
-blogIndex tags context =
+blogIndex :: Tags -> Tags -> Context String -> Rules ()
+blogIndex categories tags context =
   match "blog/index.html" do
     route idRoute
     compile do
-      tagCloud <- renderTagCloud 0.8 2.0 tags
+      categoryCloud <- renderTagCloud categories
+      tagCloud <- renderTagCloud tags
       recentPosts <- recentPostsContext
       let blogContext =
-            constField "tagCloud" tagCloud
+            constField "categoryCloud" categoryCloud
+              <> constField "tagCloud" tagCloud
               <> recentPosts
               <> postContext
               <> context
@@ -112,8 +138,10 @@ drafts context = do
         >>= pageCompilerWithSnapshots [draftPostsSnapshot] (postContext <> context)
         >>= relativizeUrls
 
-postContext :: Context a
-postContext = tagLinksField "tagLinks"
+postContext :: Context String
+postContext =
+  tagLinksField "tagLinks"
+    <> postHeaderField "postHeader"
 
 recentPostsContext :: Compiler (Context String)
 recentPostsContext = do
@@ -144,3 +172,11 @@ datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}-"
 
 dateRoute :: Routes
 dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))
+
+postHeaderField :: String -> Context String
+postHeaderField key = functionField key f
+  where
+    defaults = defaultKeys ["headerLevel", "latestPost"]
+    f (fields :: Context String) = do
+      tplWithContext (fields <> defaults) do
+        itemBody <$> loadAndApplyTemplate' (fromFilePath "_templates/post-header.html")

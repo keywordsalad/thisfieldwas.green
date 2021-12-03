@@ -98,9 +98,16 @@ layout: page
   <p>
     Engineers are too expensive to be putting together bespoke content with high rates of churn. Low code allows engineers to focus on the hard problems and enables more opportunities for businesses to better harness the value they bring. I mentor engineers to help them realize their full potential as technologists and become drivers in better engineering with less code.
   </p>
+  <h3>Some Writing</h3>
+  <p>Here's a sampling of things I've blogged about. A complete selection may be found on their <a href="{{route 'blog/index.html'}}">dedicated page</a>.</p>
+  <ul>
+    {{#for previousPosts}}
+    <li>
+      <a href="{{url}}">{{title}}</a> - {{date | dateAs shortDate}}
+    </li>
+    {{#end}}
+  </ul>
 </section>
-
-{{partial "teaser-list"}}
 
 {{partial "employment"}}
 

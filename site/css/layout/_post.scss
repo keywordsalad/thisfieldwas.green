@@ -4,8 +4,16 @@
 
 .post-published {
   color: $color-text-light;
-  margin-top: 0.25rem;
+  margin: 0.25rem 0;
   font-size: $text-font-size-small;
+}
+
+.post-tags {
+  font-size: $text-font-size-small;
+  margin-top: 0.25rem;
+  a {
+    color: #a33;
+  }
 }
 
 .teaser-list {

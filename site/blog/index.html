@@ -1,15 +1,42 @@
 ---
-title: Latest Posts
+title: Keeping This Field Green
 bodyClass: blog
 layout: page
 changefreq: weekly
 ---
 
-{{#for latestPost}}{{partial "post"}}{{#end}}
+{{-#for latestPost}}
+  <section class="latest-post">
+    {{postHeader headerLevel: "h2", latestPost: True}}
+    {{-teaser}}
+  </section>
+{{-#end}}
 
-<section class="tag-cloud">
-  <h2>Topics</h2>
-  {{tagCloud}}
+<section class="other-reading">
+  <h2>Other Reading</h2>
+  {{-#if categoryCloud}}
+    <section class="categories">
+      <h3>Categories</h3>
+      <p class="tag-cloud" data-show-count>{{categoryCloud}}</p>
+    </section>
+  {{-#end}}
+  {{-#if tagCloud}}
+    <section class="tags">
+      <h3>Tags</h3>
+      <p class="tag-cloud" data-show-count>{{tagCloud}}</p>
+    </section>
+  {{-#end}}
 </section>
 
-{{partial "teaser-list"}}
+<article class="teaser-list">
+  <header>
+    <h2>Recent Posts</h2>
+  </header>
+  {{-#for previousPosts-}}
+    <section class="teaser-item post">
+      {{postHeader headerLevel: "h3"}}
+      {{-teaser}}
+      <p class="read-more"><a href="{{url}}">Read more...</a></p>
+    </section>
+  {{-#end}}
+</article>

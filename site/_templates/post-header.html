@@ -1,0 +1,26 @@
+<header class="post-header">
+  <hgroup>
+    <{{headerLevel}} class="post-title">
+      {{-#if latestPost}}Latest Post: {{#end-}}
+      <a href="{{url}}">{{title}}</a>
+    </{{headerLevel}}>
+    <p class="post-published">
+      {{-#if published-}}
+        Posted on {{published | dateAs shortDate}}
+      {{-#else-}}
+        Drafted on {{date | dateAs shortDate}}
+      {{-#end}}
+      {{-#if author}} by {{author}}{{#end}}
+    </p>
+    {{-#if categories}}
+      <p class="post-categories">
+        Categories: {{categories}}
+      </p>
+    {{-#end}}
+    {{-#if tags}}
+      <p class="post-tags">
+        Tags: {{tagLinks}}
+      </p>
+    {{-#end}}
+  </hgroup>
+</header>

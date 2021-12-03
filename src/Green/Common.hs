@@ -22,7 +22,7 @@ where
 
 import Control.Applicative ((<|>))
 import Control.Exception (bracket)
-import Control.Monad (forM, join, (<=<), (>=>))
+import Control.Monad (forM, join, void, (<=<), (>=>))
 import Control.Monad.Except (MonadError, catchError, throwError)
 import Control.Monad.Trans (lift)
 import Data.Bifunctor (bimap, first, second)
