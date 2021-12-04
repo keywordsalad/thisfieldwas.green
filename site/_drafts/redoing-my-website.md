@@ -106,6 +106,10 @@ All of these features gave me a rather roundabout way of satisfying some of the 
 
 I hadn't touched CSS since probably 2013, which I think is about 8 years. It feels the same, with a few upgrades that are in very much the same vein as the old stuff. For as frustrated as I found myself still being with it, I am happy with how the site looks considering that I didn't particularly know what I was doing.
 
+Despite feeling as though I was fumbling about, I was so proud to have figured out how to style my site in such a way that looked great on both desktop and mobile, scaling across multiple resolutions and feeling that I wasn't compromising on aesthetics or functionality. Try looking at this or other pages from desktop or phone, and try especially comparing landscape vs. portrait! 
+
+I was utterly thrilled to find that all major browsers' dev tools had greatly matured, had even become on-par with each other, and I was able to view my site from various resolutions and make changes at a dizzying pace. I'm incredibly impressed and very happy with how enabling the tools are.
+
 ### I did not find myself fighting functional programming
 
 I don't get what the fuss is about. Everything I needed help with was googleable, like everything else in tech. Y'all are primadonnas.
