@@ -20,6 +20,10 @@ aside, figure {
       padding: 0;
     }
   }
+
+  figcaption {
+    font-size: 1.1rem;
+  }
 }
 
 @mixin aside($side) {

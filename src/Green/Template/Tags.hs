@@ -23,7 +23,7 @@ tagLinksField key = field key f
     f item = lift do
       tags <- getTags $ itemIdentifier item
       links <- mapM makeLink' tags
-      return $ unwords links
+      return $ intercalate ", " links
     makeLink' tag =
       getRoute (makeTagId tag) >>= \case
         Just url -> return $ "<a href=\"/" ++ url ++ "\">" ++ tag ++ "</a>"

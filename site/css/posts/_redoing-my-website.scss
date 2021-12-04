@@ -1,0 +1,8 @@
+#family-guy-css-aside {
+  @include aside(right);
+
+  img {
+    width: 320px;
+    height: 240px;
+  }
+}
