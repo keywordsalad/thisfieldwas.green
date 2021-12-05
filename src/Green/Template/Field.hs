@@ -36,13 +36,7 @@ defaultKeys keys = intoContext $ (,"" :: String) <$> keys
 withField :: Context String
 withField = functionField2 "with" f
   where
-    f ::
-      FunctionValue2
-        (Context String)
-        [Block]
-        String
-        String
-    f context blocks =
+    f (context :: Context String) (blocks :: [Block]) =
       tplWithContext context do
         reduceBlocks blocks
 

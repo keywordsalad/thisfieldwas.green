@@ -15,7 +15,7 @@ $header-font-fudge-factor: 1.1;
 $aside-font-family: $header-font-family;
 
 $code-font-family: "Andale Mono", Monaco, "Courier New", monospace;
-$code-font-size: 0.75rem;
+$code-font-size: 0.85rem;
 
 $color-green: darkgreen;
 $color-text: darkslategray;
@@ -26,6 +26,7 @@ $color-highlight: gold;
 $color-hover: yellow;
 $color-aside: color.adjust(honeydew, $hue: -10%, $saturation: -50%, $lightness: -3%);
 $color-hyperlink: dodgerblue;
+$color-hyperlink-complement: indianred;
 $color-background: aliceblue;
 $color-scrollbar: cadetblue;
 

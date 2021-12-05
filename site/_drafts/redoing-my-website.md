@@ -62,13 +62,13 @@ I kept a small scratch list of things I "knew" would happen but didn't "expect":
 * Templating is inexplicably difficult
 * Type inferencing is a real treat until it doesn't work
 * CSS is still like the Family Guy meme
-* I did not find myself fighting functional programming
+* I did not fight functional programming like I expected, I rather found it invaluable
 
 So there's some weird in that list. Let me expand on some more impactful subjects in detail.
 
 ### Haskell compiles really slow, like _really_ slow
 
-Hakyll depends on the [pandoc](https://hackage.haskell.org/package/pandoc) library for its document processing. It's very large, and for my particular use case provides way more functionality than my website will ever need. I'm only leveraging code highlighting, HTML, and Markdown processing but pandoc (which can be thought of as a pan-document processing utility) can process pretty much everything under the sun and transform it all this-way and that-. It takes something like 40 minutes to compile clean on my 2019 MacBook.
+Hakyll depends on the [pandoc](https://hackage.haskell.org/package/pandoc) library for its document processing. It's very large, and for my particular use case provides way more functionality than my website will ever need. I'm only leveraging code highlighting, HTML, and Markdown processing but pandoc (which can be thought of as a pan-document processing utility) can process pretty much everything under the sun and transform it all this-way and that-. It takes something like 40 minutes to compile clean on my 2019 MacBook Pro.
 
 ### Compiled languages are supposed to be more productive but they don't _feel_ that way
 
@@ -96,7 +96,18 @@ Hakyll does not have a good template system. I spent some months on and off writ
 * Syntax literals (i.e. macros and lazy evaluation)
 * Falsy and Truthy values, even _undefined_ values!
 
-All of these features gave me a rather roundabout way of satisfying some of the conveniences of a dynamic language within the very stiff context of a Haskell-powered static site generator. However strapping together my own template system was a rather fun and informative experience and worth a writeup for another post.
+All of these features gave me a rather roundabout way of satisfying some of the conveniences of a dynamic language within the very stiff context of a Haskell-powered static site generator. Strapping together my own template system was a surprisingly fun, though difficult itch to scratch and a very informative experience worth writing about in another post.
+
+### Type inferencing is a real treat until it doesn't work
+
+Sometimes Haskell couldn't figure out what I was trying to tell it to do. While I didn't read up on any formal documentation on how Haskell's type inferencing algorithm works specifically (it's some flavor of [Hindley-Milner](https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system), interesting stuff) but I did develop some intuition on what was going on and Haskell would complain primarily in two cases, where I was:
+
+1. Failing to return a specifically typed argument from a function
+2. Failing to return a specifically typed context from a function
+
+Both of these came down to Haskell not being able to figure out parametrically polymorphic type arguments and this seemed perfectly reasonable to me. I imagine any language would have complained similarly. That said, figuring out the syntaxes to force Haskell to figure out what I mean was like pulling teeth initially and I nearly table-flipped my computer out the living room window at least twice.
+
+Type signatures of this variety usually come in the form of `f :: m a` where _something_ in the calling context has to heavily signal to the compiler what `m a` ought to be, but the calling context is _dependent_ on what `m a` _actually are_ and thus the compiler fails. The trick that I found worked for me was to indicate the type directly via this syntax, as here `(f :: Compiler String)` so that the compiler knows to resolve `f` as `Compiler String` because that's what I mean it to be, and it will fail if the calling location expects differently.
 
 ### CSS is still like the Family Guy meme
 
@@ -106,10 +117,23 @@ All of these features gave me a rather roundabout way of satisfying some of the 
 
 I hadn't touched CSS since probably 2013, which I think is about 8 years. It feels the same, with a few upgrades that are in very much the same vein as the old stuff. For as frustrated as I found myself still being with it, I am happy with how the site looks considering that I didn't particularly know what I was doing.
 
-Despite feeling as though I was fumbling about, I was so proud to have figured out how to style my site in such a way that looked great on both desktop and mobile, scaling across multiple resolutions and feeling that I wasn't compromising on aesthetics or functionality. Try looking at this or other pages from desktop or phone, and try especially comparing landscape vs. portrait! 
+Despite feeling as though I was fumbling about, I was so proud to have figured out how to style my site in such a way that looked great on both desktop and mobile, scaling across multiple resolutions and feeling that I wasn't compromising on aesthetics or functionality. Try looking at this or other pages from desktop or phone, and try especially comparing landscape vs. portrait!
 
 I was utterly thrilled to find that all major browsers' dev tools had greatly matured, had even become on-par with each other, and I was able to view my site from various resolutions and make changes at a dizzying pace. I'm incredibly impressed and very happy with how enabling the tools are.
 
-### I did not find myself fighting functional programming
+### I did not fight functional programming like I expected, I rather found it invaluable
 
-I don't get what the fuss is about. Everything I needed help with was googleable, like everything else in tech. Y'all are primadonnas.
+I don't get what the negative fuss about functional programming is. Everything I needed help with was googleable, like everything else in tech. I rather enjoyed using Haskell for what was a pretty boring problem solvable by any programming language, and on the whole I'm happy with my decision to use it. Learning functional programming benefits from a palate cleanser in order to fully grok, and I gave it an earnest shot and found some valuable tidbits that I imagine will find their ways back into how I write code elsewhere:
+
+* Laziness is _wonderful_ because I don't have to perform acrobatics to suspend logic for running later. My code is simpler for being able to use it, and my code more closely followed intuition than an alien, prescriptive execution plan.
+* Abstract data types are the best way of implementing closed polymorphism that I've found thus far, and enums in object oriented languages are close enough to simulate them effectively in those languages.
+* Type classes are the best way of implementing open polymorphism that I've found thus far, and interfaces in object oriented languages are close enough to simulate them effectively in those languages.
+* I did not for one moment miss inheritance or class-based polymorphism. They're a rather brittle way of implementing polymorphism. I wager I could even write decent Java without them, and I have actually been doing this for some time already in other languages.
+* Immutability makes reasoning about data flow and change of state across an application so, so easy and I will leverage this everywhere I reasonably can.
+* Pattern matching and branching conditionally based on the _shape_ of arguments is astoundingly empowering as it elevates data into a first-class position within API design. Until recently, I can't think of any C syntax-inspired language that took advantage of this concept and now that this is changing it most certainly will have an enormous economic impact as this will have an enabling effect in how we write our applications. I wish this was something that could be measured more concretely, but I'm happy even if it's just a convenience to have.
+* This is perhaps my most unexpected takeaway: effect types make very clear that _here there be dragons_. Those dragons such as:
+  * _Changing the world_ when you launch a rocket with `IO`
+  * _Nondeterminism_ when sometimes you don't know how many you get back with `[a]`
+  * _Absence_ when sometimes you don't get nothing back with `Maybe`
+  * _Wrong_ when sometimes it's not right with `Either`
+  * Or any other _"nope"_ modes of execution

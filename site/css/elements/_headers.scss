@@ -7,11 +7,10 @@ h1, h2, h3 {
   color: $color-emphasize;
   font-family: $header-font-family;
   a {
-    color: inherit;
-    text-decoration: none;
-    &:hover {
-      color: $color-hyperlink;
-    }
+    text-decoration: underline;
+  }
+  em {
+    text-decoration: underline;
   }
 }
 
