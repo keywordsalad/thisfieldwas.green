@@ -1,8 +1,8 @@
 ---
 title: Redoing My Website With Haskell and Hakyll
 author: Logan McGrath
-date: 2021-12-03T05:58:58-08:00
-published: 2021-12-03T05:58:58-08:00
+date: 2021-12-05T08:08:32-08:00
+published: 2021-12-05T08:08:32-08:00
 comments: false
 tags: Hakyll, Haskell
 layout: post
@@ -64,15 +64,15 @@ I kept a small scratch list of things I "knew" would happen but didn't "expect":
 * CSS is still like the Family Guy meme
 * I did not fight functional programming like I expected, I rather found it invaluable
 
-So there's some weird in that list. Let me expand on some more impactful subjects in detail.
+Let me expand on these items.
 
 ### Haskell compiles really slow, like _really_ slow
 
-Hakyll depends on the [pandoc](https://hackage.haskell.org/package/pandoc) library for its document processing. It's very large, and for my particular use case provides way more functionality than my website will ever need. I'm only leveraging code highlighting, HTML, and Markdown processing but pandoc (which can be thought of as a pan-document processing utility) can process pretty much everything under the sun and transform it all this-way and that-. It takes something like 40 minutes to compile clean on my 2019 MacBook Pro.
+Hakyll depends on the [pandoc](https://hackage.haskell.org/package/pandoc) library for its document processing. It's very large, and for my particular use case provides way more functionality than my website will ever need. I'm only leveraging code highlighting, HTML, and Markdown processing but pandoc (which can be thought of as a pan-document processing utility) can process pretty much everything under the sun and transform it all this-way and that-. It takes something like 40 minutes to clean-compile on my 2019 MacBook Pro.
 
 ### Compiled languages are supposed to be more productive but they don't _feel_ that way
 
-With compiled dependencies, my site takes about two minutes to compile clean just the executable. It's at about the upper limit of what I would consider acceptable. Nothing made me feel more slow however than changing a widely dependend-on source file and then waiting two minutes for the binary to rebuild.
+With compiled dependencies, my site takes about two minutes to clean-compile just the executable. It's at about the upper limit of what I would consider acceptable. Nothing made me feel more slow however than changing a widely depended-on source file and then waiting two minutes for the binary to rebuild.
 
 I never had to worry about a type error at runtime, but I did miss the quick turnaround I had with my Ruby-based site generator. I can't say whether I was faster or slower in fact, as I wasn't dealing with a whole class of problems related to typos alone, but it sure didn't feel like I was more productive.
 
@@ -125,11 +125,11 @@ I was utterly thrilled to find that all major browsers' dev tools had greatly ma
 
 I don't get what the negative fuss about functional programming is. Everything I needed help with was googleable, like everything else in tech. I rather enjoyed using Haskell for what was a pretty boring problem solvable by any programming language, and on the whole I'm happy with my decision to use it. Learning functional programming benefits from a palate cleanser in order to fully grok, and I gave it an earnest shot and found some valuable tidbits that I imagine will find their ways back into how I write code elsewhere:
 
-* Laziness is _wonderful_ because I don't have to perform acrobatics to suspend logic for running later. My code is simpler for being able to use it, and my code more closely followed intuition than an alien, prescriptive execution plan.
+* Laziness is _wonderful_ because I don't have to perform acrobatics to suspend logic for running later. My code is simpler for being able to use it, and my code more closely-followed intuition than an alien, prescriptive execution plan.
 * Abstract data types are the best way of implementing closed polymorphism that I've found thus far, and enums in object oriented languages are close enough to simulate them effectively in those languages.
 * Type classes are the best way of implementing open polymorphism that I've found thus far, and interfaces in object oriented languages are close enough to simulate them effectively in those languages.
 * I did not for one moment miss inheritance or class-based polymorphism. They're a rather brittle way of implementing polymorphism. I wager I could even write decent Java without them, and I have actually been doing this for some time already in other languages.
-* Immutability makes reasoning about data flow and change of state across an application so, so easy and I will leverage this everywhere I reasonably can.
+* Immutability makes reasoning about data flow and change of state across an application so easy and I will leverage this everywhere I reasonably can.
 * Pattern matching and branching conditionally based on the _shape_ of arguments is astoundingly empowering as it elevates data into a first-class position within API design. Until recently, I can't think of any C syntax-inspired language that took advantage of this concept and now that this is changing it most certainly will have an enormous economic impact as this will have an enabling effect in how we write our applications. I wish this was something that could be measured more concretely, but I'm happy even if it's just a convenience to have.
 * This is perhaps my most unexpected takeaway: effect types make very clear that _here there be dragons_. Those dragons such as:
   * _Changing the world_ when you launch a rocket with `IO`
@@ -137,3 +137,7 @@ I don't get what the negative fuss about functional programming is. Everything I
   * _Absence_ when sometimes you don't get nothing back with `Maybe`
   * _Wrong_ when sometimes it's not right with `Either`
   * Or any other _"nope"_ modes of execution
+
+## I rather like Hakyll and Haskell!
+
+I'm really happy with Hakyll! I'm also really happy with Haskell. My website has taken some investment to reach a point where I'm pleased with the output, but I feel it was worth the up-front effort and I've come out of the experience with some good takeaways already.
