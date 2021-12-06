@@ -18,7 +18,7 @@ $color-green: darkgreen;
 $color-text: darkslategray;
 $color-text-dark: color.adjust($color-green, $lightness: 1%);
 $color-text-light: slategray;
-$color-emphasize: indianred;
+$color-emphasize: firebrick;
 $color-highlight: gold;
 $color-hover: yellow;
 $color-aside: color.adjust(honeydew, $hue: -10%, $saturation: -50%, $lightness: -3%);
@@ -43,7 +43,7 @@ $border-thin: $border-thin-width $border-style;
 
 $content-max-width: 65rem;
 
-$code-font-family: "Andale Mono", Monaco, "Courier New", monospace;
+$code-font-family: monospace;
 $code-font-size: 0.85rem;
 $code-color: indianred;
 $code-color-hyperlink: $color-hyperlink;
