@@ -8,12 +8,16 @@
   font-size: $text-font-size-small;
 }
 
-.post-tags {
+.post-categories, .post-tags {
   font-size: $text-font-size-small;
-  margin-top: 0.25rem;
+  margin: 0.25rem 0;
   a {
     color: #a33;
   }
+}
+
+.post-categories {
+  font-style: italic;
 }
 
 .teaser-list {

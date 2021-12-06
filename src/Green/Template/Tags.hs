@@ -17,17 +17,23 @@ makeTagId = Hakyll.fromCapture "blog/tags/*.html"
 tagsField :: String -> Context a
 tagsField key = field key $ lift . getTags . itemIdentifier
 
-tagLinksField :: String -> Context a
-tagLinksField key = field key f
+tagLinksFieldWith :: String -> (Identifier -> Compiler [String]) -> Context a
+tagLinksFieldWith key f = field key f'
   where
-    f item = lift do
-      tags <- getTags $ itemIdentifier item
+    f' item = lift do
+      tags <- f $ itemIdentifier item
       links <- mapM makeLink' tags
       return $ intercalate ", " links
     makeLink' tag =
       getRoute (makeTagId tag) >>= \case
-        Just url -> return $ "<a href=\"/" ++ url ++ "\">" ++ tag ++ "</a>"
-        Nothing -> return tag
+        Just url -> return $ "<a class=\"tag\" href=\"/" ++ url ++ "\">" ++ tag ++ "</a>"
+        Nothing -> return $ "<span class=\"tag\">" ++ tag ++ "</span>"
+
+tagLinksField :: String -> Context a
+tagLinksField key = tagLinksFieldWith key getTags
+
+categoryLinksField :: String -> Context a
+categoryLinksField key = tagLinksFieldWith key getCategory
 
 makeCategoryId :: String -> Identifier
 makeCategoryId = Hakyll.fromCapture "blog/categories/*.html"

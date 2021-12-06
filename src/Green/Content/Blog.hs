@@ -140,7 +140,8 @@ drafts context = do
 
 postContext :: Context String
 postContext =
-  tagLinksField "tagLinks"
+  categoryLinksField "categoryLinks"
+    <> tagLinksField "tagLinks"
     <> postHeaderField "postHeader"
 
 recentPostsContext :: Compiler (Context String)

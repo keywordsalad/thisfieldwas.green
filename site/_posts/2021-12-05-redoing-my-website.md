@@ -1,5 +1,5 @@
 ---
-title: Redoing My Website With Haskell and Hakyll
+title: Redoing my website with Haskell and Hakyll
 author: Logan McGrath
 date: 2021-12-05T08:08:32-08:00
 published: 2021-12-05T08:08:32-08:00
@@ -18,7 +18,7 @@ My website prior to 2021 was authored using Octopress or Jekyll. Truthfully I do
 
 Sitting down, I tried to size up the amount of work I was in for. It looked like Jekyll was no longer maintained, and I had already known for some time that Octopress wasn't maintained either. Additionally, I had hopped a few computers since the last time I actively worked on my site so I did not have the old software handy. This work was starting to look like quite the yak shave and a fair amount of work to get some software running that I would likely not want to have running for very long. I don't mind a yak shave, however, so I decided to choose a new static site generator.
 
-## Wants In a Static Site Generator
+## Wants in a static site generator
 
 * Support for arbitrary static pages written in either Markdown or HTML
 * Sass support
@@ -30,19 +30,19 @@ Sitting down, I tried to size up the amount of work I was in for. It looked like
 
 Really any static site generator could meet these, but I do like a yak shave. [Hakyll](https://jaspervdj.be/hakyll/) in this regard seemed like a good fit.
 
-## Why Hakyll, Specifically?
+## Why Hakyll, specifically?
 
 Briefly, let me introduce Hakyll as I understand it: Hakyll is a Jekyll-like or -inspired static site generator that provides just enough tools to put together a website. Not to knock it, of course, in reality Hakyll is very lean but provides plenty of building blocks to deliver a no-frills blog.
 
 Naturally the primary value proposition of Hakyll for me was the opportunity to use Haskell for a project that wasn't entirely trivial. A good yak shave, if you will!
 
-## How Hakyll Accomplishes What I Need
+## How Hakyll accomplishes what I need
 
-### Inputs and Outputs
+### Inputs and outputs
 
 Hakyll roughly models a website as a series of transformations between inputs and outputs using the `Rules` monad. Rules are initialized by matching file paths by name or patterns as inputs, `Route`ing is specified for the output, and a transformation is applied by means of the `Compiler` monad.
 
-### Turning One Thing Into Another
+### Turning one thing into another
 
 Compilers are cool, they're where all the magic happens! Through compilers Hakyll is able to take any input format, usually Markdown or HTML, and output usually proper HTML for viewing in a browser. Hakyll out-of-the-box supports multiple input and output formats, and I suspect that in addition to a plain-old technical blog I could also write a really large textbook source in Latex and output a PDF if I really wanted.
 
@@ -50,7 +50,7 @@ My sense is that compilers are Hakyll's primary extension point, as I leaned on 
 
 Hakyll very smartly tracks dependencies between each compiled artifact and, like a good modern software, only compiles artifacts when it detects changes. For example, this allows for precompiling templates early in the build pipeline and allowing multiple dependants downstream use the same built artifact.
 
-## So What Happened?
+## So what happened?
 
 So I did in fact redo my website with Haskell and Hakyll!
 
@@ -76,13 +76,13 @@ With compiled dependencies, my site takes about two minutes to clean-compile jus
 
 I never had to worry about a type error at runtime, but I did miss the quick turnaround I had with my Ruby-based site generator. I can't say whether I was faster or slower in fact, as I wasn't dealing with a whole class of problems related to typos alone, but it sure didn't feel like I was more productive.
 
-### Just using HTML is a tall order, aka. Transformation Telephone
+### Just using HTML is a tall order, aka. _Transformation Telephone_
 
 Pandoc loses some data fidelity as it transforms markup between formats. I was trying to use HTML5 semantic tags (`<aside>`, `<figure>`, and friends) as I updated my existing posts and found out that pandoc would process the HTML in the Markdown source and remove the tags but pass the contents through. Digging through pandoc's source code I discovered that there is an intermediate representation for all documents that does not itself have the fidelity necessary to retain whether the contents of those tags _are those tags_ so I didn't feel that I could affect a pull request without a very large amount of work whose value did not appear to serve only my own ends.
 
 ### Templating is inexplicably difficult
 
-Hakyll does not have a good template system. I spent some months on and off writing my own system on top of Hakyll compilers to provide the following capabilities that weren't present by default or just weren't very good out of the box:
+Hakyll does not have a good template system. I spent some months on and off when I could squeeze a little time out after work writing my own system on top of Hakyll compilers to provide the following capabilities that weren't present by default or just weren't very good out of the box:
 
 * Better contexts to retrieve data from compiled items in scope
 * Dotted field accessors along contexts
