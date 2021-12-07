@@ -106,3 +106,12 @@ code.sourceCode {
     }
   }
 }
+
+.nowrap {
+  overflow-x: auto;
+
+  code > span {
+    white-space: pre;
+    word-wrap: normal;
+  }
+}

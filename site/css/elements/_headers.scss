@@ -1,6 +1,6 @@
 @import "containers";
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   @include block;
   line-height: 1.2;
   padding: 0;
@@ -20,13 +20,17 @@ section h1 {
 }
 
 h1 {
-  font-size: $text-font-size * 1.5 * $header-font-fudge-factor;
+  font-size: $text-font-size * 1.5;
 }
 h2 {
-  font-size: $text-font-size * 1.25 * $header-font-fudge-factor;
+  font-size: $text-font-size * 1.25;
   font-style: italic;
 }
 h3 {
-  font-size: $text-font-size * $header-font-fudge-factor;
+  font-size: $text-font-size * 1.125;
+  font-style: italic;
+}
+h4 {
+  font-size: $text-font-size;
   font-style: italic;
 }
