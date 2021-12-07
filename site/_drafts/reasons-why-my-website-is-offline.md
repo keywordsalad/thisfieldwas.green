@@ -7,7 +7,7 @@ tags: self host, configuration management
 layout: post
 ---
 
-My website is hosted from a 2007 HP Pavilion tower that my best friend, `[REDACTED]`, a privacy buff, found next to the garbage chute at his condo building. It must have been someone’s gaming rig in its prior life as it had a decent graphics card in it and 8gb of RAM. Its demise appeared to be an upgrade to Windows 10, as upon boot the login screen was so unresponsive that I could barely get the mouse to register movement and indicate for the computer to shut down again.
+My website is hosted from a 2007 HP Pavilion tower that my best friend, `[REDACTED]`, a privacy buff, found next to the garbage chute at his condo building. It must have been someone’s gaming rig in its prior life as it had a decent graphics card in it and `8GB` of RAM. Its demise appeared to be an upgrade to Windows 10, as upon boot the login screen was so unresponsive that I could barely get the mouse to register movement and indicate for the computer to shut down again.
 
 Per recommendation by `[REDACTED]`, I breathed new life into this computer with an Arch Linux install. I began a project for myself: to see how many of my third party services I could host on my own.
 
@@ -27,18 +27,18 @@ The computer sat in many pieces in my living room for about a month as I removed
 
 After I arranged the disks within and successfully had an Arch installation that could be bootstrapped in a repeatable manner, I closed up the case and moved the computer into the bedroom closet where I could plug it directly into the router.
 
-I spent a good number of days iterating on this computer with an [Ansible playbook](https://bitsof.thisfieldwas.green/keywordsalad/ansibled/src/commit/2f8b5c99c51adeb2226d2e9e51cead6766448559/servers.yml#L1-L23) to get the configuration just right. I have the drive array set up so that if I nuke the computer then the array will be rebuilt and re-encrypt the drives, though the data will be lost. My goal with this was to be able to take a second computer, because this one will at some point cease to work, and be able to spin the new computer up with the same configuration before plugging the drive array into it. Configuration management is Ansible's primary domain, it does this very well, and I now use it for my current three Linux-based systems. I have very much nuked and enjoyed rebuilding my Arch Linux-powered _thonkpad_ with just a few keystrokes several times now, and I manage all changes to it through its playbook.
+I spent a good number of days iterating on this computer with an [Ansible playbook](https://bitsof.thisfieldwas.green/keywordsalad/ansibled/src/commit/2f8b5c99c51adeb2226d2e9e51cead6766448559/servers.yml#L1-L23) to get the configuration just right. The drive array is set up so that if I nuke the computer then the array will be rebuilt and the drives re-encrypted, though the data will be lost if this happens. My goal with this was to be able to take a second computer, because this one will at some point cease to work, and be able to spin the new computer up with the same configuration before plugging the drive array into it. Configuration management is Ansible's primary domain, it does this very well, and I now use it for my current three Linux-based systems. I have very much nuked and enjoyed rebuilding my Arch Linux-powered _thonkpad_ with just a few keystrokes several times now, and I manage all changes to it through its associated playbook.
 
 ## Logistics
 
 The closet computer now hosts a small set of services:
 
-* My website uses `nginx`, which also terminates `ssl`.
+* My website using `nginx`, which also terminates `ssl`.
 * My source code using [`gitea`](https://gitea.io/).
-* A big `16TB` of usable space, _just a bunch of disks_ array, redundancy provided by [`snapraid`](https://www.snapraid.it/), and unioned with [`mergerfs`](https://github.com/trapexit/mergerfs). Functionally it looks like one big fat disk and it's very nice to use.
+* A big, _just a bunch of disks_ arrray providing `16TB` of usable storage, with redundancy provided by [`snapraid`](https://www.snapraid.it/), and unioned with [`mergerfs`](https://github.com/trapexit/mergerfs). Functionally it looks like one big fat disk and it's very nice to use.
 * `pihole`... I thought this would mean less ads, but it's mostly been more headaches.
 
-I’m using docker containers for `gitea` and `postgres` (which supports `gitea`), and `nginx` routes everything from the web either to static `html` or to `gitea`.
+I’m using docker containers for `gitea` and `postgres` (which supports `gitea`). `nginx` runs natively and provides routing for each domain I have configured for it.
 
 I mentioned above that this computer sits in the closet. I refer to this computer at home simply as _the closet computer_. This location comes with some problems, however. For example the closet does not have a dedicated power outlet and I have to run an extension cable from an outlet in the middle of the room and under the bed.
 
@@ -52,28 +52,53 @@ Here is a short list of reasons that my website has been offline:
 * My husband pushed a box of shoes under the bed and pushed the extension cable out of its plug.
 * Instead of unplugging the router itself to turn it off and then on again, I flipped the switch on the power strip and forgot to turn the closet computer back on.
 * I can’t get into the `bios` to configure the closet computer to power back on when power returns.
-* The computer came up before the router and `autossh` stops trying to open the tunnels to the outside network after a period of time because systemd being what it is simply gives up.
+* The computer came up before the router and `autossh` stops trying to open the tunnels to the outside network after a period of time because `systemd` flakes.
 * The `pihole` service seems to not be working after powering on and my router refuses to route any traffic whatsoever. Not even IP addresses!
 * Hubris.
 
-I don’t have a static IP. My ISP’s network infrastructure simply doesn’t allow for it. To get around this, I had to swallow my pride and purchase a cloud server from [`linode`](https://linode.com), whose IP is pointed to by all of my domains. I use `autossh` to maintain `ssh` tunnels for ports `22`, `80`, and `443` on the closet computer into which an `nginx` streaming server on the `linode` forwards traffic coming in on the same ports. It’s ok that I’m using a cloud server for this, I tell myself, because none of my data is stored on it.
+### A hosting solution held together by glue and popsicle sticks
 
-If the `ssh` tunnels aren’t up, the sites can’t be served and I can’t even get an error page out. It’s really kinda crap like that. Being what it is, `systemd` on the closet computer will stop `autossh` from retrying connections to the `linode` after a certain period and this is a major problem if there’s a hiccup in the home internet connection. Sometimes my internet is out for five minutes, but that’s a tradeoff made when using a cheaper, locally-based ISP over Comcast's cartoon villain bundled contracts.
+I don’t have a static IP. My ISP’s network infrastructure simply doesn’t allow for it, as it is based on a mesh of wireless signal propagated between antennas installed on top of each house using their service. To get around this, I had to swallow my pride and purchase a cloud server from [`linode`](https://linode.com), I call this my bastion server, and I configured my domains to point to its IP address.
 
-I absolutely need to use something other than `systemd` to manage my `ssh` tunnels as it hasn’t been reliable _at all_ and probably one of the bigger points of failure because it cascades after any failures the router experiences.
+With the bastion server as a static anchor that my closet computer could reach out to, I could then enable my website to come out of the closet:
 
-The closet receives too much human traffic for the closet computer or really any hardware to be held there. We live in a century craftsman whose modern infrastructure has been monkey-patched together and I conveniently piggybacked on existing connections made by the previous homeowners without putting thought into any consequences therein. Now we have a closet acting as a server cabinet instead of a closet. We are of course using it as both, with frequent access throughout the day and cables running everywhere as if a panicked octopus were dropped on the floor and then frozen in place.
+* I use `autossh` with an unprivileged user to maintain `ssh` tunnels that end at public ports `22`, `80`, and `443` on the closet computer.
+* These `ssh` tunnels begin at the bastion, privately bound to its `127.0.0.1` ports `10022`, `10080`, and `10443`.
+* An `nginx` streaming server on the bastion is configured to pass all traffic from the bastion's public ports `22`, `80`, and `443` to the `127.0.0.1` ports `10022`, `10080`, and `10443`.
+* As the `ssh` tunnels simply pass bits from point `A` to point `B`, to an outside observer it's as if my website is coming from the bastion server, when in fact it's coming out of the closet.
+
+**It basically looks like this:**
+
+```
+the world-|    |-bastion-----------------------|     |-closet-------------|
+-------------> nginx --stream--> ssh tunnel -------> all my stuff
+               *:22              127.0.0.1:10022     *:22
+               *:80              127.0.0.1:10080     *:80
+               *:443             127.0.0.1:10443     *:443
+```
+
+It’s ok that I’m using a cloud server for this, I tell myself, because none of my data is stored on it. But also, I think I pulled off something kinda cool.
+
+This is a really fragile architecture, however. If the `ssh` tunnels aren’t up, the sites can’t be served and I can’t even get an error page out as there doesn't seem to be a way to query for whether the streaming server is working. It’s really kinda crap like that. Being what it is, `systemd` on the closet computer will stop `autossh` from retrying connections to the bastion after a certain period and this is a major problem if there’s a hiccup in the home internet connection. Sometimes my internet is out for five minutes, but that’s a tradeoff made when using a cheaper, locally-based ISP over Comcast's cartoon villain bundled contracts.
+
+At a minimum I need to use something other than `systemd` to manage my `ssh` tunnels as it hasn’t been reliable _at all_ and probably one of the bigger points of failure because it cascades with any failures the router experiences.
+
+Physically the closet receives too much human traffic for the closet computer or really any hardware to be held there. We live in a century craftsman whose modern infrastructure has been monkey-patched together and I conveniently piggybacked on existing connections made by the previous homeowners without putting thought into any consequences therein. Now we have a closet acting as a server cabinet instead of a closet. We are of course using it as both, with frequent access throughout the day and cables running everywhere as if a panicked octopus were dropped on the floor and frozen in place.
 
 ## Duct tape and rainbows
 
 I’ve had a lot of problems hosting my website and source code from my closet computer in terms of uptime. Mostly related to tripping over the power cable, though in other ways the setup isn’t resilient and I still need to do some work to improve how it performs. But it’s been a really rewarding experience nonetheless. I’ve been able to work in a part of tech that I use all the time but have never myself had to engineer or maintain.
 
-Retaking my source code and hosting my website myself has felt very empowering, as if I’ve also reclaimed a little piece of the internet. For that alone I want to see what more I can self host. As a whole the internet has become clustered around a lot of centralizing services, and I pine for the days when everyone and their dog had their own small, weird websites and frequented a handful of small, niche forums with just enough users to be interesting. Now there's Facebook. GitHub. Google... Name a _thing_, and there's effectively a single company that one goes to for that _thing_, and it's regressed towards the mean and mediocre.
+Retaking my source code and hosting my website myself has felt very empowering, as if I’ve also reclaimed a little piece of the internet. For that alone I want to see what more I can self host. As a whole the internet has become clustered around a lot of centralizing services, and I pine for the days when everyone and their dog had their own small, weird websites and frequented a handful of small, niche forums with just enough users to be interesting. Now there's Facebook. GitHub. Google... Name a _thing_, and there's effectively a single company that one goes to for that _thing_, and it's regressed towards the mean and mediocre. And I can't tell what is and isn't an ad.
 
-Despite this disdain I'm expressing, third parties are invaluable for uptime. I took this for granted rather severely, and it’s making me rethink what total cost actually looks like, not only in terms of dollars and _rights_ but even simple booleans such as _will the hiring manager able to see that writeup I referred her to?_ I would absolutely benefit from hosting my website from my `linode`, perhaps after I reread the service agreements to allay my confounding mind.
+{{img id: "closet-computer-in-context",
+      title: "The closet computer, in context.",
+      src: "/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024.png"}}
 
-I still use GitHub professionally and for open source projects hosted there. I may see the light one day and realize that being a principled curmudgeon means that I’m only that. Obviously there exists a sort of cognitive dissonance in regards to contributing to open source works in the context of labor. Regardless, I have given myself a learning opportunity and thus I don’t use GitHub as a consumer for most things now. I suppose that was my goal after all.
+Despite this disdain I'm expressing, third party services are invaluable for uptime. I took this for granted rather severely, and it’s making me rethink what total cost actually looks like, not only in terms of dollars and nebulous ideals but even simple booleans such as _will the manager able to see that writeup I referred her to?_ I would absolutely benefit from hosting my website from my bastion instead, perhaps after I reread `linode`'s service agreements to allay my confounding mind.
 
-I might even give Copilot a go soon. I'm reading some good things about how it cuts through boilerplate like a hot knife through butter. Reviews such as this have helped me conceptualize how it might fit into my own workflow especially now that I've had time to step back. I would be over the moon to have an intelligent assist for the boring parts of my job. I suppose that was GitHub's goal, too.
+I still use GitHub professionally and for open source projects hosted there. I realize that being a principled curmudgeon sometimes means that I’m only that. Obviously there also exists a sort of cognitive dissonance in regards to contributing to open source works in the context of labor. Regardless, I have given myself a learning opportunity and thus I don’t use GitHub as a consumer for most things now. I suppose that was my goal after all.
+
+I might give Copilot a go soon. I'm reading some good things about how it cuts through boilerplate like a hot knife through butter. Reviews such as this have helped me conceptualize how it might fit into my own workflow especially now that I've had time to step back. I would be over the moon to have an intelligent assist for the boring parts of my job. I suppose that was GitHub's goal, too.
 
 On the lighter side, being professionally out and telling people that my website is coming out of the closet has given me a certain subversive glee that I never realized I needed. It's a great lead into how the computer got there.

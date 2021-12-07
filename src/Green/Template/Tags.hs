@@ -12,7 +12,7 @@ import Hakyll (MonadMetadata, Tags, buildTags, getTags, renderTagCloudWith)
 import qualified Hakyll
 
 makeTagId :: String -> Identifier
-makeTagId = Hakyll.fromCapture "blog/tags/*.html"
+makeTagId = Hakyll.fromCapture "tags/*.html"
 
 tagsField :: String -> Context a
 tagsField key = field key $ lift . getTags . itemIdentifier
@@ -36,7 +36,7 @@ categoryLinksField :: String -> Context a
 categoryLinksField key = tagLinksFieldWith key getCategory
 
 makeCategoryId :: String -> Identifier
-makeCategoryId = Hakyll.fromCapture "blog/categories/*.html"
+makeCategoryId = Hakyll.fromCapture "categories/*.html"
 
 categoriesField :: String -> Context a
 categoriesField key = field key $ lift . getCategory . itemIdentifier

@@ -1,3 +1,17 @@
+@mixin aside($side) {
+  margin: 1rem 0;
+  @include media('>=tablet') {
+    float: $side;
+    @if $side == 'right' {
+      margin-left: 2rem;
+      margin-right: 0;
+    } @else {
+      margin-right: 2rem;
+      margin-left: 0;
+    }
+  }
+}
+
 aside, figure {
   @include contain-floats;
   color: $color-text-dark;
@@ -23,19 +37,5 @@ aside, figure {
 
   figcaption {
     font-size: 1.1rem;
-  }
-}
-
-@mixin aside($side) {
-  margin: 1rem 0;
-  @include media('>=tablet') {
-    float: $side;
-    @if $side == 'right' {
-      margin-left: 2rem;
-      margin-right: 0;
-    } @else {
-      margin-right: 2rem;
-      margin-left: 0;
-    }
   }
 }

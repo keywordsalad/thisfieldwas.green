@@ -19,5 +19,7 @@ compileRedirect targetId = do
 brokenLinkTargetIds :: [(Identifier, Identifier)]
 brokenLinkTargetIds =
   bimap fromFilePath fromFilePath
-    <$> [ ("about-me/index.html", "index.html")
+    <$> [ ("about-me/index.html", "index.html"),
+          ("blog/drafts/reasons-why-my-website-is-offline/index.html", "_drafts/reasons-why-my-website-is-offline.md"),
+          ("blog/drafts/redoing-my-website/index.html", "_posts/2021-12-05-redoing-my-website.md")
         ]

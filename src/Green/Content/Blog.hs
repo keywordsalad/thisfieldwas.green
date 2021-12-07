@@ -129,7 +129,7 @@ drafts :: Context String -> Rules ()
 drafts context = do
   match "_drafts/**" do
     route $
-      subPrefixRoute "_drafts/" "blog/drafts/"
+      subPrefixRoute "_drafts/" "drafts/"
         `composeRoutes` dateRoute
         `composeRoutes` setExtension "html"
         `composeRoutes` indexRoute
