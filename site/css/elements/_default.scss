@@ -83,3 +83,13 @@ a {
 .youtube {
   text-align: center;
 }
+
+.footnotes {
+  font-size: 0.9rem;
+  color: $color-text-light;
+  border-top: $border-thin;
+
+  hr {
+    display: none;
+  }
+}
