@@ -1,25 +1,23 @@
 module Green.Content.BrokenLinks (brokenLinks) where
 
 import Green.Common
+import Hakyll (preprocess)
 
 brokenLinks :: Rules ()
-brokenLinks = foldl (>>) (return ()) $ fmap fixBrokenLink brokenLinkTargetIds
+brokenLinks = do
+  pairs <- preprocess $ mapM splitLine . lines =<< readFile "broken-links.cfg"
+  foldl (>>) (return ()) $ fmap createRedirect pairs
+  where
+    splitLine = go []
+    go acc (x : xs)
+      | x == '|' = return (reverse acc, xs)
+      | otherwise = go (x : acc) xs
+    go acc [] = fail $ "Could not split broken link config, got line " ++ show (reverse acc)
 
-fixBrokenLink :: (Identifier, Identifier) -> Rules ()
-fixBrokenLink (brokenLink, targetId) = do
-  create [brokenLink] do
+createRedirect :: (String, String) -> Rules ()
+createRedirect (brokenLink, target) =
+  create [fromFilePath brokenLink] do
     route idRoute
-    compile $ compileRedirect targetId
-
-compileRedirect :: Identifier -> Compiler (Item Redirect)
-compileRedirect targetId = do
-  r <- fromJust <$> getRoute targetId
-  makeItem $ Redirect (toUrl r)
-
-brokenLinkTargetIds :: [(Identifier, Identifier)]
-brokenLinkTargetIds =
-  bimap fromFilePath fromFilePath
-    <$> [ ("about-me/index.html", "index.html"),
-          ("blog/drafts/reasons-why-my-website-is-offline/index.html", "_drafts/reasons-why-my-website-is-offline.md"),
-          ("blog/drafts/redoing-my-website/index.html", "_posts/2021-12-05-redoing-my-website.md")
-        ]
+    compile do
+      r <- fromMaybe target <$> getRoute (fromFilePath target)
+      makeItem $ Redirect (toUrl r)

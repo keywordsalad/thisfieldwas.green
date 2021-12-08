@@ -16,5 +16,6 @@ homePage siteContext =
               <> teaserField "teaser" publishedPostsSnapshot
               <> siteContext
       getResourceBody
-        >>= pageCompiler context
+        >>= contentCompiler context
+        >>= layoutCompiler context
         >>= relativizeUrls

@@ -5,14 +5,13 @@ import Data.List (nub)
 import Green.Common
 import Green.Template
 
-pageCompiler :: Context String -> Item String -> Compiler (Item String)
-pageCompiler = pageCompilerWithSnapshots []
+contentCompiler :: Context String -> Item String -> Compiler (Item String)
+contentCompiler context = pandocCompiler <=< applyAsTemplate context
 
-pageCompilerWithSnapshots :: [String] -> Context String -> Item String -> Compiler (Item String)
-pageCompilerWithSnapshots snapshots context =
-  applyAsTemplate context
-    >=> compilePandoc
-    >=> (\x -> foldM (flip saveSnapshot) x snapshots')
-    >=> loadAndApplyTemplate (fromFilePath "_layouts/from-context.html") context
+layoutCompiler :: Context String -> Item String -> Compiler (Item String)
+layoutCompiler = loadAndApplyTemplate $ fromFilePath "_layouts/from-context.html"
+
+snapshotCompiler :: [String] -> Item String -> Compiler (Item String)
+snapshotCompiler snapshots item = foldM (flip saveSnapshot) item snapshots'
   where
     snapshots' = nub ("_content" : snapshots)

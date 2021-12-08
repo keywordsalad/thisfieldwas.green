@@ -15,7 +15,7 @@ import Green.Content.Page
 import Green.Content.Robot
 import Green.Content.Sitemap
 import Green.Content.Template
-import Green.Template.Custom
+import Green.Template.Custom.Context
 
 content :: SiteConfig -> Rules ()
 content config = do

@@ -68,6 +68,7 @@ import Hakyll
     idRoute,
     itemSetBody,
     load,
+    loadBody,
     loadSnapshot,
     loadSnapshotBody,
     lookupString,

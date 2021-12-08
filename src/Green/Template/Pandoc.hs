@@ -4,8 +4,8 @@ import Hakyll
 import System.FilePath
 import Text.Pandoc hiding (readers, writers)
 
-compilePandoc :: Item String -> Compiler (Item String)
-compilePandoc item@(Item id' _) = do
+pandocCompiler :: Item String -> Compiler (Item String)
+pandocCompiler item@(Item id' _) = do
   let ext = takeExtension $ toFilePath id'
   go ext
   where

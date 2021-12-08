@@ -11,9 +11,9 @@ import Green.Template.Source.Parser (parse)
 import Hakyll.Core.Compiler.Internal
 
 -- | Compiles an item as a template.
-templateCompiler :: Compiler (Item Template)
-templateCompiler =
-  cached "Green.Template.Compiler.templateCompiler" $
+getResourceTemplate :: Compiler (Item Template)
+getResourceTemplate =
+  cached "Green.Template.Compiler.getResourceTemplate" $
     getResourceBody
       >>= compileTemplateItem
       >>= makeItem

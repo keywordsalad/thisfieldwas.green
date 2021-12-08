@@ -14,10 +14,11 @@ customContext config = self
   where
     latestPostPatterns =
       fromFilePath
-        <$> [ "blog/index.html",
-              "blog/archives.html",
-              "blog/tags.html",
-              "blog/drafts.html"
+        <$> [ "blog.html",
+              "archives.html",
+              "categories.html",
+              "tags.html",
+              "drafts.html"
             ]
     latestPostUpdated (latestPost : _) = tplWithItem latestPost (unContext self "updated")
     latestPostUpdated _ = tplTried "latest post updated"

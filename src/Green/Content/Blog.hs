@@ -10,66 +10,28 @@ import Green.Common
 import Green.Compiler (loadExistingSnapshots)
 import Green.Route
 import Green.Template
-import Green.Template.Custom.Compiler (pageCompiler, pageCompilerWithSnapshots)
+import Green.Template.Custom
 import qualified Hakyll as H
 
 blog :: Context String -> Rules ()
 blog context = do
   categories <- buildCategories "_categories/**" makeCategoryId
-  categoriesIndex categories context
   tags <- buildTags "_posts/**" makeTagId
-  tagsIndex tags context
-  blogIndex categories tags context
 
-  archives context
-  draftArchives context
+  blogHome categories tags context
   posts context
+  archives context
+
+  categoriesPages categories context
+  tagesPages tags context
+
+  draftsIndex context
   drafts context
 
-categoriesIndex :: Tags -> Context String -> Rules ()
-categoriesIndex categories context = do
-  match "blog/tag.html" do
-    compile getResourceString
-  H.tagsRules categories \category pat -> do
+blogHome :: Tags -> Tags -> Context String -> Rules ()
+blogHome categories tags context =
+  match "blog.html" do
     route indexRoute
-    compile do
-      categoryPosts <- H.recentFirst =<< H.loadAll pat
-      let categoryContext =
-            constField "category" category
-              <> constField "title" ("Posts under \"" ++ category ++ "\"")
-              <> constField "posts" (itemListValue context categoryPosts)
-              <> constField "layout" ("page" :: String)
-              <> postContext
-              <> context
-      H.loadBody (fromFilePath "blog/tag.html")
-        >>= makeItem
-        >>= pageCompiler categoryContext
-        >>= relativizeUrls
-
-tagsIndex :: Tags -> Context String -> Rules ()
-tagsIndex tags context = do
-  match "blog/tag.html" do
-    compile getResourceString
-  H.tagsRules tags \tag pat -> do
-    route indexRoute
-    compile do
-      tagPosts <- H.recentFirst =<< H.loadAll pat
-      let tagsContext =
-            constField "tag" tag
-              <> constField "title" ("Posts tagged \"" ++ tag ++ "\"")
-              <> constField "posts" (itemListValue context tagPosts)
-              <> constField "layout" ("page" :: String)
-              <> postContext
-              <> context
-      H.loadBody (fromFilePath "blog/tag.html")
-        >>= makeItem
-        >>= pageCompiler tagsContext
-        >>= relativizeUrls
-
-blogIndex :: Tags -> Tags -> Context String -> Rules ()
-blogIndex categories tags context =
-  match "blog/index.html" do
-    route idRoute
     compile do
       categoryCloud <- renderTagCloud categories
       tagCloud <- renderTagCloud tags
@@ -81,12 +43,13 @@ blogIndex categories tags context =
               <> postContext
               <> context
       getResourceBody
-        >>= pageCompiler blogContext
+        >>= contentCompiler blogContext
+        >>= layoutCompiler blogContext
         >>= relativizeUrls
 
 archives :: Context String -> Rules ()
 archives context = do
-  match "blog/archives.html" do
+  match "archives.html" do
     route indexRoute
     compile do
       publishedPosts <- H.recentFirst =<< loadPublishedPosts
@@ -95,12 +58,13 @@ archives context = do
               <> postContext
               <> context
       getResourceBody
-        >>= pageCompiler archivesContext
+        >>= contentCompiler archivesContext
+        >>= layoutCompiler archivesContext
         >>= relativizeUrls
 
-draftArchives :: Context String -> Rules ()
-draftArchives context = do
-  match "blog/drafts.html" do
+draftsIndex :: Context String -> Rules ()
+draftsIndex context = do
+  match "drafts.html" do
     route indexRoute
     compile do
       draftPosts <- H.recentFirst =<< loadDraftPosts
@@ -109,7 +73,8 @@ draftArchives context = do
               <> postContext
               <> context
       getResourceBody
-        >>= pageCompiler draftsContext
+        >>= contentCompiler draftsContext
+        >>= layoutCompiler draftsContext
         >>= relativizeUrls
 
 posts :: Context String -> Rules ()
@@ -122,8 +87,12 @@ posts context = do
         `composeRoutes` indexRoute
     compile $
       getResourceBody
-        >>= pageCompilerWithSnapshots [publishedPostsSnapshot] (postContext <> context)
+        >>= contentCompiler postsContext
+        >>= snapshotCompiler [publishedPostsSnapshot]
+        >>= layoutCompiler postsContext
         >>= relativizeUrls
+  where
+    postsContext = postContext <> context
 
 drafts :: Context String -> Rules ()
 drafts context = do
@@ -135,7 +104,51 @@ drafts context = do
         `composeRoutes` indexRoute
     compile $
       getResourceBody
-        >>= pageCompilerWithSnapshots [draftPostsSnapshot] (postContext <> context)
+        >>= contentCompiler draftsContext
+        >>= snapshotCompiler [draftPostsSnapshot]
+        >>= layoutCompiler draftsContext
+        >>= relativizeUrls
+  where
+    draftsContext = postContext <> context
+
+categoriesPages :: Tags -> Context String -> Rules ()
+categoriesPages categories context =
+  H.tagsRules categories \category pat -> do
+    route indexRoute
+    compile do
+      categoryPosts <- H.recentFirst =<< H.loadAll pat
+      let categoryContext =
+            constField "category" category
+              <> constField "title" ("Posts under \"" ++ category ++ "\"")
+              <> constField "posts" (itemListValue context categoryPosts)
+              <> constField "layout" ("page" :: String)
+              <> postContext
+              <> context
+      dummy <- makeItem ""
+      template <- loadBody "_templates/posts-under-category.html"
+      applyTemplate template categoryContext dummy
+        >>= pandocCompiler
+        >>= layoutCompiler categoryContext
+        >>= relativizeUrls
+
+tagesPages :: Tags -> Context String -> Rules ()
+tagesPages tags context =
+  H.tagsRules tags \tag pat -> do
+    route indexRoute
+    compile do
+      tagPosts <- H.recentFirst =<< H.loadAll pat
+      let tagsContext =
+            constField "tag" tag
+              <> constField "title" ("Posts tagged \"" ++ tag ++ "\"")
+              <> constField "posts" (itemListValue context tagPosts)
+              <> constField "layout" ("page" :: String)
+              <> postContext
+              <> context
+      dummy <- makeItem ""
+      template <- loadBody "_templates/posts-under-tag.html"
+      applyTemplate template tagsContext dummy
+        >>= pandocCompiler
+        >>= layoutCompiler tagsContext
         >>= relativizeUrls
 
 postContext :: Context String

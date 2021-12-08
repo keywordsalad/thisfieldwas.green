@@ -10,7 +10,8 @@ pages context =
     route $ setExtension "html" `composeRoutes` indexRoute
     compile $
       getResourceBody
-        >>= pageCompiler context
+        >>= contentCompiler context
+        >>= layoutCompiler context
         >>= relativizeUrls
   where
     pageList =

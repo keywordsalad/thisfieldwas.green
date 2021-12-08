@@ -2,9 +2,13 @@ module Green.Content.Template (templates) where
 
 import Green.Common
 import Green.Template
+import Hakyll.Core.Identifier.Pattern ((.||.))
 
 templates :: Rules ()
 templates = do
-  match "_layouts/**" $ compile templateCompiler
-  match "_partials/**" $ compile templateCompiler
-  match "_templates/**" $ compile templateCompiler
+  let templatePattern =
+        "_layouts/**"
+          .||. "_partials/**"
+          .||. "_templates/**"
+  match templatePattern do
+    compile getResourceTemplate

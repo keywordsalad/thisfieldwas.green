@@ -28,14 +28,15 @@ sitemapContext siteContext = do
     pagePatterns =
       [ "index.html",
         "*.md",
-        "blog/index.html",
-        "blog/archives.html"
+        "blog.html",
+        "archives.html"
       ]
     latestPostPatterns =
       fromFilePath
-        <$> [ "blog/index.html",
-              "blog/archives.html",
-              "blog/tags.html"
+        <$> [ "blog.html",
+              "archives.html",
+              "categories.html",
+              "tags.html"
             ]
     latestPostUpdated (latestPost : _) = tplWithItem latestPost (unContext siteContext "updated")
     latestPostUpdated _ = tplTried "latest post updated"
