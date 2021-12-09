@@ -4,7 +4,7 @@ import Green.Common
 import Green.Template
 import Hakyll.Core.Identifier.Pattern ((.||.))
 
-templates :: Rules ()
+templates :: Rules Dependency
 templates = do
   let templatePattern =
         "_layouts/**"
@@ -12,3 +12,4 @@ templates = do
           .||. "_templates/**"
   match templatePattern do
     compile getResourceTemplate
+  makePatternDependency templatePattern

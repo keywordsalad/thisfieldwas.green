@@ -36,6 +36,7 @@ aside, figure {
   }
 
   figcaption {
+    @include block;
     font-size: 1.1rem;
   }
 }

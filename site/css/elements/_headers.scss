@@ -34,3 +34,11 @@ h4 {
   font-size: $text-font-size;
   font-style: italic;
 }
+
+* + h1, * + h2, * + h3, * + h4 {
+  margin-top: 1.2rem;
+}
+
+h1 + h2, h2 + h3, h3 + h4 {
+  margin-top: 1rem;
+}

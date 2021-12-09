@@ -26,8 +26,8 @@ content config = do
   scss config
   downloads
   codeDep <- code
-  rulesExtraDependencies [codeDep] do
-    templates
+  templateDep <- templates
+  rulesExtraDependencies [codeDep, templateDep] do
     blog context
     feed
     homePage context
