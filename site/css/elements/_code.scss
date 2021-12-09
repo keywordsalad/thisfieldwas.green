@@ -59,9 +59,14 @@ div.sourceCode, pre.sourceCode {
   padding: 0;
 }
 
+pre.sourceCode {
+  margin: 1rem 0;
+  padding: 0;
+}
+
 code.sourceCode {
   display: block;
-  margin: 1rem 0;
+  margin: 0;
   padding: 0;
   font-size: 0;
 
