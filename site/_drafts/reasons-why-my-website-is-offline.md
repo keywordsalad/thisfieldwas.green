@@ -11,23 +11,39 @@ My website is hosted from a 2007 HP Pavilion tower that my best friend, _`[REDAC
 
 <!--more-->
 
-`[REDACTED]` recommended to me that I breathe a new life into this computer using Arch Linux. Thus began my journey to self host my website.
+I previously complained to `[REDACTED]` about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by shear luck, and recommends that I breath new life into it using Arch Linux and to see if I can self host some of my own services.
 
 ## Tinfoil hat time!
 
-This sudden urge to self host is impulsed by the advent of [GitHub Copilot](https://copilot.github.com/). The concept of it sure spooks the hell out of me. Not the idea that my professional role has now become so fungible that I could be replaced by a machine, I feel that is inevitable regardless.
+This sudden urge to self host is impulsed by the advent of [GitHub Copilot](https://copilot.github.com/). The concept of it sure spooks the hell out of me. Not the idea that my professional role as a software engineer has now become so fungible that I could be replaced by a machine, I feel that is inevitable regardless, but that this event hastens us toward an economic singularity.
 
 ### My revulsion is more nuanced than replacement
 
-My use of GitHub, a long-standing freemium product, has been in the form of a paid subscription for their provate tier. I pay GitHub for this private tier so that my code remains under my control, and this code is hosted in this context as I am paid to develop it privately, or it is a personal project that I am prototyping. Despite this, if I make this code publicly available it feeds into Copilot without my express knowledge. This code is analyzed and transformed into data for which _corporations_ will be paying untold sums of money to _another, single corporation_ in order to manifest their technical means of production, _I assume_. In my blind acceptance of terms, I have willingly consented my passion projects, many contributions to open source, _my labor_, to subsidize the widening profit margins that power the visceral push of late stage capitalism's articulating proboscis as it lances another artery through which our collective value pulses.[^matt-taibbi] 
+My use of GitHub, a long-standing freemium product, has been in the form of a paid _Pro Plan_. I pay GitHub for this tier so that I can configure private-only access for repositories I choose, as I am paid to develop those codes, or because they are a personal project that I am prototyping.
 
-In a sense I am training my replacement. For free. Or at least in exchange for _"free hosting"_. At a less sleazy company I would be told that "Bill" is my inexpensive replacement and that for the next two months I will be training him, and then I would fuck off. However I would continue to be paid during the transition.
+Despite paying for a _Pro Plan_, if I make those codes publicly available, then they are fed into Copilot without my express consent or knowledge. These codes are then analyzed and transformed into data for which _corporations_ will be paying untold sums of money to _another, single corporation_ in order to manifest their technical means of production, _I assume_. This means that in order to gain a competitive edge, a company must use Copilot to out-produce a competitor, but pay GitHub in order to do so. This creates a concentration of wealth and with no clear distribution mechanism for it back into the lower rungs of the economic ladder.
 
-GitHub does not respect opensource software licenses when scanning public codebases to feed data into Copilot. I can't trust that they don't also scan private repositories as well, and the data derived from repositories is so, well, _derived_ that I don't see any realistic means of enforcing copyright law should anyone be able to prove that private repositories are in fact scanned.
+Personally, my passion projects, my many contributions to open source, every private repository that I accidentally made public that one time... in a phrase: _my labor_, has been consented to subsidize widening profit margins in GitHub's favor, and even to the favor of companies using Copilot. An articulation of late stage capitalism's twitching proboscis has lanced into another artery from which to siphon our collective value; our dessicated tissues will remain with no further need for a paycheck.
 
-I am very motivated to get as much of my stuff out of third party services as I can because to generalize based on GitHub, it's likely that no third party can be trusted with my data _even if they are already making money off of it_. I resolve to divest Apple and Google of my cloud data, GitHub of my source code, and `linode` of my miscellaneous. In this post I will focus roughly on how my website and source code are now hosted.
+### I guess my revulsion is still about replacement
 
-Because I complain to `[REDACTED]` about this GitHub Copilot thing, he offers to help me find a new option for hosting my data. Just a few days later he finds this computer next to the garbage chute and with much excitement calls me and gleefully announces, _“It turns on!”_ What luck!
+In a sense I am training my replacement. For free. Or at least in exchange for _"free hosting"_ that I'm also partially paying for. At a less sleazy company I would be told that "Bob" is my inexpensive replacement, that for next two months I will be training him, and that I will continue to be paid before I fuck off to another company where I will become paid again. This time, however, _I go to another company and "Bob" is already working there_.
+
+### Not all sunshine and rainbows in the cloud
+
+At this same time Apple announces they are [scanning everyone's photos](https://towardsdatascience.com/apples-neuralhash-how-it-works-and-ways-to-break-it-577d1edc9838). Don't worry, they aren't actually looking at what the photos are. They pinky promise.
+
+I pay Apple to store my photos in the cloud. I thought they were encrypted, right? So now they're scanning them _on my device_ because they can't look at them on the cloud, because they're encrypted. `wat`.
+
+### Bringing the cloud home
+
+I am very motivated to get as much of my stuff out of third party services as I can, because to generalize based on GitHub and Apple, it's likely that no third party can be trusted with my data _even if they are already making money off of it_. I resolve to divest Apple and Google of my cloud data, GitHub of my source code, and `linode` of my miscellaneous.
+
+**In this post I will focus roughly on how my website and source code are now hosted**
+
+Because I complain to `[REDACTED]` about this GitHub Copilot thing, he offers to help me find a new option for hosting my data. Just a few days later he finds this computer next to the garbage chute, and with much excitement he calls me and gleefully announces, _“It turns on!”_
+
+What luck!
 
 ## Keeping my data in the closet
 
@@ -131,7 +147,5 @@ I might give Copilot a go soon. I'm reading some good things about how it cuts t
 On the lighter side, being professionally out and telling people that my website is coming out of the closet gives me a certain subversive glee that I never realized I needed. It's a great lead into how the computer got there.
 
 For now, I host my source code at [bitsof.thisfieldwas.green](https://bitsof.thisfieldwas.green). My website source repository is directly accessible from [keywordsalad/thisfieldwas.green](https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green).
-
-[^matt-taibbi]: Matt Taibbi used similar language to describe Goldman Sachs in his famous Rolling Stones article [The Great American Bubble Machine](https://www.rollingstone.com/politics/politics-news/the-great-american-bubble-machine-195229/)
 
 [^tos]: There exists an episode of South Park where Kyle accepts the Apple iTunes user agreement [without reading it](https://www.imdb.com/title/tt1884035/). It's worth a watch but the writers apply a heavy-handed story telling device to get their point across. I liked it, but you may not.
