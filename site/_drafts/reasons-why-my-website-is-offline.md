@@ -9,9 +9,9 @@ layout: post
 
 My website is hosted from a 2007 HP Pavilion tower that my best friend, _`[REDACTED]`_, a privacy buff, found next to the garbage chute at his condo building. It appears to have been someone’s gaming rig in its prior life, as it has a decent graphics card in it and `8GB` of RAM. Its demise was likely an upgrade to Windows 10, as upon boot, the login screen was so unresponsive that I could barely get the mouse to register movement and indicate for the computer to shut down again.
 
-`[REDACTED]` recommended to me that I breathe a new life into this computer using Arch Linux. Thus began my journey to self host my website.
-
 <!--more-->
+
+`[REDACTED]` recommended to me that I breathe a new life into this computer using Arch Linux. Thus began my journey to self host my website.
 
 ## Tinfoil hat time!
 

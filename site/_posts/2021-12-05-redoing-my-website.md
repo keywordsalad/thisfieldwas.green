@@ -14,9 +14,9 @@ I'm picking up a COVID project: _Redoing my website!_
 
 My website prior to 2021 was authored using [`octopress`](http://octopress.org/) or [`jekyll`](https://jekyllrb.com/). Truthfully I don't remember which as I haven't touched my website in quite a few years. I want to update my homepage and I'm in a bind because I don't know how to produce a build after I make changes.
 
-Sitting down, I try to size up the amount of housekeeping present here. I can't quite tell what's going on with `jekyll`, and I know that `octopress` [hasn't been updated](http://octopress.org/2015/01/15/octopress-3.0-is-coming/) for a while. Additionally, I'm several computers removed in time since I last actively worked on my site, so I don't have the old software handy. This work is starting to look like quite the yak shave to get some software running that I would soon have to update. I don't mind a _good_ yak shave, however, so I'm going to find a new static site generator.
-
 <!--more-->
+
+Sitting down, I try to size up the amount of housekeeping present here. I can't quite tell what's going on with `jekyll`, and I know that `octopress` [hasn't been updated](http://octopress.org/2015/01/15/octopress-3.0-is-coming/) for a while. Additionally, I'm several computers removed in time since I last actively worked on my site, so I don't have the old software handy. This work is starting to look like quite the yak shave to get some software running that I would soon have to update. I don't mind a _good_ yak shave, however, so I'm going to find a new static site generator.
 
 ## Wants in a static site generator
 

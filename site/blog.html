@@ -2,13 +2,14 @@
 title: Keeping This Field Green
 bodyClass: blog
 layout: page
-changefreq: weekly
+changefreq: daily
 ---
 
 {{-#for latestPost}}
   <section class="latest-post">
     {{postHeader headerLevel: "h2", latestPost: True}}
     {{-teaser}}
+    <p class="read-more"><a href="{{url}}">Read more...</a></p>
   </section>
 {{-#end}}
 
