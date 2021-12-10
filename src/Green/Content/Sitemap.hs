@@ -2,24 +2,23 @@ module Green.Content.Sitemap (sitemap) where
 
 import Green.Common
 import Green.Compiler (loadExistingSnapshots)
-import Green.Config
 import Green.Content.Blog (loadPublishedPosts)
 import Green.Template
 import Hakyll (recentFirst)
 
-sitemap :: SiteConfig -> Context String -> Rules ()
-sitemap config siteContext =
+sitemap :: Context String -> Rules ()
+sitemap siteContext =
   match "sitemap.xml" do
     route idRoute
     compile do
-      context <- sitemapContext config siteContext
+      context <- sitemapContext siteContext
       getResourceBody
         >>= applyAsTemplate context
 
-sitemapContext :: SiteConfig -> Context String -> Compiler (Context String)
-sitemapContext config siteContext = do
+sitemapContext :: Context String -> Compiler (Context String)
+sitemapContext siteContext = do
   pages <- concat <$> mapM (`loadExistingSnapshots` "_content") pagePatterns
-  posts <- recentFirst =<< loadPublishedPosts config
+  posts <- recentFirst =<< loadPublishedPosts
   let context =
         forItemField "updated" latestPostPatterns (\_ -> latestPostUpdated posts)
           <> constField "pages" (itemListValue context (pages <> posts))

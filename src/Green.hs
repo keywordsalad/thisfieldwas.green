@@ -13,6 +13,9 @@ import System.Environment
 site :: IO ()
 site = do
   siteConfig <- loadSiteConfig
+  putStrLn $ replicate 80 '-'
+  print siteConfig
+  putStrLn $ replicate 80 '-'
   H.hakyllWith (siteConfig ^. siteHakyllConfiguration) (content siteConfig)
 
 author :: IO ()

@@ -85,6 +85,7 @@ import Hakyll
     toFilePath,
     toUrl,
     unsafeCompiler,
+    version,
     withErrorMessage,
     withItemBody,
   )
