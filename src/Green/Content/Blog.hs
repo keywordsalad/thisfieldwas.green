@@ -8,34 +8,36 @@ where
 
 import Green.Common
 import Green.Compiler (loadExistingSnapshots)
+import Green.Config
 import Green.Route
 import Green.Template
 import Green.Template.Custom
 import qualified Hakyll as H
 
-blog :: Context String -> Rules ()
-blog context = do
-  categories <- buildCategories "_categories/**" makeCategoryId
-  tags <- buildTags "_posts/**" makeTagId
+blog :: SiteConfig -> Context String -> Rules ()
+blog config context = do
+  let postsPattern = config ^. sitePostsPattern
+  categories <- buildCategories postsPattern makeCategoryId
+  tags <- buildTags postsPattern makeTagId
 
-  blogHome categories tags context
-  posts context
-  archives context
+  blogHome config categories tags context
+  posts postsPattern context
+  archives config context
 
   categoriesPages categories context
-  tagesPages tags context
+  tagsPages tags context
 
   draftsIndex context
-  drafts context
+  drafts config context
 
-blogHome :: Tags -> Tags -> Context String -> Rules ()
-blogHome categories tags context =
+blogHome :: SiteConfig -> Tags -> Tags -> Context String -> Rules ()
+blogHome config categories tags context =
   match "blog.html" do
     route indexRoute
     compile do
       categoryCloud <- renderTagCloud categories
       tagCloud <- renderTagCloud tags
-      recentPosts <- recentPostsContext
+      recentPosts <- recentPostsContext config
       let blogContext =
             constField "categoryCloud" categoryCloud
               <> constField "tagCloud" tagCloud
@@ -47,12 +49,12 @@ blogHome categories tags context =
         >>= layoutCompiler blogContext
         >>= relativizeUrls
 
-archives :: Context String -> Rules ()
-archives context = do
+archives :: SiteConfig -> Context String -> Rules ()
+archives config context = do
   match "archives.html" do
     route indexRoute
     compile do
-      publishedPosts <- H.recentFirst =<< loadPublishedPosts
+      publishedPosts <- H.recentFirst =<< loadPublishedPosts config
       let archivesContext =
             constField "posts" (itemListValue context publishedPosts)
               <> postContext
@@ -77,9 +79,9 @@ draftsIndex context = do
         >>= layoutCompiler draftsContext
         >>= relativizeUrls
 
-posts :: Context String -> Rules ()
-posts context = do
-  match "_posts/**" do
+posts :: Pattern -> Context String -> Rules ()
+posts postsPattern context = do
+  match postsPattern do
     route $
       subPrefixRoute "_posts/" "blog/"
         `composeRoutes` dateRoute
@@ -94,8 +96,8 @@ posts context = do
   where
     postsContext = postContext <> context
 
-drafts :: Context String -> Rules ()
-drafts context = do
+drafts :: SiteConfig -> Context String -> Rules ()
+drafts config context = do
   match "_drafts/**" do
     route $
       subPrefixRoute "_drafts/" "drafts/"
@@ -105,11 +107,14 @@ drafts context = do
     compile $
       getResourceBody
         >>= contentCompiler draftsContext
-        >>= snapshotCompiler [draftPostsSnapshot]
+        >>= snapshotCompiler snapshots
         >>= layoutCompiler draftsContext
         >>= relativizeUrls
   where
     draftsContext = postContext <> context
+    snapshots =
+      draftPostsSnapshot :
+        [publishedPostsSnapshot | config ^. siteDebug . debugPreview]
 
 categoriesPages :: Tags -> Context String -> Rules ()
 categoriesPages categories context =
@@ -131,8 +136,8 @@ categoriesPages categories context =
         >>= layoutCompiler categoryContext
         >>= relativizeUrls
 
-tagesPages :: Tags -> Context String -> Rules ()
-tagesPages tags context =
+tagsPages :: Tags -> Context String -> Rules ()
+tagsPages tags context =
   H.tagsRules tags \tag pat -> do
     route indexRoute
     compile do
@@ -157,9 +162,9 @@ postContext =
     <> tagLinksField "tagLinks"
     <> postHeaderField "postHeader"
 
-recentPostsContext :: Compiler (Context String)
-recentPostsContext = do
-  recentPosts <- fmap (take 5) . H.recentFirst =<< loadPublishedPosts
+recentPostsContext :: SiteConfig -> Compiler (Context String)
+recentPostsContext config = do
+  recentPosts <- fmap (take 5) . H.recentFirst =<< loadPublishedPosts config
   let latestPost = take 1 recentPosts
       previousPosts = drop 1 recentPosts
   return $
@@ -169,8 +174,8 @@ recentPostsContext = do
 teaserContext :: Context String
 teaserContext = teaserField "teaser" publishedPostsSnapshot
 
-loadPublishedPosts :: Compiler [Item String]
-loadPublishedPosts = loadExistingSnapshots "_posts/**" publishedPostsSnapshot
+loadPublishedPosts :: SiteConfig -> Compiler [Item String]
+loadPublishedPosts config = loadExistingSnapshots (config ^. sitePostsPattern) publishedPostsSnapshot
 
 loadDraftPosts :: Compiler [Item String]
 loadDraftPosts = loadExistingSnapshots "_drafts/**" draftPostsSnapshot

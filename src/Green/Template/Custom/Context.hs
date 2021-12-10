@@ -25,7 +25,7 @@ customContext config = self
     self =
       mconcat
         [ forItemField "updated" latestPostPatterns \_ -> do
-            latestPosts <- lift $ recentFirst =<< loadPublishedPosts
+            latestPosts <- lift $ recentFirst =<< loadPublishedPosts config
             latestPostUpdated latestPosts,
           trimmedUrlField "url",
           includeField "include" "",

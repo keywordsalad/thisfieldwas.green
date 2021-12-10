@@ -6,9 +6,10 @@ import qualified Data.Text as T
 import Green.Common
 import Green.Lens
 import Hakyll.Core.Configuration as HC
+import Hakyll.Core.Identifier.Pattern ((.||.))
 
 data SiteDebug = SiteDebug
-  { _debugPrintItem :: Maybe Identifier,
+  { _debugPreview :: Bool,
     _debugRawCss :: Bool
   }
 
@@ -17,7 +18,7 @@ makeLenses ''SiteDebug
 defaultSiteDebug :: SiteDebug
 defaultSiteDebug =
   SiteDebug
-    { _debugPrintItem = Nothing,
+    { _debugPreview = False,
       _debugRawCss = False
     }
 
@@ -72,6 +73,13 @@ siteStoreDirectory = siteHakyllConfiguration . storeDirectoryL
 siteInMemoryCache :: Lens' SiteConfig Bool
 siteInMemoryCache = siteHakyllConfiguration . inMemoryCacheL
 
+sitePostsPattern :: SimpleGetter SiteConfig Pattern
+sitePostsPattern = to f
+  where
+    f config
+      | config ^. siteDebug . debugPreview = "_posts/**" .||. "_drafts/**"
+      | otherwise = "_posts/**"
+
 hasEnvFlag :: String -> [(String, String)] -> Bool
 hasEnvFlag f e = isJust (lookup f e)
 
@@ -90,8 +98,8 @@ parseConfigIni env timeLocale time iniText = parseIniFile iniText do
 
   debugSettings <- sectionDef "Debug" defaultSiteDebug do
     SiteDebug
-      <$> configEnvMbOf "printItems" "SITE_PREVIEW" string env
-      <*> configEnvFlag "rawCss" "SITE_RAW_CSS" False env
+      <$> configEnvFlag "preview" "DEBUG_PREVIEW" False env
+      <*> configEnvFlag "rawCss" "DEBUG_RAW_CSS" False env
 
   displayFormat <- section "DisplayFormats" do
     SiteDisplayFormat

@@ -28,10 +28,10 @@ content config = do
   codeDep <- code
   templateDep <- templates
   rulesExtraDependencies [codeDep, templateDep] do
-    blog context
+    blog config context
     feed
-    homePage context
+    homePage config context
     pages context
     robotsTxt context
-    sitemap context
+    sitemap config context
     brokenLinks
