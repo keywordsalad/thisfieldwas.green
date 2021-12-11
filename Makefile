@@ -37,3 +37,12 @@ test:
 hpack:
 	stack exec hpack
 .PHONY: hpack
+
+upload:
+	set -e; source ./commands.sh; upload
+.PHONY: upload
+
+datestamp:
+	set -e; source ./commands.sh; datestamp
+.PHONY: datestamp
+

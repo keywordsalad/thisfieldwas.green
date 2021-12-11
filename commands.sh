@@ -106,3 +106,14 @@ test_sync () {
 test () {
   stack test
 }
+
+upload () {
+  rsync -ahp _site/* closet.oflogan.xyz:/usr/share/nginx/thisfieldwas.green/
+}
+
+datestamp () {
+    DATE=$(date +"%Y-%m-%dT%H:%M:%S%z")
+    echo "$DATE" | pbcopy
+    echo "Copied to clipboard: $DATE"
+}
+

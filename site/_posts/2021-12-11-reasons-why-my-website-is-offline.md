@@ -2,7 +2,7 @@
 title: Reasons why my website is offline
 author: Logan McGrath
 comments: false
-date: 2021-12-06T04:54:32-08:00
+date: 2021-12-11T14:43:25-0800
 tags: self host, configuration management, tinfoil hat
 layout: post
 ---
@@ -11,9 +11,9 @@ My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a 
 
 <!--more-->
 
-I previously complained to Vlad about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by sheer accident, and that, by the way, he uses Arch Linux[^archbtw] so he recommends that I breathe new life into it using Arch, and to see if I can self host some of my own services.
+I previously complained to Vlad about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by sheer accident, and that he uses Arch Linux, btw[^archbtw], so he recommends that I breathe new life into it using Arch, and to see if I can self host some of my own services.
 
-**I present my journey into self hosting: a rant, a recipe, and a retrospective.**
+_I present my journey into self hosting: a rant, a recipe, and a retrospective._
 
 ## Tinfoil hat time!
 
