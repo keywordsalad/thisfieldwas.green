@@ -11,7 +11,7 @@ My website is hosted from a 2007 HP Pavilion tower that my best friend, _`[REDAC
 
 <!--more-->
 
-I previously complained to `[REDACTED]` about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by shear accident, and recommends that I breath new life into it using Arch Linux and to see if I can self host some of my own services.
+I previously complained to `[REDACTED]` about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by sheer accident, and recommends that I breathe new life into it using Arch Linux and to see if I can self host some of my own services.
 
 ## Tinfoil hat time!
 
@@ -31,7 +31,7 @@ In a sense I am training my replacement. For free. Or at least in exchange for _
 
 ### Not all sunshine and rainbows in the cloud
 
-At this same time Apple announces that they are [scanning everyone's photos](https://towardsdatascience.com/apples-neuralhash-how-it-works-and-ways-to-break-it-577d1edc9838) to make sure they don't contain a potato. Don't worry, they aren't actually looking to see if the photo is or is not a potato. Until they aren't. They pinky promise.
+At this same time Apple announces that they are [scanning everyone's photos](https://towardsdatascience.com/apples-neuralhash-how-it-works-and-ways-to-break-it-577d1edc9838) to make sure they don't contain CSAM. Don't worry, they aren't actually looking to see if the photo contains a CSAM. Until they aren't. They pinky-promise they will only ever look for CSAM, even though they could look for anything they wanted.
 
 I pay Apple to store my photos in the cloud. I thought they were encrypted, right? So now they're scanning them _on my device_ because they can't look at them on the cloud, because they're encrypted. `wat`.
 
@@ -69,12 +69,12 @@ Configuration management is Ansible's primary domain, it does this very well, an
 
 The _closet computer_ hosts a small set of services:
 
-* My website using [`nginx`](https://www.nginx.com/), which also terminates `ssl`.
-* My source code using [`gitea`](https://gitea.io/) with [`postgres`](https://postgresql.org/) to support its data.
-* My data array with `16TB` usable storage:
+* My website is served by [`nginx`](https://www.nginx.com/), which also terminates `ssl`.
+* My source code is hosted by [`gitea`](https://gitea.io/) with [`postgres`](https://postgresql.org/) to support its data.
+* My data array provides `16TB` usable storage:
   * It's [just a bunch of disks](https://en.wikipedia.org/wiki/Non-RAID_drive_architectures#JBOD) with redundancy provided by [`snapraid`](https://www.snapraid.it/).
-  * It looks like a single disk by using [`mergerfs`](https://github.com/trapexit/mergerfs).
-  * It’s very nice to use, a choice recommendation by `[REDACTED]`.
+  * It's treated as a single disk using [`mergerfs`](https://github.com/trapexit/mergerfs).
+  * It’s very nice to use, and I think a choice recommendation by `[REDACTED]`.
 * [`pi-hole`](https://pi-hole.net/)... I thought this would mean less ads, but it hasn't really helped much.
 
 I’m using docker containers for `gitea` and `postgres`. `nginx` runs natively and provides routing into `gitea` or static `html` for its configured domains.
@@ -91,7 +91,7 @@ Now that I think about it, _uptime_ may not be the right word to use. Let me ins
 * The power was out.
 * I closed the sliding closet door too quickly, and it unplugged the router.
 * My husband pushed a box of shoes under the bed, and it pushed the extension cable out of its plug.
-* Instead of unplugging the router itself to turn it off and then on again, I flipped the switch on the power strip because I thought it would be less effort. I did not fully grasp that this turns of _everything_ in the closet. Consequently, I forgot to turn the _closet computer_ back on.
+* Instead of unplugging the router itself to turn it off and then on again, I flipped the switch on the power strip because I thought it would be less effort. I did not fully grasp that this turns off _everything_ in the closet. Consequently, I forgot to turn the _closet computer_ back on.
 * I can’t get into the `bios` to configure the _closet computer_ to turn back on when the power returns.
 * The _closet computer_ came up before the router and `autossh` stopped trying to open the `ssh` tunnels to the _bastion server_ after a period of time, because `systemd` is designed to give up and stop trying.
 * My router refuses to route any traffic whatsoever until I point DNS away from the `pi-hole` on the _closet computer_.
@@ -146,7 +146,7 @@ Hosting my website and source code myself feels very empowering. I feel as if I 
 
 I severely took for granted the uptime that a third party service could give me. It’s making me rethink what the total cost of what third party hosting actually looks like, not only in terms of dollars and nebulous ideals, but more importantly in terms of peace of mind. Terms such as _will the promotion committee be able to see that writeup I referred them to?_ I would absolutely benefit from hosting my website from my _bastion server_ instead, but perhaps after I reread `linode`'s service agreements to allay my confounding mind.
 
-Regarding nebulous ideals, Copilot makes a very strong case for treating [data as a form of labor](https://www.brookings.edu/blog/techtank/2018/02/21/should-we-treat-data-as-labor-lets-open-up-the-discussion/). At the time of this writing, Wed Dec 8, 2021, Copilot is in technical review and accessible via waitlist. I can't find any mention of licensing cost, or whether there will be a distinction beetween paid and community editions. If Copilot is available as an exclusively free service, then I believe it stands as an excellent reinvestment back into the community and profession as a whole. If someone is paying for Copilot, then we are collectively exploited within some legally-accepted gray area, because we agreed to be.[^tos]
+Regarding nebulous ideals, Copilot makes a very strong case for treating [data as a form of labor](https://www.brookings.edu/blog/techtank/2018/02/21/should-we-treat-data-as-labor-lets-open-up-the-discussion/). At the time of this writing, Wed Dec 8, 2021, Copilot is in technical review and accessible via waitlist. I can't find any mention of licensing cost, or whether there will be a distinction between paid and community editions. If Copilot is available as an exclusively free service, then I believe it stands as an excellent reinvestment back into the community and profession as a whole. If someone is paying for Copilot, then we are collectively exploited within some legally-accepted gray area, because we agreed to be.[^tos]
 
 ## Stepping back
 
@@ -158,4 +158,5 @@ On the lighter side, being professionally out and telling people that my website
 
 For now, I host my source code at [bitsof.thisfieldwas.green](https://bitsof.thisfieldwas.green). My website source repository is directly accessible from [keywordsalad/thisfieldwas.green](https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green).
 
-[^tos]: There exists an episode of South Park where Kyle accepts the Apple iTunes user agreement [without reading it](https://www.imdb.com/title/tt1884035/). It's worth a watch but the writers apply a heavy-handed story telling device to get their point across. I liked it, but you may not.
+[^tos]: There exists an episode of South Park where Kyle accepts the Apple iTunes user agreement [without reading it](https://www.imdb.com/title/tt1884035/). It's worth a watch but the writers employ a heavy-handed storytelling device to get their point across. I liked it, but you may not.
+
