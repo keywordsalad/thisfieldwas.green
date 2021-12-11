@@ -14,7 +14,7 @@
 
 aside, figure {
   @include contain-floats;
-  color: $color-text-dark;
+  color: $text-color-dark;
   font-family: $aside-font-family;
   font-style: italic;
   margin: 1rem 0;

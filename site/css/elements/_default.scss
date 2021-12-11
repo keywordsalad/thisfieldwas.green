@@ -6,12 +6,10 @@ html {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: $color-green;
-  font-family: $text-font-family;
-  font-size: 1rem;
-  text-align: $text-align-default;
-  line-height: 1.6;
-  hyphens: $text-hyphens;
+  background-color: $root-background;
+  font-family: $root-font-family;
+  font-size: $root-font-size;
+  line-height: $root-line-height;
   text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
@@ -23,13 +21,12 @@ body {
   min-height: 100%;
   margin: 0;
   padding: 0;
-  color: $color-text;
-  background-color: $color-background;
+  color: $text-color;
   overflow: scroll;
 }
 
 strong, em, b, i {
-  color: $color-emphasize;
+  color: $text-color-emphasize;
 }
 
 section {
@@ -49,8 +46,26 @@ li > ul {
   margin: 0.5rem 0;
 }
 
+dl {
+  @include block;
+}
+
+dt {
+  margin: 1.2em 0 0;
+  color: $header-color;
+  font-family: $header-font-family;
+  font-style: italic;
+  font-weight: bold;
+  font-size: $header-font-size-ratio * 1em;
+  text-decoration: underline;
+}
+
+dd {
+  margin: 0 0 0 1.5em;
+}
+
 blockquote {
-  background-color: $color-aside;
+  background-color: $aside-background;
   margin: 1.5rem 1rem;
   padding: 0.5rem 1rem;
   border-left: $border-regular;
@@ -75,12 +90,12 @@ nav {
 }
 
 a {
-  color: $color-hyperlink;
+  color: $text-color-hyperlink;
   text-decoration: underline;
 }
 
 a em {
-  color: $color-hyperlink;
+  color: $text-color-hyperlink;
 }
 
 .image-link {
@@ -93,7 +108,7 @@ a em {
 
 .footnotes {
   font-size: 0.9rem;
-  color: $color-text-light;
+  color: $text-color-light;
   border-top: $border-thin;
 
   hr {

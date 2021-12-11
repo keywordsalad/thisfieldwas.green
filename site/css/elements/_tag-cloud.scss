@@ -17,7 +17,7 @@
         * (var(--max-size) - var(--min-size))
         + var(--min-size)
     );
-    color: $color-hyperlink-complement;
+    color: $text-color-hyperlink-complement;
     display: block;
     font-size: calc(var(--size) * 1rem);
     padding: 0.125em 0.25em;

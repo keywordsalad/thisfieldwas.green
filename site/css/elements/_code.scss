@@ -86,10 +86,10 @@ code.sourceCode {
     .numberLines & {
       counter-increment: line-number;
       &:hover {
-        background-color: $color-hover;
+        background-color: $code-color-highlight-hover;
       }
       &:target {
-        background-color: $color-highlight;
+        background-color: $code-color-highlight;
       }
 
       > a:first-child {

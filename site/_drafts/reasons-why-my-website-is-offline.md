@@ -7,11 +7,13 @@ tags: self host, configuration management, tinfoil hat
 layout: post
 ---
 
-My website is hosted from a 2007 HP Pavilion tower that my best friend, _`[REDACTED]`_, a privacy buff, found next to the garbage chute at his condo building. It appears to have been someone’s gaming rig in its prior life, as it has a decent graphics card in it and `8GB` of RAM. Its demise was likely an upgrade to Windows 10, as upon boot, the login screen was so unresponsive that I could barely get the mouse to register movement and indicate for the computer to shut down again.
+My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and [low-key minimalist](https://internetwebsite.ofvlad.xyz), found next to the garbage chute at his condo building. It appears to have been someone’s gaming rig in its prior life, as it has a decent graphics card in it and `8GB` of RAM. Its demise was likely an upgrade to Windows 10, as upon boot, the login screen was so unresponsive that I could barely get the mouse to register movement and indicate for the computer to shut down again.
 
 <!--more-->
 
-I previously complained to `[REDACTED]` about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by sheer accident, and recommends that I breathe new life into it using Arch Linux and to see if I can self host some of my own services.
+I previously complained to Vlad about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by sheer accident, and that, by the way, he uses Arch Linux[^archbtw] so he recommends that I breathe new life into it using Arch, and to see if I can self host some of my own services.
+
+**I present my journey into self hosting: a rant, a recipe, and a retrospective.**
 
 ## Tinfoil hat time!
 
@@ -39,33 +41,33 @@ I pay Apple to store my photos in the cloud. I thought they were encrypted, righ
 
 I am very motivated to get as much of my stuff out of third party services as I can, because--to generalize based on GitHub and Apple--it's likely that no third party can be trusted with my data _even if they are already making money off of it_. I resolve to divest Apple and Google of my cloud data, GitHub of my source code, and `linode` of my miscellaneous.
 
-I talk to `[REDACTED]` about my feelings regarding GitHub Copilot, Apple, and cloud providers in general. He offers to help me find a new option for hosting my data. Just a few days later he finds this computer next to the garbage chute, and with much excitement he calls me and gleefully announces, _“It turns on!”_
+I talk to <span class="redacted">Vlad</redacted> about my feelings regarding GitHub Copilot, Apple, and cloud providers in general. He offers to help me find a new option for hosting my data. Just a few days later he finds that computer next to the garbage chute, and with much excitement he calls me and cheerfully announces, _“It turns on!”_
 
 What luck!
 
 ## Keeping my data in the closet
 
-The computer sits in many pieces in my living room as I remove dust and await several shipments of spinning platter drives. Installing the array of drives to hold my media proves difficult: HP did not make this case amenable to changes or even provide much in the way of expansion bays. As a consequence, I now have a drive array that is free-floating within the case. No matter though, the drives are each `4TB`, and so heavy that they are held in place by the friction induced by their own mass and density alone. Later, for a short period, the computer carries the hostname `gravwell` because of the density these drives give it.
+The computer sits in many pieces in my living room as I remove dust and await several shipments of spinning platter drives. Installing the array of drives to hold my media proves difficult: HP did not make this case amenable to changes or even provide much in the way of expansion bays. As a consequence, I now have a bunch of drives that are free-floating within the case. No matter though, the drives are each `4TB`, and so heavy that they are held in place by the friction induced by their own mass and density alone. Later, for a short period, the computer carries the hostname `gravwell` because of the density these drives give it.
 
 I craft a script so that I can reproducibly install Arch Linux with disk encryption over `ssh`, comfortably iterating from my 2019 MacBook Pro until the installation looks correct. I nuke the computer and try again, just to be sure. Then several times more.
 
 Once the OS is installed to satisfaction, I carefully arrange the drives within the case, making sure the case can tolerate some degrees of tilt in any direction without the drives sliding out of place. To my surprise, the computer can be rotated a full 90&deg; in any direction, and the drives don't move _at all_. I place the computer inside of the bedroom closet, where I can plug it directly into the router. The computer is now _closet computer_.
 
-I spend some number of days iterating on _closet computer_ with an [Ansible playbook](https://bitsof.thisfieldwas.green/keywordsalad/ansibled/src/commit/2f8b5c99c51adeb2226d2e9e51cead6766448559/servers.yml#L1-L23) to get the configuration just right. As long as the data array remains intact, I can incrementally add new disks to it by appending the disks to the playbook configuration. If the data array is compromised, then I can nuke it and build anew just by running the playbook.
+I spend some number of days iterating on _closet computer_ with an [Ansible playbook](https://bitsof.thisfieldwas.green/keywordsalad/ansibled/src/commit/2f8b5c99c51adeb2226d2e9e51cead6766448559/servers.yml#L1-L23) to get the configuration just right. As long as the data array remains intact, I can incrementally add new disks to it by appending the disks to the playbook configuration. If the data array is lost, then I can nuke it and build anew just by running the playbook. _(To be clear, I lose data if this happens.)_
 
 My goal with this playbook is primarily to retain a living snapshot of _closet computer_'s configuration. A secondary goal is to be able to provision a replacement system if the computer should ever cease to work. In my head I imagine the happy path for such an event looks like this:
 
 1. A few keystrokes.
 2. I then grab a coffee while the playbook runs.
 3. When the playbook is complete, I can power off the computer.
-4. I plug the drive array into it.
+4. I plug the drives into it.
 5. I turn on the new _closet computer_. Huzzah.
 
 Configuration management is Ansible's primary domain, it does this very well, and I now use it for my current three Linux-based systems.
 
-> I both nuke and enjoy rebuilding my Arch Linux-powered _thonkpad_ on occasion. All changes I make to it are managed through its associated playbook.
+> I both nuke and enjoy rebuilding my Arch Linux-powered _thonkpad_ on occasion. All changes I make to it are managed through its associated playbook. I use Arch Linux, btw.
 
-## Software and Hardware
+## Hosting from inside the closet
 
 _closet computer_ hosts a small set of services:
 
@@ -74,7 +76,7 @@ _closet computer_ hosts a small set of services:
 * My data array provides `16TB` usable storage:
   * It's [just a bunch of disks](https://en.wikipedia.org/wiki/Non-RAID_drive_architectures#JBOD) with redundancy provided by [`snapraid`](https://www.snapraid.it/).
   * It's treated as a single disk using [`mergerfs`](https://github.com/trapexit/mergerfs).
-  * It’s very nice to use, and I think a choice recommendation by `[REDACTED]`.
+  * It’s very nice to use, and I think a choice recommendation by Vlad.
 * [`pi-hole`](https://pi-hole.net/)... I thought this would mean less ads, but it hasn't really helped much.
 
 I’m using docker containers for `gitea` and `postgres`. `nginx` runs natively and provides routing into `gitea` or static `html` for its configured domains.
@@ -97,7 +99,7 @@ Now that I think about it, _uptime_ may not be the right word to use. Let me ins
 * My router refuses to route any traffic whatsoever until I point DNS away from the `pi-hole` on _closet computer_.
 * Hubris.
 
-## A hosting solution held together by glue and popsicle sticks
+### A hosting solution held together by glue and popsicle sticks
 
 I don’t have a static IP. My ISP’s network infrastructure simply doesn’t allow for it, as the infrastructure is based on a mesh of wireless signal that is propagated between large, unsightly antennas installed on top of each house using their service. To get around this, I swallow my pride and purchase, again, a cloud server from `linode`. I call this one my _bastion server_, and with it I have this sort of static IP address that I can configure my domains to point to.
 
@@ -109,7 +111,7 @@ Using `ssh`, I can open a [remote tunnel](https://www.ssh.com/academy/ssh/tunnel
 ssh -R 10080:localhost:80 bastion.oflogan.xyz
 ```
 
-This command binds a connection to the _bastion server_'s `localhost:10080` port and forwards it to _closet computer_'s `*:80` port.
+This command binds a connection to the _bastion server_'s `localhost:10080` port and forwards it to _closet computer_'s `*:80` port. You may notice that I'm using port `10080` rather than `80`, and this is because I am using a non-priveleged user to open the tunnel, as only `root` may bind to ports under `1024`.
 
 Because the remote tunnel binds `localhost:10080` on the _bastion server_, this means that the tunnel is not accessible publicly, and that my website is still in the closet. In order for my website to come out of the closet, I use an `nginx` [reverse proxy](https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/) to forward the _bastion server_'s public port `*:80` to `localhost:10080`. With this final connection made, the world can reach out and see my website coming out of the closet.
 
@@ -157,6 +159,8 @@ I might give Copilot a go soon. I'm reading some good things about how it cuts t
 On the lighter side, being professionally out and telling people that my website is coming out of the closet gives me a certain subversive glee that I never realized I needed. It's a great lead into how the computer got there, too.
 
 For now, I host my source code at [bitsof.thisfieldwas.green](https://bitsof.thisfieldwas.green). My website source repository is directly accessible from [keywordsalad/thisfieldwas.green](https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green).
+
+[^archbtw]: Meme reference: [btw i use arch](https://knowyourmeme.com/memes/btw-i-use-arch) -- When Vlad proofread this post, he informed me that it was customary to let the reader know that one uses Arch, btw.
 
 [^tos]: There exists an episode of South Park where Kyle accepts the Apple iTunes user agreement [without reading it](https://www.imdb.com/title/tt1884035/). It's worth a watch but the writers employ a heavy-handed storytelling device to get their point across. I liked it, but you may not.
 

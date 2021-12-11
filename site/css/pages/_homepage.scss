@@ -32,7 +32,7 @@
 
       &::before, &:last-child::after {
         content: "∗";
-        color: $color-green;
+        color: $signature-green;
         display: inline-block;
         margin: 0 0.2rem;
       }

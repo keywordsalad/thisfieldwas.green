@@ -141,42 +141,53 @@ I am thrilled that all major browsers' dev tools have greatly matured, have even
 
 ### I did not fight functional programming like I expected, I rather experienced it as an invaluable teacher
 
-I don't get what the negative fuss about functional programming is. Everything I've needed help with is googleable, like everything else in tech. I rather enjoy using Haskell for what is a pretty boring problem solvable by any programming language, and on the whole I'm happy so far with my decision to use it. Learning functional programming benefits from a palate cleanser in order to fully grok, and I'm giving it an earnest shot. I've also picked up some tidbits that I imagine will find their way back into how I write code elsewhere.
+I don't get what the negative fuss about functional programming is. Everything I've needed help with is googleable, like everything else in tech. I rather enjoy using Haskell for what is a pretty boring problem solvable by any programming language, and on the whole I'm happy so far with my decision to use it. Learning functional programming benefits from a palate cleanser in order to fully grok, and I'm giving it an earnest shot.
 
-#### Abstract data types
+I've picked up some concepts that I imagine will find their way back into how I write code elsewhere:
 
-Abstract data types are the best way of implementing closed polymorphism that I've found thus far, and enums in object oriented languages are close enough to simulate them effectively in those languages.
+Abstract data types
 
-In my experience, polymorphism dealing with data only needs to extend over a small number of cases. By using abstract data types, I can keep my code variants local to each other so that differences can be viewed in context. Adding new variants requires that changes be made in-context, ensuring that no case for a polymorphic change in behavior is unchecked. I lean on the compiler to tell me if I left any location unhandled.
+: Abstract data types are the best way of implementing closed polymorphism that I've found thus far, and enums in object oriented languages are close enough to simulate them effectively in those languages.
 
-#### Type classes
+    In my experience, polymorphism dealing with data only needs to extend over a small number of cases. By using abstract data types, I can keep my code variants local to each other, so that adding new variants requires that changes be made in-context. This ensures that no case for a polymorphic change in behavior goes unchecked. I lean on the compiler to tell me if I left any location unhandled.
 
-Type classes are the best way of implementing open polymorphism that I've found thus far, and interfaces in object oriented languages are close enough to simulate them effectively in those languages.
+Type classes
 
-Contrasting with abstract data types, interfaces provide a facility for extending polymorphism over an open set of cases. As interfaces speak only in terms of operations, they run a much lower risk of introducing variant code paths that could introduce defects related to data.
+:   Type classes are the best way of implementing open polymorphism that I've found thus far, and interfaces in object oriented languages are close enough to simulate them effectively in those languages.
 
-#### Object-oriented programming in the Kingdom of Nouns
+    Contrasting with abstract data types, interfaces provide a facility for extending polymorphism over an open set of cases. As interfaces speak only in terms of operations, they run a much lower risk of introducing variant code paths that could introduce defects related to data.
 
-I did not for one moment miss inheritance or class-based polymorphism. They're a brittle way of implementing polymorphism, generally. I wager I could write decent Java without them, and I have been doing this for some time already in other languages.
+Rethinking conventional object-oriented programming
 
-#### Changing the world
+:   I did not find myself reaching into my toolbox for inheritance or class-based polymorphism to solve problems. These two mechanisms are a brittle way of implementing polymorphism, I feel. I wager I could write decent Java without them, as I have been doing this for some time already in other languages.
 
-Immutability makes reasoning about data flow and change of state across an application really easy and I will leverage this everywhere I reasonably can.
+Changing the world
 
-#### Pattern matching
+:   Immutability makes reasoning about data flow and change of state across an application really easy and I will leverage this everywhere I that I reasonably can.
 
-Pattern matching and branching conditionally based on the _shape_ of arguments is astoundingly empowering. It elevates data into a first-class position within API design. Until recently, I can't think of any C syntax-inspired language that takes advantage of this concept. Pattern matching may be so enabling, I think, that it might even have a measurable impact on the economy! I wish this was something that could be measured more concretely, but I'm happy even if it's just a convenience to have.
+    I find my mental model of objects in object-oriented programming changes starkly when I apply immutability to data. As conventionally understood, I imagine a small container of data, an _object_, which I can modify at-will, via a provided interface of methods, in order to change its state over time. When I apply immutability as a design constraint, the concept of an _object_ as realized here is no longer a possible option.
 
-#### Dial "M" for Monad
+    Immutability imposes a fundamental change in how business and technical capabilities within code are designed. Instead of objects as methods around mutable data, methods become organized into _modules_ containing _functions_. Some functions act as _entry points_ into the associated capability, and they receive, usually, an abstract data type as an argument, and construct a new one as a result. Change over time can be observed without modifying state destructively, and entire classes of runtime errors, like data races, are eliminated.
 
-This is perhaps my most unexpected takeaway: Effect types make very clear that _here there be dragons_. Those dragons such as:
+    There are more impacts to the design of an application than I suggest here. I admit any value proposition may appear dubious on its face. Consider for a moment: state within long-running Haskell applications appears as if it were mutating. Designing for immutability thus works in production applications and I am very interested in learning more about the patterns used to support it.
 
-* _Changing the world_ when I launch a rocket with `IO`
-* _Nondeterminism_ when I don't know how many things I'm going to get back with `[a]`
-* _Absence_ when sometimes I `Just` get `Nothing` with `Maybe`
-* _Wrong_ when sometimes it's not `Right` and all I'm `Left` with is `Either`
-* Or any other modes of execution where the outcome has an orthogonal quality in addition to the one I wanted.
+Pattern matching
+
+:   Pattern matching and branching conditionally based on the _shape_ of arguments is astoundingly empowering. It elevates data into a first-class position within API design.
+
+    Until recently, I can't think of any C syntax-inspired language that takes advantage of this concept. Pattern matching may be so enabling, I think, that it might even have a measurable impact on the economy! I wish this was something that could be measured more concretely, but I'm happy even if it's just a convenience to have.
+
+Encoding the effect in result
+
+:   This is perhaps my most unexpected takeaway: Effect types make very clear that as part of the contract of a function that I am calling, some orthogonal quality in addition to a result, including whether or not I receive a result, occurs.
+
+    * `f :: IO a` will give me an `a` if `f` _succeeds_. It will also affect external systems in some way, or it might _fail_ due to one. Java engineers might recall method signatures polluted with `throws IOException`; this is same/same but different.
+    * `g :: [a]` will give me _one or more_ of `a` if `g` _succeeds_. Effectively, `g` _fails_ if I receive _zero_ `a`'s. This is a sort of non-zero nondeterminism of the number of results an operation.
+    * `h :: Maybe a` will give me `Just a` if an `a` exists and it _succeeds_. It gives me `Nothing` otherwise and _fails_. This is encodes an explicit presence or absence of a value. I like to think of `Maybe` as a `null` done right.
+    * `i :: Either a b` will give me `Right a` if `i` _succeeds_. I receive `Left b` if `i` _fails_, which allows me to inspect `b` for why `i` may have failed.
+
+    An observation: each of these effect types encodes some notion of _success_ and _failure_. The `Monad` typeclass generalizes over these and this allows for a high degree of code reuse, independent of specific error handling. Error handling can be pushed out to the edge of the contexts they need to be contained within, which helps keep business logic cleaner. Each of the above effect types implement the `Monad` typeclass.
 
 ## I rather like `hakyll` and Haskell!
 
-I'm really happy with `hakyll`! I'm also really happy with Haskell. My website is taking some investment, but it's at a point where I'm really happy with it. I think I'm going to keep it this way for a while yet.
+I'm really happy with `hakyll`! I'm also really happy with Haskell. My website is taking some investment, but it's been worth the effort especially given the quality of the output. I think I'm going to keep this setup for a while yet.

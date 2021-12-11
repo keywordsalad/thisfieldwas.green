@@ -12,7 +12,7 @@
   padding: 0 1rem;
   clear: both;
   .content-bound {
-    max-width: $content-max-width;
+    max-width: $body-max-width;
     padding: 0 0.5rem;
     margin: 0 auto;
     @content

@@ -23,7 +23,7 @@
   .acks {
     display: flex;
     font-size: $text-font-size-miniscule;
-    color: $color-text-light;
+    color: $text-color-light;
     margin: $margin;
     padding: 0;
     list-style: none;
@@ -35,14 +35,14 @@
 
     li + li {
       border-left: $border-thin;
-      border-color: $color-text-light;
+      border-color: $text-color-light;
       padding-left: 0.3rem;
     }
   }
 
   .generated {
     font-size: $text-font-size-miniscule;
-    color: $color-text-light;
+    color: $text-color-light;
     margin: $margin;
   }
 }

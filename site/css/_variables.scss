@@ -1,47 +1,49 @@
 @use "sass:color";
 
-$text-font-family: Helvetica, Arial, sans-serif;
-$text-font-size: 1em;
+$signature-green: darkgreen;
+
+$font-family-sans-serif: "Helvetica", "Arial", sans-serif;
+$font-family-serif: "Times New Roman", serif;
+
+$root-background: aliceblue;
+$root-font-family: $font-family-sans-serif;
+$root-font-size: 1rem;
+$root-line-height: 1.6;
+
+$body-max-width: 65rem;
+
+$header-color: $signature-green;
+$header-font-family: $font-family-serif;
+$header-font-size-ratio: 1.12;
+$header-font-size-base: 0.8;
+
+$text-color: darkslategray;
+$text-color-dark: color.adjust($signature-green, $lightness: 1%);
+$text-color-light: slategray;
+$text-color-hyperlink: dodgerblue;
+$text-color-hyperlink-complement: indianred;
+$text-color-emphasize: darkred;
+$text-font-size: $root-font-size;
 $text-font-size-small: $text-font-size * 0.9;
 $text-font-size-tiny: $text-font-size * 0.85;
 $text-font-size-miniscule: $text-font-size * 0.8;
 $text-font-size-large: $text-font-size * 1.1;
-$text-hyphens: none;
-$text-align-default: left;
-
-$header-font-family: "Times New Roman", serif;
-$aside-font-family: $header-font-family;
-
-$color-green: darkgreen;
-$color-text: darkslategray;
-$color-text-dark: color.adjust($color-green, $lightness: 1%);
-$color-text-light: slategray;
-$color-emphasize: darkred;
-$color-highlight: gold;
-$color-hover: yellow;
-$color-aside: color.adjust(honeydew, $hue: -10%, $saturation: -50%, $lightness: -3%);
-$color-hyperlink: dodgerblue;
-$color-hyperlink-complement: indianred;
-$color-background: aliceblue;
-$color-scrollbar: cadetblue;
-
-$border-ginormous-width: 0.5rem;
-$border-very-thick-width: 0.4rem;
-$border-thick-width: 0.3rem;
-$border-regular-width: 0.2rem;
-$border-thin-width: 0.1rem;
-$border-color: darken($color-green, 4%);
-$border-style: solid $border-color;
-
-$border-ginormous: $border-ginormous-width $border-style;
-$border-very-thick: $border-very-thick-width $border-style;
-$border-thick: $border-thick-width $border-style;
-$border-regular: $border-regular-width $border-style;
-$border-thin: $border-thin-width $border-style;
-
-$content-max-width: 65rem;
 
 $code-font-family: "Courier", "Courier New", monospace;
 $code-font-size: 1em;
 $code-color: indianred;
-$code-color-hyperlink: $color-hyperlink;
+$code-color-highlight: gold;
+$code-color-highlight-hover: yellow;
+$code-color-hyperlink: $text-color-hyperlink;
+
+$aside-background: color.adjust(honeydew, $hue: -10%, $saturation: -50%, $lightness: -3%);
+$aside-font-family: $font-family-serif;
+$aside-font-size: 1.1em;
+
+$border-color: darken($signature-green, 4%);
+$border-style: solid $border-color;
+$border-ginormous: 0.5rem $border-style;
+$border-very-thick: 0.4rem $border-style;
+$border-thick: 0.3rem $border-style;
+$border-regular: 0.2rem $border-style;
+$border-thin: 0.1rem $border-style;

@@ -1,42 +1,52 @@
 @import "containers";
 
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5, h6 {
   @include block;
-  line-height: 1.2;
-  padding: 0;
-  color: $color-green;
+  color: $header-color;
   font-family: $header-font-family;
   font-style: italic;
-  a {
-    text-decoration: underline;
-  }
-  em {
+  line-height: 1.2;
+  a, em, i, strong, b {
     text-decoration: underline;
   }
 }
 
 section h1 {
   border-top: $border-regular;
-  padding: 0.5rem 0;
+  padding: 0.5em 0;
+}
+
+@function header-size-factor($multiplier) {
+  $factor: $header-font-size-base;
+  @for $i from 1 through $multiplier {
+    $factor: $factor * $header-font-size-ratio;
+  }
+  @return $factor;
 }
 
 h1 {
-  font-size: $text-font-size * 2;
+  font-size: header-size-factor(6) * 1em;
 }
 h2 {
-  font-size: $text-font-size * 1.6;
+  font-size: header-size-factor(5) * 1em;
 }
 h3 {
-  font-size: $text-font-size * 1.3;
+  font-size: header-size-factor(4) * 1em;
 }
 h4 {
-  font-size: $text-font-size * 1.1;
+  font-size: header-size-factor(3) * 1em;
+}
+h5 {
+  font-size: header-size-factor(2) * 1em;
+}
+h6 {
+  font-size: header-size-factor(1) * 1em;
 }
 
 * + h1, * + h2, * + h3, * + h4 {
-  margin-top: 1.2rem;
+  margin-top: 1.2em;
 }
 
 h1 + h2, h2 + h3, h3 + h4 {
-  margin-top: 1rem;
+  margin-top: 0;
 }
