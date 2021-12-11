@@ -111,7 +111,7 @@ ssh -R 10080:localhost:80 bastion.oflogan.xyz
 
 This command binds a connection to the _bastion server_'s `localhost:10080` port and forwards it to the _closet computer_'s `*:80` port.
 
-Because the remote tunnel binds `localhost:10080` on the _bastion server_, this means that the tunnel is not accessible publicly, and that my website is still in the closet. In order for my website to come out of the closet, I use an `nginx` [reverse proxy](https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/) to forward the _bastion server_'s public port `*:80` to `localhost:10080`. With this final connection made, the world can reach into the closet.
+Because the remote tunnel binds `localhost:10080` on the _bastion server_, this means that the tunnel is not accessible publicly, and that my website is still in the closet. In order for my website to come out of the closet, I use an `nginx` [reverse proxy](https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/) to forward the _bastion server_'s public port `*:80` to `localhost:10080`. With this final connection made, the world can reach out and see my website coming out of the closet.
 
 I can set up reverse proxies for each port, `22`, `80`, and `443`, on the _bastion server_ into reverse tunnels from the _closet computer_'s `22`, `80`, and `443` ports to the _bastion server_'s `10022`, `10080`, and `10443` ports. I then leverage `autossh` to maintain persistent remote tunnels from the _closet computer_ to the _bastion server_.
 
