@@ -49,11 +49,11 @@ The computer sits in many pieces in my living room as I remove dust and await se
 
 I craft a script so that I can reproducibly install Arch Linux with disk encryption over `ssh`, comfortably iterating from my 2019 MacBook Pro until the installation looks correct. I nuke the computer and try again, just to be sure. Then several times more.
 
-Once the OS is installed to satisfaction, I carefully arrange the drives within the case, making sure the case can tolerate some degrees of tilt in any direction without the drives sliding out of place. To my surprise, the computer can be rotated a full 90&deg; in any direction, and the drives don't move _at all_. I place the computer inside of the bedroom closet, where I can plug it directly into the router. The computer is now the _closet computer_.
+Once the OS is installed to satisfaction, I carefully arrange the drives within the case, making sure the case can tolerate some degrees of tilt in any direction without the drives sliding out of place. To my surprise, the computer can be rotated a full 90&deg; in any direction, and the drives don't move _at all_. I place the computer inside of the bedroom closet, where I can plug it directly into the router. The computer is now _closet computer_.
 
-I spend some number of days iterating on the _closet computer_ with an [Ansible playbook](https://bitsof.thisfieldwas.green/keywordsalad/ansibled/src/commit/2f8b5c99c51adeb2226d2e9e51cead6766448559/servers.yml#L1-L23) to get the configuration just right. As long as the data array remains intact, I can incrementally add new disks to it by appending the disks to the playbook configuration. If the data array is compromised, then I can nuke it and build anew just by running the playbook.
+I spend some number of days iterating on _closet computer_ with an [Ansible playbook](https://bitsof.thisfieldwas.green/keywordsalad/ansibled/src/commit/2f8b5c99c51adeb2226d2e9e51cead6766448559/servers.yml#L1-L23) to get the configuration just right. As long as the data array remains intact, I can incrementally add new disks to it by appending the disks to the playbook configuration. If the data array is compromised, then I can nuke it and build anew just by running the playbook.
 
-My goal with this playbook is primarily to retain a living snapshot of the _closet computer_'s configuration. A secondary goal is to be able to provision a replacement system if the computer should ever cease to work. In my head I imagine the happy path for such an event looks like this:
+My goal with this playbook is primarily to retain a living snapshot of _closet computer_'s configuration. A secondary goal is to be able to provision a replacement system if the computer should ever cease to work. In my head I imagine the happy path for such an event looks like this:
 
 1. A few keystrokes.
 2. I then grab a coffee while the playbook runs.
@@ -67,7 +67,7 @@ Configuration management is Ansible's primary domain, it does this very well, an
 
 ## Software and Hardware
 
-The _closet computer_ hosts a small set of services:
+_closet computer_ hosts a small set of services:
 
 * My website is served by [`nginx`](https://www.nginx.com/), which also terminates `ssl`.
 * My source code is hosted by [`gitea`](https://gitea.io/) with [`postgres`](https://postgresql.org/) to support its data.
@@ -91,10 +91,10 @@ Now that I think about it, _uptime_ may not be the right word to use. Let me ins
 * The power was out.
 * I closed the sliding closet door too quickly, and it unplugged the router.
 * My husband pushed a box of shoes under the bed, and it pushed the extension cable out of its plug.
-* Instead of unplugging the router itself to turn it off and then on again, I flipped the switch on the power strip because I thought it would be less effort. I did not fully grasp that this turns off _everything_ in the closet. Consequently, I forgot to turn the _closet computer_ back on.
-* I can’t get into the `bios` to configure the _closet computer_ to turn back on when the power returns.
-* The _closet computer_ came up before the router and `autossh` stopped trying to open the `ssh` tunnels to the _bastion server_ after a period of time, because `systemd` is designed to give up and stop trying.
-* My router refuses to route any traffic whatsoever until I point DNS away from the `pi-hole` on the _closet computer_.
+* Instead of unplugging the router itself to turn it off and then on again, I flipped the switch on the power strip because I thought it would be less effort. I did not fully grasp that this turns off _everything_ in the closet. Consequently, I forgot to turn _closet computer_ back on.
+* I can’t get into the `bios` to configure _closet computer_ to turn back on when the power returns.
+* _closet computer_ came up before the router and `autossh` stopped trying to open the `ssh` tunnels to the _bastion server_ after a period of time, because `systemd` is designed to give up and stop trying.
+* My router refuses to route any traffic whatsoever until I point DNS away from the `pi-hole` on _closet computer_.
 * Hubris.
 
 ## A hosting solution held together by glue and popsicle sticks
@@ -103,17 +103,17 @@ I don’t have a static IP. My ISP’s network infrastructure simply doesn’t a
 
 As I still can't reach from the outside world into my closet, I have to perform a little magic...
 
-Using `ssh`, I can open a [remote tunnel](https://www.ssh.com/academy/ssh/tunneling/example#remote-forwarding) from the _closet computer_ to the _bastion server_ with this command:
+Using `ssh`, I can open a [remote tunnel](https://www.ssh.com/academy/ssh/tunneling/example#remote-forwarding) from _closet computer_ to the _bastion server_ with this command:
 
 ```{.bash .numberLines}
 ssh -R 10080:localhost:80 bastion.oflogan.xyz
 ```
 
-This command binds a connection to the _bastion server_'s `localhost:10080` port and forwards it to the _closet computer_'s `*:80` port.
+This command binds a connection to the _bastion server_'s `localhost:10080` port and forwards it to _closet computer_'s `*:80` port.
 
 Because the remote tunnel binds `localhost:10080` on the _bastion server_, this means that the tunnel is not accessible publicly, and that my website is still in the closet. In order for my website to come out of the closet, I use an `nginx` [reverse proxy](https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/) to forward the _bastion server_'s public port `*:80` to `localhost:10080`. With this final connection made, the world can reach out and see my website coming out of the closet.
 
-I can set up reverse proxies for each port, `22`, `80`, and `443`, on the _bastion server_ into reverse tunnels from the _closet computer_'s `22`, `80`, and `443` ports to the _bastion server_'s `10022`, `10080`, and `10443` ports. I then leverage `autossh` to maintain persistent remote tunnels from the _closet computer_ to the _bastion server_.
+I can set up reverse proxies for each port, `22`, `80`, and `443`, on the _bastion server_ into reverse tunnels from _closet computer_'s `22`, `80`, and `443` ports to the _bastion server_'s `10022`, `10080`, and `10443` ports. I then leverage `autossh` to maintain persistent remote tunnels from _closet computer_ to the _bastion server_.
 
 **This is how it looks:**
 
@@ -130,9 +130,9 @@ It’s ok that I’m using a cloud server for this, I tell myself, because none 
 
 This is a really fragile architecture, however. If the `ssh` tunnels aren’t up, the site can’t be served. I can’t even get an error page out as there doesn't seem to be a way to query for whether the reverse proxies are passing any data through. This setup is really kinda crap like that.
 
-Being what it is, `systemd` on the _closet computer_ will stop `autossh` from retrying connections to the _bastion server_ after a certain period. This is a major problem if there’s a hiccup in the home internet connection. Sometimes my internet is out for five minutes, but that’s a tradeoff made when using a cheaper, locally-based ISP over Comcast's cartoon villain bundled contracts. At a minimum, I need to use something other than `systemd` to manage my `ssh` tunnels, as it hasn’t been reliable _at all_ and is probably one of the bigger points of failure because it cascades with any failures at the router.
+Being what it is, `systemd` on _closet computer_ will stop `autossh` from retrying connections to the _bastion server_ after a certain period. This is a major problem if there’s a hiccup in the home internet connection. Sometimes my internet is out for five minutes, but that’s a tradeoff made when using a cheaper, locally-based ISP over Comcast's cartoon villain bundled contracts. At a minimum, I need to use something other than `systemd` to manage my `ssh` tunnels, as it hasn’t been reliable _at all_ and is probably one of the bigger points of failure because it cascades with any failures at the router.
 
-Physically, the closet receives too much human traffic for the _closet computer_ or really any hardware to be held there. We live in a modest century Craftsman whose modern infrastructure has been monkey-patched together, and I piggybacked on the convenient, pre-existing connections made by the previous homeowners, putting no thought into potential consequences therein. Now we have a closet acting as a server cabinet instead of a closet. We are, of course, using it as both, with frequent access throughout the day, and cables running everywhere, as if a panicked octopus were dropped on the floor and frozen in place.
+Physically, the closet receives too much human traffic for _closet computer_ or really any hardware to be held there. We live in a modest century Craftsman whose modern infrastructure has been monkey-patched together, and I piggybacked on the convenient, pre-existing connections made by the previous homeowners, putting no thought into potential consequences therein. Now we have a closet acting as a server cabinet instead of a closet. We are, of course, using it as both, with frequent access throughout the day, and cables running everywhere, as if a panicked octopus were dropped on the floor and frozen in place.
 
 ## Duct tape and rainbows
 
@@ -141,7 +141,7 @@ I have a lot of problems hosting my website and source code from my _closet comp
 Hosting my website and source code myself feels very empowering. I feel as if I reclaimed a little piece of the internet. For that alone I want to see what more I can self host. The internet today clusters around a centralizing oligopoly of services, and I pine for the days when every odd person had their own small, weird website, and frequented a handful of small, niche forums, each with just enough users to be interesting. Now there's Facebook. GitHub. Google... If I name a _thing_: there's likely a single site that I would go to for that _thing_. That _thing_ has likely regressed in quality towards the mean and mediocre. And when I go to that site for that _thing_, I can't tell whether I've found the _thing_ or an ad for a subscription service that gives me access to the _thing_ at a markup.
 
 {{img id: "closet-computer-in-context",
-      title: "The closet computer, in context. Corey asked me to dust first.",
+      title: "_Closet computer_, in context. Corey asked me to dust first.",
       src: "/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024.png"}}
 
 I severely took for granted the uptime that a third party service could give me. It’s making me rethink what the total cost of what third party hosting actually looks like, not only in terms of dollars and nebulous ideals, but more importantly in terms of peace of mind. Terms such as _will the promotion committee be able to see that writeup I referred them to?_ I would absolutely benefit from hosting my website from my _bastion server_ instead, but perhaps after I reread `linode`'s service agreements to allay my confounding mind.
