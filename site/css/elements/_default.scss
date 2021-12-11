@@ -45,6 +45,10 @@ ul {
   @include block;
 }
 
+li > ul {
+  margin: 0.5rem 0;
+}
+
 blockquote {
   background-color: $color-aside;
   margin: 1.5rem 1rem;
@@ -75,6 +79,10 @@ a {
   text-decoration: underline;
 }
 
+a em {
+  color: $color-hyperlink;
+}
+
 .image-link {
   text-decoration: none;
 }
@@ -90,5 +98,9 @@ a {
 
   hr {
     display: none;
+  }
+
+  code {
+    font-size: inherit;
   }
 }

@@ -11,27 +11,27 @@ My website is hosted from a 2007 HP Pavilion tower that my best friend, _`[REDAC
 
 <!--more-->
 
-I previously complained to `[REDACTED]` about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by shear luck, and recommends that I breath new life into it using Arch Linux and to see if I can self host some of my own services.
+I previously complained to `[REDACTED]` about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by shear accident, and recommends that I breath new life into it using Arch Linux and to see if I can self host some of my own services.
 
 ## Tinfoil hat time!
 
-This sudden urge to self host is impulsed by the advent of [GitHub Copilot](https://copilot.github.com/). The concept of it sure spooks the hell out of me. Not the idea that my professional role as a software engineer has now become so fungible that I could be replaced by a machine, I feel that is inevitable regardless, but that this event hastens us toward an economic singularity.
+This sudden urge to self host is impulsed by the advent of [GitHub Copilot](https://copilot.github.com/). The concept of it sure spooks the hell out of me. Not the idea that my professional role as a software engineer has now become so fungible that I can be replaced by a machine, I feel that is inevitable regardless, but that this event hastens us toward an economic singularity.
 
 ### My revulsion is more nuanced than replacement
 
 My use of GitHub, a long-standing freemium product, has been in the form of a paid _Pro Plan_. I pay GitHub for this tier so that I can configure private-only access for repositories I choose, as I am paid to develop those codes, or because they are a personal project that I am prototyping.
 
-Despite paying for a _Pro Plan_, if I make those codes publicly available, then they are fed into Copilot without my express consent or knowledge. These codes are then analyzed and transformed into data for which _corporations_ will be paying untold sums of money to _another, single corporation_ in order to manifest their technical means of production, _I assume_. This means that in order to gain a competitive edge, a company must use Copilot to out-produce a competitor, but pay GitHub in order to do so. This creates a concentration of wealth and with no clear distribution mechanism for it back into the lower rungs of the economic ladder.
+Despite paying for a _Pro Plan_, if I make those codes publicly available, then they are fed into Copilot without my express consent or knowledge. These codes are then analyzed and transformed into data for which _corporations_ will be paying untold sums of money to _another, single corporation_ in order to manifest their technical means of production, _I assume_. This means that in order to gain a competitive edge, a company must use Copilot to out-produce a competitor, thus paying GitHub in order to do so. This creates a concentration of wealth and with no clear distribution mechanism for it back into the lower rungs of the economic ladder.
 
 Personally, my passion projects, my many contributions to open source, every private repository that I accidentally made public that one time... in a phrase: _my labor_, has been consented to subsidize widening profit margins in GitHub's favor, and even to the favor of companies using Copilot. An articulation of late stage capitalism's twitching proboscis has lanced into another artery from which to siphon our collective value; our dessicated tissues will remain with no further need for a paycheck.
 
 ### I guess my revulsion is still about replacement
 
-In a sense I am training my replacement. For free. Or at least in exchange for _"free hosting"_ that I'm also partially paying for. At a less sleazy company I would be told that "Bob" is my inexpensive replacement, that for next two months I will be training him, and that I will continue to be paid before I fuck off to another company where I will become paid again. This time, however, _I go to another company and "Bob" is already working there_.
+In a sense I am training my replacement. For free. Or at least in exchange for _"free hosting"_ that I'm also partially paying for. At a less sleazy company I would be told that "Bob" is my inexpensive replacement, that for next two months I will be training him, and that I will continue to be paid before I bounce to another company where I will become paid again. In this scenario, however, I go to another company and _"Bob" is already working there, and he's using all of my stuff from the last place_.
 
 ### Not all sunshine and rainbows in the cloud
 
-At this same time Apple announces they are [scanning everyone's photos](https://towardsdatascience.com/apples-neuralhash-how-it-works-and-ways-to-break-it-577d1edc9838). Don't worry, they aren't actually looking at what the photos are. They pinky promise.
+At this same time Apple announces that they are [scanning everyone's photos](https://towardsdatascience.com/apples-neuralhash-how-it-works-and-ways-to-break-it-577d1edc9838) to make sure they don't contain a potato. Don't worry, they aren't actually looking to see if the photo is or is not a potato. Until they aren't. They pinky promise.
 
 I pay Apple to store my photos in the cloud. I thought they were encrypted, right? So now they're scanning them _on my device_ because they can't look at them on the cloud, because they're encrypted. `wat`.
 
@@ -39,77 +39,87 @@ I pay Apple to store my photos in the cloud. I thought they were encrypted, righ
 
 I am very motivated to get as much of my stuff out of third party services as I can, because to generalize based on GitHub and Apple, it's likely that no third party can be trusted with my data _even if they are already making money off of it_. I resolve to divest Apple and Google of my cloud data, GitHub of my source code, and `linode` of my miscellaneous.
 
-**In this post I will focus roughly on how my website and source code are now hosted**
-
-Because I complain to `[REDACTED]` about this GitHub Copilot thing, he offers to help me find a new option for hosting my data. Just a few days later he finds this computer next to the garbage chute, and with much excitement he calls me and gleefully announces, _“It turns on!”_
+I talk to `[REDACTED]` about my feelings regarding GitHub Copilot, Apple, and cloud providers in general. He offers to help me find a new option for hosting my data. Just a few days later he finds this computer next to the garbage chute, and with much excitement he calls me and gleefully announces, _“It turns on!”_
 
 What luck!
 
 ## Keeping my data in the closet
 
-The computer sits in many pieces in my living room for about a month as I remove dust and prepare to install an array of disk to host my media. HP did not make this case amenable to changes or even provide much in the way of expansion bays, so as a consequence I now have a drive array that is free-floating within the case. No matter though, the drives are each `4TB` and so heavy that they are held in place by friction induced by their own mass and density alone. Later for a short period the computer carries the hostname `gravwell` because of the density these drives give it.
+The computer sits in many pieces in my living room as I remove dust and await several shipments of spinning platter drives. Installing the array of drives to hold my media proves difficult: HP did not make this case amenable to changes or even provide much in the way of expansion bays. As a consequence, I now have a drive array that is free-floating within the case. No matter though, the drives are each `4TB`, and so heavy that they are held in place by the friction induced by their own mass and density alone. Later, for a short period, the computer carries the hostname `gravwell` because of the density these drives give it.
 
-After I carefully arrange the disks within and have an Arch installation that can be reproducibly bootstrapped, I close the case and move the computer into the bedroom closet where I can plug it directly into the router.
+I craft a script so that I can reproducibly install Arch Linux with disk encryption over `ssh`, comfortably iterating from my 2019 MacBook Pro until the installation looks correct. I nuke the computer and try again, just to be sure. Then several times more.
 
-I spend a good number of days iterating on this computer with an [Ansible playbook](https://bitsof.thisfieldwas.green/keywordsalad/ansibled/src/commit/2f8b5c99c51adeb2226d2e9e51cead6766448559/servers.yml#L1-L23) to get the configuration just right. The drive array is set up so that if I nuke the computer then the array can be rebuilt and the drives encrypted again, though the data will be lost if this happens. As long as the array remains intact, I can add new disks to it incrementally.
+Once the OS is installed to satisfaction, I carefully arrange the drives within the case, making sure the case can tolerate some degrees of tilt in any direction without the drives sliding out of place. To my surprise, the computer can be rotated a full 90&deg; in any direction, and the drives don't move _at all_. I place the computer inside of the bedroom closet, where I can plug it directly into the router. The computer is now the _closet computer_.
 
-My goal with this playbook is to be able to reproduce the configuration of the _closet computer_ on a replacement if it should ever cease to work. Happy path is a matter of a few keystrokes, I grab a coffee while the playbook runs, and then I power off the computer and plug the drive array into it before turning it back on. Huzzah. Configuration management is Ansible's primary domain, it does this very well, and I now use it for my current three Linux-based systems.
+I spend some number of days iterating on the _closet computer_ with an [Ansible playbook](https://bitsof.thisfieldwas.green/keywordsalad/ansibled/src/commit/2f8b5c99c51adeb2226d2e9e51cead6766448559/servers.yml#L1-L23) to get the configuration just right. As long as the data array remains intact, I can incrementally add new disks to it by appending the disks to the playbook configuration. If the data array is compromised, then I can nuke it and build anew just by running the playbook.
 
-I nuke and enjoy rebuilding my Arch Linux-powered _thonkpad_ on occasion. All changes I make to it are managed through its associated playbook, including an exploration of Minecraft launchers as authentication into the game broke and Microsoft required me to migrate my Mojang/Minecraft account.
+My goal with this playbook is primarily to retain a living snapshot of the _closet computer_'s configuration. A secondary goal is to be able to provision a replacement system if the computer should ever cease to work. In my head I imagine the happy path for such an event looks like this:
 
-## Logistics
+1. A few keystrokes.
+2. I then grab a coffee while the playbook runs.
+3. When the playbook is complete, I can power off the computer.
+4. I plug the drive array into it.
+5. I turn on the new _closet computer_. Huzzah.
 
-The closet computer hosts a small set of services:
+Configuration management is Ansible's primary domain, it does this very well, and I now use it for my current three Linux-based systems.
+
+> I both nuke and enjoy rebuilding my Arch Linux-powered _thonkpad_ on occasion. All changes I make to it are managed through its associated playbook.
+
+## Software and Hardware
+
+The _closet computer_ hosts a small set of services:
 
 * My website using [`nginx`](https://www.nginx.com/), which also terminates `ssl`.
-* My source code using [`gitea`](https://gitea.io/).
+* My source code using [`gitea`](https://gitea.io/) with [`postgres`](https://postgresql.org/) to support its data.
 * My data array with `16TB` usable storage:
-  * [Just a Bunch of Disks](https://en.wikipedia.org/wiki/Non-RAID_drive_architectures#JBOD) non-RAID architecture with redundancy using [`snapraid`](https://www.snapraid.it/)
-  * Magic using [`mergerfs`](https://github.com/trapexit/mergerfs) so that the array looks like one big fat disk.
+  * It's [just a bunch of disks](https://en.wikipedia.org/wiki/Non-RAID_drive_architectures#JBOD) with redundancy provided by [`snapraid`](https://www.snapraid.it/).
+  * It looks like a single disk by using [`mergerfs`](https://github.com/trapexit/mergerfs).
   * It’s very nice to use, a choice recommendation by `[REDACTED]`.
 * [`pi-hole`](https://pi-hole.net/)... I thought this would mean less ads, but it hasn't really helped much.
 
-I’m using docker containers for `gitea` and [`postgres`](https://www.postgresql.org/) (supports only `gitea`, not listed above). `nginx` runs natively and provides routing for its configured domains.
+I’m using docker containers for `gitea` and `postgres`. `nginx` runs natively and provides routing into `gitea` or static `html` for its configured domains.
 
-I mentioned above that this computer sits in the closet. I refer to this computer at home simply as the _closet computer_. This location comes with some problems, however. For example the closet does not have a dedicated power outlet and I have to run an extension cable from an outlet in the middle of the room and under the bed.
+I mentioned above that this computer sits in the closet. This location comes with some problems, however. For example, the closet does not have a dedicated power outlet: I have to run an extension cable from an outlet in the middle of the room and out from under the bed.
 
 ## Reasons why my website is offline
 
-As I can't speculate about my uptime in terms of a magnitude of `9`'s, let me paint a picture instead with a short and incomplete list of reasons for which my website is offline:
+I can't express my website's uptime in a [_magnitude of `9`'s_](https://aws.amazon.com/blogs/publicsector/achieving-five-nines-cloud-justice-public-safety/) the same way that a public safety and emergency service would. Having _"one 9's uptime"_ is really bad, and I would like to find a more impressive metric to present to someone than `90%`.
+
+Now that I think about it, _uptime_ may not be the right word to use. Let me instead paint a picture with a short and incomplete list of reasons for which my website is offline:
 
 * My ISP had an outage.
 * The power was out.
-* I closed the sliding closet door too quickly and it unplugged the router.
-* My husband pushed a box of shoes under the bed and pushed the extension cable out of its plug.
-* Instead of unplugging the router itself to turn it off and then on again, I flipped the switch on the power strip and forgot to turn the _closet computer_ back on.
-* I can’t get into the `bios` to configure the _closet computer_ to power back on when power returns.
-* The computer came up before the router and `autossh` stopped trying to open the tunnels to the outside network after a period of time because `systemd` flakes.
-* My router refuses to route any traffic whatsoever until I point DNS away from the `pi-hole`.
+* I closed the sliding closet door too quickly, and it unplugged the router.
+* My husband pushed a box of shoes under the bed, and it pushed the extension cable out of its plug.
+* Instead of unplugging the router itself to turn it off and then on again, I flipped the switch on the power strip because I thought it would be less effort. I did not fully grasp that this turns of _everything_ in the closet. Consequently, I forgot to turn the _closet computer_ back on.
+* I can’t get into the `bios` to configure the _closet computer_ to turn back on when the power returns.
+* The _closet computer_ came up before the router and `autossh` stopped trying to open the `ssh` tunnels to the _bastion server_ after a period of time, because `systemd` is designed to give up and stop trying.
+* My router refuses to route any traffic whatsoever until I point DNS away from the `pi-hole` on the _closet computer_.
 * Hubris.
 
 ## A hosting solution held together by glue and popsicle sticks
 
-I don’t have a static IP. My ISP’s network infrastructure simply doesn’t allow for it, as the infrastructure is based on a mesh of wireless signal propagated between large, unsightly antennas installed on top of each house using their service. To get around this, I swallow my pride and purchase again a cloud server from `linode`, I call this one my _bastion server_, and with this as a sort of static IP address I then configure my domains to point to.
+I don’t have a static IP. My ISP’s network infrastructure simply doesn’t allow for it, as the infrastructure is based on a mesh of wireless signal that is propagated between large, unsightly antennas installed on top of each house using their service. To get around this, I swallow my pride and purchase, again, a cloud server from `linode`. I call this one my _bastion server_, and with it I have this sort of static IP address that I can configure my domains to point to.
 
-As I still can't reach from the outside into my closet, I have to perform a little magic...
+As I still can't reach from the outside world into my closet, I have to perform a little magic...
 
 Using `ssh`, I can open a [remote tunnel](https://www.ssh.com/academy/ssh/tunneling/example#remote-forwarding) from the _closet computer_ to the _bastion server_ with this command:
 
-```bash
+```{.bash .numberLines}
 ssh -R 10080:localhost:80 bastion.oflogan.xyz
 ```
 
-This command binds a connection to the _bastion server_'s `localhost:10080` port and forwards it to the _closet computer_'s `*:80` port. This means I can forward any HTTP traffic the _bastion server_ receives on port `*:80` to `localhost:10080` to the _closet computer_, where I am now hosting my website.
+This command binds a connection to the _bastion server_'s `localhost:10080` port and forwards it to the _closet computer_'s `*:80` port.
 
-The remote tunnel binds `localhost:10080` on the _bastion server_, which means that the tunnel is not accessible publicly, and my website is still stuck in the closet. In order for my website to come out, I use an `nginx` [reverse proxy](https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/) to forward the public port `*:80` to private port `localhost:10080`.
+Because the remote tunnel binds `localhost:10080` on the _bastion server_, this means that the tunnel is not accessible publicly, and that my website is still in the closet. In order for my website to come out of the closet, I use an `nginx` [reverse proxy](https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/) to forward the _bastion server_'s public port `*:80` to `localhost:10080`. With this final connection made, the world can reach into the closet.
 
-I leverage `autossh` to maintain persistent remote tunnels from the _closet computer_ to the _bastion server_ for ports `22`, `80`, and `443`. As the `nginx` reverse proxy to the `ssh` tunnels simply pass bits from point `A` to `B` to `C`, to an outside observer it's as if my website is coming from the _bastion server_, when in fact it's coming out of the closet.
+I can set up reverse proxies for each port, `22`, `80`, and `443`, on the _bastion server_ into reverse tunnels from the _closet computer_'s `22`, `80`, and `443` ports to the _bastion server_'s `10022`, `10080`, and `10443` ports. I then leverage `autossh` to maintain persistent remote tunnels from the _closet computer_ to the _bastion server_.
 
 **This is how it looks:**
 
 ```{.txt .nowrap}
          +-BASTION-SERVER--------------\
-         | <=proxy=> | <=====ssh tunnel+===> +-CLOSET-COMPUTER---\
+         | <=proxy=> | <===remote tunnel===> +-CLOSET-COMPUTER---\
 SSH ---> | *:22----> | localhost:10022 | --> | *:22 SSH          |
 HTTP --> | *:80----> | localhost:10080 | --> | *:80 goto 443 duh |
 HTTPS -> | *:443---> | localhost:10443 | --> | *:443 my website  |
@@ -118,17 +128,17 @@ HTTPS -> | *:443---> | localhost:10443 | --> | *:443 my website  |
 
 It’s ok that I’m using a cloud server for this, I tell myself, because none of my data is stored on it. But also, I think I pulled off something kinda cool.
 
-This is a really fragile architecture, however. If the `ssh` tunnels aren’t up, the site can’t be served and I can’t even get an error page out as there doesn't seem to be a way to query for whether the reverse proxies are passing any data through. This setup is really kinda crap like that.
+This is a really fragile architecture, however. If the `ssh` tunnels aren’t up, the site can’t be served. I can’t even get an error page out as there doesn't seem to be a way to query for whether the reverse proxies are passing any data through. This setup is really kinda crap like that.
 
-Being what it is, `systemd` on the _closet computer_ will stop `autossh` from retrying connections to the _bastion server_ after a certain period and this is a major problem if there’s a hiccup in the home internet connection. Sometimes my internet is out for five minutes, but that’s a tradeoff made when using a cheaper, locally-based ISP over Comcast's cartoon villain bundled contracts. At a minimum I need to use something other than `systemd` to manage my `ssh` tunnels as it hasn’t been reliable _at all_ and is probably one of the bigger points of failure because it cascades with any failures at the router.
+Being what it is, `systemd` on the _closet computer_ will stop `autossh` from retrying connections to the _bastion server_ after a certain period. This is a major problem if there’s a hiccup in the home internet connection. Sometimes my internet is out for five minutes, but that’s a tradeoff made when using a cheaper, locally-based ISP over Comcast's cartoon villain bundled contracts. At a minimum, I need to use something other than `systemd` to manage my `ssh` tunnels, as it hasn’t been reliable _at all_ and is probably one of the bigger points of failure because it cascades with any failures at the router.
 
-Physically the closet receives too much human traffic for the _closet computer_ or really any hardware to be held there. We live in a modest century Craftsman whose modern infrastructure has been monkey-patched together and I piggybacked on the convenient, pre-existing connections made by the previous homeowners putting no thought into potential consequences therein. Now we have a closet acting as a server cabinet instead of a closet. We are of course using it as both, with frequent access throughout the day and cables running everywhere as if a panicked octopus were dropped on the floor and frozen in place.
+Physically, the closet receives too much human traffic for the _closet computer_ or really any hardware to be held there. We live in a modest century Craftsman whose modern infrastructure has been monkey-patched together, and I piggybacked on the convenient, pre-existing connections made by the previous homeowners, putting no thought into potential consequences therein. Now we have a closet acting as a server cabinet instead of a closet. We are, of course, using it as both, with frequent access throughout the day, and cables running everywhere, as if a panicked octopus were dropped on the floor and frozen in place.
 
 ## Duct tape and rainbows
 
-I have a lot of problems hosting my website and source code from my _closet computer_ in terms of uptime. Mostly related to tripping over the power cable, though in other ways the setup isn’t resilient and I still need to do some work to improve how it performs. But it’s been a really rewarding experience nonetheless. I’m working with tech that I use all the time as a consumer but have never myself had to engineer or maintain. It's a fun puzzle.
+I have a lot of problems hosting my website and source code from my _closet computer_ in terms of uptime. Mostly related to tripping over the power cable, though in other ways the setup isn’t resilient. It’s been a really rewarding experience nonetheless. I’m working with tech that I use all the time as a consumer, but have never myself had to engineer or maintain. It's a fun puzzle.
 
-Hosting my website and source code myself feels very empowering, as if I reclaimed a little piece of the internet. For that alone I want to see what more I can self host. The internet today clusters around an increasingly centralizing oligopoly of services, and I pine for the days when every odd person had their own small, weird website, and frequented a handful of small, niche forums, each with just enough users to be interesting. Now there's Facebook. GitHub. Google... If I name a _thing_: there's likely a single company that I would go to for that _thing_, and that _thing_ has likely regressed in quality towards the mean and mediocre. And when I go to that company for that _thing_, I can't tell whether I've found the _thing_ or an ad.
+Hosting my website and source code myself feels very empowering. I feel as if I reclaimed a little piece of the internet. For that alone I want to see what more I can self host. The internet today clusters around a centralizing oligopoly of services, and I pine for the days when every odd person had their own small, weird website, and frequented a handful of small, niche forums, each with just enough users to be interesting. Now there's Facebook. GitHub. Google... If I name a _thing_: there's likely a single site that I would go to for that _thing_. That _thing_ has likely regressed in quality towards the mean and mediocre. And when I go to that site for that _thing_, I can't tell whether I've found the _thing_ or an ad for a subscription service that gives me access to the _thing_ at a markup.
 
 {{img id: "closet-computer-in-context",
       title: "The closet computer, in context. Corey asked me to dust first.",
@@ -136,15 +146,15 @@ Hosting my website and source code myself feels very empowering, as if I reclaim
 
 I severely took for granted the uptime that a third party service could give me. It’s making me rethink what the total cost of what third party hosting actually looks like, not only in terms of dollars and nebulous ideals, but more importantly in terms of peace of mind. Terms such as _will the promotion committee be able to see that writeup I referred them to?_ I would absolutely benefit from hosting my website from my _bastion server_ instead, but perhaps after I reread `linode`'s service agreements to allay my confounding mind.
 
-Regarding nebulous ideals, Copilot makes a very strong case for treating [data as a form of labor](https://www.brookings.edu/blog/techtank/2018/02/21/should-we-treat-data-as-labor-lets-open-up-the-discussion/). At the time of this writing, Wed Dec 8, 2021, Copilot is in technical review and accessible via waitlist. I can't find any mention of licensing cost or whether there will be paid vs community editions. If Copilot is available as an exclusively free service then I believe it stands as an excellent reinvestment back into the community and profession as a whole. If someone is paying for it then we are collectively exploited within some legally-accepted gray area because we agreed to be.[^tos]
+Regarding nebulous ideals, Copilot makes a very strong case for treating [data as a form of labor](https://www.brookings.edu/blog/techtank/2018/02/21/should-we-treat-data-as-labor-lets-open-up-the-discussion/). At the time of this writing, Wed Dec 8, 2021, Copilot is in technical review and accessible via waitlist. I can't find any mention of licensing cost, or whether there will be a distinction beetween paid and community editions. If Copilot is available as an exclusively free service, then I believe it stands as an excellent reinvestment back into the community and profession as a whole. If someone is paying for Copilot, then we are collectively exploited within some legally-accepted gray area, because we agreed to be.[^tos]
 
 ## Stepping back
 
-I still use GitHub professionally and for open source projects hosted there. I realize that being a principled curmudgeon sometimes means that I’m only that. Obviously there also exists a sort of cognitive dissonance in regards to contributing to open source works in the context of labor. Regardless, I gave myself a learning opportunity and I consequently don’t use GitHub as a personal consumer now. I suppose that was my goal after all.
+I still use GitHub professionally, and for open source projects hosted there. I realize that being a principled curmudgeon sometimes means that I’m only that. Obviously there also exists a sort of cognitive dissonance in regards to contributing to open source works in the context of labor. Regardless, I gave myself a learning opportunity, and I consequently don’t use GitHub as a personal consumer now. I suppose that was my goal after all.
 
-I might give Copilot a go soon. I'm reading some good things about how it cuts through boilerplate like a hot knife through butter. Reviews such as this help me conceptualize how it might fit into my own workflow especially now that I've had time to step back. I would be over the moon to have an intelligent assist for the boring parts of my job. I suppose that was GitHub's goal, too.
+I might give Copilot a go soon. I'm reading some good things about how it cuts through boilerplate like a hot knife through butter. Reviews such as this help me conceptualize how it might fit into my own workflow, and that its role is more augmentation than replacement. Especially now that I've had time to step back. I would be over the moon to have an intelligent assist for the boring parts of my job. I suppose that was GitHub's goal, too.
 
-On the lighter side, being professionally out and telling people that my website is coming out of the closet gives me a certain subversive glee that I never realized I needed. It's a great lead into how the computer got there.
+On the lighter side, being professionally out and telling people that my website is coming out of the closet gives me a certain subversive glee that I never realized I needed. It's a great lead into how the computer got there, too.
 
 For now, I host my source code at [bitsof.thisfieldwas.green](https://bitsof.thisfieldwas.green). My website source repository is directly accessible from [keywordsalad/thisfieldwas.green](https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green).
 
