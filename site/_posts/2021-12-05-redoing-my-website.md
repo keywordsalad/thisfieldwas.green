@@ -145,48 +145,48 @@ I don't get what the negative fuss about functional programming is. Everything I
 
 I've picked up some concepts that I imagine will find their way back into how I write code elsewhere:
 
-Abstract data types
+#### Abstract data types
 
-: Abstract data types are the best way of implementing closed polymorphism that I've found thus far, and enums in object oriented languages are close enough to simulate them effectively in those languages.
+Abstract data types are the best way of implementing closed polymorphism that I've found thus far, and enums in object oriented languages are close enough to simulate them effectively in those languages.
 
-    In my experience, polymorphism dealing with data only needs to extend over a small number of cases. By using abstract data types, I can keep my code variants local to each other, so that adding new variants requires that changes be made in-context. This ensures that no case for a polymorphic change in behavior goes unchecked. I lean on the compiler to tell me if I left any location unhandled.
+In my experience, polymorphism dealing with data only needs to extend over a small number of cases. By using abstract data types, I can keep my code variants local to each other, so that adding new variants requires that changes be made in-context. This ensures that no case for a polymorphic change in behavior goes unchecked. I lean on the compiler to tell me if I left any location unhandled.
 
-Type classes
+#### Type classes
 
-:   Type classes are the best way of implementing open polymorphism that I've found thus far, and interfaces in object oriented languages are close enough to simulate them effectively in those languages.
+Type classes are the best way of implementing open polymorphism that I've found thus far, and interfaces in object oriented languages are close enough to simulate them effectively in those languages.
 
-    Contrasting with abstract data types, interfaces provide a facility for extending polymorphism over an open set of cases. As interfaces speak only in terms of operations, they run a much lower risk of introducing variant code paths that could introduce defects related to data.
+Contrasting with abstract data types, interfaces provide a facility for extending polymorphism over an open set of cases. As interfaces speak only in terms of operations, they run a much lower risk of introducing variant code paths that could introduce defects related to data.
 
-Rethinking conventional object-oriented programming
+#### Rethinking conventional object-oriented programming
 
-:   I did not find myself reaching into my toolbox for inheritance or class-based polymorphism to solve problems. These two mechanisms are a brittle way of implementing polymorphism, I feel. I wager I could write decent Java without them, as I have been doing this for some time already in other languages.
+I did not find myself reaching into my toolbox for inheritance or class-based polymorphism to solve problems. These two mechanisms are a brittle way of implementing polymorphism, I feel. I wager I could write decent Java without them, as I have been doing this for some time already in other languages.
 
-Changing the world
+#### Changing the world
 
-:   Immutability makes reasoning about data flow and change of state across an application really easy and I will leverage this everywhere I that I reasonably can.
+Immutability makes reasoning about data flow and change of state across an application really easy and I will leverage this everywhere I that I reasonably can.
 
-    I find my mental model of objects in object-oriented programming changes starkly when I apply immutability to data. As conventionally understood, I imagine a small container of data, an _object_, which I can modify at-will, via a provided interface of methods, in order to change its state over time. When I apply immutability as a design constraint, the concept of an _object_ as realized here is no longer a possible option.
+I find my mental model of objects in object-oriented programming changes starkly when I apply immutability to data. As conventionally understood, I imagine a small container of data, an _object_, which I can modify at-will, via a provided interface of methods, in order to change its state over time. When I apply immutability as a design constraint, the concept of an _object_ as realized here is no longer a possible option.
 
-    Immutability imposes a fundamental change in how business and technical capabilities within code are designed. Instead of objects as methods around mutable data, methods become organized into _modules_ containing _functions_. Some functions act as _entry points_ into the associated capability, and they receive, usually, an abstract data type as an argument, and construct a new one as a result. Change over time can be observed without modifying state destructively, and entire classes of runtime errors, like data races, are eliminated.
+Immutability imposes a fundamental change in how business and technical capabilities within code are designed. Instead of objects as methods around mutable data, methods become organized into _modules_ containing _functions_. Some functions act as _entry points_ into the associated capability, and they receive, usually, an abstract data type as an argument, and construct a new one as a result. Change over time can be observed without modifying state destructively, and entire classes of runtime errors, like data races, are eliminated.
 
-    There are more impacts to the design of an application than I suggest here. I admit any value proposition may appear dubious on its face. Consider for a moment: state within long-running Haskell applications appears as if it were mutating. Designing for immutability thus works in production applications and I am very interested in learning more about the patterns used to support it.
+There are more impacts to the design of an application than I suggest here. I admit any value proposition may appear dubious on its face. Consider for a moment: state within long-running Haskell applications appears as if it were mutating. Designing for immutability thus works in production applications and I am very interested in learning more about the patterns used to support it.
 
-Pattern matching
+#### Pattern matching
 
-:   Pattern matching and branching conditionally based on the _shape_ of arguments is astoundingly empowering. It elevates data into a first-class position within API design.
+Pattern matching and branching conditionally based on the _shape_ of arguments is astoundingly empowering. It elevates data into a first-class position within API design.
 
-    Until recently, I can't think of any C syntax-inspired language that takes advantage of this concept. Pattern matching may be so enabling, I think, that it might even have a measurable impact on the economy! I wish this was something that could be measured more concretely, but I'm happy even if it's just a convenience to have.
+Until recently, I can't think of any C syntax-inspired language that takes advantage of this concept. Pattern matching may be so enabling, I think, that it might even have a measurable impact on the economy! I wish this was something that could be measured more concretely, but I'm happy even if it's just a convenience to have.
 
-Encoding the effect in result
+#### Encoding the effect in result
 
-:   This is perhaps my most unexpected takeaway: Effect types make very clear that as part of the contract of a function that I am calling, some orthogonal quality in addition to a result, including whether or not I receive a result, occurs.
+This is perhaps my most unexpected takeaway: Effect types make very clear that as part of the contract of a function that I am calling, some orthogonal quality in addition to a result, including whether or not I receive a result, occurs.
 
-    * `f :: IO a` will give me an `a` if `f` _succeeds_. It will also affect external systems in some way, or it might _fail_ due to one. Java engineers might recall method signatures polluted with `throws IOException`; this is same/same but different.
-    * `g :: [a]` will give me _one or more_ of `a` if `g` _succeeds_. Effectively, `g` _fails_ if I receive _zero_ `a`'s. This is a sort of non-zero nondeterminism of the number of results an operation.
-    * `h :: Maybe a` will give me `Just a` if an `a` exists and it _succeeds_. It gives me `Nothing` otherwise and _fails_. This is encodes an explicit presence or absence of a value. I like to think of `Maybe` as a `null` done right.
-    * `i :: Either a b` will give me `Right a` if `i` _succeeds_. I receive `Left b` if `i` _fails_, which allows me to inspect `b` for why `i` may have failed.
+* `f :: IO a` will give me an `a` if `f` _succeeds_. It will also affect external systems in some way, or it might _fail_ due to one. Java engineers might recall method signatures polluted with `throws IOException`; this is same/same but different.
+* `g :: [a]` will give me _one or more_ of `a` if `g` _succeeds_. Effectively, `g` _fails_ if I receive _zero_ `a`'s. This is a sort of non-zero nondeterminism of the number of results an operation.
+* `h :: Maybe a` will give me `Just a` if an `a` exists and it _succeeds_. It gives me `Nothing` otherwise and _fails_. This is encodes an explicit presence or absence of a value. I like to think of `Maybe` as a `null` done right.
+* `i :: Either a b` will give me `Right a` if `i` _succeeds_. I receive `Left b` if `i` _fails_, which allows me to inspect `b` for why `i` may have failed.
 
-    An observation: each of these effect types encodes some notion of _success_ and _failure_. The `Monad` typeclass generalizes over these and this allows for a high degree of code reuse, independent of specific error handling. Error handling can be pushed out to the edge of the contexts they need to be contained within, which helps keep business logic cleaner. Each of the above effect types implement the `Monad` typeclass.
+**An observation**: each of these effect types encode some notion of _success_ and _failure_. The `Monad` typeclass generalizes over these and this enables a high degree of code reuse, independent of specific error handling. Error handling can be pushed out to the edge of the contexts they need to be contained within, which helps keep business logic cleaner. Each of the above effect types implement the `Monad` typeclass.
 
 ## I rather like `hakyll` and Haskell!
 
