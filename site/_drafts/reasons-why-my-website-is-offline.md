@@ -15,7 +15,7 @@ I previously complained to `[REDACTED]` about how untrustworthy I felt cloud pro
 
 ## Tinfoil hat time!
 
-This sudden urge to self host is impulsed by the advent of [GitHub Copilot](https://copilot.github.com/). The concept of it sure spooks the hell out of me. Not the idea that my professional role as a software engineer has now become so fungible that I can be replaced by a machine, I feel that is inevitable regardless, but that this event hastens us toward an economic singularity.
+This sudden urge to self host is impulsed by the advent of [GitHub Copilot](https://copilot.github.com/). The concept of it sure spooks the hell out of me. Not the idea that my professional role as a software engineer has now become so fungible that I can be replaced by a machine, I feel that is inevitable regardless, but perhaps I feel an uncomfortable rumble of an economic ripple effect.
 
 ### My revulsion is more nuanced than replacement
 
