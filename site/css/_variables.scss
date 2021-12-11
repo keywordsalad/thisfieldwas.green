@@ -1,7 +1,7 @@
 @use "sass:color";
 
 $text-font-family: Helvetica, Arial, sans-serif;
-$text-font-size: 1rem;
+$text-font-size: 1em;
 $text-font-size-small: $text-font-size * 0.9;
 $text-font-size-tiny: $text-font-size * 0.85;
 $text-font-size-miniscule: $text-font-size * 0.8;
@@ -42,6 +42,6 @@ $border-thin: $border-thin-width $border-style;
 $content-max-width: 65rem;
 
 $code-font-family: "Courier", "Courier New", monospace;
-$code-font-size: 1rem;
+$code-font-size: 1em;
 $code-color: indianred;
 $code-color-hyperlink: $color-hyperlink;

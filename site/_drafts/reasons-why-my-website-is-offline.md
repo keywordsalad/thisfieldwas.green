@@ -19,25 +19,25 @@ This sudden urge to self host is impulsed by the advent of [GitHub Copilot](http
 
 ### My revulsion is more nuanced than replacement
 
-My use of GitHub, a long-standing freemium product, has been in the form of a paid _Pro Plan_. I pay GitHub for this tier so that I can configure private-only access for repositories I choose, as I am paid to develop those codes, or because they are a personal project that I am prototyping.
+My use of GitHub, a long-standing freemium product, has been in the form of a paid _Pro Plan_. I pay GitHub for this tier so that I can choose to configure privileged access to certain repositories as their contents I am either paid to develop or they are personal projects that I am prototyping.
 
-Despite paying for a _Pro Plan_, if I make those codes publicly available, then they are fed into Copilot without my express consent or knowledge. These codes are then analyzed and transformed into data for which _corporations_ will be paying untold sums of money to _another, single corporation_ in order to manifest their technical means of production, _I assume_. This means that in order to gain a competitive edge, a company must use Copilot to out-produce a competitor, thus paying GitHub in order to do so. This creates a concentration of wealth and with no clear distribution mechanism for it back into the lower rungs of the economic ladder.
+Despite paying for a _Pro Plan_, if I make those repositories publicly available, then their contents are fed into Copilot without my express consent or knowledge. These contents are then analyzed and transformed into data for which _corporations_ will be paying untold sums of money to _another, single corporation_ in order to manifest their technical means of production, _I assume_. This means that in order to gain a competitive edge, a company must use Copilot to out-produce a competitor, paying GitHub a premium in order to do so. This creates a concentration of wealth with no clear distribution mechanism returning it to lower rungs of the economic ladder.
 
 Personally, my passion projects, my many contributions to open source, every private repository that I accidentally made public that one time... in a phrase: _my labor_, has been consented to subsidize widening profit margins in GitHub's favor, and even to the favor of companies using Copilot. An articulation of late stage capitalism's twitching proboscis has lanced into another artery from which to siphon our collective value; our dessicated tissues will remain with no further need for a paycheck.
 
 ### I guess my revulsion is still about replacement
 
-In a sense I am training my replacement. For free. Or at least in exchange for _"free hosting"_ that I'm also partially paying for. At a less sleazy company I would be told that "Bob" is my inexpensive replacement, that for next two months I will be training him, and that I will continue to be paid before I bounce to another company where I will become paid again. In this scenario, however, I go to another company and _"Bob" is already working there, and he's using all of my stuff from the last place_.
+In a sense I am training my replacement. For free. Or at least in exchange for _"free hosting"_ that I'm also partially paying for. At a less sleazy company I would be told that "Bob" is my inexpensive replacement, that for the next two months I will be training him, and that I will continue to be paid before I bounce to another company where I will become paid again. In this scenario, however, I go to another company and _"Bob" is already working there, and he's using all of my stuff from the last place_.
 
 ### Not all sunshine and rainbows in the cloud
 
-At this same time Apple announces that they are [scanning everyone's photos](https://towardsdatascience.com/apples-neuralhash-how-it-works-and-ways-to-break-it-577d1edc9838) to make sure they don't contain CSAM. Don't worry, they aren't actually looking to see if the photo contains a CSAM. Until they aren't. They pinky-promise they will only ever look for CSAM, even though they could look for anything they wanted.
+At this same time Apple announces that they are [scanning everyone's photos](https://towardsdatascience.com/apples-neuralhash-how-it-works-and-ways-to-break-it-577d1edc9838) to make sure they don't contain CSAM. Don't worry, they aren't actually looking to see if the photo contains CSAM. Until they aren't, because someone has to verify a positive match manually. They pinky-promise they will only ever look for CSAM, even though they could look for anything they wanted, or are told to look for.
 
 I pay Apple to store my photos in the cloud. I thought they were encrypted, right? So now they're scanning them _on my device_ because they can't look at them on the cloud, because they're encrypted. `wat`.
 
 ### Bringing the cloud home
 
-I am very motivated to get as much of my stuff out of third party services as I can, because to generalize based on GitHub and Apple, it's likely that no third party can be trusted with my data _even if they are already making money off of it_. I resolve to divest Apple and Google of my cloud data, GitHub of my source code, and `linode` of my miscellaneous.
+I am very motivated to get as much of my stuff out of third party services as I can, because--to generalize based on GitHub and Apple--it's likely that no third party can be trusted with my data _even if they are already making money off of it_. I resolve to divest Apple and Google of my cloud data, GitHub of my source code, and `linode` of my miscellaneous.
 
 I talk to `[REDACTED]` about my feelings regarding GitHub Copilot, Apple, and cloud providers in general. He offers to help me find a new option for hosting my data. Just a few days later he finds this computer next to the garbage chute, and with much excitement he calls me and gleefully announces, _“It turns on!”_
 
@@ -141,7 +141,7 @@ I have a lot of problems hosting my website and source code from my _closet comp
 Hosting my website and source code myself feels very empowering. I feel as if I reclaimed a little piece of the internet. For that alone I want to see what more I can self host. The internet today clusters around a centralizing oligopoly of services, and I pine for the days when every odd person had their own small, weird website, and frequented a handful of small, niche forums, each with just enough users to be interesting. Now there's Facebook. GitHub. Google... If I name a _thing_: there's likely a single site that I would go to for that _thing_. That _thing_ has likely regressed in quality towards the mean and mediocre. And when I go to that site for that _thing_, I can't tell whether I've found the _thing_ or an ad for a subscription service that gives me access to the _thing_ at a markup.
 
 {{img id: "closet-computer-in-context",
-      title: "_Closet computer_, in context. Corey asked me to dust first.",
+      title: "Cables and all, the _closet computer_ in context. Corey asked me to dust first.",
       src: "/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024.png"}}
 
 I severely took for granted the uptime that a third party service could give me. It’s making me rethink what the total cost of what third party hosting actually looks like, not only in terms of dollars and nebulous ideals, but more importantly in terms of peace of mind. Terms such as _will the promotion committee be able to see that writeup I referred them to?_ I would absolutely benefit from hosting my website from my _bastion server_ instead, but perhaps after I reread `linode`'s service agreements to allay my confounding mind.

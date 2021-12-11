@@ -1,5 +1,6 @@
 @mixin contain-floats {
   &::after {
+    content: "";
     clear: both;
     display: block;
   }

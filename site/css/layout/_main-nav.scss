@@ -1,10 +1,12 @@
 .main-nav {
-  font-size: 0;
+  @include contain-floats;
   margin: 0;
   a {
+    display: list-item;
+    list-style: none;
+    float: left;
     font-size: $text-font-size-small;
     line-height: 1.2;
-    display: inline-block;
     & + a {
       margin-left: 0.5rem;
       padding-left: 0.5rem;

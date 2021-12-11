@@ -1,11 +1,5 @@
-h1 code, h2 code, h3 code, h4 code, h5 code, h6 code {
-  color: inherit;
-  font-size: inherit;
-}
-
 code {
   font-family: $code-font-family;
-  font-size: $code-font-size;
   white-space: pre-wrap;
   word-wrap: break-word;
 
@@ -64,7 +58,7 @@ div.sourceCode, pre.sourceCode {
 }
 
 pre.sourceCode {
-  margin: 1rem 0;
+  margin: 1em 0;
   padding: 0;
 }
 
@@ -72,7 +66,8 @@ code.sourceCode {
   display: block;
   margin: 0;
   padding: 0;
-  font-size: 0;
+  display: flex;
+  flex-direction: column;
 
   .numberLines & {
     counter-reset: line-number;
@@ -80,15 +75,12 @@ code.sourceCode {
 
   > span {
     display: block;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-size: $code-font-size;
 
     &:first-child {
-      padding-top: 0.3rem;
+      padding-top: 0.3em;
     }
     &:last-child {
-      padding-bottom: 0.3rem;
+      padding-bottom: 0.3em;
     }
 
     .numberLines & {
@@ -103,9 +95,9 @@ code.sourceCode {
       > a:first-child {
         &::before {
           display: inline-block;
-          width: 2rem;
-          padding: 0 0.5rem 0 0;
-          margin: 0 0.5rem 0 0;
+          width: 2em;
+          padding: 0 0.5em 0 0;
+          margin: 0 0.5em 0 0;
           border-right: $border-thin;
           text-align: right;
           content: counter(line-number);
@@ -125,7 +117,7 @@ a code, a code:not(.sourceCode) {
 }
 
 .nowrap {
-  overflow-x: auto;
+  overflow-x: scroll;
 
   code > span {
     white-space: pre;
