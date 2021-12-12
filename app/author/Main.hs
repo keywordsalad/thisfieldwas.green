@@ -1,4 +1,4 @@
 import Green
 
 main :: IO ()
-main = author
+main = authorMain

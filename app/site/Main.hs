@@ -1,4 +1,4 @@
 import Green
 
 main :: IO ()
-main = site
+main = siteMain

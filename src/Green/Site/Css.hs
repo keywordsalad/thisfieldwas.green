@@ -1,4 +1,4 @@
-module Green.Content.Css (scss) where
+module Green.Site.Css where
 
 import Green.Common
 import Green.Config

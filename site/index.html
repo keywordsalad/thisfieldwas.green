@@ -101,7 +101,7 @@ layout: page
   <h3>Some Writing</h3>
   <p>Here's a sampling of things I've blogged about. A complete selection may be found on their <a href="{{route 'blog.html'}}">dedicated page</a>.</p>
   <ul>
-    {{#for previousPosts}}
+    {{#for recentPosts}}
     <li>
       <a href="{{url}}">{{title}}</a> - {{date | dateAs shortDate}}
     </li>

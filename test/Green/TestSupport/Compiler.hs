@@ -1,10 +1,10 @@
 module Green.TestSupport.Compiler where
 
 import Data.Set as S
+import Green.TestSupport.TestEnv
 import Hakyll as H
 import Hakyll.Core.Compiler.Internal
 import qualified Hakyll.Core.Logger as Logger
-import Green.TestSupport.TestEnv
 import Test.Hspec
 
 type RunCompiler a = Compiler a -> Identifier -> IO (CompilerResult a)
@@ -33,8 +33,8 @@ shouldProduce (CompilerDone item _) expected =
   itemBody item `shouldBe` expected
 shouldProduce (CompilerSnapshot snapshot _) _ =
   expectationFailure $ "Compiler did not complete, received snapshot " ++ snapshot
-shouldProduce (CompilerRequire (identifier, snapshot) _) _ =
-  expectationFailure $ "Compiler did not complete, produced dependency on " ++ show identifier ++ " snapshot " ++ snapshot
+shouldProduce (CompilerRequire dependencies _) _ =
+  expectationFailure $ "Compiler did not complete, produced dependencies on " ++ show dependencies
 shouldProduce (CompilerError errors) _ = expectationFailure message
   where
     message = case errors of
@@ -43,4 +43,4 @@ shouldProduce (CompilerError errors) _ = expectationFailure message
       CompilationNoResult exceptions -> "Compiler produced no result with exceptions: " ++ show exceptions
 
 compileBody :: (Item String -> Compiler (Item String)) -> Compiler (Item String)
-compileBody compiler = getUnderlying >>= loadBody >>= compiler
+compileBody compiler = getResourceBody >>= compiler

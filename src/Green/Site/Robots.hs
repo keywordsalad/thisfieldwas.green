@@ -1,4 +1,4 @@
-module Green.Content.Robot (robotsTxt) where
+module Green.Site.Robots where
 
 import Green.Common
 import Green.Template

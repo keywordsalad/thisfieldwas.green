@@ -3,7 +3,7 @@ module Green.TestSupport.Config where
 import Data.Time
 import Green.Common
 import Green.Config
-import Hakyll (Configuration (..))
+import Hakyll (Configuration (..), defaultConfiguration)
 
 defaultTestTimeString :: String
 defaultTestTimeString = "2013-06-16T21:12:00-07:00"
@@ -44,7 +44,8 @@ defaultSiteConfigWith hakyllConfig =
         SiteDisplayFormat
           { _displayDateLongFormat = "%B %e, %Y %l:%M %P %EZ",
             _displayDateShortFormat = "%B %e, %Y",
-            _displayTimeFormat = "%l:%M %p %EZ"
+            _displayTimeFormat = "%l:%M %p %EZ",
+            _displayImageWidths = [320, 768, 1024, 1920, 3840]
           },
       _siteDebug = defaultSiteDebug
     }

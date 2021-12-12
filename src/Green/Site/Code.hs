@@ -1,4 +1,4 @@
-module Green.Content.Code (code) where
+module Green.Site.Code where
 
 import Green.Common
 

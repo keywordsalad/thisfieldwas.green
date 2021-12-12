@@ -1,8 +1,8 @@
-module Green.Content.Sitemap (sitemap) where
+module Green.Site.Sitemap where
 
 import Green.Common
 import Green.Compiler (loadExistingSnapshots)
-import Green.Content.Blog (loadPublishedPosts)
+import Green.Site.Blog (loadPublishedPosts)
 import Green.Template
 import Hakyll (recentFirst)
 

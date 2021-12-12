@@ -1,4 +1,4 @@
-module Green.Content.Feed (feed) where
+module Green.Site.Feed where
 
 import Green.Common
 

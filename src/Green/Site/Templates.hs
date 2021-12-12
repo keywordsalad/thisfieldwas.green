@@ -1,4 +1,4 @@
-module Green.Content.Template (templates) where
+module Green.Site.Templates where
 
 import Green.Common
 import Green.Template

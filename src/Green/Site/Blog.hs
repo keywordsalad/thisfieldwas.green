@@ -1,10 +1,4 @@
-module Green.Content.Blog
-  ( blog,
-    loadPublishedPosts,
-    publishedPostsSnapshot,
-    recentPostsContext,
-  )
-where
+module Green.Site.Blog where
 
 import Green.Common
 import Green.Compiler (loadExistingSnapshots)
@@ -80,11 +74,7 @@ draftsIndex context = do
 posts :: Context String -> Rules ()
 posts context = do
   match "_posts/**" do
-    route $
-      subPrefixRoute
-        `composeRoutes` dateRoute
-        `composeRoutes` setExtension "html"
-        `composeRoutes` indexRoute
+    route postsRoute
     compile $
       getResourceBody
         >>= contentCompiler postsContext
@@ -93,16 +83,18 @@ posts context = do
         >>= relativizeUrls
   where
     postsContext = postContext <> context
-    subPrefixRoute = subRoute "^_posts/" "blog/"
+
+postsRoute :: Routes
+postsRoute =
+  subRoute "^_posts/" "blog/"
+    `composeRoutes` dateRoute
+    `composeRoutes` setExtension "html"
+    `composeRoutes` indexRoute
 
 drafts :: Context String -> Rules ()
 drafts context = do
   match "_drafts/**" do
-    route $
-      subPrefixRoute
-        `composeRoutes` dateRoute
-        `composeRoutes` setExtension "html"
-        `composeRoutes` indexRoute
+    route draftsRoute
     compile $
       getResourceBody
         >>= contentCompiler draftsContext
@@ -111,7 +103,13 @@ drafts context = do
         >>= relativizeUrls
   where
     draftsContext = postContext <> context
-    subPrefixRoute = subRoute "_drafts/" "drafts/"
+
+draftsRoute :: Routes
+draftsRoute =
+  subRoute "_drafts/" "drafts/"
+    `composeRoutes` dateRoute
+    `composeRoutes` setExtension "html"
+    `composeRoutes` indexRoute
 
 categoriesPages :: Tags -> Context String -> Rules ()
 categoriesPages categories context =

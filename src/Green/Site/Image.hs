@@ -1,4 +1,4 @@
-module Green.Content.Image (images) where
+module Green.Site.Image where
 
 import Green.Common
 

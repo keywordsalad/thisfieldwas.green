@@ -1,4 +1,4 @@
-module Green.Content.Js (js) where
+module Green.Site.Js where
 
 import qualified Data.ByteString.Lazy.Char8 as C
 import Hakyll

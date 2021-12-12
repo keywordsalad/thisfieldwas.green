@@ -12,9 +12,3 @@ spec = do
           ("contact.html", Just "contact/index.html"),
           ("contact/index.html", Just "contact/index.html")
         ]
-    describe "subPrefixRoute" do
-      runRouteExamples (subPrefixRoute "pages/" "potatoes/") $
-        [ ("pages/contact.md", Just "potatoes/contact.md"),
-          ("pages/archives.html", Just "potatoes/archives.html"),
-          ("404.md", Just "404.md")
-        ]

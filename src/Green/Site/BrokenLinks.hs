@@ -1,4 +1,4 @@
-module Green.Content.BrokenLinks (brokenLinks) where
+module Green.Site.BrokenLinks where
 
 import Green.Common
 import Hakyll (preprocess)

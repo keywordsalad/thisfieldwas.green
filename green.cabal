@@ -26,24 +26,24 @@ library
       Green.Common
       Green.Compiler
       Green.Config
-      Green.Content
-      Green.Content.Blog
-      Green.Content.BrokenLinks
-      Green.Content.Code
-      Green.Content.Css
-      Green.Content.Download
-      Green.Content.Feed
-      Green.Content.HomePage
-      Green.Content.Image
-      Green.Content.Js
-      Green.Content.Page
-      Green.Content.Robot
-      Green.Content.Sitemap
-      Green.Content.Template
       Green.Lens
       Green.Lens.Hakyll
       Green.Lens.TH
       Green.Route
+      Green.Site
+      Green.Site.Blog
+      Green.Site.BrokenLinks
+      Green.Site.Code
+      Green.Site.Css
+      Green.Site.Download
+      Green.Site.Feed
+      Green.Site.HomePage
+      Green.Site.Image
+      Green.Site.Js
+      Green.Site.Page
+      Green.Site.Robots
+      Green.Site.Sitemap
+      Green.Site.Templates
       Green.Template
       Green.Template.Ast
       Green.Template.Compiler
@@ -249,7 +249,7 @@ test-suite test
   main-is: Spec.hs
   other-modules:
       Green.RouteSpec
-      Green.Rule.BlogSpec
+      Green.Site.BlogSpec
       Green.Template.AstStructure
       Green.Template.Source.LexerSpec
       Green.Template.Source.ParserSpec

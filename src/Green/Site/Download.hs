@@ -1,4 +1,4 @@
-module Green.Content.Download (downloads) where
+module Green.Site.Download where
 
 import Green.Common
 

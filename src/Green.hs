@@ -5,21 +5,18 @@ import Data.Time
 import Green.Command
 import Green.Common
 import Green.Config
-import Green.Content
+import Green.Site
 import qualified Hakyll as H
 import Options.Applicative
 import System.Environment
 
-site :: IO ()
-site = do
+siteMain :: IO ()
+siteMain = do
   siteConfig <- loadSiteConfig
-  putStrLn $ replicate 80 '-'
-  print siteConfig
-  putStrLn $ replicate 80 '-'
-  H.hakyllWith (siteConfig ^. siteHakyllConfiguration) (content siteConfig)
+  H.hakyllWith (siteConfig ^. siteHakyllConfiguration) (site siteConfig)
 
-author :: IO ()
-author = do
+authorMain :: IO ()
+authorMain = do
   progName <- getProgName
   siteConfig <- loadSiteConfig
   processAuthorCommand siteConfig =<< customExecParser prefs' (authorCommands progName)
@@ -31,5 +28,12 @@ loadSiteConfig = do
   env <- getEnvironment
   time <- utcToZonedTime <$> getCurrentTimeZone <*> getCurrentTime
   configIniText <- TIO.readFile "config.ini"
-  let result = parseConfigIni env defaultTimeLocale time configIniText
-  either fail return result
+  siteConfig <-
+    either fail return $
+      parseConfigIni env defaultTimeLocale time configIniText
+
+  putStrLn $ replicate 80 '-'
+  print siteConfig
+  putStrLn $ replicate 80 '-'
+
+  return siteConfig

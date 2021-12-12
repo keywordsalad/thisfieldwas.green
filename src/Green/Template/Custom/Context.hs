@@ -2,7 +2,7 @@ module Green.Template.Custom.Context where
 
 import Green.Common
 import Green.Config
-import Green.Content.Blog (loadPublishedPosts)
+import Green.Site.Blog (loadPublishedPosts)
 import Green.Template
 import Green.Template.Custom.DateField
 import Green.Template.Custom.GitField

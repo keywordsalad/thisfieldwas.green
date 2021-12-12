@@ -1,4 +1,4 @@
-module Green.Content.Page (pages) where
+module Green.Site.Page where
 
 import Green.Common
 import Green.Route

@@ -117,15 +117,15 @@ text = mconcat <$> manyTill p (lookAhead $ try end)
           labeled "Just '}'" $ closeBrace <* notFollowedBy (try closeBrace),
           labeled "Just '-'" $ string "-" <* notFollowedBy braces,
           labeled "Just '\\'" $ string "\\" <* notFollowedBy (braces <|> try (string "-")),
-          labeled "EscapedBlock" $ char '\\' *> braces,
-          labeled "SpaceString" $ many1 space <* notFollowedBy trimmingClose
+          labeled "EscapedText" $ char '\\' *> tryOne [braces, string "\\", string "-"],
+          labeled "SpaceString" $ many1 space <* notFollowedBy trimmingOpen
         ]
-    braces = tryOne [open, close, trimmingOpen, trimmingClose]
+    braces = tryOne [open, close, trimmingOpen, trimmingOpen]
     end =
       labeled "text terminator" . tryOne $
         [ open,
           close,
-          spaces *> trimmingClose,
+          spaces *> trimmingOpen,
           "" <$ eof
         ]
 

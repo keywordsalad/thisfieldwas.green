@@ -1,7 +1,7 @@
-module Green.Content.HomePage (homePage) where
+module Green.Site.HomePage where
 
 import Green.Common
-import Green.Content.Blog
+import Green.Site.Blog
 import Green.Template.Custom
 import Hakyll (recentFirst)
 
@@ -10,9 +10,9 @@ homePage siteContext =
   match "index.html" do
     route idRoute
     compile do
-      posts <- fmap (take 5) $ recentFirst =<< loadPublishedPosts
+      recentPosts <- fmap (take 5) $ recentFirst =<< loadPublishedPosts
       let context =
-            constField "previousPosts" (itemListValue siteContext posts)
+            constField "recentPosts" (itemListValue siteContext recentPosts)
               <> teaserField "teaser" publishedPostsSnapshot
               <> siteContext
       getResourceBody
