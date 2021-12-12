@@ -103,7 +103,7 @@ instance Show SiteConfig where
         "    TimeFormat: " <> show (config ^. siteDisplayFormat . displayTimeFormat),
         "    ImageWidths: " <> show (config ^. siteDisplayFormat . displayImageWidths),
         "  Env:",
-        "    " <> intercalate "\n    " ((\(key, val) -> key <> ": " <> show val) <$> config ^. siteEnv)
+        "    " <> intercalate "\n    " ((\(key, val) -> key <> "=" <> show val) <$> config ^. siteEnv)
       ]
 
 hasEnvFlag :: String -> [(String, String)] -> Bool
