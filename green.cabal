@@ -38,9 +38,9 @@ library
       Green.Site.Download
       Green.Site.Feed
       Green.Site.HomePage
-      Green.Site.Image
+      Green.Site.Images
       Green.Site.Js
-      Green.Site.Page
+      Green.Site.Pages
       Green.Site.Robots
       Green.Site.Sitemap
       Green.Site.Templates

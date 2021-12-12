@@ -9,9 +9,9 @@ import Green.Site.Css
 import Green.Site.Download
 import Green.Site.Feed
 import Green.Site.HomePage
-import Green.Site.Image
+import Green.Site.Images
 import Green.Site.Js
-import Green.Site.Page
+import Green.Site.Pages
 import Green.Site.Robots
 import Green.Site.Sitemap
 import Green.Site.Templates
@@ -25,8 +25,8 @@ site config = do
   js
   scss config
   downloads
-  _codeDep <- code
-  _templateDep <- templates
+  code
+  templates
   blog context
   feed
   homePage context
