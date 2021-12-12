@@ -195,6 +195,7 @@ spec = do
             TextBlock' "\n"
           ]
 
+    context "off blocks" do
       unlines
         [ "{{*",
           "{{this}} is",
@@ -203,4 +204,4 @@ spec = do
           "-}}"
         ]
         `produces` Template'
-          [TextBlock' "\n{{this}} is\n{{!verbatim}}\nand {{@bananana}}"]
+          [TextBlock' "\n{{this}} is\n{{!verbatim}}\nand {{@bananana}}\n"]

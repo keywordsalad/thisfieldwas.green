@@ -78,7 +78,7 @@ spec = do
         "{a" `produces` [TextToken' "{a"]
         "}a" `produces` [TextToken' "}a"]
         "\\a" `produces` [TextToken' "\\a"]
-        "\\\\" `produces` [TextToken' "\\\\"]
+        "\\\\" `produces` [TextToken' "\\"]
 
         "this contains a \\}} literal"
           `produces` [TextToken' "this contains a }} literal"]

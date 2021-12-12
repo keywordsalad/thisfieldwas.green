@@ -17,23 +17,27 @@ token :: Lexer Token
 token =
   getLexerMode >>= \case
     --
-    BlockMode ->
+    BlockMode -> do
+      trace "BlockMode"
       blockToken >>= \t -> case t of
         TaggedToken TurnOffToken _ -> t <$ startFenced
         TaggedToken CommentBlockToken _ -> t <$ startFenced
         TaggedToken CloseBlockToken _ -> t <$ startText
         _ -> return t
     --
-    TextMode ->
+    TextMode -> do
+      trace "TextMode"
       tryOne
         [ do
-            void . lookAhead $ tryOne [spaces *> trimmingOpen, open]
+            void . lookAhead $ tryOne [trimmingOpen, open]
             startBlock
             token,
           textToken
         ]
     --
-    FencedMode {} -> fencedText
+    FencedMode {} -> do
+      trace "FencedMode"
+      fencedText
 
 startText :: (Show t, Stream s m t) => ParsecT s ParserState m ()
 startText = putLexerMode TextMode <?> "starting text"
@@ -77,21 +81,24 @@ fencedText = withPosition (TextToken <$> p "")
         ]
     -- {{
     downFence acc = do
+      trace "downFence"
       x <- open
       downFenceLevel
       p (acc ++ x)
     -- }}
     upFence acc = do
-      lookAhead (tryOne [close, trimmingClose])
-        *> upFenceLevel >>= \case
-          0 -> do
-            startBlock
-            return acc
-          _ -> do
-            x <- tryOne [close, trimmingClose]
-            p (acc ++ x)
+      trace "upFence"
+      void . lookAhead $ tryOne [trimmingClose, close]
+      upFenceLevel >>= \case
+        0 -> do
+          startBlock
+          return acc
+        _ -> do
+          x <- tryOne [trimmingClose <* spaces, close]
+          p (acc ++ x)
     -- ...abc...
     fenceText acc = do
+      trace "fenceText"
       t <- text
       p (acc ++ t)
     --
@@ -115,17 +122,24 @@ text = mconcat <$> manyTill p (lookAhead $ try end)
         [ labeled "TextString" $ many1 (noneOf "-{}\\\n\t "),
           labeled "Just '{'" $ openBrace <* notFollowedBy (try openBrace),
           labeled "Just '}'" $ closeBrace <* notFollowedBy (try closeBrace),
-          labeled "Just '-'" $ string "-" <* notFollowedBy braces,
-          labeled "Just '\\'" $ string "\\" <* notFollowedBy (braces <|> try (string "-")),
-          labeled "EscapedText" $ char '\\' *> tryOne [braces, string "\\", string "-"],
-          labeled "SpaceString" $ many1 space <* notFollowedBy trimmingOpen
+          labeled "Just '-'" $ string "-" <* notFollowedBy (try closeBrace),
+          labeled "Just '\\'" $ string "\\" <* notFollowedBy (try escapedText),
+          labeled "EscapedText" $ char '\\' *> escapedText,
+          labeled "SpaceString" $ many1 space <* notFollowedBy (try trimmingOpen)
         ]
-    braces = tryOne [open, close, trimmingOpen, trimmingOpen]
+    escapedText =
+      tryOne
+        [ openBrace,
+          closeBrace,
+          string "-",
+          string "\\"
+        ]
     end =
       labeled "text terminator" . tryOne $
-        [ open,
+        [ spaces *> trimmingOpen,
+          trimmingClose,
+          open,
           close,
-          spaces *> trimmingOpen,
           "" <$ eof
         ]
 
@@ -361,10 +375,10 @@ close :: Lexer String
 close = tokenTagParser CloseBlockToken
 
 trimmingOpen :: Lexer String
-trimmingOpen = trimmingTokenTagParser ExpressionBlockToken
+trimmingOpen = spaces *> trimmingTokenTagParser ExpressionBlockToken
 
 trimmingClose :: Lexer String
-trimmingClose = trimmingTokenTagParser CloseBlockToken
+trimmingClose = trimmingTokenTagParser CloseBlockToken <* spaces
 
 openBrace :: Lexer String
 openBrace = tokenTagParser OpenBraceToken
