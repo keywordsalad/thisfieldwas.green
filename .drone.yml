@@ -1,0 +1,11 @@
+kind: pipeline
+type: docker
+name: build-test-deploy
+
+steps:
+- name: build and test
+  image: haskell:8.10.7
+  commands:
+  - stack build
+  - stack exec test
+  - stack exec site build
