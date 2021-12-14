@@ -1,0 +1,65 @@
+*[data-infinity-headers] {
+  h1::before {
+    counter-increment: header_l1;
+    content: counter(header_l1) " - ";
+  }
+  h1 {
+    counter-reset: header_l2;
+  }
+
+  h2::before {
+    counter-increment: header_l2;
+    content: counter(header_l1) "." counter(header_l2) " - ";
+  }
+  h2 {
+    counter-reset: header_l3;
+  }
+
+  h3::before {
+    counter-increment: header_l3;
+    content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) " - ";
+  }
+  h3 {
+    counter-reset: header_l4;
+  }
+
+  h4::before {
+    counter-increment: header_l4;
+    content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) " - ";
+  }
+  h4 {
+    counter-reset: header_l5;
+  }
+
+  h5::before {
+    counter-increment: header_l5;
+    content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) "." counter(header_l5) " - ";
+  }
+  h5 {
+    counter-reset: header_l6;
+  }
+
+  h6::before {
+    counter-increment: header_l6;
+    content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) "." counter(header_l5) "." counter(header_l6) " - ";
+  }
+  h6 {
+    counter-reset: header_l7;
+  }
+
+  h7::before {
+    counter-increment: header_l7;
+    content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) "." counter(header_l5) "." counter(header_l6) "." counter(header_l7) " - ";
+  }
+  h7 {
+    counter-reset: header_l8;
+  }
+
+  h8::before {
+    counter-increment: header_l8;
+    content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) "." counter(header_l5) "." counter(header_l6) "." counter(header_l7) "." counter(header_l8) " - ";
+  }
+  h8 {
+    counter-reset: header_l9;
+  }
+}

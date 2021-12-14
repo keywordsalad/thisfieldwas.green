@@ -40,5 +40,6 @@ customContext config = self
           imgField,
           youtubeField,
           codeField,
+          linkField,
           defaultFields
         ]

@@ -1,5 +1,6 @@
 module Green.Template.Custom.HtmlField where
 
+import qualified Data.HashMap.Strict as M
 import Green.Common
 import Green.Template
 import Green.Util (dropIndex)
@@ -44,3 +45,17 @@ youtubeField = functionField "youtube" f
     f (ytFields :: Context String) = do
       tplWithContext (ytFields <> defaults) do
         itemBody <$> loadAndApplyTemplate' (fromFilePath "_templates/youtube.html")
+
+linkField :: Context String
+linkField = functionField2 "link" f
+  where
+    f (linkPath :: String) (linkContent :: [Block]) = do
+      let fields =
+            hashMapField $
+              M.fromList
+                [ ("linkPath", intoValue linkPath :: ContextValue String),
+                  ("linkContent", intoValue linkContent)
+                ]
+      tplWithContext fields do
+        template <- loadTemplate' (fromFilePath "_templates/link.html")
+        applyTemplate' template

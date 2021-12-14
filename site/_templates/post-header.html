@@ -1,29 +1,24 @@
 <header class="post-header">
-  <hgroup>
-    <{{headerLevel}} class="post-title">
-      {{-#if latestPost}}Latest Post: {{#end-}}
-      <a href="{{url}}">{{title}}</a>
-    </{{headerLevel}}>
-    <p class="post-published">
-      {{-#if published-}}
-        Posted on {{published | dateAs shortDate}}
-      {{-#else-}}
-        Drafted on {{date | dateAs shortDate}}
-      {{-#end}}
-      {{-#if author}} by {{author}}{{#end}}
+  <{{headerLevel}} class="post-title">
+    {{-#if latestPost}}Latest Post: {{#end-}}
+    <a href="{{url}}">{{title}}</a>
+  </{{headerLevel}}>
+  <p class="post-published">
+    {{-#if published-}}
+      Posted on {{published | dateAs shortDate}}
+    {{-#else-}}
+      Drafted on {{date | dateAs shortDate}}
+    {{-#end}}
+    {{-#if author}} by {{author}}{{#end}}
+  </p>
+  {{-#if categoryLinks}}
+    <p class="post-categories">
+      Posted in {{categoryLinks}}
     </p>
-    {{-#if categoryLinks}}
-      <p class="post-categories">
-        Posted in {{categoryLinks}}
-      </p>
-    {{-#end}}
-    {{-#if tags}}
-      <p class="post-tags">
-        Tags: {{tagLinks}}
-      </p>
-    {{-#end}}
-  </hgroup>
+  {{-#end}}
+  {{-#if tags}}
+    <p class="post-tags">
+      Tags: {{tagLinks}}
+    </p>
+  {{-#end}}
 </header>
-
-
-{{#if False}}GOT IT{{#else}}nooooooope{{#end}}

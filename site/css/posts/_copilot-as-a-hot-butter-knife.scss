@@ -1,0 +1,33 @@
+.copilot-as-a-hot-butter-knife {
+  @import "copilot-as-a-hot-butter-knife/infinity-headers";
+  @import "copilot-as-a-hot-butter-knife/numbered-headers";
+}
+
+#numbered-headers {
+  display: flex;
+  justify-content: space-around;
+}
+
+#headers-without-numbers-aside, #headers-with-numbers-aside {
+  @include aside(right);
+  a {
+    border: $border-thick;
+  }
+
+  @include media('>=tablet') {
+    figcaption {
+      width: 18rem;
+    }
+  }
+}
+
+#headers-without-numbers, #headers-with-numbers {
+  // filter: contrast(150%);
+
+  @include media('>=tablet') {
+    width: 18rem;
+  }
+  @include media('<tablet') {
+    width: 100%;
+  }
+}
