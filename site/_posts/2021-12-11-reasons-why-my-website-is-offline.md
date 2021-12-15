@@ -85,7 +85,7 @@ I mentioned above that this computer sits in the closet. This location comes wit
 
 ## Reasons why my website is offline
 
-I can't express my website's uptime in a [_magnitude of `9`'s_](https://aws.amazon.com/blogs/publicsector/achieving-five-nines-cloud-justice-public-safety/) the same way that a public safety and emergency service would. Having _"one 9's uptime"_ is really bad, and I would like to find a more impressive metric to present to someone than `90%`.
+I can't express my website's uptime in a _magnitude of nines_[^aws59s] the same way that a public safety and emergency service would[^aws39s]. Having _"one nines"_ uptime is really bad, and I would like to find a more impressive metric to present to someone than `9%`.
 
 Now that I think about it, _uptime_ may not be the right word to use. Let me instead paint a picture with a short and incomplete list of reasons for which my website is offline:
 
@@ -162,5 +162,8 @@ For now, I host my source code at [bitsof.thisfieldwas.green](https://bitsof.thi
 
 [^archbtw]: Meme reference: [btw i use arch](https://knowyourmeme.com/memes/btw-i-use-arch) -- When Vlad proofread this post, he informed me that it was customary to let the reader know that one uses Arch, btw.
 
-[^tos]: There exists an episode of South Park where Kyle accepts the Apple iTunes user agreement [without reading it](https://www.imdb.com/title/tt1884035/). It's worth a watch but the writers employ a heavy-handed storytelling device to get their point across. I liked it, but you may not.
+[^aws59s]: [AWS Public Sector Blog: Achieving "five nines" in the cloud for justice and public safety](https://aws.amazon.com/blogs/publicsector/achieving-five-nines-cloud-justice-public-safety/)
 
+[^aws39s]: Amazon Web Services experienced a significant outage on Tue Dec 7, 2021, and it lasted some [seven hours and thirty minutes](https://www.cnbc.com/2021/12/07/amazon-web-services-outage-causes-issues-at-disney-netflix-coinbase.html), taking out large swaths of services and even preventing people from doing their jobs. This means that for 2021, AWS's US-East-1 region had an uptime of no better than 99.9%, or _"three nines"_. I wish for my home-spun home hosting solution to one day perform at least as well as AWS does on their bad days.
+
+[^tos]: There exists an episode of South Park where Kyle accepts the Apple iTunes user agreement [without reading it](https://www.imdb.com/title/tt1884035/). It's worth a watch but the writers employ a heavy-handed storytelling device to get their point across. I liked it, but you may not.
