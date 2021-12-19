@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -e
+
+src_file="$(pwd)/$1"
+out_file="$(pwd)/_site/favicon.ico"
+
+mkdir -p _cache/favicon_tmp
+pushd _cache/favicon_tmp
+
+sizes=(16 32 48 64 96 128 256)
+for x in ${sizes[@]}; do
+  inkscape -w $x -h $x -o $x.png "$src_file"
+done
+
+files=("${sizes[@]/%/.png}")
+convert "${files[@]}" "$out_file"
+identify "$out_file"
+popd
