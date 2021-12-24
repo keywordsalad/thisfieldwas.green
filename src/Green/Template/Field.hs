@@ -67,12 +67,7 @@ layoutField key basePath = functionField2 key f
           reduceBlocks bs
 
 ifField :: forall a. Context a
-ifField = functionField2 "if" f
-  where
-    f (arg :: ContextValue a) (blocks :: [Block]) =
-      isTruthy arg <&> \case
-        True -> Just blocks
-        False -> Nothing
+ifField = functionField "if" isTruthy
 
 forField :: Context String
 forField = functionField2 "for" f

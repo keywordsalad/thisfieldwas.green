@@ -79,21 +79,21 @@ applyBlock = \case
       eval e >>= \case
         FunctionValue f -> f (intoValue bs')
         x -> fail $ "invalid chrome function " ++ show x ++ " near " ++ show pos
-  AltBlock (ApplyBlock e bs _ :| alts) mdef _ -> intoValue <$> applyGuard e bs alts mdef
+  AltBlock (ApplyBlock e bs _ :| alts) mdef _ ->
+    intoValue <$> applyAltBlock' e bs alts mdef
   where
-    applyGuard e bs alts mdef =
+    applyAltBlock' e bs alts mdef =
       eval e >>= \case
         FunctionValue f ->
           pure <$> f (intoValue bs)
-        x -> do
-          truthy <- isTruthy x
-          if truthy
-            then applyBlocks bs
-            else applyAlt alts mdef
-    --
-    applyAlt (ApplyBlock e bs _ : alts) mdef = applyGuard e bs alts mdef
-    applyAlt _ (Just (DefaultBlock bs _)) = applyBlocks bs
-    applyAlt _ Nothing = return []
+        x ->
+          isTruthy x >>= \case
+            True -> applyBlocks bs
+            False -> case alts of
+              ApplyBlock e' bs' _ : alts' -> applyAltBlock' e' bs' alts' mdef
+              [] -> case mdef of
+                Just (DefaultBlock bs' _) -> applyBlocks bs'
+                Nothing -> return []
 
 eval :: Expression -> TemplateRunner a (ContextValue a)
 eval = \case
