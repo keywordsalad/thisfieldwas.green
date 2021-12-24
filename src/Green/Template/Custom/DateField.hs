@@ -50,10 +50,8 @@ updatedField key timeLocale = field key f
 
 dateFromMetadata :: TimeLocale -> [String] -> Item a -> Compiler String
 dateFromMetadata timeLocale sourceKeys item =
-  cached cacheKey do
-    firstAlt $ findDate <$> sourceKeys
+  firstAlt $ findDate <$> sourceKeys
   where
-    cacheKey = "Green.Template.Custom.DateFields.dateFromMetadata:" ++ show sourceKeys
     id' = itemIdentifier item
     findDate sourceKey = do
       metadata <- getMetadata id'
@@ -69,11 +67,9 @@ dateFromMetadata timeLocale sourceKeys item =
 
 dateFromFilePath :: TimeLocale -> Item a -> Compiler String
 dateFromFilePath timeLocale item =
-  cached cacheKey do
-    dateFromPath
-      <|> noResult ("Could not find file path date from " ++ show (toFilePath $ itemIdentifier item))
+  dateFromPath
+    <|> noResult ("Could not find file path date from " ++ show (toFilePath $ itemIdentifier item))
   where
-    cacheKey = "Green.Template.Custom.DateFields.dateFromFilePath"
     dateFromPath =
       firstAlt $
         dateFromPath' . intercalate "-"

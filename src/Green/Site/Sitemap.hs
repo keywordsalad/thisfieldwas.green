@@ -13,7 +13,7 @@ sitemap siteContext =
     compile do
       context <- sitemapContext siteContext
       getResourceBody
-        >>= applyAsTemplate context
+        >>= applyAsTemplate' context
 
 sitemapContext :: Context String -> Compiler (Context String)
 sitemapContext siteContext = do

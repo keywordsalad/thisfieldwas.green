@@ -16,7 +16,7 @@ blog context = do
   posts context
   archives context
 
-  categoriesPages categories context
+  -- categoriesPages categories context
   tagsPages tags context
 
   draftsIndex context
@@ -48,8 +48,7 @@ archives context = do
     compile do
       publishedPosts <- H.recentFirst =<< loadPublishedPosts
       let archivesContext =
-            constField "posts" (itemListValue context publishedPosts)
-              <> postContext
+            constField "posts" (itemListValue (postContext <> context) publishedPosts)
               <> context
       getResourceBody
         >>= contentCompiler archivesContext
@@ -63,8 +62,7 @@ draftsIndex context = do
     compile do
       draftPosts <- H.recentFirst =<< loadDraftPosts
       let draftsContext =
-            constField "posts" (itemListValue context draftPosts)
-              <> postContext
+            constField "posts" (itemListValue (postContext <> context) draftPosts)
               <> context
       getResourceBody
         >>= contentCompiler draftsContext
@@ -120,13 +118,12 @@ categoriesPages categories context =
       let categoryContext =
             constField "category" category
               <> constField "title" ("Posts under \"" ++ category ++ "\"")
-              <> constField "posts" (itemListValue context categoryPosts)
+              <> constField "posts" (itemListValue (postContext <> context) categoryPosts)
               <> constField "layout" ("page" :: String)
-              <> postContext
               <> context
-      dummy <- makeItem ""
       template <- loadBody "_templates/posts-under-category.html"
-      applyTemplate template categoryContext dummy
+      makeItem ""
+        >>= applyTemplate' template categoryContext
         >>= pandocCompiler
         >>= layoutCompiler categoryContext
         >>= relativizeUrls
@@ -140,13 +137,12 @@ tagsPages tags context =
       let tagsContext =
             constField "tag" tag
               <> constField "title" ("Posts tagged \"" ++ tag ++ "\"")
-              <> constField "posts" (itemListValue context tagPosts)
+              <> constField "posts" (itemListValue (postContext <> context) tagPosts)
               <> constField "layout" ("page" :: String)
-              <> postContext
               <> context
-      dummy <- makeItem ""
       template <- loadBody "_templates/posts-under-tag.html"
-      applyTemplate template tagsContext dummy
+      makeItem ""
+        >>= applyTemplate' template tagsContext
         >>= pandocCompiler
         >>= layoutCompiler tagsContext
         >>= relativizeUrls
@@ -155,7 +151,6 @@ postContext :: Context String
 postContext =
   categoryLinksField "categoryLinks"
     <> tagLinksField "tagLinks"
-    <> postHeaderField "postHeader"
 
 recentPostsContext :: Compiler (Context String)
 recentPostsContext = do
@@ -185,11 +180,3 @@ dateRoute :: Routes
 dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))
   where
     datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}-"
-
-postHeaderField :: String -> Context String
-postHeaderField key = functionField key f
-  where
-    defaults = defaultKeys ["headerLevel", "latestPost"]
-    f (fields :: Context String) = do
-      tplWithContext (fields <> defaults) do
-        itemBody <$> loadAndApplyTemplate' (fromFilePath "_templates/post-header.html")

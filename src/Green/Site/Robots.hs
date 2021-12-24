@@ -9,4 +9,4 @@ robotsTxt context = do
     route idRoute
     compile $
       getResourceBody
-        >>= applyAsTemplate context
+        >>= applyAsTemplate' context

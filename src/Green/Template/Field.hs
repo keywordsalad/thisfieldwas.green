@@ -17,24 +17,28 @@ defaultFields =
     [ bodyField "body",
       urlField "url",
       pathField "path",
-      routeField,
+      routeField "route",
+      putField "put",
       linkedTitleField,
       metadataPriorityField "updated" ["updated", "published", "created"],
       metadataPriorityField "published" ["updated", "created"],
       ifField,
       forField,
       defaultField,
-      withField,
+      withField "with",
       metadataField,
       titleFromFileField "title",
       missingField
     ]
 
+emptyString :: ContextValue a
+emptyString = intoValue ("" :: String)
+
 defaultKeys :: [String] -> Context a
 defaultKeys keys = intoContext $ (,"" :: String) <$> keys
 
-withField :: Context String
-withField = functionField2 "with" f
+withField :: String -> Context String
+withField key = functionField2 key f
   where
     f (context :: Context String) (blocks :: [Block]) =
       tplWithContext context do
@@ -45,20 +49,20 @@ includeField key basePath = functionField key f
   where
     f (filePath :: String) = do
       let filePath' = basePath </> filePath <.> "html"
-      tplWithCall (filePath' ++ " included via " ++ show key) do
+      tplWithCall (filePath' ++ " via " ++ show key) do
         context <- tplContext
-        result <- loadAndApplyTemplate' (fromFilePath filePath')
+        result <- loadAndApplyTemplate (fromFilePath filePath')
         return $ itemValue context result
 
 layoutField :: String -> FilePath -> Context String
 layoutField key basePath = functionField2 key f
   where
-    f (filePath :: FilePath) (blocks :: [Block]) = do
+    f (filePath :: FilePath) (content :: String) = do
       let filePath' = basePath </> filePath <.> "html"
-      tplWithCall (filePath' ++ " applied via " ++ show key) do
+      tplWithCall (filePath' ++ " via " ++ show key) do
         let layoutId = fromFilePath filePath'
-        (Template bs _) <- loadTemplate' layoutId
-        item <- itemSetBody <$> reduceBlocks blocks <*> tplItem
+        (Template bs _) <- loadTemplate layoutId
+        item <- itemSetBody content <$> tplItem
         tplWithItem item do
           reduceBlocks bs
 
@@ -89,8 +93,8 @@ defaultField = functionField2 "default" f
         True -> arg
         False -> default'
 
-routeField :: Context String
-routeField = functionField "route" f
+routeField :: String -> Context String
+routeField key = functionField key f
   where
     f (filePath :: String) = lift do
       let id' = fromFilePath filePath
@@ -169,3 +173,12 @@ metadataPriorityField :: String -> [String] -> Context a
 metadataPriorityField key priorityKeys = field key f
   where
     f item = lift $ foldl (<|>) (noResult "") (flip getMetadataField item <$> priorityKeys)
+
+putField :: forall a. String -> Context a
+putField key = functionField key tplPut
+
+putBlockField :: String -> Context a
+putBlockField key = functionField2 key f
+  where
+    f (name :: String) (blocks :: [Block]) = do
+      tplPut $ constField name blocks

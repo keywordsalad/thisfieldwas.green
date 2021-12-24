@@ -2,10 +2,13 @@
 title: Reasons why my website is offline
 author: Logan McGrath
 comments: false
-date: 2021-12-11T14:43:25-0800
+published: 2021-12-11T14:43:25-0800
 tags: self host, configuration management, tinfoil hat
 layout: post
+og_image: /images/reasons-my-website-is-offline/coming-out-of-the-closet-1024.png
 ---
+
+{{put og_image: "peanutbutterjellytime.jpg"}}
 
 My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and [low-key minimalist](https://internetwebsite.ofvlad.xyz), found next to the garbage chute at his condo building. It appears to have been someone’s gaming rig in its prior life, as it has a decent graphics card in it and `8GB` of RAM. Its demise was likely an upgrade to Windows 10, as upon boot, the login screen was so unresponsive that I could barely get the mouse to register movement and indicate for the computer to shut down again.
 

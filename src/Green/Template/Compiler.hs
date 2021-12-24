@@ -13,10 +13,9 @@ import Hakyll.Core.Compiler.Internal
 -- | Compiles an item as a template.
 getResourceTemplate :: Compiler (Item Template)
 getResourceTemplate =
-  cached "Green.Template.Compiler.getResourceTemplate" $
-    getResourceBody
-      >>= compileTemplateItem
-      >>= makeItem
+  getResourceBody
+    >>= compileTemplateItem
+    >>= makeItem
 
 -- | Takes an item and compiles a template from it.
 compileTemplateItem :: Item String -> Compiler Template
@@ -24,31 +23,43 @@ compileTemplateItem item = do
   let filePath = toFilePath $ itemIdentifier item
   either (fail . show) return $ parse filePath (itemBody item)
 
-loadTemplate' :: Identifier -> TemplateRunner a Template
-loadTemplate' = lift . fmap itemBody . load
+evalTemplate :: Context String -> (Item String -> TemplateRunner String (Item String)) -> Item String -> Compiler (Item String)
+evalTemplate context f item = evalStateT (f item) $ templateRunner context item
 
-loadAndApplyTemplate :: Identifier -> Context String -> Item String -> Compiler (Item String)
-loadAndApplyTemplate id' context item = do
+loadTemplate :: Identifier -> TemplateRunner a Template
+loadTemplate = lift . fmap itemBody . load
+
+loadAndApplyTemplate' :: Identifier -> Context String -> Item String -> Compiler (Item String)
+loadAndApplyTemplate' id' context item = do
   let s = templateRunner context item
-  evalStateT (loadAndApplyTemplate' id') s
+  evalStateT (loadAndApplyTemplate id') s
 
-loadAndApplyTemplate' :: Identifier -> TemplateRunner String (Item String)
-loadAndApplyTemplate' = lift . makeItem <=< applyTemplate' <=< loadTemplate'
+loadAndApplyTemplate :: Identifier -> TemplateRunner String (Item String)
+loadAndApplyTemplate =
+  loadTemplate
+    >=> applyTemplate
+    >=> lift . makeItem
+
+applyAsTemplate :: Item String -> TemplateRunner String (Item String)
+applyAsTemplate =
+  lift . compileTemplateItem
+    >=> applyTemplate
+    >=> lift . makeItem
 
 -- | Applies an item as a template to itself.
-applyAsTemplate :: Context String -> Item String -> Compiler (Item String)
-applyAsTemplate context item = do
+applyAsTemplate' :: Context String -> Item String -> Compiler (Item String)
+applyAsTemplate' context item = do
   template <- compileTemplateItem item
-  applyTemplate template context item
+  applyTemplate' template context item
 
 -- | Applies a template with context to an item
-applyTemplate :: Template -> Context String -> Item String -> Compiler (Item String)
-applyTemplate template context item = do
+applyTemplate' :: Template -> Context String -> Item String -> Compiler (Item String)
+applyTemplate' template context item = do
   let s = templateRunner context item
-  makeItem =<< evalStateT (applyTemplate' template) s
+  makeItem =<< evalStateT (applyTemplate template) s
 
-applyTemplate' :: Template -> TemplateRunner String String
-applyTemplate' (Template bs src) =
+applyTemplate :: Template -> TemplateRunner String String
+applyTemplate (Template bs src) =
   tplWithCall ("template " ++ src) (reduceBlocks bs)
 
 reduceBlocks :: [Block] -> TemplateRunner String String -- Context String -> [Block] -> Item String -> Compiler String
@@ -62,7 +73,12 @@ applyBlock = \case
   TextBlock t _ -> return $ intoValue t
   ExpressionBlock e _ -> eval e
   CommentBlock {} -> return EmptyValue
-  ChromeBlock e bs _ -> intoValue <$> applyGuard e bs [] Nothing
+  ChromeBlock e bs pos ->
+    fmap intoValue do
+      bs' <- reduceBlocks bs
+      eval e >>= \case
+        FunctionValue f -> f (intoValue bs')
+        x -> fail $ "invalid chrome function " ++ show x ++ " near " ++ show pos
   AltBlock (ApplyBlock e bs _ :| alts) mdef _ -> intoValue <$> applyGuard e bs alts mdef
   where
     applyGuard e bs alts mdef =

@@ -55,16 +55,29 @@ tplWithItem item f = do
   modify' \s -> s {tplItemStack = stack}
   return x
 
+-- | Place context within a given scope.
 tplWithContext :: Context a -> TemplateRunner a b -> TemplateRunner a b
 tplWithContext context f =
   gets tplContextStack >>= \stack -> do
     let head' = case stack of
           (next : _) -> context <> next
           [] -> context
+    -- temporarily push the new context onto the stack
     modify' \s -> s {tplContextStack = head' : stack}
     x <- f
+    -- pop the new context off the stack
     modify' \s -> s {tplContextStack = stack}
     return x
+
+-- | Place context in global scope.
+tplPut :: Context a -> TemplateRunner a ()
+tplPut context = do
+  contextStack <- gets tplContextStack
+  let init' = init contextStack
+      last' = last contextStack
+  -- prepend the new context to the root context
+  modify' \s -> s {tplContextStack = init' <> [context <> last']}
+  return ()
 
 tplWithCall :: String -> TemplateRunner a b -> TemplateRunner a b
 tplWithCall call f = do
@@ -154,12 +167,6 @@ forItemField key ids f = field key f'
       | itemIdentifier item `elem` ids = f item
       | otherwise = tplTried $ show key ++ " for items " ++ show (toFilePath <$> ids)
 
-tplWithFunction :: String -> Context a -> Item a -> TemplateRunner a b -> TemplateRunner a b
-tplWithFunction key context item =
-  tplWithField key
-    . tplWithContext context
-    . tplWithItem item
-
 functionField :: (FromValue v a, IntoValue w a) => String -> (v -> TemplateRunner a w) -> Context a
 functionField = constField
 
@@ -180,6 +187,9 @@ instance Monoid (Context a) where
 
 class IntoContext v a where
   intoContext :: v -> Context a
+
+instance IntoContext (Context a) a where
+  intoContext = id
 
 instance (IntoValue v a) => IntoContext (HashMap String v) a where
   intoContext = hashMapField
@@ -276,6 +286,9 @@ instance IntoValue Value a where
       | otherwise -> DoubleValue $ fromRight 0.0 $ toBoundedRealFloat n
     Bool b -> BoolValue b
     Null -> EmptyValue
+
+instance IntoValue () a where
+  intoValue () = EmptyValue
 
 instance IntoValue Bool a where
   intoValue = BoolValue

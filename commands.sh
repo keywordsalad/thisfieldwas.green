@@ -29,6 +29,8 @@ build () {
 
   stack build
   stack exec site build -- ${ARGS[@]}
+  favicon
+  default_og_image
 }
 
 clean () {
@@ -115,5 +117,30 @@ datestamp () {
     DATE=$(date +"%Y-%m-%dT%H:%M:%S%z")
     echo "$DATE" | pbcopy
     echo "Copied to clipboard: $DATE"
+}
+
+favicon () {
+  src_file="$(pwd)/site/images/grass.svg"
+  out_file="$(pwd)/_site/favicon.ico"
+
+  mkdir -p _cache/favicon_tmp
+  pushd _cache/favicon_tmp
+
+  sizes=(16 32 48 64 96 128 256)
+  for x in ${sizes[@]}; do
+    inkscape -w $x -h $x -b "aliceblue" -o $x.png "$src_file"
+  done
+
+  files=("${sizes[@]/%/.png}")
+  convert "${files[@]}" "$out_file"
+  identify "$out_file"
+  popd
+}
+
+default_og_image () {
+  src_file="$(pwd)/site/images/grass.svg"
+  out_file="$(pwd)/_site/grass_og-image.png"
+  inkscape -w 1024 -h 1024 -b "aliceblue" -o "$out_file" "$src_file"
+  identify "$out_file"
 }
 

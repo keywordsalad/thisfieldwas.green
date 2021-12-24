@@ -6,10 +6,10 @@ import Green.Common
 import Green.Template
 
 contentCompiler :: Context String -> Item String -> Compiler (Item String)
-contentCompiler context = pandocCompiler <=< applyAsTemplate context
+contentCompiler context = pandocCompiler <=< applyAsTemplate' context
 
 layoutCompiler :: Context String -> Item String -> Compiler (Item String)
-layoutCompiler = loadAndApplyTemplate $ fromFilePath "_layouts/from-context.html"
+layoutCompiler = loadAndApplyTemplate' $ fromFilePath "_layouts/from-context.html"
 
 snapshotCompiler :: [String] -> Item String -> Compiler (Item String)
 snapshotCompiler snapshots item = foldM (flip saveSnapshot) item snapshots'

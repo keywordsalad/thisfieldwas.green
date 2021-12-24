@@ -1,5 +1,7 @@
 {{@applyLayout "default"}}
 <article class="post post-full">
-  {{postHeader headerLevel: "h1"}}
+  {{#with headerLevel: "h1"}}
+    {{partial "post-header"}}
+  {{#end}}
   {{body}}
 </article>

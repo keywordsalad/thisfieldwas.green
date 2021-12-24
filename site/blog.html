@@ -7,7 +7,9 @@ changefreq: daily
 
 {{-#for latestPost}}
   <section class="latest-post">
-    {{postHeader headerLevel: "h2", latestPost: True}}
+    {{#with headerLevel: "h2", latestPost: True}}
+      {{partial "post-header"}}
+    {{#end}}
     {{-teaser}}
     <p class="read-more"><a href="{{url}}">Read more...</a></p>
   </section>
@@ -36,7 +38,9 @@ changefreq: daily
   </header>
   {{-#for previousPosts-}}
     <section class="teaser-item post">
-      {{postHeader headerLevel: "h3"}}
+      {{#with headerLevel: "h3", latestPost: False}}
+        {{partial "post-header"}}
+      {{#end}}
       {{-teaser}}
       <p class="read-more"><a href="{{url}}">Read more...</a></p>
     </section>

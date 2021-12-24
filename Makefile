@@ -46,3 +46,10 @@ datestamp:
 	set -e; source ./commands.sh; datestamp
 .PHONY: datestamp
 
+favicon:
+	set -e; source ./commands.sh; favicon
+.PHONY: favicon
+
+default_og_image:
+	set -e; source ./commands.sh; default_og_image
+.PHONY: default_og_image

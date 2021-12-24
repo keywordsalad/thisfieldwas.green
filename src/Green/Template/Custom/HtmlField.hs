@@ -35,8 +35,8 @@ imgField = functionField "img" f
     defaults = defaultKeys ["id", "src", "title", "alt"]
     f (imgFields :: Context String) =
       tplWithContext (imgFields <> defaults) do
-        template <- loadTemplate' (fromFilePath "_templates/image.html")
-        applyTemplate' template
+        template <- loadTemplate (fromFilePath "_templates/image.html")
+        applyTemplate template
 
 youtubeField :: Context String
 youtubeField = functionField "youtube" f
@@ -44,7 +44,7 @@ youtubeField = functionField "youtube" f
     defaults = defaultKeys ["id", "video", "title"]
     f (ytFields :: Context String) = do
       tplWithContext (ytFields <> defaults) do
-        itemBody <$> loadAndApplyTemplate' (fromFilePath "_templates/youtube.html")
+        itemBody <$> loadAndApplyTemplate (fromFilePath "_templates/youtube.html")
 
 linkField :: Context String
 linkField = functionField2 "link" f
@@ -57,5 +57,5 @@ linkField = functionField2 "link" f
                   ("linkContent", intoValue linkContent)
                 ]
       tplWithContext fields do
-        template <- loadTemplate' (fromFilePath "_templates/link.html")
-        applyTemplate' template
+        template <- loadTemplate (fromFilePath "_templates/link.html")
+        applyTemplate template
