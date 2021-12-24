@@ -128,7 +128,7 @@ favicon () {
 
   sizes=(16 32 48 64 96 128 256)
   for x in ${sizes[@]}; do
-    inkscape -w $x -h $x -b "aliceblue" -o $x.png "$src_file"
+    inkscape -w $x -h $x -y 0 -o $x.png "$src_file"
   done
 
   files=("${sizes[@]/%/.png}")

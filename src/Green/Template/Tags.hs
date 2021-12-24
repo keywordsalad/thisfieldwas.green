@@ -8,6 +8,7 @@ where
 
 import Green.Common
 import Green.Template.Context
+import Green.Util (dropIndex)
 import Hakyll (MonadMetadata, Tags, buildTags, getTags, renderTagCloudWith)
 import qualified Hakyll
 
@@ -26,7 +27,7 @@ tagLinksFieldWith key f = field key f'
       return $ intercalate ", " links
     makeLink' tag =
       getRoute (makeTagId tag) >>= \case
-        Just url -> return $ "<a class=\"tag\" href=\"/" ++ url ++ "\">" ++ tag ++ "</a>"
+        Just url -> return $ "<a class=\"tag\" href=\"/" ++ dropIndex url ++ "\">" ++ tag ++ "</a>"
         Nothing -> return $ "<span class=\"tag\">" ++ tag ++ "</span>"
 
 tagLinksField :: String -> Context a
@@ -69,6 +70,6 @@ makeLink _minSize _maxSize tag url count minCount maxCount =
             ";--max-count:" ++ show maxCount
           ]
         ++ "\"",
-      " href=\"" ++ url ++ "\"",
+      " href=\"" ++ dropIndex url ++ "\"",
       ">" ++ tag ++ "</a>"
     ]
