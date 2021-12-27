@@ -26,7 +26,7 @@ The bastion server in the current configuration simply passes bits that are encr
 
 Port 80 is also forwarded the same way, even though its traffic is unencrypted. The closet computer redirects all requests on port 80 to port 443 regardless. Port 22 is also forwarded, and the traffic is completely opaque to the bastion.
 
-This configuration doesn’t allow the bastion to cache requests on port 443 because they are encrypted: at the bastion I don’t know what’s being requested so that I can cache the response. As a risk assessment, these requests are for pages from a site that hosts a static blog whose content pines for a reader, therefore there is no risk associated with exchanging these bits with linode.
+This configuration doesn’t allow the bastion to cache requests on port 443 because they are encrypted: at the bastion I don’t know what’s being requested so that I can cache the response. As a risk assessment, these requests are for pages from a site that hosts a _static blog_ whose content pines for a reader, therefore there is no risk associated with exchanging these bits with linode.
 
 As the site in its entirety can be held in cache on the bastion, then this presents an obvious and very simple option:
 
