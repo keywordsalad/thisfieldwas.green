@@ -6,7 +6,6 @@ import Green.Site.Blog
 import Green.Site.BrokenLinks
 import Green.Site.Code
 import Green.Site.Css
-import Green.Site.Download
 import Green.Site.Feed
 import Green.Site.HomePage
 import Green.Site.Images
@@ -19,18 +18,17 @@ import Green.Template.Custom.Context
 
 site :: SiteConfig -> Rules ()
 site config = do
-  let context = customContext config
   brokenLinks
   images
   js
   scss config
-  downloads
-  code
-  templates
-  blog context
-  feed
-  homePage context
-  pages context
-  robotsTxt context
-  sitemap context
-  brokenLinks
+  templatesDependency <- templates
+  rulesExtraDependencies [templatesDependency] do
+    let context = customContext config
+    homePage context
+    pages context
+    blog context
+    code
+    feed
+    sitemap context
+    robotsTxt context

@@ -7,10 +7,15 @@
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
     {{-#for pages}}
     <url>
-        <loc>{{siteRoot}}{{url}}</loc>
-        <lastmod>{{#if updated}}{{updated}}{{#else if date}}{{date}}{{#end}}</lastmod>
-        <changefreq>{{#if changefreq}}{{changefreq}}{{#else}}weekly{{#end}}</changefreq>
-        <priority>{{#if priority}}{{priority}}{{#else}}0.8{{#end}}</priority>
+        <loc>{{siteRoot}}{{url | escapeHtmlUri}}</loc>
+        <lastmod>{{
+            updated
+                | default date
+                | default currentDate
+                | dateAs robotTime
+            }}</lastmod>
+        <changefreq>{{changefreq | default "monthly"}}</changefreq>
+        <priority>{{priority | default 0.8}}</priority>
     </url>
     {{-#end}}
 </urlset>

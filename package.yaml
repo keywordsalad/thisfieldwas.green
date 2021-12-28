@@ -20,7 +20,6 @@ library:
     - aeson
     - binary
     - bytestring
-    - config-ini
     - data-default
     - directory
     - filepath
@@ -31,6 +30,7 @@ library:
     - microlens
     - microlens-th
     - mtl
+    - network-uri
     - optparse-applicative
     - pandoc
     - parsec
@@ -41,6 +41,7 @@ library:
     - time
     - unordered-containers
     - vector
+    - yaml
 
 executables:
   site:

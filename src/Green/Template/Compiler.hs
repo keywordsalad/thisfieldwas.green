@@ -23,28 +23,27 @@ compileTemplateItem item = do
   let filePath = toFilePath $ itemIdentifier item
   either (fail . show) return $ parse filePath (itemBody item)
 
-evalTemplate :: Context String -> (Item String -> TemplateRunner String (Item String)) -> Item String -> Compiler (Item String)
-evalTemplate context f item = evalStateT (f item) $ templateRunner context item
-
 loadTemplate :: Identifier -> TemplateRunner a Template
 loadTemplate = lift . fmap itemBody . load
 
 loadAndApplyTemplate' :: Identifier -> Context String -> Item String -> Compiler (Item String)
 loadAndApplyTemplate' id' context item = do
   let s = templateRunner context item
-  evalStateT (loadAndApplyTemplate id') s
+  evalStateT (loadAndApplyTemplate id' >> tplItem) s
 
-loadAndApplyTemplate :: Identifier -> TemplateRunner String (Item String)
+loadAndApplyTemplate :: Identifier -> TemplateRunner String ()
 loadAndApplyTemplate =
   loadTemplate
     >=> applyTemplate
     >=> lift . makeItem
+    >=> tplPushItem
 
-applyAsTemplate :: Item String -> TemplateRunner String (Item String)
+applyAsTemplate :: TemplateRunner String ()
 applyAsTemplate =
-  lift . compileTemplateItem
-    >=> applyTemplate
-    >=> lift . makeItem
+  tplModifyItem do
+    lift . compileTemplateItem
+      >=> applyTemplate
+      >=> lift . makeItem
 
 -- | Applies an item as a template to itself.
 applyAsTemplate' :: Context String -> Item String -> Compiler (Item String)
@@ -117,6 +116,8 @@ eval = \case
             StringValue name -> return name
             x -> tplFail $ "invalid field " ++ show x ++ " near " ++ show (getExpressionPos field)
           >>= unContext target'
+      EmptyValue -> return EmptyValue
+      UndefinedValue {} -> return EmptyValue
       x -> tplFail $ "invalid context " ++ show x ++ " near " ++ show pos
   FilterExpression x f _ -> apply f x
   ContextExpression pairs _ -> do

@@ -1,9 +1,9 @@
 module Green.Template.Custom.HtmlField where
 
-import qualified Data.HashMap.Strict as M
 import Green.Common
 import Green.Template
 import Green.Util (dropIndex)
+import Network.URI (escapeURIString, isUnescapedInURI)
 
 -- | Trims @index.html@ from @$url$@'s
 trimmedUrlField :: String -> Context String
@@ -35,27 +35,24 @@ imgField = functionField "img" f
     defaults = defaultKeys ["id", "src", "title", "alt"]
     f (imgFields :: Context String) =
       tplWithContext (imgFields <> defaults) do
-        template <- loadTemplate (fromFilePath "_templates/image.html")
-        applyTemplate template
+        loadAndApplyTemplate "_templates/image.html"
+        itemBody <$> tplPopItem
 
 youtubeField :: Context String
 youtubeField = functionField "youtube" f
   where
     defaults = defaultKeys ["id", "video", "title"]
-    f (ytFields :: Context String) = do
+    f (ytFields :: Context String) =
       tplWithContext (ytFields <> defaults) do
-        itemBody <$> loadAndApplyTemplate (fromFilePath "_templates/youtube.html")
+        loadAndApplyTemplate "_templates/youtube.html"
+        itemBody <$> tplPopItem
 
-linkField :: Context String
-linkField = functionField2 "link" f
+escapeHtmlField :: Context String
+escapeHtmlField = functionField "escapeHtml" f
   where
-    f (linkPath :: String) (linkContent :: [Block]) = do
-      let fields =
-            hashMapField $
-              M.fromList
-                [ ("linkPath", intoValue linkPath :: ContextValue String),
-                  ("linkContent", intoValue linkContent)
-                ]
-      tplWithContext fields do
-        template <- loadTemplate (fromFilePath "_templates/link.html")
-        applyTemplate template
+    f = return . escapeHtml
+
+escapeHtmlUriField :: Context String
+escapeHtmlUriField = functionField "escapeHtmlUri" f
+  where
+    f = return . escapeHtml . escapeURIString isUnescapedInURI

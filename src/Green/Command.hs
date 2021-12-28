@@ -41,5 +41,5 @@ createDraft :: SiteConfig -> CreateDraftOpts -> IO ()
 createDraft _ (CreateDraftOpts title maybeCategory) =
   putStrLn $ "Writing post '" ++ title ++ "' to file " ++ draftFilePath
   where
-    draftFilePath = categoryPrefix ++ kebabCase title ++ ".md"
-    categoryPrefix = maybe "" ((++ "/") . kebabCase) maybeCategory
+    draftFilePath = categoryPrefix ++ camelToKebab title ++ ".md"
+    categoryPrefix = maybe "" ((++ "/") . camelToKebab) maybeCategory

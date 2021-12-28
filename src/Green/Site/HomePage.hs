@@ -15,7 +15,6 @@ homePage siteContext =
             constField "recentPosts" (itemListValue siteContext recentPosts)
               <> teaserField "teaser" publishedPostsSnapshot
               <> siteContext
-      getResourceBody
-        >>= contentCompiler context
-        >>= layoutCompiler context
-        >>= relativizeUrls
+      (getResourceBody, context) `applyTemplates` do
+        contentTemplate
+        layoutTemplate

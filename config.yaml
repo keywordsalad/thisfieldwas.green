@@ -1,0 +1,35 @@
+default: &default
+  site-info:
+    title: This Field Was Green
+    root: http://localhost:8000
+    author-name: Logan McGrath
+    author-email: logan.mcgrath@thisfieldwas.green
+    linkedin-profile: https://www.linkedin.com/in/loganmcgrath
+    twitter-profile: https://twitter.com/thisgreenfield
+    git-web-url: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit
+
+  display-formats:
+    date-short-format: '%B %e, %Y'
+    date-long-format: '%B %e, %Y %l:%M %P %EZ'
+    time-format: '%l:%M %p %EZ'
+    robot-date: '%Y-%m-%d'
+    robot-time: '%Y-%m-%dT%H:%M:%S%Ez'
+    image-widths: [320, 768, 1024, 1920, 3840]
+
+  hakyll-config:
+    provider-directory: site
+    destination-directory: _site
+
+  debug-settings:
+    preview: true
+    inflate-css: true
+
+prod:
+  <<: *default
+
+  site-info:
+    root: https://thisfieldwas.green
+
+  debug-settings:
+    preview: false
+    inflate-css: false

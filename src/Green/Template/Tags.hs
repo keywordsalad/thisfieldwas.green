@@ -6,14 +6,21 @@ module Green.Template.Tags
   )
 where
 
+import Data.Char (toLower)
 import Green.Common
 import Green.Template.Context
-import Green.Util (dropIndex)
+import Green.Util
 import Hakyll (MonadMetadata, Tags, buildTags, getTags, renderTagCloudWith)
 import qualified Hakyll
 
+normalizeTag :: String -> String
+normalizeTag tag = toLower <$> sanitized
+  where
+    sanitized =
+      wordsToKebab $ camelToKebab <$> words tag
+
 makeTagId :: String -> Identifier
-makeTagId = Hakyll.fromCapture "tags/*.html"
+makeTagId = Hakyll.fromCapture "tags/*.html" . normalizeTag
 
 tagsField :: String -> Context a
 tagsField key = field key $ lift . getTags . itemIdentifier
@@ -36,8 +43,12 @@ tagLinksField key = tagLinksFieldWith key getTags
 categoryLinksField :: String -> Context a
 categoryLinksField key = tagLinksFieldWith key getCategory
 
+normalizeCategory :: String -> String
+normalizeCategory = normalizeTag
+{-# INLINE normalizeCategory #-}
+
 makeCategoryId :: String -> Identifier
-makeCategoryId = Hakyll.fromCapture "categories/*.html"
+makeCategoryId = Hakyll.fromCapture "categories/*.html" . normalizeCategory
 
 categoriesField :: String -> Context a
 categoriesField key = field key $ lift . getCategory . itemIdentifier

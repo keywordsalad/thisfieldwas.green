@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# https://code.ofvlad.xyz/vlad/lightning-runner
+set -euo pipefail
+
+main() {
+  [[ $(type -t _verify-prerequisites) == "function" ]] && ! _verify-prerequisites && exit 1
+
+  redefine-functions-defined-with-selector-16
+
+  if [[ $(type -t "⚡${1:-}") == "function" ]]; then
+    command="$1"
+    shift
+    ⚡$command "$@"
+  else
+    ⚡help
+  fi
+}
+
+redefine-functions-defined-with-selector-16() {
+  for function in $(compgen -c $(printf "⚡\uFE0F")); do
+    original_definition="$(typeset -f $function)"
+    eval "${original_definition//$(printf "⚡\uFE0F")/⚡}"
+    unset $function
+  done
+}
+
+⚡help() {
+  _help-line "Show this list"
+  export HELP_LINE=please
+  echo Usage: "$0" SUBCOMMAND
+  echo
+  echo "Available subcommands:"
+  for subcommand in $(_subcommands); do
+    if [[ $(type ⚡$subcommand) =~ _help-line ]]; then
+      printf "\t%-20s - %s\n" "$subcommand" "$(⚡$subcommand help-line)"
+    else
+      printf "\t%-20s\n" $subcommand
+    fi
+  done
+}
+
+_subcommands() {
+  prefix_length=1
+  while [[ "$(cut -c ${prefix_length}- <<< "⚡tomato")" != "tomato" ]]; do
+    prefix_length=$((prefix_length + 1))
+  done
+
+  compgen -c ⚡ | cut -c ${prefix_length}-
+}
+
+_help-line() {
+  if [[ "${HELP_LINE:-}" == "please" ]]; then
+    echo "$1" && exit 0
+  fi
+}
+
+_good-message() {
+  echo -e "\e[32m$@\e[0m"
+}
+
+_bad-message() {
+  echo -e "\e[31m$@\e[0m"
+}
+
+_wrapper() {
+  unset OPTIND
+  while getopts "l:d:n:v:" opt; do
+    case $opt in
+      l) linux_url=$OPTARG ;;
+      d) darwin_url=$OPTARG ;;
+      n) name=$OPTARG ;;
+      v) version=$OPTARG ;;
+    esac
+  done
+
+  while [[ -n "${1:-}" && "$1" != "--" ]]; do
+    shift
+  done
+  shift
+
+  if [[ $(uname -s) == Linux ]]; then
+    url=$linux_url
+  else
+    url=$darwin_url
+  fi
+
+  wrapper_root=".generated/wrapper/$name/$version/"
+  mkdir -p $wrapper_root
+  [[ -f $wrapper_root/bin ]] || curl --location ${url//VERSION/$version} > $wrapper_root/bin
+  chmod +x $wrapper_root/bin
+  ./$wrapper_root/bin "$@"
+}
+
+main "$@"

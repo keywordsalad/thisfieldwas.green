@@ -33,13 +33,18 @@ customContext config = self
           layoutField "applyLayout" "_layouts",
           dateFields config,
           gitCommits config,
-          constField "siteTitle" (config ^. siteTitle),
-          constField "siteRoot" (config ^. siteRoot),
-          constField "linkedInProfile" (config ^. siteLinkedInProfile),
-          constField "authorEmail" (config ^. siteAuthorEmail),
+          constField "siteTitle" (config ^. siteInfo . siteTitle),
+          constField "siteRoot" (config ^. siteInfo . siteRoot),
+          constField "currentTime" (formatTime timeLocale robotTime currentTime),
+          constField "linkedInProfile" (config ^. siteInfo . siteLinkedInProfile),
+          constField "authorEmail" (config ^. siteInfo . siteAuthorEmail),
+          escapeHtmlField,
+          escapeHtmlUriField,
           imgField,
           youtubeField,
           codeField,
-          linkField,
           defaultFields
         ]
+    timeLocale = config ^. siteTimeLocale
+    robotTime = config ^. siteDisplayFormat . displayRobotTime
+    currentTime = config ^. siteCurrentTime

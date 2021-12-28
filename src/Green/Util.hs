@@ -10,9 +10,6 @@ dropIndex url = case splitFileName url of
   (p, "index.html") -> takeDirectory p
   _ -> url
 
-timeFormat :: String
-timeFormat = "%Y-%m-%dT%H:%M:%S%Z"
-
 stripSuffix :: String -> String -> String
 stripSuffix suffix text =
   if drop prefixLength text == suffix
@@ -41,18 +38,68 @@ sequenceRules = sequenceA_
 
 infixr 4 ~<>
 
-kebabCase :: String -> String
-kebabCase [] = []
-kebabCase (x : xs)
-  | notAllowed x = go xs
-  | otherwise = toLower x : go xs
+splitWordsBy :: (Char -> Bool) -> String -> [String]
+splitWordsBy _ [] = []
+splitWordsBy f xs = takeWhile (not . f) xs : splitWordsBy f (dropWhile f xs)
+
+splitWordsByHumps :: String -> [String]
+splitWordsByHumps "" = []
+splitWordsByHumps xss@(x : _)
+  | isUpper x =
+    let prefix = takeWhile isUpper xss
+        rest = dropWhile isUpper xss
+     in if null rest
+          then [prefix]
+          else
+            let currentLength = length prefix - 1
+                currentWord = take currentLength prefix
+                restWords = splitWordsByHumps rest
+                nextWord = drop currentLength prefix ++ concat (take 1 restWords)
+             in [y | y <- [currentWord, nextWord], not (null y)] ++ drop 1 restWords
+  | otherwise =
+    let currentWord = takeWhile (not . isUpper) xss
+        rest = dropWhile (not . isUpper) xss
+     in currentWord : splitWordsByHumps rest
+
+kebabToWords :: String -> [String]
+kebabToWords = splitWordsBy (== '-')
+
+wordsToKebab :: [String] -> String
+wordsToKebab = intercalate "-"
+
+camelToWords :: String -> [String]
+camelToWords = splitWordsByHumps
+
+wordsToCamel :: [String] -> String
+wordsToCamel [] = []
+wordsToCamel wss = go $ fmap toLower <$> wss
   where
     go [] = []
-    go (y : ys)
-      | isUpper y = '-' : toLower y : kebabCase ys
-      | notAllowed y = '-' : kebabCase ys
-      | otherwise = y : kebabCase ys
-    notAllowed c = not (isAlphaNum c || c `elem` ("_." :: [Char]))
+    go (w : ws) = w ++ firstToUpper ws
+    firstToUpper = concatMap \case
+      (w : ws) -> toUpper w : ws
+      [] -> []
+
+snakeToWords :: String -> [String]
+snakeToWords = splitWordsBy (== '_')
+
+wordsToSnake :: [String] -> String
+wordsToSnake = intercalate "_"
+
+camelToKebab :: String -> String
+camelToKebab = wordsToKebab . camelToWords
+
+kebabToCamel :: String -> String
+kebabToCamel = wordsToCamel . kebabToWords
+
+snakeToCamel :: String -> String
+snakeToCamel = wordsToCamel . snakeToWords
+
+kebabToSnake :: String -> String
+kebabToSnake = wordsToSnake . kebabToWords
+
+snakeToKebab :: String -> String
+snakeToKebab = wordsToKebab . snakeToWords
 
 firstAlt :: (Foldable m, Alternative n) => m (n a) -> n a
 firstAlt = foldl (<|>) empty

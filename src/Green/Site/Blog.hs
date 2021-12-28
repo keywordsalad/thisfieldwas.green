@@ -7,16 +7,22 @@ import Green.Template
 import Green.Template.Custom
 import qualified Hakyll as H
 
+buildBlogCategories :: (H.MonadMetadata m) => m Tags
+buildBlogCategories = buildCategories "_posts/**" makeCategoryId
+
+buildBlogTags :: (H.MonadMetadata m) => m Tags
+buildBlogTags = buildTags "_posts/**" makeTagId
+
 blog :: Context String -> Rules ()
 blog context = do
-  categories <- buildCategories "_posts/**" makeCategoryId
-  tags <- buildTags "_posts/**" makeTagId
+  categories <- buildBlogCategories
+  tags <- buildBlogTags
 
   blogHome categories tags context
   posts context
   archives context
 
-  -- categoriesPages categories context
+  categoriesPages categories context
   tagsPages tags context
 
   draftsIndex context
@@ -36,10 +42,9 @@ blogHome categories tags context =
               <> recentPosts
               <> postContext
               <> context
-      getResourceBody
-        >>= contentCompiler blogContext
-        >>= layoutCompiler blogContext
-        >>= relativizeUrls
+      (getResourceBody, blogContext) `applyTemplates` do
+        contentTemplate
+        layoutTemplate
 
 archives :: Context String -> Rules ()
 archives context = do
@@ -50,10 +55,9 @@ archives context = do
       let archivesContext =
             constField "posts" (itemListValue (postContext <> context) publishedPosts)
               <> context
-      getResourceBody
-        >>= contentCompiler archivesContext
-        >>= layoutCompiler archivesContext
-        >>= relativizeUrls
+      (getResourceBody, archivesContext) `applyTemplates` do
+        contentTemplate
+        layoutTemplate
 
 draftsIndex :: Context String -> Rules ()
 draftsIndex context = do
@@ -64,21 +68,19 @@ draftsIndex context = do
       let draftsContext =
             constField "posts" (itemListValue (postContext <> context) draftPosts)
               <> context
-      getResourceBody
-        >>= contentCompiler draftsContext
-        >>= layoutCompiler draftsContext
-        >>= relativizeUrls
+      (getResourceBody, draftsContext) `applyTemplates` do
+        contentTemplate
+        layoutTemplate
 
 posts :: Context String -> Rules ()
 posts context = do
   match "_posts/**" do
     route postsRoute
     compile $
-      getResourceBody
-        >>= contentCompiler postsContext
-        >>= snapshotCompiler [publishedPostsSnapshot]
-        >>= layoutCompiler postsContext
-        >>= relativizeUrls
+      (getResourceBody, postsContext) `applyTemplates` do
+        contentTemplate
+        saveSnapshots [publishedPostsSnapshot]
+        layoutTemplate
   where
     postsContext = postContext <> context
 
@@ -94,11 +96,10 @@ drafts context = do
   match "_drafts/**" do
     route draftsRoute
     compile $
-      getResourceBody
-        >>= contentCompiler draftsContext
-        >>= snapshotCompiler [draftPostsSnapshot]
-        >>= layoutCompiler draftsContext
-        >>= relativizeUrls
+      (getResourceBody, draftsContext) `applyTemplates` do
+        contentTemplate
+        saveSnapshots [draftPostsSnapshot]
+        layoutTemplate
   where
     draftsContext = postContext <> context
 
@@ -121,12 +122,10 @@ categoriesPages categories context =
               <> constField "posts" (itemListValue (postContext <> context) categoryPosts)
               <> constField "layout" ("page" :: String)
               <> context
-      template <- loadBody "_templates/posts-under-category.html"
-      makeItem ""
-        >>= applyTemplate' template categoryContext
-        >>= pandocCompiler
-        >>= layoutCompiler categoryContext
-        >>= relativizeUrls
+      (makeItem "", categoryContext) `applyTemplates` do
+        loadAndApplyTemplate "_templates/posts-under-category.html"
+        withCompiler pandocCompiler
+        layoutTemplate
 
 tagsPages :: Tags -> Context String -> Rules ()
 tagsPages tags context =
@@ -140,12 +139,10 @@ tagsPages tags context =
               <> constField "posts" (itemListValue (postContext <> context) tagPosts)
               <> constField "layout" ("page" :: String)
               <> context
-      template <- loadBody "_templates/posts-under-tag.html"
-      makeItem ""
-        >>= applyTemplate' template tagsContext
-        >>= pandocCompiler
-        >>= layoutCompiler tagsContext
-        >>= relativizeUrls
+      (makeItem "", tagsContext) `applyTemplates` do
+        loadAndApplyTemplate "_templates/posts-under-tag.html"
+        withCompiler pandocCompiler
+        layoutTemplate
 
 postContext :: Context String
 postContext =

@@ -6,19 +6,19 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta rel="canonical" href="{{siteRoot}}{{url}}">
-<meta property="og:title" content="{{title}}">
-<meta property="og:url" content="{{siteRoot}}{{url}}">
-<meta property="og:image" content="{{siteRoot}}{{og_image | default '/grass_og-image.png'}}">
 <title>{{siteTitle}}{{#if title}} - {{title}}{{#end}}</title>
-
-{{#if author}}<link rel="author" href="{{siteRoot}}/" content="{{author}}">{{#end}}
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="{{siteRoot}}/favicon.ico">
 
+<meta property="og:title" content="{{title}}">
+<meta property="og:url" content="{{siteRoot}}{{url}}">
+<meta property="og:image:url" content="{{siteRoot}}{{og.image.url | default '/grass_og-image.png'}}">
+<meta property="og:image:alt" content="{{og.image.alt | default siteTitle}}">
+
 <link rel="stylesheet" href="/css/main.css">
-<script src="/js/main.js"></script>
+<script src="{{route 'js/main.js'}}"></script>
 
 </head>
-<body class='{{bodyClass | default "default"}}'>
+<body class="{{bodyClass | default 'default'}}">
 {{body}}
 </body>
 </html>

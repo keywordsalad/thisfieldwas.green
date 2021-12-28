@@ -12,7 +12,7 @@ scss siteConfig = do
       route $ setExtension "css"
       compile do
         css <- withItemBody compileSass =<< getResourceString
-        if siteConfig ^. siteDebug . debugRawCss
+        if siteConfig ^. siteDebug . debugInflateCss
           then return css
           else return $ compressCss <$> css
   where

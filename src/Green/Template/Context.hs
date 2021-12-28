@@ -44,6 +44,33 @@ templateRunner context item =
 tplItem :: TemplateRunner a (Item a)
 tplItem = gets $ head . tplItemStack
 
+tplModifyItem :: (Item a -> TemplateRunner a (Item a)) -> TemplateRunner a ()
+tplModifyItem f =
+  tplItem
+    >>= f
+    >>= tplReplaceItem
+
+tplReplaceItem :: Item a -> TemplateRunner a ()
+tplReplaceItem item = do
+  stack <-
+    gets tplItemStack <&> \case
+      [] -> [item]
+      _ : rest -> item : rest
+  modify \s -> s {tplItemStack = stack}
+
+tplPopItem :: TemplateRunner a (Item a)
+tplPopItem =
+  gets tplItemStack >>= \case
+    [] -> error "tplPopItem: empty stack"
+    x : xs -> do
+      modify \s -> s {tplItemStack = xs}
+      return x
+
+tplPushItem :: Item a -> TemplateRunner a ()
+tplPushItem item = do
+  stack <- gets tplItemStack
+  modify \s -> s {tplItemStack = item : stack}
+
 tplContext :: TemplateRunner a (Context a)
 tplContext = gets $ head . tplContextStack
 

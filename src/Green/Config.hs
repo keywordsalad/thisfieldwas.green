@@ -1,15 +1,16 @@
 module Green.Config where
 
-import Data.Ini.Config
-import Data.Text (Text)
+import Data.Aeson.Types
+import Data.ByteString (ByteString)
 import qualified Data.Text as T
+import Data.Yaml
 import Green.Common
 import Green.Lens
-import Hakyll.Core.Configuration as HC
+import qualified Hakyll as H
 
 data SiteDebug = SiteDebug
   { _debugPreview :: Bool,
-    _debugRawCss :: Bool
+    _debugInflateCss :: Bool
   }
   deriving stock (Show)
 
@@ -19,31 +20,67 @@ defaultSiteDebug :: SiteDebug
 defaultSiteDebug =
   SiteDebug
     { _debugPreview = False,
-      _debugRawCss = False
+      _debugInflateCss = False
     }
+
+instance FromJSON SiteDebug where
+  parseJSON = withObject "SiteDebug" \debug ->
+    SiteDebug
+      <$> debug .:? "preview" .!= (defaultSiteDebug ^. debugPreview)
+      <*> debug .:? "inflate-css" .!= (defaultSiteDebug ^. debugInflateCss)
+
+data SiteInfo = SiteInfo
+  { _siteRoot :: String,
+    _siteTitle :: String,
+    _siteDescription :: String,
+    _siteAuthorName :: String,
+    _siteAuthorEmail :: String,
+    _siteLinkedInProfile :: String,
+    _siteGitWebUrl :: String
+  }
+  deriving stock (Show)
+
+makeLenses ''SiteInfo
+
+instance FromJSON SiteInfo where
+  parseJSON = withObject "SiteInfo" \info ->
+    SiteInfo
+      <$> info .: "root"
+      <*> info .: "title"
+      <*> info .:? "description" .!= ""
+      <*> info .: "author-name"
+      <*> info .: "author-email"
+      <*> info .: "linkedin-profile"
+      <*> info .: "git-web-url"
 
 data SiteDisplayFormat = SiteDisplayFormat
   { _displayDateLongFormat :: String,
     _displayDateShortFormat :: String,
     _displayTimeFormat :: String,
+    _displayRobotDate :: String,
+    _displayRobotTime :: String,
     _displayImageWidths :: [Int]
   }
   deriving stock (Show)
 
 makeLenses ''SiteDisplayFormat
 
+instance FromJSON SiteDisplayFormat where
+  parseJSON = withObject "SiteDisplayFormat" \format ->
+    SiteDisplayFormat
+      <$> format .: "date-long-format"
+      <*> format .: "date-short-format"
+      <*> format .: "time-format"
+      <*> format .: "robot-date"
+      <*> format .: "robot-time"
+      <*> format .:? "image-widths" .!= []
+
 data SiteConfig = SiteConfig
   { _siteEnv :: [(String, String)],
-    _siteRoot :: String,
-    _siteTitle :: String,
-    _siteDescription :: String,
-    _siteAuthorName :: String,
-    _siteAuthorEmail :: String,
-    _siteLinkedInProfile :: String,
-    _siteGitWebUrl :: String,
+    _siteInfo :: SiteInfo,
     _siteDebug :: SiteDebug,
-    _siteHakyllConfiguration :: Configuration,
-    _siteTime :: ZonedTime,
+    _siteHakyllConfiguration :: H.Configuration,
+    _siteCurrentTime :: ZonedTime,
     _siteTimeLocale :: TimeLocale,
     _siteDisplayFormat :: SiteDisplayFormat
   }
@@ -55,11 +92,11 @@ siteFeedConfiguration = to f
   where
     f siteConfig =
       FeedConfiguration
-        { feedTitle = siteConfig ^. siteTitle,
-          feedRoot = siteConfig ^. siteRoot,
-          feedAuthorName = siteConfig ^. siteAuthorName,
-          feedAuthorEmail = siteConfig ^. siteAuthorEmail,
-          feedDescription = siteConfig ^. siteDescription
+        { feedTitle = siteConfig ^. siteInfo . siteTitle,
+          feedRoot = siteConfig ^. siteInfo . siteRoot,
+          feedAuthorName = siteConfig ^. siteInfo . siteAuthorName,
+          feedAuthorEmail = siteConfig ^. siteInfo . siteAuthorEmail,
+          feedDescription = siteConfig ^. siteInfo . siteDescription
         }
 
 siteDestinationDirectory :: Lens' SiteConfig FilePath
@@ -81,17 +118,18 @@ instance Show SiteConfig where
   show config =
     intercalate "\n" $
       [ "SiteConfig:",
-        "  Root: " <> show (config ^. siteRoot),
-        "  Title: " <> show (config ^. siteTitle),
-        "  Description: " <> show (config ^. siteDescription),
-        "  AuthorName: " <> show (config ^. siteAuthorName),
-        "  AuthorEmail: " <> show (config ^. siteAuthorEmail),
-        "  LinkedInProfile: " <> show (config ^. siteLinkedInProfile),
-        "  GitWebUrl: " <> show (config ^. siteGitWebUrl),
-        "  Time: " <> show (config ^. siteTime),
+        "  Time: " <> show (config ^. siteCurrentTime),
+        "  SiteInfo:",
+        "    Root: " <> show (config ^. siteInfo . siteRoot),
+        "    Title: " <> show (config ^. siteInfo . siteTitle),
+        "    Description: " <> show (config ^. siteInfo . siteDescription),
+        "    AuthorName: " <> show (config ^. siteInfo . siteAuthorName),
+        "    AuthorEmail: " <> show (config ^. siteInfo . siteAuthorEmail),
+        "    LinkedInProfile: " <> show (config ^. siteInfo . siteLinkedInProfile),
+        "    GitWebUrl: " <> show (config ^. siteInfo . siteGitWebUrl),
         "  Debug:",
         "    Preview: " <> show (config ^. siteDebug . debugPreview),
-        "    RawCss: " <> show (config ^. siteDebug . debugRawCss),
+        "    InflateCss: " <> show (config ^. siteDebug . debugInflateCss),
         "  HakyllConfiguration:",
         "    DestinationDirectory: " <> show (config ^. siteDestinationDirectory),
         "    ProviderDirectory: " <> show (config ^. siteProviderDirectory),
@@ -101,71 +139,50 @@ instance Show SiteConfig where
         "    DateLongFormat: " <> show (config ^. siteDisplayFormat . displayDateLongFormat),
         "    DateShortFormat: " <> show (config ^. siteDisplayFormat . displayDateShortFormat),
         "    TimeFormat: " <> show (config ^. siteDisplayFormat . displayTimeFormat),
+        "    RobotDate: " <> show (config ^. siteDisplayFormat . displayRobotDate),
+        "    RobotTime: " <> show (config ^. siteDisplayFormat . displayRobotTime),
         "    ImageWidths: " <> show (config ^. siteDisplayFormat . displayImageWidths),
         "  Env:",
         "    " <> intercalate "\n    " ((\(key, val) -> key <> "=" <> show val) <$> config ^. siteEnv)
       ]
 
-hasEnvFlag :: String -> [(String, String)] -> Bool
-hasEnvFlag f e = isJust (lookup f e)
+customIgnoreFile :: Foldable t => t FilePath -> FilePath -> Bool
+customIgnoreFile allowedFiles path =
+  H.ignoreFile H.defaultConfiguration path
+    && takeFileName path `notElem` allowedFiles
 
-parseConfigIni :: [(String, String)] -> TimeLocale -> ZonedTime -> Text -> Either String SiteConfig
-parseConfigIni env timeLocale time iniText = parseIniFile iniText do
-  hakyllConfiguration <- section "Hakyll" do
-    providerDirectory' <- fieldOf "providerDirectory" string
-    destinationDirectory' <- fieldOf "destinationDirectory" string
-    allowedFiles <- fieldListOf "allowedFiles" string
-    return
-      HC.defaultConfiguration
-        { providerDirectory = providerDirectory',
-          destinationDirectory = destinationDirectory',
-          ignoreFile = customIgnoreFile allowedFiles
+parseHakyllConfigurationJSON :: Value -> Parser H.Configuration
+parseHakyllConfigurationJSON = withObject "Hakyll.Core.Configuration" \config ->
+  initConfig
+    <$> config .: "provider-directory"
+    <*> config .: "destination-directory"
+    <*> config .:? "allowed-files" .!= []
+  where
+    initConfig providerDirectory' destinationDirectory' allowedFiles =
+      H.defaultConfiguration
+        { H.providerDirectory = providerDirectory',
+          H.destinationDirectory = destinationDirectory',
+          H.ignoreFile = customIgnoreFile allowedFiles
         }
 
-  debugSettings <- sectionDef "Debug" defaultSiteDebug do
-    SiteDebug
-      <$> configEnvFlag "preview" "SITE_PREVIEW" False env
-      <*> configEnvFlag "rawCss" "SITE_RAW_CSS" False env
-
-  displayFormat <- section "DisplayFormats" do
-    SiteDisplayFormat
-      <$> fieldOf "dateLongFormat" string
-      <*> fieldOf "dateShortFormat" string
-      <*> fieldOf "timeFormat" string
-      <*> fieldListOf "imageWidths" number
-
-  section "Site" do
-    SiteConfig env
-      <$> fieldOf "root" string
-      <*> fieldOf "title" string
-      <*> (fieldOf "description" string <|> return "")
-      <*> fieldOf "authorName" string
-      <*> fieldOf "authorEmail" string
-      <*> fieldOf "linkedInProfile" string
-      <*> fieldOf "gitWebUrl" string
-      <*> pure debugSettings
-      <*> pure hakyllConfiguration
-      <*> pure time
-      <*> pure timeLocale
-      <*> pure displayFormat
+parseSiteConfigJSON :: [(String, String)] -> TimeLocale -> ZonedTime -> Value -> Parser SiteConfig
+parseSiteConfigJSON env timeLocale time = withObject "SiteConfig" \allConfig -> do
+  config <- allConfig .: T.pack envKey
+  SiteConfig env
+    <$> config .: "site-info"
+    <*> (overrideDebugSettings <$> config .:? "debug-settings" .!= defaultSiteDebug)
+    <*> (config .: "hakyll-config" >>= parseHakyllConfigurationJSON)
+    <*> pure time
+    <*> pure timeLocale
+    <*> config .: "display-formats"
   where
-    customIgnoreFile allowedFiles path =
-      ignoreFile defaultConfiguration path
-        && takeFileName path `notElem` allowedFiles
+    envKey = fromMaybe "default" $ lookup "SITE_ENV" env
+    overrideDebugSettings debug =
+      debug
+        & debugInflateCss %~ (\x -> maybe x read $ lookup "SITE_INFLATE_CSS" env)
+        & debugPreview %~ (\x -> maybe x read $ lookup "SITE_PREVIEW" env)
 
-fieldListOf :: Text -> (Text -> Either String a) -> SectionParser [a]
-fieldListOf k p = fieldDefOf k (listWithSeparator "," p) []
-
-configEnvFlag :: String -> String -> Bool -> [(String, String)] -> SectionParser Bool
-configEnvFlag configKey envKey defaultValue env =
-  case lookup envKey env of
-    Just _ -> return True
-    Nothing -> fieldFlagDef (T.pack configKey) defaultValue
-
-configEnvMbOf :: String -> String -> (Text -> Either String a) -> [(String, String)] -> SectionParser (Maybe a)
-configEnvMbOf configKey envKey parseFn env =
-  fieldFromEnv <|> fieldMbOf (T.pack configKey) parseFn
-  where
-    fieldFromEnv = sequence $ getValue . parseFn . T.pack <$> lookup envKey env
-    getValue (Left e) = error e
-    getValue (Right v) = return v
+parseConfigYaml :: [(String, String)] -> TimeLocale -> ZonedTime -> ByteString -> Either String SiteConfig
+parseConfigYaml env timeLocale time =
+  first prettyPrintParseException . decodeEither'
+    >=> parseEither (parseSiteConfigJSON env timeLocale time)

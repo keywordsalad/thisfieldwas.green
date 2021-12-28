@@ -51,8 +51,8 @@ includeField key basePath = functionField key f
       let filePath' = basePath </> filePath <.> "html"
       tplWithCall (filePath' ++ " via " ++ show key) do
         context <- tplContext
-        result <- loadAndApplyTemplate (fromFilePath filePath')
-        return $ itemValue context result
+        loadAndApplyTemplate (fromFilePath filePath')
+        itemValue context <$> tplPopItem
 
 layoutField :: String -> FilePath -> Context String
 layoutField key basePath = functionField2 key f

@@ -1,6 +1,6 @@
 module Green where
 
-import qualified Data.Text.IO as TIO
+import qualified Data.ByteString as BS
 import Data.Time
 import Green.Command
 import Green.Common
@@ -27,10 +27,10 @@ loadSiteConfig :: IO SiteConfig
 loadSiteConfig = do
   env <- getEnvironment
   time <- utcToZonedTime <$> getCurrentTimeZone <*> getCurrentTime
-  configIniText <- TIO.readFile "config.ini"
+  configYamlBs <- BS.readFile "config.yaml"
   siteConfig <-
     either fail return $
-      parseConfigIni env defaultTimeLocale time configIniText
+      parseConfigYaml env defaultTimeLocale time configYamlBs
 
   putStrLn $ replicate 80 '-'
   print siteConfig

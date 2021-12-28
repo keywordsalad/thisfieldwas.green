@@ -1,10 +1,11 @@
 module Green.Site.Sitemap where
 
 import Green.Common
-import Green.Compiler (loadExistingSnapshots)
-import Green.Site.Blog (loadPublishedPosts)
+import Green.Site.Blog (buildBlogCategories, buildBlogTags, loadPublishedPosts)
 import Green.Template
-import Hakyll (recentFirst)
+import Green.Template.Custom
+import Hakyll ((.||.))
+import qualified Hakyll as H
 
 sitemap :: Context String -> Rules ()
 sitemap siteContext =
@@ -12,31 +13,33 @@ sitemap siteContext =
     route idRoute
     compile do
       context <- sitemapContext siteContext
-      getResourceBody
-        >>= applyAsTemplate' context
+      (getResourceBody, context) `applyTemplates` applyAsTemplate
 
 sitemapContext :: Context String -> Compiler (Context String)
 sitemapContext siteContext = do
-  pages <- concat <$> mapM (`loadExistingSnapshots` "_content") pagePatterns
-  posts <- recentFirst =<< loadPublishedPosts
-  let context =
-        forItemField "updated" latestPostPatterns (\_ -> latestPostUpdated posts)
-          <> constField "pages" (itemListValue context (pages <> posts))
+  categoriesPages <- H.loadAll . tagsPattern =<< buildBlogCategories :: Compiler [Item String]
+  tagsPages <- H.loadAll . tagsPattern =<< buildBlogTags :: Compiler [Item String]
+  blogPage <- H.load "blog.html" :: Compiler (Item String)
+  posts <- H.recentFirst =<< loadPublishedPosts
+  pages <- H.loadAll pagesPattern :: Compiler [Item String]
+  let allPages =
+        pages
+          <> [blogPage]
+          <> categoriesPages
+          <> tagsPages
+          <> posts
+      context =
+        constField "updated" (latestPostUpdated posts)
+          <> constField "pages" (itemListValue context allPages)
           <> siteContext
   return context
   where
-    pagePatterns =
-      [ "index.html",
-        "*.md",
-        "blog.html",
-        "archives.html"
-      ]
-    latestPostPatterns =
-      fromFilePath
-        <$> [ "blog.html",
-              "archives.html",
-              "categories.html",
-              "tags.html"
-            ]
+    pagesPattern =
+      foldl1 (.||.) $
+        [ H.fromGlob "_pages/**",
+          "index.html",
+          "archives.html"
+        ]
     latestPostUpdated (latestPost : _) = tplWithItem latestPost (unContext siteContext "updated")
-    latestPostUpdated _ = tplTried "latest post updated"
+    latestPostUpdated [] = tplTried "latest post updated"
+    tagsPattern tags = H.fromList (H.tagsMap tags <&> \(tag, _) -> H.tagsMakeId tags tag)

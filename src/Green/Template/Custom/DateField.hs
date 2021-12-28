@@ -10,16 +10,18 @@ import Green.Util
 dateFields :: SiteConfig -> Context a
 dateFields config =
   mconcat
-    [ dateField "date" timeLocale,
+    [ dateField "date" timeLocale currentTime,
       publishedField "published" timeLocale,
       updatedField "updated" timeLocale,
       constField "longDate" (displayFormat ^. displayDateLongFormat),
       constField "shortDate" (displayFormat ^. displayDateShortFormat),
       constField "timeOnly" (displayFormat ^. displayTimeFormat),
+      constField "robotTime" (displayFormat ^. displayRobotTime),
       dateFormatField "dateAs" timeLocale
     ]
   where
     timeLocale = config ^. siteTimeLocale
+    currentTime = config ^. siteCurrentTime
     displayFormat = config ^. siteDisplayFormat
 
 dateFormatField :: String -> TimeLocale -> Context a
@@ -30,13 +32,14 @@ dateFormatField key timeLocale = functionField2 key f
       return $ formatTime timeLocale dateFormat date
     deserializeTime = parseTimeM' timeLocale normalizedFormat
 
-dateField :: String -> TimeLocale -> Context a
-dateField key timeLocale = field key f
+dateField :: String -> TimeLocale -> ZonedTime -> Context a
+dateField key timeLocale currentTime = field key f
   where
     f item =
       lift $
         dateFromMetadata timeLocale ["date", "published"] item
           <|> dateFromFilePath timeLocale item
+          <|> return (formatTime timeLocale "%Y-%m-%dT%H:%M:%S%Ez" currentTime)
 
 publishedField :: String -> TimeLocale -> Context a
 publishedField key timeLocale = field key f

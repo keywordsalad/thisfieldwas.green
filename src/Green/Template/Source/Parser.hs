@@ -146,6 +146,7 @@ accessExpression = simpleExpression `chainl1` try accessed <?> "AccessExpression
     accessed = withPosition do
       withTag DotToken
       return f
+    f pos x (NameExpression id' pos') = f pos x (StringExpression id' pos')
     f pos x y = AccessExpression x y pos
 
 simpleExpression :: Parser Expression
