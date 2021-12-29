@@ -115,7 +115,7 @@ _verify-prerequisites () {
 
 ⚡datestamp () {
   _help-line "Generate ISO-8601 datestamp with time and offset"
-  DATE=$(date +"%Y-%m-%dT%H:%M:%S%z")
+  DATE=$(date +"%Y-%m-%dT%H:%M:%S%:z")
   echo "$DATE" | pbcopy
   echo "Copied to clipboard: $DATE"
 }
