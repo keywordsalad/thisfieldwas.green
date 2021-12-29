@@ -13,7 +13,9 @@ sitemap siteContext =
     route idRoute
     compile do
       context <- sitemapContext siteContext
-      (getResourceBody, context) `applyTemplates` applyAsTemplate
+      getResourceBody >>= applyTemplates do
+        applyContext context
+        applyAsTemplate
 
 sitemapContext :: Context String -> Compiler (Context String)
 sitemapContext siteContext = do

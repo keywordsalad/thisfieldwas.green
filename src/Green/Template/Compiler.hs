@@ -26,15 +26,10 @@ compileTemplateItem item = do
 loadTemplate :: Identifier -> TemplateRunner a Template
 loadTemplate = lift . fmap itemBody . load
 
-loadAndApplyTemplate' :: Identifier -> Context String -> Item String -> Compiler (Item String)
-loadAndApplyTemplate' id' context item = do
-  let s = templateRunner context item
-  evalStateT (loadAndApplyTemplate id' >> tplItem) s
-
-loadAndApplyTemplate :: Identifier -> TemplateRunner String ()
-loadAndApplyTemplate =
+applyTemplate :: Identifier -> TemplateRunner String ()
+applyTemplate =
   loadTemplate
-    >=> applyTemplate
+    >=> reduceTemplate
     >=> lift . makeItem
     >=> tplPushItem
 
@@ -42,26 +37,14 @@ applyAsTemplate :: TemplateRunner String ()
 applyAsTemplate =
   tplModifyItem do
     lift . compileTemplateItem
-      >=> applyTemplate
+      >=> reduceTemplate
       >=> lift . makeItem
 
--- | Applies an item as a template to itself.
-applyAsTemplate' :: Context String -> Item String -> Compiler (Item String)
-applyAsTemplate' context item = do
-  template <- compileTemplateItem item
-  applyTemplate' template context item
-
--- | Applies a template with context to an item
-applyTemplate' :: Template -> Context String -> Item String -> Compiler (Item String)
-applyTemplate' template context item = do
-  let s = templateRunner context item
-  makeItem =<< evalStateT (applyTemplate template) s
-
-applyTemplate :: Template -> TemplateRunner String String
-applyTemplate (Template bs src) =
+reduceTemplate :: Template -> TemplateRunner String String
+reduceTemplate (Template bs src) =
   tplWithCall ("template " ++ src) (reduceBlocks bs)
 
-reduceBlocks :: [Block] -> TemplateRunner String String -- Context String -> [Block] -> Item String -> Compiler String
+reduceBlocks :: [Block] -> TemplateRunner String String
 reduceBlocks = stringify . intoValue <=< applyBlocks
 
 applyBlocks :: [Block] -> TemplateRunner String [ContextValue String]

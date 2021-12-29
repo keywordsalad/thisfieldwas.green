@@ -11,10 +11,10 @@ homePage siteContext =
     route idRoute
     compile do
       recentPosts <- fmap (take 5) $ recentFirst =<< loadPublishedPosts
-      let context =
-            constField "recentPosts" (itemListValue siteContext recentPosts)
-              <> teaserField "teaser" publishedPostsSnapshot
-              <> siteContext
-      (getResourceBody, context) `applyTemplates` do
-        contentTemplate
-        layoutTemplate
+      getResourceBody >>= applyTemplates do
+        applyContext $
+          constField "recentPosts" (itemListValue siteContext recentPosts)
+            <> teaserField "teaser" publishedPostsSnapshot
+            <> siteContext
+        applyContent
+        applyLayout

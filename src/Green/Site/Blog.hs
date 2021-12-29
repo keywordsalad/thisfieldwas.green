@@ -36,15 +36,15 @@ blogHome categories tags context =
       categoryCloud <- renderTagCloud categories
       tagCloud <- renderTagCloud tags
       recentPosts <- recentPostsContext
-      let blogContext =
-            constField "categoryCloud" categoryCloud
-              <> constField "tagCloud" tagCloud
-              <> recentPosts
-              <> postContext
-              <> context
-      (getResourceBody, blogContext) `applyTemplates` do
-        contentTemplate
-        layoutTemplate
+      getResourceBody >>= applyTemplates do
+        applyContext $
+          constField "categoryCloud" categoryCloud
+            <> constField "tagCloud" tagCloud
+            <> recentPosts
+            <> postContext
+            <> context
+        applyContent
+        applyLayout
 
 archives :: Context String -> Rules ()
 archives context = do
@@ -52,12 +52,12 @@ archives context = do
     route indexRoute
     compile do
       publishedPosts <- H.recentFirst =<< loadPublishedPosts
-      let archivesContext =
-            constField "posts" (itemListValue (postContext <> context) publishedPosts)
-              <> context
-      (getResourceBody, archivesContext) `applyTemplates` do
-        contentTemplate
-        layoutTemplate
+      getResourceBody >>= applyTemplates do
+        applyContext $
+          constField "posts" (itemListValue (postContext <> context) publishedPosts)
+            <> context
+        applyContent
+        applyLayout
 
 draftsIndex :: Context String -> Rules ()
 draftsIndex context = do
@@ -65,24 +65,23 @@ draftsIndex context = do
     route indexRoute
     compile do
       draftPosts <- H.recentFirst =<< loadDraftPosts
-      let draftsContext =
-            constField "posts" (itemListValue (postContext <> context) draftPosts)
-              <> context
-      (getResourceBody, draftsContext) `applyTemplates` do
-        contentTemplate
-        layoutTemplate
+      getResourceBody >>= applyTemplates do
+        applyContext $
+          constField "posts" (itemListValue (postContext <> context) draftPosts)
+            <> context
+        applyContent
+        applyLayout
 
 posts :: Context String -> Rules ()
 posts context = do
   match "_posts/**" do
     route postsRoute
     compile $
-      (getResourceBody, postsContext) `applyTemplates` do
-        contentTemplate
+      getResourceBody >>= applyTemplates do
+        applyContext $ postContext <> context
+        applyContent
         saveSnapshots [publishedPostsSnapshot]
-        layoutTemplate
-  where
-    postsContext = postContext <> context
+        applyLayout
 
 postsRoute :: Routes
 postsRoute =
@@ -96,10 +95,11 @@ drafts context = do
   match "_drafts/**" do
     route draftsRoute
     compile $
-      (getResourceBody, draftsContext) `applyTemplates` do
-        contentTemplate
+      getResourceBody >>= applyTemplates do
+        applyContext draftsContext
+        applyContent
         saveSnapshots [draftPostsSnapshot]
-        layoutTemplate
+        applyLayout
   where
     draftsContext = postContext <> context
 
@@ -116,16 +116,16 @@ categoriesPages categories context =
     route indexRoute
     compile do
       categoryPosts <- H.recentFirst =<< H.loadAll pat
-      let categoryContext =
-            constField "category" category
-              <> constField "title" ("Posts under \"" ++ category ++ "\"")
-              <> constField "posts" (itemListValue (postContext <> context) categoryPosts)
-              <> constField "layout" ("page" :: String)
-              <> context
-      (makeItem "", categoryContext) `applyTemplates` do
-        loadAndApplyTemplate "_templates/posts-under-category.html"
-        withCompiler pandocCompiler
-        layoutTemplate
+      makeItem "" >>= applyTemplates do
+        applyContext $
+          constField "category" category
+            <> constField "title" ("Posts under \"" ++ category ++ "\"")
+            <> constField "posts" (itemListValue (postContext <> context) categoryPosts)
+            <> constField "layout" ("page" :: String)
+            <> context
+        applyTemplate "_templates/posts-under-category.html"
+        applyCompiler pandocCompiler
+        applyLayout
 
 tagsPages :: Tags -> Context String -> Rules ()
 tagsPages tags context =
@@ -133,16 +133,16 @@ tagsPages tags context =
     route indexRoute
     compile do
       tagPosts <- H.recentFirst =<< H.loadAll pat
-      let tagsContext =
-            constField "tag" tag
-              <> constField "title" ("Posts tagged \"" ++ tag ++ "\"")
-              <> constField "posts" (itemListValue (postContext <> context) tagPosts)
-              <> constField "layout" ("page" :: String)
-              <> context
-      (makeItem "", tagsContext) `applyTemplates` do
-        loadAndApplyTemplate "_templates/posts-under-tag.html"
-        withCompiler pandocCompiler
-        layoutTemplate
+      makeItem "" >>= applyTemplates do
+        applyContext $
+          constField "tag" tag
+            <> constField "title" ("Posts tagged \"" ++ tag ++ "\"")
+            <> constField "posts" (itemListValue (postContext <> context) tagPosts)
+            <> constField "layout" ("page" :: String)
+            <> context
+        applyTemplate "_templates/posts-under-tag.html"
+        applyCompiler pandocCompiler
+        applyLayout
 
 postContext :: Context String
 postContext =

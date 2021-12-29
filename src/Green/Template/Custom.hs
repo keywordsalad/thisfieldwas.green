@@ -15,28 +15,29 @@ import Green.Template.Custom.DateField
 import Green.Template.Custom.GitField
 import Green.Template.Custom.HtmlField
 
-applyTemplates :: (Compiler (Item a), Context a) -> TemplateRunner a () -> Compiler (Item a)
-applyTemplates (itemM, context) =
-  applyTemplatesWith itemM context
+applyTemplates :: TemplateRunner a () -> Item a -> Compiler (Item a)
+applyTemplates templates item =
+  evalStateT (templates >> tplItem) $
+    TemplateState
+      { tplContextStack = [],
+        tplItemStack = [item],
+        tplCallStack = ["item " ++ itemFilePath item]
+      }
 
-applyTemplatesWith :: Compiler (Item a) -> Context a -> TemplateRunner a () -> Compiler (Item a)
-applyTemplatesWith itemM context templates =
-  itemM >>= evalStateT (templates >> tplItem) . templateRunner context
-
-contentTemplate :: TemplateRunner String ()
-contentTemplate = do
+applyContent :: TemplateRunner String ()
+applyContent = do
   applyAsTemplate
   tplModifyItem $ lift . pandocCompiler
 
-layoutTemplate :: TemplateRunner String ()
-layoutTemplate = loadAndApplyTemplate "_layouts/from-context.html"
+applyLayout :: TemplateRunner String ()
+applyLayout = applyTemplate "_layouts/from-context.html"
 
 fileTemplate :: FilePath -> TemplateRunner String ()
 fileTemplate filePath =
-  loadAndApplyTemplate (fromFilePath filePath)
+  applyTemplate (fromFilePath filePath)
 
-withCompiler :: (Item a -> Compiler (Item a)) -> TemplateRunner a ()
-withCompiler compiler =
+applyCompiler :: (Item a -> Compiler (Item a)) -> TemplateRunner a ()
+applyCompiler compiler =
   tplModifyItem $ lift . compiler
 
 saveSnapshots :: [String] -> TemplateRunner String ()
@@ -45,3 +46,7 @@ saveSnapshots snapshots = do
   lift $ forM_ snapshots' (`saveSnapshot` item)
   where
     snapshots' = nub ("_content" : snapshots)
+
+applyContext :: Context a -> TemplateRunner a ()
+applyContext = tplPushContext
+{-# INLINE applyContext #-}

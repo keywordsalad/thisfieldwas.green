@@ -33,14 +33,6 @@ data TemplateState a = TemplateState
 
 type TemplateRunner a b = StateT (TemplateState a) Compiler b
 
-templateRunner :: Context a -> Item a -> TemplateState a
-templateRunner context item =
-  TemplateState
-    { tplContextStack = [context],
-      tplItemStack = [item],
-      tplCallStack = ["item " ++ itemFilePath item]
-    }
-
 tplItem :: TemplateRunner a (Item a)
 tplItem = gets $ head . tplItemStack
 
@@ -66,6 +58,9 @@ tplPopItem =
       modify \s -> s {tplItemStack = xs}
       return x
 
+tplPopBody :: TemplateRunner a a
+tplPopBody = itemBody <$> tplPopItem
+
 tplPushItem :: Item a -> TemplateRunner a ()
 tplPushItem item = do
   stack <- gets tplItemStack
@@ -73,6 +68,10 @@ tplPushItem item = do
 
 tplContext :: TemplateRunner a (Context a)
 tplContext = gets $ head . tplContextStack
+
+tplPushContext :: Context a -> TemplateRunner a ()
+tplPushContext context =
+  modify \s -> s {tplContextStack = context : tplContextStack s}
 
 tplWithItem :: Item a -> TemplateRunner a b -> TemplateRunner a b
 tplWithItem item f = do

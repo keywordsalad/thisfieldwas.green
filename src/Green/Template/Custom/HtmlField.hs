@@ -35,8 +35,8 @@ imgField = functionField "img" f
     defaults = defaultKeys ["id", "src", "title", "alt"]
     f (imgFields :: Context String) =
       tplWithContext (imgFields <> defaults) do
-        loadAndApplyTemplate "_templates/image.html"
-        itemBody <$> tplPopItem
+        applyTemplate "_templates/image.html"
+        tplPopBody
 
 youtubeField :: Context String
 youtubeField = functionField "youtube" f
@@ -44,8 +44,8 @@ youtubeField = functionField "youtube" f
     defaults = defaultKeys ["id", "video", "title"]
     f (ytFields :: Context String) =
       tplWithContext (ytFields <> defaults) do
-        loadAndApplyTemplate "_templates/youtube.html"
-        itemBody <$> tplPopItem
+        applyTemplate "_templates/youtube.html"
+        tplPopBody
 
 escapeHtmlField :: Context String
 escapeHtmlField = functionField "escapeHtml" f

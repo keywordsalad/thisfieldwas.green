@@ -14,6 +14,7 @@ pages context = forM_ ["_pages/", "_errors/"] \dir -> do
         `composeRoutes` setExtension "html"
         `composeRoutes` indexRoute
     compile $
-      (getResourceBody, context) `applyTemplates` do
-        contentTemplate
-        layoutTemplate
+      getResourceBody >>= applyTemplates do
+        applyContext context
+        applyContent
+        applyLayout
