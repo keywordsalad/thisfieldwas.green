@@ -75,23 +75,34 @@ _verify-prerequisites () {
 ⚡publish () {
   _help-line "Build the site and then publish it live"
   current_branch="$(git branch --show-current)"
-  if [[ "$current_branch" -ne "main" ]]; then
+  if [[ "$current_branch" != "main" ]]; then
     _bad-message "Can only publish from main branch; tried to publish from $current_branch"
     exit 1
   fi
   ⚡test_sync "main"
-  ⚡build
 
   if [ ! -d _site ] || [ -z "$(ls -A _site)" ]; then
     git clone --branch _site "$(git config --get remote.origin.url)" _site
   fi
 
   sha="$(git log -1 HEAD --pretty=format:%h)"
+  tag="$(date +'publish_%Y.%m.%d_%H.%M.%S')_$sha"
+
   pushd ./_site
-  test_sync "_site"
+  ⚡test_sync "_site"
+  popd
+
+  SITE_ENV=prod ⚡rebuild
+
+  pushd ./_site
   git add .
   git commit -m "Build on $(date) generated from $sha"
   git push origin "_site"
+
+  git tag -a "$tag" -m "Build on $(date) generated from $sha"
+  git push origin "$tag"
+  popd
+
   rsync -ahp * closet.oflogan.xyz:/usr/share/nginx/thisfieldwas.green/
   popd
 }
