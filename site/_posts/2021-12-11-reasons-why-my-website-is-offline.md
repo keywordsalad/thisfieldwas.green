@@ -1,18 +1,26 @@
 ---
 title: Reasons why my website is offline
+description: >-
+  My website comes out of the closet. This is from where I host several of my
+  services, but the uptime is terrible!
 author: Logan McGrath
 comments: false
-published: 2021-12-11T14:43:25-0800
+published: 2021-12-11T14:43:25-08:00
 tags: self host, configuration management, tinfoil hat
 layout: post
-og_image: /images/reasons-my-website-is-offline/coming-out-of-the-closet-1024.png
+twitter:
+  image: /images/reasons-my-website-is-offline/coming-out-of-the-closet-512x512.png
+og:
+  image:
+    url: /images/reasons-my-website-is-offline/coming-out-of-the-closet-512x512.png
+    alt: The closet computer, in context
 ---
 
-{{put og_image: "peanutbutterjellytime.jpg"}}
-
-My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and [low-key minimalist](https://internetwebsite.ofvlad.xyz), found next to the garbage chute at his condo building. It appears to have been someone’s gaming rig in its prior life, as it has a decent graphics card in it and `8GB` of RAM. Its demise was likely an upgrade to Windows 10, as upon boot, the login screen was so unresponsive that I could barely get the mouse to register movement and indicate for the computer to shut down again.
+My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and [low-key minimalist](https://internetwebsite.ofvlad.xyz), found next to the garbage chute at his condo building.
 
 <!--more-->
+
+> It appears to have been someone’s gaming rig in its prior life, as it has a decent graphics card in it and `8GB` of RAM. Its abandonment was likely due to an upgrade to Windows 10, as upon boot, the login screen was so unresponsive that I could barely get the mouse to register movement and indicate for the computer to shut down again.
 
 I previously complained to Vlad about how untrustworthy I felt cloud providers are regarding data privacy. He finds this computer by sheer accident, and that he uses Arch Linux, btw[^archbtw], so he recommends that I breathe new life into it using Arch, and to see if I can self host some of my own services.
 
@@ -44,7 +52,7 @@ I pay Apple to store my photos in the cloud. I thought they were encrypted, righ
 
 I am very motivated to get as much of my stuff out of third party services as I can, because--to generalize based on GitHub and Apple--it's likely that no third party can be trusted with my data _even if they are already making money off of it_. I resolve to divest Apple and Google of my cloud data, GitHub of my source code, and `linode` of my miscellaneous.
 
-I talk to <span class="redacted">Vlad</redacted> about my feelings regarding GitHub Copilot, Apple, and cloud providers in general. He offers to help me find a new option for hosting my data. Just a few days later he finds that computer next to the garbage chute, and with much excitement he calls me and cheerfully announces, _“It turns on!”_
+I talk to Vlad about my feelings regarding GitHub Copilot, Apple, and cloud providers in general. He offers to help me find a new option for hosting my data. Just a few days later he finds that computer next to the garbage chute, and with much excitement he calls me and cheerfully announces, _“It turns on!”_
 
 What luck!
 
@@ -146,7 +154,7 @@ I have a lot of problems hosting my website and source code from my _closet comp
 Hosting my website and source code myself feels very empowering. I feel as if I reclaimed a little piece of the internet. For that alone I want to see what more I can self host. The internet today clusters around a centralizing oligopoly of services, and I pine for the days when every odd person had their own small, weird website, and frequented a handful of small, niche forums, each with just enough users to be interesting. Now there's Facebook. GitHub. Google... If I name a _thing_: there's likely a single site that I would go to for that _thing_. That _thing_ has likely regressed in quality towards the mean and mediocre. And when I go to that site for that _thing_, I can't tell whether I've found the _thing_ or an ad for a subscription service that gives me access to the _thing_ at a markup.
 
 {{img id: "closet-computer-in-context",
-      title: "Cables and all, the _closet computer_ in context. Corey asked me to dust first.",
+      title: "Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.",
       src: "/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024.png"}}
 
 I severely took for granted the uptime that a third party service could give me. It’s making me rethink what the total cost of what third party hosting actually looks like, not only in terms of dollars and nebulous ideals, but more importantly in terms of peace of mind. Terms such as _will the promotion committee be able to see that writeup I referred them to?_ I would absolutely benefit from hosting my website from my _bastion server_ instead, but perhaps after I reread `linode`'s service agreements to allay my confounding mind.

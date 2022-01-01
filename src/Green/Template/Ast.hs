@@ -48,7 +48,7 @@ getBlockName = \case
   TextBlock {} -> "TextBlock"
   ExpressionBlock {} -> "ExpressionBlock"
   CommentBlock {} -> "CommentBlock"
-  ChromeBlock {} -> "ApplyBlock"
+  ChromeBlock {} -> "ChromeBlock"
   AltBlock {} -> "AltBlock"
 
 getBlockPos :: Block -> SourcePos

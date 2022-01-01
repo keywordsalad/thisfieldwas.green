@@ -151,7 +151,6 @@ symbolToken =
           *> tryOne
             [ mkTrimmingSymbol TurnOffToken,
               mkTrimmingSymbol CommentBlockToken,
-              mkTrimmingSymbol IncludeBlockToken <* spaces,
               mkTrimmingSymbol AltBlockToken <* spaces,
               mkTrimmingSymbol ChromeBlockToken <* spaces,
               mkTrimmingSymbol ExpressionBlockToken <* spaces
@@ -160,7 +159,6 @@ symbolToken =
         --
         mkSymbol TurnOffToken,
         mkSymbol CommentBlockToken,
-        mkSymbol IncludeBlockToken <* spaces,
         mkSymbol AltBlockToken <* spaces,
         mkSymbol ChromeBlockToken <* spaces,
         mkSymbol ExpressionBlockToken <* spaces,
@@ -285,7 +283,6 @@ getTokenPos = \case
 data TokenTag
   = ExpressionBlockToken
   | CommentBlockToken
-  | IncludeBlockToken
   | AltBlockToken
   | ChromeBlockToken
   | CloseBlockToken
@@ -308,7 +305,6 @@ tokenTagName :: TokenTag -> String
 tokenTagName = \case
   ExpressionBlockToken -> "ExpressionBlock"
   CommentBlockToken -> "CommentBlock"
-  IncludeBlockToken -> "IncludeBlock"
   AltBlockToken -> "AltBlock"
   ChromeBlockToken -> "ChromeBlock"
   CloseBlockToken -> "CloseBlock"
@@ -330,7 +326,6 @@ tokenTagValue :: TokenTag -> String
 tokenTagValue = \case
   ExpressionBlockToken -> "{{"
   CommentBlockToken -> "{{!"
-  IncludeBlockToken -> "{{>"
   AltBlockToken -> "{{#"
   ChromeBlockToken -> "{{@"
   CloseBlockToken -> "}}"
@@ -355,7 +350,6 @@ trimmingTokenTagValue :: TokenTag -> String
 trimmingTokenTagValue = \case
   ExpressionBlockToken -> "{{-"
   CommentBlockToken -> "{{-!"
-  IncludeBlockToken -> "{{->"
   AltBlockToken -> "{{-#"
   ChromeBlockToken -> "{{-@"
   CloseBlockToken -> "-}}"

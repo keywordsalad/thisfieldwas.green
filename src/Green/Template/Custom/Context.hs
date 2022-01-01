@@ -24,27 +24,37 @@ customContext config = self
     latestPostUpdated _ = tplTried "latest post updated"
     self =
       mconcat
-        [ forItemField "updated" latestPostPatterns \_ -> do
+        [ trimmedUrlField "url",
+          forItemField "updated" latestPostPatterns \_ -> do
             latestPosts <- lift $ recentFirst =<< loadPublishedPosts
             latestPostUpdated latestPosts,
-          trimmedUrlField "url",
-          includeField "include" "",
-          includeField "partial" "_partials",
+          includeField "include" Nothing,
+          includeField "partial" (Just "_partials"),
           layoutField "applyLayout" "_layouts",
           dateFields config,
           gitCommits config,
-          constField "siteTitle" (config ^. siteInfo . siteTitle),
-          constField "siteRoot" (config ^. siteInfo . siteRoot),
-          constField "currentTime" (formatTime timeLocale robotTime currentTime),
-          constField "linkedInProfile" (config ^. siteInfo . siteLinkedInProfile),
-          constField "authorEmail" (config ^. siteInfo . siteAuthorEmail),
           escapeHtmlField,
           escapeHtmlUriField,
           imgField,
           youtubeField,
           codeField,
-          defaultFields
+          defaultFields,
+          constField "currentTime" currentTime,
+          constField "siteTitle" (info ^. siteTitle),
+          constField "siteRoot" (info ^. siteRoot),
+          constField "authorEmail" (info ^. siteAuthorEmail),
+          constField "authorName" (info ^. siteAuthorName),
+          constField "author" (info ^. siteAuthorName), -- default to authorName
+          constField "linkedInProfile" (info ^. siteLinkedInProfile),
+          constField "twitterProfile" (info ^. siteTwitterProfile),
+          constField "twitterHandle" (info ^. siteTwitterHandle),
+          constField "githubProfile" (info ^. siteGitHubProfile),
+          constField "giteaProfile" (info ^. siteGiteaProfile),
+          constField "useSocial" True
         ]
-    timeLocale = config ^. siteTimeLocale
-    robotTime = config ^. siteDisplayFormat . displayRobotTime
-    currentTime = config ^. siteCurrentTime
+    currentTime =
+      formatTime
+        (config ^. siteTimeLocale)
+        (config ^. siteDisplayFormat . displayRobotTime)
+        (config ^. siteCurrentTime)
+    info = config ^. siteInfo

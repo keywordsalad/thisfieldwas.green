@@ -1,10 +1,11 @@
 module Green.Site.Images where
 
 import Green.Common
+import Hakyll ((.||.))
 
 images :: Rules ()
 images =
-  match "images/**" do
+  match ("images/**/*.png" .||. "images/**/*.jpg" .||. "images/**/*.gif") do
     route idRoute
     compile copyFileCompiler
 

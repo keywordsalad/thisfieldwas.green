@@ -2,7 +2,7 @@ module Green.Template.Pandoc where
 
 import Hakyll
 import System.FilePath
-import Text.Pandoc hiding (readers, writers)
+import Text.Pandoc
 
 pandocCompiler :: Item String -> Compiler (Item String)
 pandocCompiler item@(Item id' _) = do
@@ -15,7 +15,14 @@ pandocCompiler item@(Item id' _) = do
       return $ writePandocWith writerOpts pandoc
 
 readerOpts :: ReaderOptions
-readerOpts = defaultHakyllReaderOptions
+readerOpts =
+  defaultHakyllReaderOptions
+    { readerExtensions =
+        foldl (flip ($)) (readerExtensions defaultHakyllReaderOptions) $
+          [ enableExtension Ext_smart,
+            disableExtension Ext_markdown_in_html_blocks
+          ]
+    }
 
 writerOpts :: WriterOptions
 writerOpts = defaultHakyllWriterOptions

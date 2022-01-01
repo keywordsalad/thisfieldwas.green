@@ -15,6 +15,7 @@
 aside, figure {
   @include contain-floats;
   color: $text-color-dark;
+  background-color: $aside-background;
   font-family: $aside-font-family;
   font-style: italic;
   margin: 1rem 0;
@@ -22,6 +23,35 @@ aside, figure {
   border-top: $border-regular;
   border-bottom: $border-thin;
   text-align: center;
+
+  &.video {
+    padding-top: 1em;
+    padding-bottom: 1em;
+
+    @include media('>=tablet') {
+      padding-left: 6%;
+      padding-right: 6%;
+    }
+
+    @include media('>=desktop') {
+      padding-left: 12%;
+      padding-right: 12%;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+    }
+
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  }
 
   .image-link, picture {
     display: block;

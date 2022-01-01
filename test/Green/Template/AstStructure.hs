@@ -80,7 +80,6 @@ instance AstStructure Expression Expression' where
 data Token'
   = ExpressionBlockToken'
   | CommentBlockToken'
-  | IncludeBlockToken'
   | AltBlockToken'
   | ChromeBlockToken'
   | CloseBlockToken'
@@ -110,7 +109,6 @@ instance AstStructure Token Token' where
     TaggedToken t _ -> case t of
       ExpressionBlockToken -> ExpressionBlockToken'
       CommentBlockToken -> CommentBlockToken'
-      IncludeBlockToken -> IncludeBlockToken'
       AltBlockToken -> AltBlockToken'
       ChromeBlockToken -> ChromeBlockToken'
       CloseBlockToken -> CloseBlockToken'

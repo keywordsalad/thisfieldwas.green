@@ -22,7 +22,7 @@ instance Binary GitFile where
 gitCommits :: SiteConfig -> Context a
 gitCommits config =
   mconcat
-    [ constField "gitWebUrl" (config ^. siteInfo . siteGitWebUrl),
+    [ constField "giteaWebUrl" (config ^. siteInfo . siteGiteaWebUrl),
       field "gitSha1" (gitSha1Compiler root),
       field "gitMessage" (gitMessageCompiler root),
       field "gitBranch" gitBranchCompiler,

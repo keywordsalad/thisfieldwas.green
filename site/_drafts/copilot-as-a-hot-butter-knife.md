@@ -7,7 +7,7 @@ tags: copilot, programming
 layout: post
 ---
 
-In my [last post]({{route '_posts/2021-12-11-reasons-why-my-website-is-offline.md'}}), I vaguely recall a review of GitHub Copilot along the lines of _"cuts through boilerplate like a hot knife through butter"_.
+In my [last post]({{getUrl '_posts/2021-12-11-reasons-why-my-website-is-offline.md'}}), I vaguely recall a review of GitHub Copilot along the lines of _"cuts through boilerplate like a hot knife through butter"_.
 
 While reviewing drafts of my post, my brother, [Ian McGrath](https://www.ians.tech/), pointed out to me that he couldn't tell on his phone whether the heading of the current section belonged under the previous heading or introduced a new section. I feel that font size alone is a poor differentiator between heading levels, and I think that I ought to be able to use `css` to automatically number them and make their relationships explicit. Given `html`'s six header elements, there should be enough boilerplate for Copilot to demonstrate whether it saves me time.
 

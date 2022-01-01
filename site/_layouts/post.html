@@ -1,7 +1,6 @@
-{{@applyLayout "default"}}
-<article class="post post-full">
-  {{#with headerLevel: "h1"}}
-    {{partial "post-header"}}
-  {{#end}}
-  {{body}}
-</article>
+{{put bodyClass: "post post-full"-}}
+{{@applyLayout "default"-}}
+{{#with headerLevel: "h1"-}}
+  {{partial "post-header"-}}
+{{#end-}}
+{{body}}

@@ -246,7 +246,7 @@ I had to fiddle with `index.html` quite a bit. This basically involved editing a
 local copy of `index.html`, then pasting the entire contents into the associated
 form in Chronicle. I have not tried checking out `index.html` directly from
 Perforce, and I imagine that any edits would need to be made within Chronicle.
-Github offers an in-browser raw editor, and something like that would be real
+GitHub offers an in-browser raw editor, and something like that would be real
 handy in Chronicle.
 
 ### Handling conflicts

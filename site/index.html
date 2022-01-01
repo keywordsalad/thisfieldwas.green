@@ -1,5 +1,6 @@
 ---
 title: Mowing My Technical Lawn
+description: I write about my personal mishmash of tech and life
 bodyClass: homepage
 layout: page
 ---
@@ -7,7 +8,7 @@ layout: page
   <aside class="meatball-headshot">
     <picture>
       <img width="288" height="384"
-        src="{{route 'images/about-me/headshot-w-meatball-doge_400w.png'}}"
+        src="{{getUrl 'images/about-me/headshot-w-meatball-doge_400w.png'}}"
         title="Myself and Meatball. He's cute cuz he's little."
         alt="Mysql and Meatball">
     </picture>
@@ -99,7 +100,7 @@ layout: page
     Engineers are too expensive to be putting together bespoke content with high rates of churn. Low code allows engineers to focus on the hard problems and enables more opportunities for businesses to better harness the value they bring. I mentor engineers to help them realize their full potential as technologists and become drivers in better engineering with less code.
   </p>
   <h3>Some Writing</h3>
-  <p>Here's a sampling of things I've blogged about. A complete selection may be found on their <a href="{{route 'blog.html'}}">dedicated page</a>.</p>
+  <p>Here's a sampling of things I've blogged about. A complete selection may be found on their <a href="{{getUrl 'blog.html'}}">dedicated page</a>.</p>
   <ul>
     {{#for recentPosts}}
     <li>
@@ -115,7 +116,7 @@ layout: page
   <aside class="meatball-jellybean">
     <picture>
       <img width="200" height="266"
-        src="{{route 'images/about-me/meatball-n-jelly-doges_400w.png'}}"
+        src="{{getUrl 'images/about-me/meatball-n-jelly-doges_400w.png'}}"
         title="Meatball is the little one, Jellybean is the big one."
         alt="Meatball and Jellybean">
     </picture>

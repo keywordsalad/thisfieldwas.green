@@ -7,7 +7,7 @@
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
     {{-#for pages}}
     <url>
-        <loc>{{siteRoot}}{{url | escapeHtmlUri}}</loc>
+        <loc>{{absUrl | escapeHtmlUri}}</loc>
         <lastmod>{{
             updated
                 | default date

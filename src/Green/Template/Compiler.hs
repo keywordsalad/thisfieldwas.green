@@ -60,22 +60,27 @@ applyBlock = \case
       bs' <- reduceBlocks bs
       eval e >>= \case
         FunctionValue f -> f (intoValue bs')
-        x -> fail $ "invalid chrome function " ++ show x ++ " near " ++ show pos
+        x -> tplFail $ "invalid chrome function " ++ show x ++ " near " ++ show pos
   AltBlock (ApplyBlock e bs _ :| alts) mdef _ ->
-    intoValue <$> applyAltBlock' e bs alts mdef
-  where
-    applyAltBlock' e bs alts mdef =
-      eval e >>= \case
-        FunctionValue f ->
-          pure <$> f (intoValue bs)
-        x ->
-          isTruthy x >>= \case
-            True -> applyBlocks bs
-            False -> case alts of
-              ApplyBlock e' bs' _ : alts' -> applyAltBlock' e' bs' alts' mdef
-              [] -> case mdef of
-                Just (DefaultBlock bs' _) -> applyBlocks bs'
-                Nothing -> return []
+    intoValue <$> applyAltBlock e bs alts mdef
+
+applyAltBlock ::
+  Expression ->
+  [Block] ->
+  [ApplyBlock] ->
+  Maybe DefaultBlock ->
+  TemplateRunner String [ContextValue String]
+applyAltBlock guard' bs alts mdef =
+  eval guard' >>= \case
+    FunctionValue f -> pure <$> f (intoValue bs)
+    x ->
+      isTruthy x >>= \case
+        True -> applyBlocks bs
+        False -> case alts of
+          ApplyBlock guard'' bs' _ : alts' -> applyAltBlock guard'' bs' alts' mdef
+          [] -> case mdef of
+            Just (DefaultBlock bs' _) -> applyBlocks bs'
+            Nothing -> return []
 
 eval :: Expression -> TemplateRunner a (ContextValue a)
 eval = \case
@@ -93,12 +98,20 @@ eval = \case
   ApplyExpression f x _ -> apply f x
   AccessExpression target field pos ->
     eval target >>= \case
-      ContextValue target' ->
-        eval field
-          >>= \case
-            StringValue name -> return name
+      ContextValue target' -> do
+        name <-
+          eval field >>= \case
+            StringValue x -> return x
             x -> tplFail $ "invalid field " ++ show x ++ " near " ++ show (getExpressionPos field)
-          >>= unContext target'
+        s <- get
+        (x, s') <-
+          lift $
+            compilerTry (runStateT (unContext target' name) s) >>= \case
+              Left (CompilationFailure errors) -> compilerThrow (NonEmpty.toList errors)
+              Left (CompilationNoResult _) -> return (EmptyValue, s) -- TODO figure out how to get state changes to persist if value comes back empty
+              Right xs -> return xs
+        put s'
+        return x
       EmptyValue -> return EmptyValue
       UndefinedValue {} -> return EmptyValue
       x -> tplFail $ "invalid context " ++ show x ++ " near " ++ show pos
@@ -111,7 +124,7 @@ eval = \case
     apply f x =
       eval f >>= \case
         FunctionValue f' -> f' (ThunkValue $ eval x)
-        x' -> fail $ "invalid function " ++ show x' ++ " in " ++ show (getExpressionPos f)
+        x' -> tplFail $ "invalid function " ++ show x' ++ " in " ++ show (getExpressionPos f)
 
 stringify :: ContextValue String -> TemplateRunner String String
 stringify = \case

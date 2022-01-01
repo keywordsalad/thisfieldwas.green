@@ -1,5 +1,6 @@
 module Green.Template.Context where
 
+import Control.Monad.Except
 import Control.Monad.State.Strict
 import Data.Aeson
 import Data.Bifunctor
@@ -95,6 +96,12 @@ tplWithContext context f =
     modify' \s -> s {tplContextStack = stack}
     return x
 
+tplGet :: (FromValue v a) => String -> TemplateRunner a v
+tplGet k =
+  tplContext
+    >>= flip unContext k
+    >>= fromValue
+
 -- | Place context in global scope.
 tplPut :: Context a -> TemplateRunner a ()
 tplPut context = do
@@ -130,7 +137,7 @@ tplTrace = gets tplCallStack
 tplTraced :: String -> TemplateRunner a String
 tplTraced message = do
   trace <- tplTrace
-  return $ message ++ ", trace: [" ++ intercalate ", " trace ++ "]"
+  return $ message ++ ", trace from most recent: [" ++ intercalate ", " trace ++ "]"
 
 -- | Apply @f@ to an item if @key@ is requested.
 field :: (IntoValue v a) => String -> (Item a -> TemplateRunner a v) -> Context a
@@ -153,7 +160,7 @@ constField :: (IntoValue v a) => String -> v -> Context a
 constField key val = field key f
   where
     constResult = return val
-    f _ = constResult
+    f _ = tplWithCall key constResult
 
 -- | Mapping of function @g@ after context @f@.
 mapField :: (FromValue v a, IntoValue w a) => (v -> w) -> Context a -> Context a
@@ -174,17 +181,15 @@ bindField g (Context f) = Context h
 composeField :: Context a -> Context a -> Context a
 composeField (Context g) (Context f) = Context h
   where
-    h name = do
-      s <- get
-      lift $ evalStateT (f name) s <|> evalStateT (g name) s
+    h name = f name `catchError` (\_ -> g name)
 
 -- | Lookup of @val@ by @key@ into provided @HashMap@.
 hashMapField :: (IntoValue v a) => HashMap String v -> Context a
 hashMapField m = Context f
   where
     m' = intoValue <$> m
-    f k = maybe tried return (HashMap.lookup k m')
-    tried = lift . noResult $ "tried hashmap of " ++ show (HashMap.keys m')
+    f k = tplWithCall "hashMap" $ maybe (tried k) return (HashMap.lookup k m')
+    tried k = lift . noResult $ "tried " ++ show k ++ " from hashmap of keys " ++ show (HashMap.keys m')
 
 forItemField :: (IntoValue v a) => String -> [Identifier] -> (Item a -> TemplateRunner a v) -> Context a
 forItemField key ids f = field key f'
@@ -374,19 +379,20 @@ instance (FromValue v a) => FromValue' 'False [v] a where
   fromValue' flag = \case
     ListValue xs -> sequence $ fromValue <$> xs
     ThunkValue fx -> fromValue' flag =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as List"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as List"
 
 instance FromValue' 'True String a where
   fromValue' flag = \case
     StringValue x -> return x
+    EmptyValue -> return ""
     ThunkValue fx -> fromValue' flag =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as String"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as String"
 
 instance FromValue (Context a) a where
   fromValue = \case
     ContextValue c -> return c
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Context"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Context"
 
 instance FromValue (ContextValue a) a where
   fromValue = return
@@ -395,31 +401,31 @@ instance FromValue Bool a where
   fromValue = \case
     BoolValue x -> return x
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Bool"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Bool"
 
 instance FromValue Double a where
   fromValue = \case
     DoubleValue x -> return x
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Double"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Double"
 
 instance FromValue Int a where
   fromValue = \case
     IntValue x -> return x
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Int"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Int"
 
 instance FromValue (Context a, [Item a]) a where
   fromValue = \case
     ItemValue context items -> return (context, items)
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Item"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Item"
 
 instance FromValue Block a where
   fromValue = \case
     BlockValue block -> return block
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Block"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Block"
 
 instance (IntoValue v a, FromValue w a) => FromValue (FunctionValue v w a) a where
   fromValue cv = case cv of
@@ -427,7 +433,7 @@ instance (IntoValue v a, FromValue w a) => FromValue (FunctionValue v w a) a whe
       where
         f' v = fromValue =<< f (intoValue v)
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Function"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Function"
 
 instance (IntoValue v a, IntoValue x a, FromValue w a) => FromValue (FunctionValue2 v x w a) a where
   fromValue cv = case cv of
@@ -437,7 +443,7 @@ instance (IntoValue v a, IntoValue x a, FromValue w a) => FromValue (FunctionVal
           g <- fromValue =<< f (intoValue v)
           g x
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Function2"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Function2"
 
 instance (IntoValue v a, IntoValue x a, IntoValue y a, FromValue w a) => FromValue (FunctionValue3 v x y w a) a where
   fromValue = \case
@@ -448,7 +454,7 @@ instance (IntoValue v a, IntoValue x a, IntoValue y a, FromValue w a) => FromVal
           h <- g x
           h y
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Function3"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Function3"
 
 instance (IntoValue v a, IntoValue x a, IntoValue y a, IntoValue z a, FromValue w a) => FromValue (FunctionValue4 v x y z w a) a where
   fromValue = \case
@@ -460,4 +466,4 @@ instance (IntoValue v a, IntoValue x a, IntoValue y a, IntoValue z a, FromValue 
           i <- h y
           i z
     ThunkValue fx -> fromValue =<< fx
-    x -> fail $ "Tried to get " ++ show x ++ " as Function4"
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Function4"

@@ -2,6 +2,7 @@ module Green.Config where
 
 import Data.Aeson.Types
 import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as Char8
 import qualified Data.Text as T
 import Data.Yaml
 import Green.Common
@@ -29,6 +30,13 @@ instance FromJSON SiteDebug where
       <$> debug .:? "preview" .!= (defaultSiteDebug ^. debugPreview)
       <*> debug .:? "inflate-css" .!= (defaultSiteDebug ^. debugInflateCss)
 
+instance ToJSON SiteDebug where
+  toJSON SiteDebug {..} =
+    object
+      [ "preview" .= _debugPreview,
+        "inflate-css" .= _debugInflateCss
+      ]
+
 data SiteInfo = SiteInfo
   { _siteRoot :: String,
     _siteTitle :: String,
@@ -36,11 +44,18 @@ data SiteInfo = SiteInfo
     _siteAuthorName :: String,
     _siteAuthorEmail :: String,
     _siteLinkedInProfile :: String,
-    _siteGitWebUrl :: String
+    _siteTwitterProfile :: String,
+    _siteGitHubProfile :: String,
+    _siteGiteaProfile :: String,
+    _siteGiteaWebUrl :: String
   }
   deriving stock (Show)
 
 makeLenses ''SiteInfo
+
+siteTwitterHandle :: SimpleGetter SiteInfo String
+siteTwitterHandle = to \info ->
+  '@' : (reverse . takeWhile (/= '/') . reverse $ info ^. siteTwitterProfile)
 
 instance FromJSON SiteInfo where
   parseJSON = withObject "SiteInfo" \info ->
@@ -51,7 +66,26 @@ instance FromJSON SiteInfo where
       <*> info .: "author-name"
       <*> info .: "author-email"
       <*> info .: "linkedin-profile"
-      <*> info .: "git-web-url"
+      <*> info .: "twitter-profile"
+      <*> info .: "github-profile"
+      <*> info .: "gitea-profile"
+      <*> info .: "gitea-web-url"
+
+instance ToJSON SiteInfo where
+  toJSON info@SiteInfo {..} =
+    object
+      [ "root" .= _siteRoot,
+        "title" .= _siteTitle,
+        "description" .= _siteDescription,
+        "author-name" .= _siteAuthorName,
+        "author-email" .= _siteAuthorEmail,
+        "linkedin-profile" .= _siteLinkedInProfile,
+        "twitter-profile" .= _siteTwitterProfile,
+        "twitter-handle" .= (info ^. siteTwitterHandle),
+        "github-profile" .= _siteGitHubProfile,
+        "gitea-profile" .= _siteGiteaProfile,
+        "gitea-web-url" .= _siteGiteaWebUrl
+      ]
 
 data SiteDisplayFormat = SiteDisplayFormat
   { _displayDateLongFormat :: String,
@@ -74,6 +108,17 @@ instance FromJSON SiteDisplayFormat where
       <*> format .: "robot-date"
       <*> format .: "robot-time"
       <*> format .:? "image-widths" .!= []
+
+instance ToJSON SiteDisplayFormat where
+  toJSON SiteDisplayFormat {..} =
+    object
+      [ "date-long-format" .= _displayDateLongFormat,
+        "date-short-format" .= _displayDateShortFormat,
+        "time-format" .= _displayTimeFormat,
+        "robot-date" .= _displayRobotDate,
+        "robot-time" .= _displayRobotTime,
+        "image-widths" .= _displayImageWidths
+      ]
 
 data SiteConfig = SiteConfig
   { _siteEnv :: [(String, String)],
@@ -114,37 +159,20 @@ siteInMemoryCache = siteHakyllConfiguration . inMemoryCacheL
 sitePreview :: Lens' SiteConfig Bool
 sitePreview = siteDebug . debugPreview
 
-instance Show SiteConfig where
-  show config =
-    intercalate "\n" $
-      [ "SiteConfig:",
-        "  Time: " <> show (config ^. siteCurrentTime),
-        "  SiteInfo:",
-        "    Root: " <> show (config ^. siteInfo . siteRoot),
-        "    Title: " <> show (config ^. siteInfo . siteTitle),
-        "    Description: " <> show (config ^. siteInfo . siteDescription),
-        "    AuthorName: " <> show (config ^. siteInfo . siteAuthorName),
-        "    AuthorEmail: " <> show (config ^. siteInfo . siteAuthorEmail),
-        "    LinkedInProfile: " <> show (config ^. siteInfo . siteLinkedInProfile),
-        "    GitWebUrl: " <> show (config ^. siteInfo . siteGitWebUrl),
-        "  Debug:",
-        "    Preview: " <> show (config ^. siteDebug . debugPreview),
-        "    InflateCss: " <> show (config ^. siteDebug . debugInflateCss),
-        "  HakyllConfiguration:",
-        "    DestinationDirectory: " <> show (config ^. siteDestinationDirectory),
-        "    ProviderDirectory: " <> show (config ^. siteProviderDirectory),
-        "    StoreDirectory: " <> show (config ^. siteStoreDirectory),
-        "    InMemoryCache: " <> show (config ^. siteInMemoryCache),
-        "  DisplayFormat:",
-        "    DateLongFormat: " <> show (config ^. siteDisplayFormat . displayDateLongFormat),
-        "    DateShortFormat: " <> show (config ^. siteDisplayFormat . displayDateShortFormat),
-        "    TimeFormat: " <> show (config ^. siteDisplayFormat . displayTimeFormat),
-        "    RobotDate: " <> show (config ^. siteDisplayFormat . displayRobotDate),
-        "    RobotTime: " <> show (config ^. siteDisplayFormat . displayRobotTime),
-        "    ImageWidths: " <> show (config ^. siteDisplayFormat . displayImageWidths),
-        "  Env:",
-        "    " <> intercalate "\n    " ((\(key, val) -> key <> "=" <> show val) <$> config ^. siteEnv)
+instance ToJSON SiteConfig where
+  toJSON SiteConfig {..} =
+    object
+      [ "current-time" .= _siteCurrentTime,
+        "time-locale" .= show _siteTimeLocale,
+        "info" .= _siteInfo,
+        "debug" .= _siteDebug,
+        "hakyll-configuration" .= toHakyllConfigurationJSON _siteHakyllConfiguration,
+        "display-format" .= _siteDisplayFormat,
+        "env" .= _siteEnv
       ]
+
+instance Show SiteConfig where
+  show = Char8.unpack . encode . toJSON
 
 customIgnoreFile :: Foldable t => t FilePath -> FilePath -> Bool
 customIgnoreFile allowedFiles path =
@@ -164,6 +192,14 @@ parseHakyllConfigurationJSON = withObject "Hakyll.Core.Configuration" \config ->
           H.destinationDirectory = destinationDirectory',
           H.ignoreFile = customIgnoreFile allowedFiles
         }
+
+toHakyllConfigurationJSON :: H.Configuration -> Value
+toHakyllConfigurationJSON H.Configuration {..} =
+  object
+    [ "provider-directory" .= providerDirectory,
+      "destination-directory" .= destinationDirectory,
+      "allowed-files" .= ("[consumed]" :: String)
+    ]
 
 parseSiteConfigJSON :: [(String, String)] -> TimeLocale -> ZonedTime -> Value -> Parser SiteConfig
 parseSiteConfigJSON env timeLocale time = withObject "SiteConfig" \allConfig -> do

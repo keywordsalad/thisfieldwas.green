@@ -56,9 +56,20 @@ _verify-prerequisites () {
 }
 
 ⚡watch () {
-  _help-line "Build the site generator, generate the site, and then serve it so that it may be viewed in a browser"
+  _help-line "Build the site generator, generate the site, and then run the preview server"
   ⚡build
   stack exec site watch
+}
+
+⚡rewatch() {
+  _help-line "Rebuild the site generator, regenerate the site, and then run the preview server"
+  ⚡rebuild
+  stack exec site watch
+}
+
+⚡kill() {
+  _help-line "Kill the site preview server if has gotten loose and run away!"
+  lsof -ti tcp:8000 | xargs kill -9
 }
 
 ⚡publish () {

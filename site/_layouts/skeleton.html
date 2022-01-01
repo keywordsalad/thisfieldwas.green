@@ -1,21 +1,21 @@
-<!doctype html prefix="og: https://ogp.me/ns#">
-<html lang="en">
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta rel="canonical" href="{{siteRoot}}{{url}}">
 <title>{{siteTitle}}{{#if title}} - {{title}}{{#end}}</title>
+<link rel="canonical" href="{{absUrl}}">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="{{siteRoot}}/favicon.ico">
 
-<meta property="og:title" content="{{title}}">
-<meta property="og:url" content="{{siteRoot}}{{url}}">
-<meta property="og:image:url" content="{{siteRoot}}{{og.image.url | default '/grass_og-image.png'}}">
-<meta property="og:image:alt" content="{{og.image.alt | default siteTitle}}">
+{{#if useSocial-}}
+{{-partial "social/open-graph"-}}
+{{-partial "social/twitter-card"-}}
+{{-#end-}}
 
 <link rel="stylesheet" href="/css/main.css">
-<script src="{{route 'js/main.js'}}"></script>
+<script src="{{getUrl 'js/main.js'}}"></script>
 
 </head>
 <body class="{{bodyClass | default 'default'}}">

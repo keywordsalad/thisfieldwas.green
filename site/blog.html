@@ -1,5 +1,6 @@
 ---
 title: Keeping This Field Green
+description: The latest and greenest of things I've written about
 bodyClass: blog
 layout: page
 changefreq: daily
@@ -29,7 +30,7 @@ changefreq: daily
       <p class="tag-cloud" data-show-count>{{tagCloud}}</p>
     </section>
   {{-#end}}
-  <p><a href="{{route 'archives.html'}}">View all posts</a></p>
+  <p><a href="{{getUrl 'archives.html'}}">View all posts</a></p>
 </section>
 
 <article class="teaser-list">

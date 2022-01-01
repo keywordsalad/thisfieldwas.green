@@ -130,7 +130,7 @@ That particular instance above is due to a [footgun](http://dev.stephendiehl.com
 ### Using `css` is still like the Family Guy meme
 
 {{img id: "family-guy-css",
-      title: "`css`: it's still like this, but it got prettier",
+      title: "<code>css</code>: it's still like this, but it got prettier",
       src: "/images/redoing-my-website/family-guy-css.gif"}}
 
 I probably haven't touched `css` since 2013, which right now is about 8 years ago. It feels the same, with a few upgrades that are in very much the same vein as the old stuff. It's still weird and clunky, at least to me. For as frustrated as I find myself with it, I am happy with how the site looks considering that I don't particularly know what I'm doing.

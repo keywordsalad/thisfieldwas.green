@@ -18,18 +18,18 @@ blog context = do
   categories <- buildBlogCategories
   tags <- buildBlogTags
 
-  blogHome categories tags context
+  blogHome tags categories context
   posts context
   archives context
 
-  categoriesPages categories context
   tagsPages tags context
+  categoriesPages categories context
 
   draftsIndex context
   drafts context
 
 blogHome :: Tags -> Tags -> Context String -> Rules ()
-blogHome categories tags context =
+blogHome tags categories context =
   match "blog.html" do
     route indexRoute
     compile do
@@ -38,8 +38,8 @@ blogHome categories tags context =
       recentPosts <- recentPostsContext
       getResourceBody >>= applyTemplates do
         applyContext $
-          constField "categoryCloud" categoryCloud
-            <> constField "tagCloud" tagCloud
+          constField "tagCloud" tagCloud
+            <> constField "categoryCloud" categoryCloud
             <> recentPosts
             <> postContext
             <> context
@@ -96,12 +96,10 @@ drafts context = do
     route draftsRoute
     compile $
       getResourceBody >>= applyTemplates do
-        applyContext draftsContext
+        applyContext $ postContext <> context
         applyContent
         saveSnapshots [draftPostsSnapshot]
         applyLayout
-  where
-    draftsContext = postContext <> context
 
 draftsRoute :: Routes
 draftsRoute =
@@ -148,6 +146,9 @@ postContext :: Context String
 postContext =
   categoryLinksField "categoryLinks"
     <> tagLinksField "tagLinks"
+    <> tagListField "tagList"
+    <> tagListField "categoryList"
+    <> constField "article" True
 
 recentPostsContext :: Compiler (Context String)
 recentPostsContext = do
@@ -177,3 +178,6 @@ dateRoute :: Routes
 dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))
   where
     datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}-"
+
+tagListField :: String -> Context String
+tagListField key = field key $ lift . getTags . itemIdentifier

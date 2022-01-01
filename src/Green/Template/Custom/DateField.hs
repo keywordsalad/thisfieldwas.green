@@ -36,7 +36,7 @@ dateField :: String -> TimeLocale -> ZonedTime -> Context a
 dateField key timeLocale currentTime = field key f
   where
     f item =
-      lift $
+      tplWithCall key . lift $
         dateFromMetadata timeLocale ["date", "published"] item
           <|> dateFromFilePath timeLocale item
           <|> return (formatTime timeLocale "%Y-%m-%dT%H:%M:%S%Ez" currentTime)
@@ -44,12 +44,12 @@ dateField key timeLocale currentTime = field key f
 publishedField :: String -> TimeLocale -> Context a
 publishedField key timeLocale = field key f
   where
-    f = lift . dateFromMetadata timeLocale ["published"]
+    f = tplWithCall key . lift . dateFromMetadata timeLocale ["published"]
 
 updatedField :: String -> TimeLocale -> Context a
 updatedField key timeLocale = field key f
   where
-    f = lift . dateFromMetadata timeLocale ["updated"]
+    f = tplWithCall key . lift . dateFromMetadata timeLocale ["updated"]
 
 dateFromMetadata :: TimeLocale -> [String] -> Item a -> Compiler String
 dateFromMetadata timeLocale sourceKeys item =
