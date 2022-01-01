@@ -1,0 +1,841 @@
+@charset "UTF-8";
+html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: aliceblue;
+  font-family: "Helvetica", "Arial", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  color: darkslategray;
+  overflow: scroll;
+}
+
+strong, em, b, i {
+  color: darkred;
+}
+
+section {
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  margin: 1rem 0;
+}
+
+ul {
+  margin: 1rem 0;
+}
+
+li > ul {
+  margin: 0.5rem 0;
+}
+
+dl {
+  margin: 1rem 0;
+}
+
+dt {
+  margin: 1.2em 0 0;
+  color: darkgreen;
+  font-family: "Times New Roman", serif;
+  font-style: italic;
+  font-weight: bold;
+  font-size: 1.12em;
+  text-decoration: underline;
+}
+
+dd {
+  margin: 0 0 0 1.5em;
+}
+
+blockquote {
+  background-color: #ebf7e8;
+  margin: 1.5rem 1rem;
+  padding: 0.5rem 1rem;
+  border-left: 0.2rem solid #005000;
+  border-right: 0.1rem solid #005000;
+  font-style: italic;
+}
+blockquote > *:first-child {
+  margin-top: 0;
+}
+blockquote > *:last-child {
+  margin-bottom: 0;
+}
+
+iframe {
+  border: none;
+}
+
+nav {
+  border-top: 0.1rem;
+  max-width: 75rem;
+  margin: 0 auto;
+}
+
+a {
+  color: dodgerblue;
+  text-decoration: underline;
+}
+
+a em {
+  color: dodgerblue;
+}
+
+.image-link {
+  text-decoration: none;
+}
+
+.youtube {
+  text-align: center;
+}
+
+.footnotes {
+  font-size: 0.9rem;
+  color: slategray;
+  border-top: 0.1rem solid #005000;
+}
+.footnotes hr {
+  display: none;
+}
+.footnotes code {
+  font-size: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 1rem 0;
+  color: darkgreen;
+  font-family: "Times New Roman", serif;
+  font-style: italic;
+  line-height: 1.2;
+}
+h1 a, h1 em, h1 i, h1 strong, h1 b, h2 a, h2 em, h2 i, h2 strong, h2 b, h3 a, h3 em, h3 i, h3 strong, h3 b, h4 a, h4 em, h4 i, h4 strong, h4 b, h5 a, h5 em, h5 i, h5 strong, h5 b, h6 a, h6 em, h6 i, h6 strong, h6 b {
+  text-decoration: underline;
+}
+
+section h1 {
+  border-top: 0.2rem solid #005000;
+  padding: 0.5em 0;
+}
+
+h1 {
+  font-size: 1.5790581481em;
+}
+
+h2 {
+  font-size: 1.4098733466em;
+}
+
+h3 {
+  font-size: 1.258815488em;
+}
+
+h4 {
+  font-size: 1.1239424em;
+}
+
+h5 {
+  font-size: 1.00352em;
+}
+
+h6 {
+  font-size: 0.896em;
+}
+
+* + h1, * + h2, * + h3, * + h4 {
+  margin-top: 1.2em;
+}
+
+h1 + h2, h2 + h3, h3 + h4 {
+  margin-top: 0;
+}
+
+aside, figure {
+  color: #006900;
+  background-color: #ebf7e8;
+  font-family: "Times New Roman", serif;
+  font-style: italic;
+  margin: 1rem 0;
+  padding: 0 0.5rem;
+  border-top: 0.2rem solid #005000;
+  border-bottom: 0.1rem solid #005000;
+  text-align: center;
+}
+aside::after, figure::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+aside.video, figure.video {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+@media (min-width: 768px) {
+  aside.video, figure.video {
+    padding-left: 6%;
+    padding-right: 6%;
+  }
+}
+@media (min-width: 1024px) {
+  aside.video, figure.video {
+    padding-left: 12%;
+    padding-right: 12%;
+  }
+}
+aside.video .video-container, figure.video .video-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+}
+aside.video iframe, figure.video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+aside .image-link, aside picture, figure .image-link, figure picture {
+  display: block;
+  overflow-x: auto;
+  margin: 1rem auto;
+}
+aside .image-link > img, aside picture > img, figure .image-link > img, figure picture > img {
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+}
+aside figcaption, figure figcaption {
+  margin: 1rem 0;
+  font-size: 1.1rem;
+}
+
+code {
+  font-family: "Courier", "Courier New", monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+code .kw, code .cf {
+  color: seagreen;
+  font-weight: bold;
+}
+code .op {
+  color: orangered;
+}
+code .ot {
+  color: slateblue;
+}
+code .dt {
+  color: blue;
+}
+code .fu {
+  color: blueviolet;
+}
+code .st {
+  color: lightseagreen;
+}
+code .ch {
+  color: yellowgreen;
+}
+code .cn {
+  color: blueviolet;
+}
+code .at {
+  color: darkblue;
+}
+code .va {
+  color: cornflowerblue;
+}
+code .co {
+  color: gray;
+}
+
+div.sourceCode, pre.sourceCode {
+  margin: 0;
+  padding: 0;
+}
+
+pre.sourceCode {
+  margin: 1em 0;
+  padding: 0;
+}
+
+code.sourceCode {
+  display: block;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.numberLines code.sourceCode {
+  counter-reset: line-number;
+}
+code.sourceCode > span {
+  display: block;
+}
+code.sourceCode > span:first-child {
+  padding-top: 0.3em;
+}
+code.sourceCode > span:last-child {
+  padding-bottom: 0.3em;
+}
+.numberLines code.sourceCode > span {
+  counter-increment: line-number;
+}
+.numberLines code.sourceCode > span:hover {
+  background-color: yellow;
+}
+.numberLines code.sourceCode > span:target {
+  background-color: gold;
+}
+.numberLines code.sourceCode > span > a:first-child::before {
+  display: inline-block;
+  width: 2em;
+  padding: 0 0.5em 0 0;
+  margin: 0 0.5em 0 0;
+  border-right: 0.1rem solid #005000;
+  text-align: right;
+  content: counter(line-number);
+  user-select: none;
+}
+
+code:not(.sourceCode) {
+  color: indianred;
+}
+
+a code, a code:not(.sourceCode) {
+  color: dodgerblue;
+}
+
+.nowrap {
+  overflow-x: scroll;
+}
+.nowrap code > span {
+  white-space: pre;
+  word-wrap: normal;
+}
+
+.tag-cloud {
+  --min-size: 0.7;
+  --max-size: 1.6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  line-height: 2;
+}
+.tag-cloud .tag {
+  --norm: calc(
+    (var(--count) - var(--min-count))
+      / (var(--max-count) - var(--min-count))
+  );
+  --size: calc(
+    var(--norm)
+      * (var(--max-size) - var(--min-size))
+      + var(--min-size)
+  );
+  color: indianred;
+  display: block;
+  font-size: calc(var(--size) * 1em);
+  padding: 0.125em 0.25em;
+  text-decoration: none;
+  position: relative;
+}
+.tag-cloud[data-show-count] .tag::after {
+  content: " (" attr(data-count) ")";
+}
+
+.page-header {
+  border-top: 0.5rem solid #005000;
+  border-bottom: 0.2rem solid #005000;
+  margin: 0;
+  padding: 0 1rem;
+  clear: both;
+}
+.page-header::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+.page-header .content-bound {
+  max-width: 65rem;
+  padding: 0 0.5rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-areas: "logo-nav logo-icon";
+  grid-template-columns: auto 2.5rem;
+  padding: 0.5rem;
+}
+.page-header .content-bound .logo-nav {
+  grid-area: logo-nav;
+  grid-column: 1/auto;
+}
+.page-header .content-bound .logo-icon {
+  grid-area: logo-icon;
+  grid-column: 2/rem(2.5rem);
+  display: block;
+  background-image: url("/images/grass.svg");
+  background-size: 2.5rem;
+}
+.page-header .content-bound .logo-icon, .page-header .content-bound .logo-icon > a {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: block;
+}
+.page-header .content-bound .logo {
+  margin: 0 0 0.25rem;
+  padding: 0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: left;
+}
+.page-header .content-bound .logo a {
+  color: darkgreen;
+  text-decoration: none;
+}
+
+.page-content {
+  margin: 0;
+  padding: 0 1rem;
+  clear: both;
+}
+.page-content::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+.page-content .content-bound {
+  max-width: 65rem;
+  padding: 0 0.5rem;
+  margin: 0 auto;
+}
+
+.main-nav {
+  margin: 0;
+}
+.main-nav::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+.main-nav a {
+  display: list-item;
+  list-style: none;
+  float: left;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+.main-nav a + a {
+  margin-left: 0.5rem;
+  padding-left: 0.5rem;
+  border-left: 0.1rem solid #005000;
+}
+@media (max-width: 767px) {
+  .main-nav a + a {
+    margin-left: 0.2rem;
+    padding-left: 0.2rem;
+    border-left: none;
+  }
+}
+
+.page-footer {
+  margin: 0;
+  padding: 0 1rem;
+  clear: both;
+  padding-top: 0.3rem;
+  padding-bottom: 0.5rem;
+  border-top: 0.2rem solid #005000;
+  border-bottom: 0.5rem solid #005000;
+  line-height: 1.2;
+}
+.page-footer::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+.page-footer .content-bound {
+  max-width: 65rem;
+  padding: 0 0.5rem;
+  margin: 0 auto;
+}
+.page-footer .main-nav {
+  margin: 0.3rem 0;
+}
+.page-footer .copyright {
+  font-size: 0.85rem;
+  margin: 0.3rem 0;
+  margin-bottom: 0.6rem;
+}
+.page-footer .acks {
+  display: flex;
+  font-size: 0.8rem;
+  color: slategray;
+  margin: 0.3rem 0;
+  padding: 0;
+  list-style: none;
+}
+.page-footer .acks li {
+  margin: 0;
+  padding-right: 0.3rem;
+}
+.page-footer .acks li + li {
+  border-left: 0.1rem solid #005000;
+  border-color: slategray;
+  padding-left: 0.3rem;
+}
+.page-footer .generated {
+  font-size: 0.8rem;
+  color: slategray;
+  margin: 0.3rem 0;
+}
+
+.post-title {
+  margin-bottom: 0.25rem;
+}
+
+.post-published {
+  color: slategray;
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.post-categories, .post-tags {
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+.post-categories a, .post-tags a {
+  color: #a33;
+}
+
+.post-categories {
+  font-style: italic;
+}
+
+.teaser-list .teaser-item {
+  border-top: 0.1rem solid #005000;
+}
+.teaser-list header + * {
+  margin-top: 0.5rem;
+}
+
+.post-full {
+  counter-reset: heading_l2;
+}
+.post-full h2::before {
+  content: counter(heading_l2) " - ";
+  counter-increment: heading_l2;
+  user-select: none;
+}
+.post-full h2 {
+  counter-reset: heading_l3;
+}
+.post-full h3::before {
+  content: counter(heading_l2) "." counter(heading_l3) " - ";
+  counter-increment: heading_l3;
+  user-select: none;
+}
+.post-full h3 {
+  counter-reset: heading_l4;
+}
+.post-full h4::before {
+  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) " - ";
+  counter-increment: heading_l4;
+  user-select: none;
+}
+.post-full h4 {
+  counter-reset: heading_l5;
+}
+.post-full h5::before {
+  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) " - ";
+  counter-increment: heading_l5;
+  user-select: none;
+}
+.post-full h5 {
+  counter-reset: heading_l6;
+}
+.post-full h6::before {
+  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) "." counter(heading_l6) " - ";
+  counter-increment: heading_l6;
+  user-select: none;
+}
+
+.homepage .meatball-headshot {
+  margin: 1rem 0;
+}
+@media (min-width: 768px) {
+  .homepage .meatball-headshot {
+    float: right;
+    margin-left: 2rem;
+    margin-right: 0;
+  }
+}
+.homepage .meatball-jellybean {
+  margin: 1rem 0;
+}
+@media (min-width: 768px) {
+  .homepage .meatball-jellybean {
+    float: left;
+    margin-right: 2rem;
+    margin-left: 0;
+  }
+}
+.homepage .professional-offering {
+  clear: both;
+}
+.homepage .professional-offering h2 {
+  text-align: center;
+}
+.homepage .skills {
+  text-align: center;
+}
+.homepage .skills ul {
+  padding: 0;
+  font-size: 0;
+}
+.homepage .skills li {
+  font-size: 1rem;
+  list-style: none;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+.homepage .skills li::before, .homepage .skills li:last-child::after {
+  content: "∗";
+  color: darkgreen;
+  display: inline-block;
+  margin: 0 0.2rem;
+}
+.homepage .personal-stuff::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+@media (min-width: 768px) {
+  .homepage .meatball-headshot {
+    width: 24rem;
+  }
+  .homepage .meatball-jellybean {
+    width: 20rem;
+  }
+}
+
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h1::before {
+  counter-increment: header_l1;
+  content: counter(header_l1) " - ";
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h1 {
+  counter-reset: header_l2;
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h2::before {
+  counter-increment: header_l2;
+  content: counter(header_l1) "." counter(header_l2) " - ";
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h2 {
+  counter-reset: header_l3;
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h3::before {
+  counter-increment: header_l3;
+  content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) " - ";
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h3 {
+  counter-reset: header_l4;
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h4::before {
+  counter-increment: header_l4;
+  content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) " - ";
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h4 {
+  counter-reset: header_l5;
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h5::before {
+  counter-increment: header_l5;
+  content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) "." counter(header_l5) " - ";
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h5 {
+  counter-reset: header_l6;
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h6::before {
+  counter-increment: header_l6;
+  content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) "." counter(header_l5) "." counter(header_l6) " - ";
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h6 {
+  counter-reset: header_l7;
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h7::before {
+  counter-increment: header_l7;
+  content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) "." counter(header_l5) "." counter(header_l6) "." counter(header_l7) " - ";
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h7 {
+  counter-reset: header_l8;
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h8::before {
+  counter-increment: header_l8;
+  content: counter(header_l1) "." counter(header_l2) "." counter(header_l3) "." counter(header_l4) "." counter(header_l5) "." counter(header_l6) "." counter(header_l7) "." counter(header_l8) " - ";
+}
+.copilot-as-a-hot-butter-knife *[data-infinity-headers] h8 {
+  counter-reset: header_l9;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] {
+  counter-reset: h1 h2 h3 h4 h5 h6;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1::before {
+  counter-increment: h1;
+  content: counter(h1) ". ";
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1 {
+  counter-reset: h2 h3 h4 h5 h6;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h2::before {
+  counter-increment: h2;
+  content: counter(h1) "." counter(h2) ". ";
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h2 {
+  counter-reset: h3 h4 h5 h6;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h3::before {
+  counter-increment: h3;
+  content: counter(h1) "." counter(h2) "." counter(h3) ". ";
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h3 {
+  counter-reset: h4 h5 h6;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h4::before {
+  counter-increment: h4;
+  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) ". ";
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h4 {
+  counter-reset: h5 h6;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h5::before {
+  counter-increment: h5;
+  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". ";
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h5 {
+  counter-reset: h6;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h6::before {
+  counter-increment: h6;
+  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". ";
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h6 {
+  counter-reset: h6;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h2, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h3, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h4, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h5, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h2, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h3, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h4, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h5, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h6, .copilot-as-a-hot-butter-knife *[data-numbered-headers] p, .copilot-as-a-hot-butter-knife *[data-numbered-headers] ul, .copilot-as-a-hot-butter-knife *[data-numbered-headers] ol, .copilot-as-a-hot-butter-knife *[data-numbered-headers] dl, .copilot-as-a-hot-butter-knife *[data-numbered-headers] blockquote, .copilot-as-a-hot-butter-knife *[data-numbered-headers] pre, .copilot-as-a-hot-butter-knife *[data-numbered-headers] table, .copilot-as-a-hot-butter-knife *[data-numbered-headers] figure {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h2, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h3, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h4, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h5, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h6 {
+  font-weight: 600;
+  line-height: 1.25;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1 {
+  font-size: 2.25rem;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h2 {
+  font-size: 1.75rem;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h3 {
+  font-size: 1.5rem;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h4 {
+  font-size: 1.25rem;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h5 {
+  font-size: 1rem;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h6 {
+  font-size: 0.875rem;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h2, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h3, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h4, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h5, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h6, .copilot-as-a-hot-butter-knife *[data-numbered-headers] p, .copilot-as-a-hot-butter-knife *[data-numbered-headers] ul, .copilot-as-a-hot-butter-knife *[data-numbered-headers] ol, .copilot-as-a-hot-butter-knife *[data-numbered-headers] dl, .copilot-as-a-hot-butter-knife *[data-numbered-headers] blockquote, .copilot-as-a-hot-butter-knife *[data-numbered-headers] pre, .copilot-as-a-hot-butter-knife *[data-numbered-headers] table, .copilot-as-a-hot-butter-knife *[data-numbered-headers] figure {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h2, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h3, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h4, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h5, .copilot-as-a-hot-butter-knife *[data-numbered-headers] h6 {
+  font-weight: 600;
+  line-height: 1.25;
+}
+.copilot-as-a-hot-butter-knife *[data-numbered-headers] h1 {
+  font-size: 2.25rem;
+}
+
+#numbered-headers {
+  display: flex;
+  justify-content: space-around;
+}
+
+#headers-without-numbers-aside, #headers-with-numbers-aside {
+  margin: 1rem 0;
+}
+@media (min-width: 768px) {
+  #headers-without-numbers-aside, #headers-with-numbers-aside {
+    float: right;
+    margin-left: 2rem;
+    margin-right: 0;
+  }
+}
+#headers-without-numbers-aside a, #headers-with-numbers-aside a {
+  border: 0.3rem solid #005000;
+}
+@media (min-width: 768px) {
+  #headers-without-numbers-aside figcaption, #headers-with-numbers-aside figcaption {
+    width: 18rem;
+  }
+}
+
+@media (min-width: 768px) {
+  #headers-without-numbers, #headers-with-numbers {
+    width: 18rem;
+  }
+}
+@media (max-width: 767px) {
+  #headers-without-numbers, #headers-with-numbers {
+    width: 100%;
+  }
+}
+
+#family-guy-css-aside {
+  margin: 1rem 0;
+}
+@media (min-width: 768px) {
+  #family-guy-css-aside {
+    float: right;
+    margin-left: 2rem;
+    margin-right: 0;
+  }
+}
+#family-guy-css-aside img {
+  width: 320px;
+  height: 240px;
+}
+
+#closet-computer-in-context-aside {
+  margin: 1rem 0;
+}
+@media (min-width: 768px) {
+  #closet-computer-in-context-aside {
+    float: right;
+    margin-left: 2rem;
+    margin-right: 0;
+  }
+}
+
+#closet-computer-in-context {
+  width: 30rem;
+}

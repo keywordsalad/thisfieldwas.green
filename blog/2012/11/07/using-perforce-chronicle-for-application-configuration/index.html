@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>This Field Was Green - Using Perforce Chronicle for application configuration</title>
+<link rel="canonical" href="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration">
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
+
+<meta property="og:site_name" content="">
+<meta property="og:title" content="Using Perforce Chronicle for application configuration">
+<meta property="og:url" content="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration">
+<meta property="og:description" content="">
+<meta property="og:image:url" content="https://thisfieldwas.green/grass_og-image.png">
+
+<meta property="article:published_time" content="2012-11-07T13:54:00-06:00">
+  <meta property="article:modified_time" content="2012-11-07T13:54:00-06:00">
+  <meta property="article:author" content="Logan McGrath">
+  <meta property="article:tag" content="Perforce">
+  <meta property="article:tag" content="configuration management">
+  
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@thisgreenfield">
+<meta name="twitter:title" content="Using Perforce Chronicle for application configuration">
+
+
+
+<link rel="stylesheet" href="/css/main.css">
+<script src="/js/main.js"></script>
+
+</head>
+<body class="post post-full">
+
+<header class="page-header">
+  <div class="content-bound">
+    <div class="logo-icon"><a href="/"></a></div>
+    <div class="logo-nav">
+      <h1 class="logo"><a href="/">This Field Was Green</a></h1>
+      <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog">Blog</a>
+  <a href="/resume">Resume</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+    </div>
+  </div>
+</header>
+
+<main class="page-content">
+  <div class="content-bound">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2012/11/07/using-perforce-chronicle-for-application-configuration">Using Perforce Chronicle for application configuration</a>
+  </h1>
+  <p class="post-published">Posted on November  7, 2012 by Logan McGrath
+  </p>
+    <p class="post-tags">
+      Tags: <a class="tag" href="/tags/perforce">Perforce</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>
+    </p>
+</header>
+<p>Following Paul Hammant’s post <a href="http://paulhammant.com/2012/07/10/app-config-workflow-using-scm/">App-config workflow using SCM</a> and subsequent <a href="http://paulhammant.com/2012/08/14/app-config-using-git-and-angular/">proof of concept</a> backed by Git, I will show that an app-config application backed by Perforce is possible using <a href="http://www.perforce.com/products/chronicle">Perforce Chronicle</a>.</p>
+<!--more-->
+<h2 id="perforce-and-permissions-for-branches">Perforce and permissions for branches</h2>
+<p><a href="http://en.wikipedia.org/wiki/Perforce">Perforce</a> is an enterprise-class source control management (SCM) system, remarkably similar to Subversion (Subversion was inspired by Perforce :) Perforce is more bulletproof than Subversion in many ways and it’s generally faster. Git does not impose any security constraints or permissions on branches, Perforce gives comprehensive security options allowing you to control access to different branches: for example, development, staging, and production. Subversion, however, can support permissions on branches with some extra configuration (Apache plus mod_dav_svn/mod_dav_authz). For these reasons, Perforce is a better option for storing configuration data than either Git or Subversion.</p>
+<h2 id="perforce-cms-as-an-application-server">Perforce CMS as an application server</h2>
+<p><a href="http://www.perforce.com/products/chronicle">Perforce Chronicle</a> is a content management system (CMS) using Perforce as the back-end store for configuration and content. The app-config application is built on top of Chronicle because Perforce does not offer a web view into the depot the way Subversion can through Apache. Branching and maintaining divergence between environments can be managed through the user interface, and Chronicle provides user authentication and management, so access between different configuration files can be restricted appropriately. The INSTALL.txt file that is distributed with Chronicle helps with an easy install, mine being set up to run locally from <code>http://localhost</code>.</p>
+<p>There is a key issue in using Chronicle, however. The system is designed for the management of <em>content</em> and not necessarily arbitrary <em>files</em>. In order to make the app-config application work, I had to add a custom content type and write a module. Configuration and HTML are both plain-text content, so I created a ” Plain Text” content type with the fields <em>title</em> and <em>content</em>:</p>
+<ol type="1">
+<li>Go to “Manage” &gt; “Content Types”</li>
+<li>Click “Add Content Type”</li>
+<li>Enter the following information:</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource ini numberLines"><code class="sourceCode ini"><span id="cb1-1"><a href="#cb1-1"></a><span class="dt">Id:       plaintext</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="dt">Label:    Plain Text</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="dt">Group:    Assets</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="dt">Elements:</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="kw">[title]</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a><span class="dt">type </span><span class="ot">=</span><span class="st"> text</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="dt">options.label </span><span class="ot">=</span><span class="st"> Title</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="dt">options.required </span><span class="ot">=</span><span class="st"> </span><span class="kw">true</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="dt">display.tagName </span><span class="ot">=</span><span class="st"> h1</span></span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="dt">display.filters.0 </span><span class="ot">=</span><span class="st"> HtmlSpecialChars</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="kw">[content]</span></span>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="dt">type </span><span class="ot">=</span><span class="st"> textarea</span></span>
+<span id="cb1-15"><a href="#cb1-15"></a><span class="dt">options.label </span><span class="ot">=</span><span class="st"> &quot;Content&quot;</span></span>
+<span id="cb1-16"><a href="#cb1-16"></a><span class="dt">options.required </span><span class="ot">=</span><span class="st"> </span><span class="kw">true</span></span>
+<span id="cb1-17"><a href="#cb1-17"></a><span class="dt">display.tagName </span><span class="ot">=</span><span class="st"> pre</span></span>
+<span id="cb1-18"><a href="#cb1-18"></a><span class="dt">display.filters.0 </span><span class="ot">=</span><span class="st"> HtmlSpecialChars</span></span></code></pre></div>
+<p>Click “Save”.</p>
+<h2 id="the-config-app">The Config App</h2>
+<p>I’ve borrowed heavily from Paul’s <a href="https://github.com/paul-hammant/app-config-app/blob/master/index.html">app-config HTML page</a>, which uses <a href="http://angularjs.org/">AngularJS</a> to manage the UI and interaction with the server. Where Paul’s app-config app used the <a href="http://kmkeen.com/jshon/">jshon</a> command to encode and decode JSON, Zend Framework has a utility class for encoding, decoding, and pretty-printing JSON, and Chronicle also ships with the <a href="https://github.com/paulgb/simplediff/">simplediff</a> utility for performing diffs with PHP.</p>
+<p>The source JSON configuration is the same, albeit sorted:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource json numberLines"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>  <span class="dt">&quot;bannedNicks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="st">&quot;derek&quot;</span><span class="ot">,</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="st">&quot;dino&quot;</span><span class="ot">,</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a>    <span class="st">&quot;ffff&quot;</span><span class="ot">,</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="st">&quot;jjjj&quot;</span><span class="ot">,</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="st">&quot;werwer&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>  <span class="dt">&quot;defaultErrorReciever&quot;</span><span class="fu">:</span> <span class="st">&quot;piglet@thoughtworks.com&quot;</span><span class="fu">,</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>  <span class="dt">&quot;lighton&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a>  <span class="dt">&quot;loadMaxPercent&quot;</span><span class="fu">:</span> <span class="st">&quot;88&quot;</span><span class="fu">,</span></span>
+<span id="cb2-12"><a href="#cb2-12"></a>  <span class="dt">&quot;nextShutdownDate&quot;</span><span class="fu">:</span> <span class="st">&quot;8</span><span class="ch">\/</span><span class="st">9</span><span class="ch">\/</span><span class="st">2012&quot;</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="fu">}</span></span></code></pre></div>
+<p>The <code>index.html</code> page has been modified from the original to support only the basic <em>commit</em> and <em>diffs</em> functionality:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource html numberLines"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1"></a><span class="dt">&lt;!DOCTYPE </span>html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;</span>
+<span id="cb3-2"><a href="#cb3-2"></a>        &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;<span class="dt">&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">&lt;html</span> <span class="er">lang</span><span class="ot">=</span><span class="st">&quot;en&quot;</span> <span class="er">xmlns:ng</span><span class="ot">=</span><span class="st">&quot;http://angularjs.org&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="kw">&lt;head&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="kw">&lt;meta</span> <span class="er">http-equiv</span><span class="ot">=</span><span class="st">&quot;content-type&quot;</span> <span class="er">content</span><span class="ot">=</span><span class="st">&quot;text/html; charset=UTF-8&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>  <span class="kw">&lt;title&gt;</span>Configuration application (alpha)<span class="kw">&lt;/title&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>  <span class="kw">&lt;script</span><span class="ot"> type=</span><span class="st">&quot;text/javascript&quot;</span> <span class="er">ng:autobind</span> <span class="er">src</span><span class="ot">=</span><span class="st">&quot;http://code.angularjs.org/0.9.19/angular-0.9.19.min.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a>  <span class="kw">&lt;style</span> <span class="er">type</span><span class="ot">=</span><span class="st">&quot;text/css&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>    ins { <span class="kw">color</span>: <span class="cn">#00CC00</span><span class="op">;</span> <span class="kw">text-decoration</span>: <span class="dv">none</span><span class="op">;</span> }</span>
+<span id="cb3-10"><a href="#cb3-10"></a>    del { <span class="kw">color</span>: <span class="cn">#CC0000</span><span class="op">;</span> <span class="kw">text-decoration</span>: <span class="dv">none</span><span class="op">;</span> }</span>
+<span id="cb3-11"><a href="#cb3-11"></a>  <span class="kw">&lt;/style&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="kw">&lt;/head&gt;</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="kw">&lt;body</span> <span class="er">ng:controller</span><span class="ot">=</span><span class="st">&quot;AppCfg&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="kw">&lt;script</span><span class="ot"> type=</span><span class="st">&quot;text/javascript&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a>    <span class="kw">function</span> <span class="fu">AppCfg</span>($resource<span class="op">,</span> $xhr) {</span>
+<span id="cb3-16"><a href="#cb3-16"></a>        <span class="kw">var</span> self <span class="op">=</span> <span class="kw">this</span><span class="op">;</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a>        <span class="kw">this</span><span class="op">.</span><span class="at">newNickname</span> <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">;</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a>        <span class="kw">this</span><span class="op">.</span><span class="at">svrMessage</span><span class="op">;</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a>        <span class="kw">this</span><span class="op">.</span><span class="at">message</span><span class="op">;</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a>        <span class="kw">this</span><span class="op">.</span><span class="at">cfg</span> <span class="op">=</span> <span class="fu">$resource</span>(<span class="st">&quot;/appconfig/stack_configuration.json&quot;</span>)<span class="op">.</span><span class="fu">get</span>({})<span class="op">;</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a></span>
+<span id="cb3-22"><a href="#cb3-22"></a>        <span class="kw">this</span><span class="op">.</span><span class="at">save</span> <span class="op">=</span> <span class="kw">function</span>() {</span>
+<span id="cb3-23"><a href="#cb3-23"></a>            self<span class="op">.</span><span class="at">cfg</span><span class="op">.</span><span class="fu">$save</span>({<span class="dt">message</span><span class="op">:</span> self<span class="op">.</span><span class="at">message</span>}<span class="op">,</span> <span class="kw">function</span>() {</span>
+<span id="cb3-24"><a href="#cb3-24"></a>                <span class="fu">alert</span>(<span class="st">&quot;Config saved to server&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-25"><a href="#cb3-25"></a>            }<span class="op">,</span> <span class="kw">function</span>() {</span>
+<span id="cb3-26"><a href="#cb3-26"></a>                <span class="fu">alert</span>(<span class="st">&quot;ERROR on save&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-27"><a href="#cb3-27"></a>            })<span class="op">;</span></span>
+<span id="cb3-28"><a href="#cb3-28"></a>            self<span class="op">.</span><span class="at">message</span> <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">;</span></span>
+<span id="cb3-29"><a href="#cb3-29"></a>        }<span class="op">;</span></span>
+<span id="cb3-30"><a href="#cb3-30"></a></span>
+<span id="cb3-31"><a href="#cb3-31"></a>        <span class="kw">this</span><span class="op">.</span><span class="at">newNick</span> <span class="op">=</span> <span class="kw">function</span>() {</span>
+<span id="cb3-32"><a href="#cb3-32"></a>            self<span class="op">.</span><span class="at">cfg</span><span class="op">.</span><span class="at">bannedNicks</span><span class="op">.</span><span class="fu">push</span>(self<span class="op">.</span><span class="at">newNickname</span>)<span class="op">;</span></span>
+<span id="cb3-33"><a href="#cb3-33"></a>            self<span class="op">.</span><span class="at">newNickname</span> <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">;</span></span>
+<span id="cb3-34"><a href="#cb3-34"></a>        }<span class="op">;</span></span>
+<span id="cb3-35"><a href="#cb3-35"></a></span>
+<span id="cb3-36"><a href="#cb3-36"></a>        <span class="kw">this</span><span class="op">.</span><span class="at">diffs</span> <span class="op">=</span> <span class="kw">function</span>() {</span>
+<span id="cb3-37"><a href="#cb3-37"></a>            <span class="fu">$xhr</span>(<span class="st">&quot;post&quot;</span><span class="op">,</span> <span class="st">&quot;/appconfig/diffs/stack_configuration.json&quot;</span><span class="op">,</span> angular<span class="op">.</span><span class="fu">toJson</span>(self<span class="op">.</span><span class="at">cfg</span>)<span class="op">,</span> <span class="kw">function</span>(code<span class="op">,</span> svrMessage) {</span>
+<span id="cb3-38"><a href="#cb3-38"></a>                self<span class="op">.</span><span class="at">svrMessage</span> <span class="op">=</span> svrMessage<span class="op">;</span></span>
+<span id="cb3-39"><a href="#cb3-39"></a>            })<span class="op">;</span></span>
+<span id="cb3-40"><a href="#cb3-40"></a>        }<span class="op">;</span></span>
+<span id="cb3-41"><a href="#cb3-41"></a></span>
+<span id="cb3-42"><a href="#cb3-42"></a>        <span class="kw">this</span><span class="op">.</span><span class="at">deleteNick</span> <span class="op">=</span> <span class="kw">function</span>(nick) {</span>
+<span id="cb3-43"><a href="#cb3-43"></a>            <span class="kw">var</span> oldBannedNicks <span class="op">=</span> self<span class="op">.</span><span class="at">cfg</span><span class="op">.</span><span class="at">bannedNicks</span><span class="op">;</span></span>
+<span id="cb3-44"><a href="#cb3-44"></a>            self<span class="op">.</span><span class="at">cfg</span><span class="op">.</span><span class="at">bannedNicks</span> <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb3-45"><a href="#cb3-45"></a>            angular<span class="op">.</span><span class="fu">forEach</span>(oldBannedNicks<span class="op">,</span> <span class="kw">function</span>(n) {</span>
+<span id="cb3-46"><a href="#cb3-46"></a>                <span class="cf">if</span> (nick <span class="op">!=</span> n) {</span>
+<span id="cb3-47"><a href="#cb3-47"></a>                    self<span class="op">.</span><span class="at">cfg</span><span class="op">.</span><span class="at">bannedNicks</span><span class="op">.</span><span class="fu">push</span>(n)<span class="op">;</span></span>
+<span id="cb3-48"><a href="#cb3-48"></a>                }</span>
+<span id="cb3-49"><a href="#cb3-49"></a>            })<span class="op">;</span></span>
+<span id="cb3-50"><a href="#cb3-50"></a>        }<span class="op">;</span></span>
+<span id="cb3-51"><a href="#cb3-51"></a>    }</span>
+<span id="cb3-52"><a href="#cb3-52"></a></span>
+<span id="cb3-53"><a href="#cb3-53"></a>    AppCfg<span class="op">.</span><span class="at">$inject</span> <span class="op">=</span> [<span class="st">&quot;$resource&quot;</span><span class="op">,</span> <span class="st">&quot;$xhr&quot;</span>]<span class="op">;</span></span>
+<span id="cb3-54"><a href="#cb3-54"></a><span class="kw">&lt;/script&gt;</span></span>
+<span id="cb3-55"><a href="#cb3-55"></a>  Light is on:  <span class="kw">&lt;input</span> <span class="er">type</span><span class="ot">=</span><span class="st">&quot;checkbox&quot;</span> <span class="er">name</span><span class="ot">=</span><span class="st">&quot;cfg.lighton&quot;</span><span class="kw">/&gt;</span> <span class="kw">&lt;br/&gt;</span></span>
+<span id="cb3-56"><a href="#cb3-56"></a>  Default Error Reciever (email): <span class="kw">&lt;input</span> <span class="er">name</span><span class="ot">=</span><span class="st">&quot;cfg.defaultErrorReciever&quot;</span> <span class="er">ng:validate</span><span class="ot">=</span><span class="st">&quot;email&quot;</span><span class="kw">/&gt;</span> <span class="kw">&lt;br/&gt;</span></span>
+<span id="cb3-57"><a href="#cb3-57"></a>  Max Load Percentage: <span class="kw">&lt;input</span> <span class="er">name</span><span class="ot">=</span><span class="st">&quot;cfg.loadMaxPercent&quot;</span> <span class="er">ng:validate</span><span class="ot">=</span><span class="st">&quot;number:0:100&quot;</span><span class="kw">/&gt;</span> <span class="kw">&lt;br/&gt;</span></span>
+<span id="cb3-58"><a href="#cb3-58"></a>  Next Shutdown Date: <span class="kw">&lt;input</span> <span class="er">name</span><span class="ot">=</span><span class="st">&quot;cfg.nextShutdownDate&quot;</span> <span class="er">ng:validate</span><span class="ot">=</span><span class="st">&quot;date&quot;</span><span class="kw">/&gt;</span> <span class="kw">&lt;br/&gt;</span></span>
+<span id="cb3-59"><a href="#cb3-59"></a>  Banned nicks:</span>
+<span id="cb3-60"><a href="#cb3-60"></a>      <span class="kw">&lt;ol&gt;</span></span>
+<span id="cb3-61"><a href="#cb3-61"></a>        <span class="kw">&lt;li</span> <span class="er">ng:repeat</span><span class="ot">=</span><span class="st">&quot;nick in cfg.bannedNicks&quot;</span><span class="kw">&gt;&lt;span&gt;</span>{{nick}} <span class="dv">&amp;nbsp;&amp;nbsp;</span><span class="kw">&lt;a</span> <span class="er">ng:click</span><span class="ot">=</span><span class="st">&quot;deleteNick(nick)&quot;</span><span class="kw">&gt;</span>[X]<span class="kw">&lt;/a&gt;&lt;/span&gt;&lt;/li&gt;</span></span>
+<span id="cb3-62"><a href="#cb3-62"></a>    <span class="kw">&lt;/ol&gt;</span></span>
+<span id="cb3-63"><a href="#cb3-63"></a>  <span class="kw">&lt;form</span> <span class="er">ng:submit</span><span class="ot">=</span><span class="st">&quot;newNick()&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-64"><a href="#cb3-64"></a>    <span class="kw">&lt;input</span> <span class="er">type</span><span class="ot">=</span><span class="st">&quot;text&quot;</span> <span class="er">name</span><span class="ot">=</span><span class="st">&quot;newNickname&quot;</span> <span class="er">size</span><span class="ot">=</span><span class="st">&quot;20&quot;</span><span class="kw">/&gt;</span></span>
+<span id="cb3-65"><a href="#cb3-65"></a>    <span class="kw">&lt;input</span> <span class="er">type</span><span class="ot">=</span><span class="st">&quot;submit&quot;</span> <span class="er">value</span><span class="ot">=</span><span class="st">&quot;</span><span class="dv">&amp;lt;</span><span class="st">-- Add Nick&quot;</span><span class="kw">/&gt;&lt;br/&gt;</span></span>
+<span id="cb3-66"><a href="#cb3-66"></a>  <span class="kw">&lt;/form&gt;</span></span>
+<span id="cb3-67"><a href="#cb3-67"></a>  <span class="kw">&lt;hr/&gt;</span></span>
+<span id="cb3-68"><a href="#cb3-68"></a>  <span class="kw">&lt;button</span> <span class="er">ng:click</span><span class="ot">=</span><span class="st">&quot;diffs()&quot;</span><span class="kw">&gt;</span>View Diffs<span class="kw">&lt;/button&gt;&lt;br/&gt;</span></span>
+<span id="cb3-69"><a href="#cb3-69"></a>  <span class="kw">&lt;button</span> <span class="er">ng:disabled</span><span class="ot">=</span><span class="st">&quot;{{!message}}&quot;</span> <span class="er">ng:click</span><span class="ot">=</span><span class="st">&quot;save()&quot;</span><span class="kw">&gt;</span>Commit Changes<span class="kw">&lt;/button&gt;</span> Commit Message: <span class="kw">&lt;input</span> <span class="er">name</span><span class="ot">=</span><span class="st">&quot;message&quot;</span><span class="kw">&gt;&lt;/button&gt;&lt;br/&gt;</span></span>
+<span id="cb3-70"><a href="#cb3-70"></a>  Last Server operation: <span class="kw">&lt;br/&gt;</span></span>
+<span id="cb3-71"><a href="#cb3-71"></a>  <span class="kw">&lt;div</span> <span class="er">ng:bind</span><span class="ot">=</span><span class="st">&quot;svrMessage | html:&#39;unsafe&#39;&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb3-72"><a href="#cb3-72"></a>  <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb3-73"><a href="#cb3-73"></a><span class="kw">&lt;/body&gt;</span></span>
+<span id="cb3-74"><a href="#cb3-74"></a><span class="kw">&lt;/html&gt;</span></span></code></pre></div>
+<p>Both of these assets were added by performing:</p>
+<ol type="1">
+<li>Click “Add” from the top navbar</li>
+<li>Click “Add Content”</li>
+<li>Select “Assets” &gt; “Plain Text”</li>
+<li>For “Title”, enter “<code>index.html</code>” or “<code>stack_configuration.json</code>”</li>
+<li>Paste in the appropriate “Content”</li>
+<li>Click “URL”, select “Custom”, and enter the same value as “Title” (otherwise, Chronicle will convert underscores to dashes, so be careful!)</li>
+<li>Click “Save”, enter a commit message, then click the next “Save”</li>
+<li>Both assets should be viewable as mangled Chronicle content entries from <code>http://localhost/index.html</code> and <code>http://localhost/stack_configuration.json</code>. <em>You normally will not use these URLs</em>.</li>
+</ol>
+<p>At this point, neither asset is actually usable. Most content is heavily decorated with additional HTML and then displayed within a layout template, but I want both the <code>index.html</code> and <code>stack_configuration.json</code> assets to be viewable as standalone files and provide a REST interface for AngularJS to work against.</p>
+<h2 id="come-back-php-all-is-forgiven">Come back PHP! All is forgiven</h2>
+<p>Chronicle is largely built using <a href="http://framework.zend.com/">Zend Framework</a> and makes adding extra modules to the system pretty easy. My module needs to be able to display plaintext assets, update their content using an <code>HTTP POST</code>, and provide diffs between the last commit and the current content.</p>
+<p>To create the module, the following paths need to be added:</p>
+<ul>
+<li><code>INSTALL/application/appconfig</code></li>
+<li><code>INSTALL/application/appconfig/controllers</code></li>
+<li><code>INSTALL/application/appconfig/views/scripts/index</code></li>
+</ul>
+<p>Declare the module with <code>INSTALL/application/appconfig/module.ini</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource ini numberLines"><code class="sourceCode ini"><span id="cb4-1"><a href="#cb4-1"></a><span class="dt">version </span><span class="ot">=</span><span class="st"> </span><span class="fl">1.0</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="dt">description </span><span class="ot">=</span><span class="st"> Application config proof of concept</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="dt">icon </span><span class="ot">=</span><span class="st"> images/icon.png</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="dt">tags </span><span class="ot">=</span><span class="st"> config</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="kw">[maintainer]</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="dt">name </span><span class="ot">=</span><span class="st"> Perforce Software</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="dt">email </span><span class="ot">=</span><span class="st"> support@perforce.com</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a><span class="dt">url </span><span class="ot">=</span><span class="st"> http://www.perforce.com</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="kw">[routes]</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="dt">appconfig.type </span><span class="ot">=</span><span class="st"> Zend_Controller_Router_Route_Regex</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="dt">appconfig.route </span><span class="ot">=</span><span class="st"> &#39;appconfig/(.+)&#39;</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a><span class="dt">appconfig.reverse </span><span class="ot">=</span><span class="st"> appconfig/%s</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="dt">appconfig.defaults.module </span><span class="ot">=</span><span class="st"> appconfig</span></span>
+<span id="cb4-16"><a href="#cb4-16"></a><span class="dt">appconfig.defaults.controller </span><span class="ot">=</span><span class="st"> index</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a><span class="dt">appconfig.defaults.action </span><span class="ot">=</span><span class="st"> index</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a><span class="dt">appconfig.map.resource </span><span class="ot">=</span><span class="st"> </span><span class="dv">1</span></span>
+<span id="cb4-19"><a href="#cb4-19"></a></span>
+<span id="cb4-20"><a href="#cb4-20"></a><span class="dt">appconfig-operation.type </span><span class="ot">=</span><span class="st"> Zend_Controller_Router_Route_Regex</span></span>
+<span id="cb4-21"><a href="#cb4-21"></a><span class="dt">appconfig-operation.route </span><span class="ot">=</span><span class="st"> &#39;appconfig/([^/]+)/(.+)&#39;</span></span>
+<span id="cb4-22"><a href="#cb4-22"></a><span class="dt">appconfig-operation.reverse </span><span class="ot">=</span><span class="st"> appconfig/%s/%s</span></span>
+<span id="cb4-23"><a href="#cb4-23"></a><span class="dt">appconfig-operation.defaults.module </span><span class="ot">=</span><span class="st"> appconfig</span></span>
+<span id="cb4-24"><a href="#cb4-24"></a><span class="dt">appconfig-operation.defaults.controller </span><span class="ot">=</span><span class="st"> index</span></span>
+<span id="cb4-25"><a href="#cb4-25"></a><span class="dt">appconfig-operation.defaults.action </span><span class="ot">=</span><span class="st"> index</span></span>
+<span id="cb4-26"><a href="#cb4-26"></a><span class="dt">appconfig-operation.map.action </span><span class="ot">=</span><span class="st"> </span><span class="dv">1</span></span>
+<span id="cb4-27"><a href="#cb4-27"></a><span class="dt">appconfig-operation.map.resource </span><span class="ot">=</span><span class="st"> </span><span class="dv">2</span></span></code></pre></div>
+<p>Add a view script for displaying plaintext assets, <code>INSTALL/application/appconfig/views/scripts/index/index.phtml</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">&lt;?</span><span class="op">=</span><span class="va">$this</span>-&gt;entry-&gt;getValue(<span class="st">&#39;content&#39;</span>) <span class="kw">?&gt;</span></span></code></pre></div>
+<p>Add a view script for displaying diffs, <code>INSTALL/application/appconfig/views/scripts/index/diffs.phtml</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1"></a><span class="op">&lt;</span>pre<span class="op">&gt;&lt;</span><span class="ot">?</span><span class="op">=</span><span class="va">$this</span>-&gt;diffs <span class="kw">?&gt;</span><span class="op">&lt;/</span>pre<span class="op">&gt;</span></span></code></pre></div>
+<p>And a controller at <code>INSTALL/application/appconfig/controllers/IndexController.phtml</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">&lt;?php</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="fu">defined</span>(<span class="st">&#39;LIBRARY_PATH&#39;</span>) <span class="op">or</span> <span class="fu">define</span>(<span class="st">&#39;LIBRARY_PATH&#39;</span><span class="ot">,</span> <span class="fu">dirname</span>(<span class="cn">__DIR__</span>))<span class="ot">;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="kw">require_once</span> <span class="cn">LIBRARY_PATH</span> <span class="op">.</span> <span class="st">&#39;/simplediff/simplediff.php&#39;</span><span class="ot">;</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="kw">class</span> <span class="cn">A</span>ppconfig_IndexController <span class="kw">extends</span> <span class="cn">Z</span>end_Controller_Action</span>
+<span id="cb7-7"><a href="#cb7-7"></a>{</span>
+<span id="cb7-8"><a href="#cb7-8"></a>    <span class="kw">private</span> <span class="va">$entry</span><span class="ot">;</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>    </span>
+<span id="cb7-10"><a href="#cb7-10"></a>    <span class="kw">private</span> <span class="va">$mimeTypes</span> <span class="op">=</span> <span class="dt">array</span>(</span>
+<span id="cb7-11"><a href="#cb7-11"></a>        <span class="st">&#39;.html&#39;</span> =&gt; <span class="st">&#39;text/html&#39;</span><span class="ot">,</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a>        <span class="st">&#39;.json&#39;</span> =&gt; <span class="st">&#39;application/json&#39;</span><span class="ot">,</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a>    )<span class="ot">;</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a>    </span>
+<span id="cb7-15"><a href="#cb7-15"></a>    <span class="kw">public</span> <span class="kw">function</span> preDispatch()</span>
+<span id="cb7-16"><a href="#cb7-16"></a>    {</span>
+<span id="cb7-17"><a href="#cb7-17"></a>        <span class="va">$request</span> <span class="op">=</span> <span class="va">$this</span>-&gt;getRequest()<span class="ot">;</span></span>
+<span id="cb7-18"><a href="#cb7-18"></a>        <span class="va">$request</span>-&gt;setParams(<span class="cn">U</span>rl_Model_Url::fetch(<span class="va">$request</span>-&gt;getParam(<span class="st">&#39;resource&#39;</span>))-&gt;getParams())<span class="ot">;</span></span>
+<span id="cb7-19"><a href="#cb7-19"></a>        <span class="va">$this</span>-&gt;entry <span class="op">=</span> <span class="cn">P</span><span class="er">4</span>Cms_Content::fetch(<span class="va">$request</span>-&gt;getParam(<span class="st">&#39;id&#39;</span>)<span class="ot">,</span> <span class="dt">array</span>(<span class="st">&#39;includeDeleted&#39;</span> =&gt; <span class="kw">true</span>))<span class="ot">;</span></span>
+<span id="cb7-20"><a href="#cb7-20"></a>    }</span>
+<span id="cb7-21"><a href="#cb7-21"></a>    </span>
+<span id="cb7-22"><a href="#cb7-22"></a>    <span class="kw">public</span> <span class="kw">function</span> indexAction()</span>
+<span id="cb7-23"><a href="#cb7-23"></a>    {</span>
+<span id="cb7-24"><a href="#cb7-24"></a>        <span class="va">$this</span>-&gt;getResponse()-&gt;setHeader(<span class="st">&#39;Content-Type&#39;</span><span class="ot">,</span> <span class="va">$this</span>-&gt;getMimeType()<span class="ot">,</span> <span class="kw">true</span>)<span class="ot">;</span></span>
+<span id="cb7-25"><a href="#cb7-25"></a>        <span class="va">$this</span>-&gt;view-&gt;entry <span class="op">=</span> <span class="va">$this</span>-&gt;entry<span class="ot">;</span></span>
+<span id="cb7-26"><a href="#cb7-26"></a>        </span>
+<span id="cb7-27"><a href="#cb7-27"></a>        <span class="cf">if</span> (<span class="va">$this</span>-&gt;getRequest()-&gt;isPost()) {</span>
+<span id="cb7-28"><a href="#cb7-28"></a>            <span class="va">$this</span>-&gt;entry-&gt;setValue(<span class="st">&#39;content&#39;</span><span class="ot">,</span> <span class="va">$this</span>-&gt;getJsonPost())<span class="ot">;</span></span>
+<span id="cb7-29"><a href="#cb7-29"></a>            <span class="va">$this</span>-&gt;entry-&gt;save(<span class="va">$this</span>-&gt;getRequest()-&gt;getParam(<span class="st">&#39;message&#39;</span>))<span class="ot">;</span></span>
+<span id="cb7-30"><a href="#cb7-30"></a>        }</span>
+<span id="cb7-31"><a href="#cb7-31"></a>    }</span>
+<span id="cb7-32"><a href="#cb7-32"></a>    </span>
+<span id="cb7-33"><a href="#cb7-33"></a>    <span class="kw">private</span> <span class="kw">function</span> getMimeType()</span>
+<span id="cb7-34"><a href="#cb7-34"></a>    {</span>
+<span id="cb7-35"><a href="#cb7-35"></a>        <span class="va">$url</span> <span class="op">=</span> <span class="va">$this</span>-&gt;entry-&gt;getValue(<span class="st">&#39;url&#39;</span>)<span class="ot">;</span></span>
+<span id="cb7-36"><a href="#cb7-36"></a>        <span class="va">$suffix</span> <span class="op">=</span> <span class="fu">substr</span>(<span class="va">$url</span>[<span class="st">&#39;path&#39;</span>]<span class="ot">,</span> <span class="fu">strrpos</span>(<span class="va">$url</span>[<span class="st">&#39;path&#39;</span>]<span class="ot">,</span> <span class="st">&#39;.&#39;</span>))<span class="ot">;</span></span>
+<span id="cb7-37"><a href="#cb7-37"></a>        </span>
+<span id="cb7-38"><a href="#cb7-38"></a>        <span class="cf">if</span> (<span class="fu">array_key_exists</span>(<span class="va">$suffix</span><span class="ot">,</span> <span class="va">$this</span>-&gt;mimeTypes)) {</span>
+<span id="cb7-39"><a href="#cb7-39"></a>            <span class="cf">return</span> <span class="va">$this</span>-&gt;mimeTypes[<span class="va">$suffix</span>]<span class="ot">;</span></span>
+<span id="cb7-40"><a href="#cb7-40"></a>        } <span class="cf">else</span> {</span>
+<span id="cb7-41"><a href="#cb7-41"></a>            <span class="cf">return</span> <span class="st">&#39;text/plain&#39;</span><span class="ot">;</span></span>
+<span id="cb7-42"><a href="#cb7-42"></a>        }</span>
+<span id="cb7-43"><a href="#cb7-43"></a>    }</span>
+<span id="cb7-44"><a href="#cb7-44"></a>    </span>
+<span id="cb7-45"><a href="#cb7-45"></a>    <span class="kw">public</span> <span class="kw">function</span> diffsAction()</span>
+<span id="cb7-46"><a href="#cb7-46"></a>    {</span>
+<span id="cb7-47"><a href="#cb7-47"></a>        <span class="va">$this</span>-&gt;getResponse()-&gt;setHeader(<span class="st">&#39;Content-Type&#39;</span><span class="ot">,</span> <span class="st">&#39;text/html&#39;</span><span class="ot">,</span> <span class="kw">true</span>)<span class="ot">;</span></span>
+<span id="cb7-48"><a href="#cb7-48"></a>        <span class="va">$this</span>-&gt;view-&gt;diffs <span class="op">=</span> htmlDiff(<span class="va">$this</span>-&gt;entry-&gt;getValue(<span class="st">&#39;content&#39;</span>)<span class="ot">,</span> <span class="va">$this</span>-&gt;getJsonPost())<span class="ot">;</span></span>
+<span id="cb7-49"><a href="#cb7-49"></a>    }</span>
+<span id="cb7-50"><a href="#cb7-50"></a>    </span>
+<span id="cb7-51"><a href="#cb7-51"></a>    <span class="kw">public</span> <span class="kw">function</span> postDispatch()</span>
+<span id="cb7-52"><a href="#cb7-52"></a>    {</span>
+<span id="cb7-53"><a href="#cb7-53"></a>        <span class="va">$this</span>-&gt;getHelper(<span class="st">&#39;layout&#39;</span>)-&gt;disableLayout()<span class="ot">;</span></span>
+<span id="cb7-54"><a href="#cb7-54"></a>    }</span>
+<span id="cb7-55"><a href="#cb7-55"></a>    </span>
+<span id="cb7-56"><a href="#cb7-56"></a>    <span class="kw">private</span> <span class="kw">function</span> getJsonPost()</span>
+<span id="cb7-57"><a href="#cb7-57"></a>    {</span>
+<span id="cb7-58"><a href="#cb7-58"></a>        <span class="cf">if</span> (<span class="va">$this</span>-&gt;getRequest()-&gt;isPost()) {</span>
+<span id="cb7-59"><a href="#cb7-59"></a>            <span class="cf">return</span> <span class="va">$this</span>-&gt;prettyPrint(<span class="fu">file_get_contents</span>(<span class="st">&#39;php://input&#39;</span>))<span class="ot">;</span></span>
+<span id="cb7-60"><a href="#cb7-60"></a>        } <span class="cf">else</span> {</span>
+<span id="cb7-61"><a href="#cb7-61"></a>            <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Exception</span>(<span class="st">&#39;Can</span><span class="sc">\&#39;</span><span class="st">t get JSON without POST&#39;</span>)<span class="ot">;</span></span>
+<span id="cb7-62"><a href="#cb7-62"></a>        }</span>
+<span id="cb7-63"><a href="#cb7-63"></a>    }</span>
+<span id="cb7-64"><a href="#cb7-64"></a>    </span>
+<span id="cb7-65"><a href="#cb7-65"></a>    <span class="kw">private</span> <span class="kw">function</span> prettyPrint(<span class="va">$json</span>)</span>
+<span id="cb7-66"><a href="#cb7-66"></a>    {</span>
+<span id="cb7-67"><a href="#cb7-67"></a>        <span class="va">$array</span> <span class="op">=</span> <span class="cn">Z</span>end_Json::decode(<span class="va">$json</span>)<span class="ot">;</span></span>
+<span id="cb7-68"><a href="#cb7-68"></a>        <span class="va">$this</span>-&gt;<span class="fu">sort</span>(<span class="va">$array</span>)<span class="ot">;</span></span>
+<span id="cb7-69"><a href="#cb7-69"></a>        </span>
+<span id="cb7-70"><a href="#cb7-70"></a>        <span class="cf">return</span> <span class="cn">Z</span>end_Json::prettyPrint(<span class="cn">Z</span>end_Json::encode(<span class="va">$array</span>)<span class="ot">,</span> <span class="dt">array</span>(<span class="st">&#39;indent&#39;</span> =&gt; <span class="st">&#39; &#39;</span>))<span class="ot">;</span></span>
+<span id="cb7-71"><a href="#cb7-71"></a>    }</span>
+<span id="cb7-72"><a href="#cb7-72"></a>    </span>
+<span id="cb7-73"><a href="#cb7-73"></a>    <span class="kw">private</span> <span class="kw">function</span> <span class="fu">sort</span>(<span class="dt">array</span> <span class="op">&amp;</span><span class="va">$array</span>)</span>
+<span id="cb7-74"><a href="#cb7-74"></a>    {</span>
+<span id="cb7-75"><a href="#cb7-75"></a>        <span class="cf">if</span> (<span class="fu">count</span>(<span class="fu">array_filter</span>(<span class="fu">array_keys</span>(<span class="va">$array</span>)<span class="ot">,</span> <span class="st">&#39;is_string&#39;</span>)) <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb7-76"><a href="#cb7-76"></a>            <span class="fu">ksort</span>(<span class="va">$array</span>)<span class="ot">;</span></span>
+<span id="cb7-77"><a href="#cb7-77"></a>        }</span>
+<span id="cb7-78"><a href="#cb7-78"></a>        </span>
+<span id="cb7-79"><a href="#cb7-79"></a>        <span class="cf">foreach</span>(<span class="va">$array</span> <span class="kw">as</span> <span class="op">&amp;</span><span class="va">$value</span>) {</span>
+<span id="cb7-80"><a href="#cb7-80"></a>            <span class="cf">if</span> (<span class="fu">is_array</span>(<span class="va">$value</span>)) {</span>
+<span id="cb7-81"><a href="#cb7-81"></a>                <span class="va">$this</span>-&gt;<span class="fu">sort</span>(<span class="va">$value</span>)<span class="ot">;</span></span>
+<span id="cb7-82"><a href="#cb7-82"></a>            }</span>
+<span id="cb7-83"><a href="#cb7-83"></a>        }</span>
+<span id="cb7-84"><a href="#cb7-84"></a>    }</span>
+<span id="cb7-85"><a href="#cb7-85"></a>}</span></code></pre></div>
+<h2 id="angularjs">AngularJS</h2>
+<p>After all files are in place, Chronicle needs to be notified that the new module exists by going to “Manage” &gt; “Modules”, where the “Appconfig” module will be listed if all goes well :) Both assets will now be viewable from <code>http://localhost/appconfig/index.html</code> and <code>http://localhost/appconfig/stack_configuration.json</code>. AngularJS’ <a href="http://code.angularjs.org/0.9.19/docs-0.9.19/#!/api/angular.service.resource">resource service</a> is used in <code>index.html</code> to fetch stack_configuration.json and post changes back.</p>
+<p>From <code>http://localhost/appconfig/index.html</code>, the data from stack_configuration.json is loaded into the form:</p>
+<figure id="img-config-form-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config/start.png" class="image-link">
+      <img src="/images/app-config/start.png"
+        id="img-config-form"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>Edits to stack_configuration.json can be made using the form, and the diffs viewed by clicking on “View Diffs”:</p>
+<figure id="img-config-diffs-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config/diffs.png" class="image-link">
+      <img src="/images/app-config/diffs.png"
+        id="img-config-diffs"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>The changes can be saved by entering a commit message and clicking “Commit Changes”. After which, clicking “View Diffs” will show no changes:</p>
+<figure id="img-config-commit-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config/diffs-after-commit.png" class="image-link">
+      <img src="/images/app-config/diffs-after-commit.png"
+        id="img-config-commit"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>To show that edits have in fact been made to stack_configuration.json, go to <code>http://localhost/stack_configuration.json</code>, select “History” and click on ” History List”:</p>
+<figure id="img-config-history-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config/history.png" class="image-link">
+      <img src="/images/app-config/history.png"
+        id="img-config-history"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>Chronicle also provides an interface for viewing diffs between revisions:</p>
+<figure id="img-config-revisions-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config/history-diffs.png" class="image-link">
+      <img src="/images/app-config/history-diffs.png"
+        id="img-config-revisions"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<h2 id="disk-usage">Disk Usage</h2>
+<p>Something to remember in using Chronicle is that each resource requested from Perforce is written to disk before being served to the client. This means that for each request to <code>index.html</code>, Chronicle allocates a new Perforce workspace, checks out the associated file, serves it to the client, then deletes the file and the workspace at the end of the request. This allocate/checkout/serve/delete cycle executes for stack_configuration.json and every other resource in the system.</p>
+<h2 id="todo"><span class="citation" data-cites="TODO">@TODO</span></h2>
+<h3 id="security">Security!</h3>
+<p>There’s one major flaw with the appconfig module: it performs zero access checks. By default, Chronicle can be configured to disallow anonymous access by going to “Manage” &gt; “Permissions” and deselecting all permissions for ” anonymous” and “members”. Logging out and attempting to access either <code>http://localhost/appconfig/stack_configuration.json</code> or <code>http://localhost/appconfig/index.html</code> will now give an error page and prompt you to log in. Clicking “New User” will also give an error, as anonymous users don’t have the permission to create users.</p>
+<p>Access rights on content are checked by the content module, but are also hard-coded in the associated controllers as IF-statements. A better solution will be required for proper access management in the appconfig module.</p>
+<h3 id="better-integration">Better integration</h3>
+<p>Chronicle’s content module provides JSON integration for most of its actions, but these mostly exist to support the <a href="http://dojotoolkit.org/">Dojo Toolkit</a>-enabled front-end. Integrating with these actions over JSON requires detailed knowledge of Chronicle’s form structures.</p>
+<p>Chronicle has some nice interfaces for viewing diffs. If I could call those up from <code>index.html</code> I would be major happy :)</p>
+<h3 id="automatic-creation-of-plaintext-content-type">Automatic creation of plaintext content type</h3>
+<p>Before the appconfig module is usable, the plaintext content type has to be created. I would like to automate creation of the plaintext content type when the module is first enabled.</p>
+<h3 id="making-applications-aware-of-updates-to-configuration">Making applications aware of updates to configuration</h3>
+<p>When stack_configuration.json is updated, there’s no way to notify applications to the change, and no interface provided so they may poll for changes. I’m not entirely sure at this point what an appropriate solution would look like. In order to complete the concept, I’d first have to create a client app dependent on that configuration.</p>
+<h3 id="better-interfaces-for-manipulating-plaintext-assets">Better interfaces for manipulating plaintext assets</h3>
+<p>I had to fiddle with <code>index.html</code> quite a bit. This basically involved editing a local copy of <code>index.html</code>, then pasting the entire contents into the associated form in Chronicle. I have not tried checking out <code>index.html</code> directly from Perforce, and I imagine that any edits would need to be made within Chronicle. GitHub offers an in-browser raw editor, and something like that would be real handy in Chronicle.</p>
+<h3 id="handling-conflicts">Handling conflicts</h3>
+<p>There is no logic in the appconfig module to catch conflicts if there are two users editing the same file. Conflicts are detectable because an exception is thrown if there is a conflict, but I’m not sure what the workflow for resolution is in Chronicle terms, or how to integrate with it. Who wins?</p>
+<h3 id="working-with-branches">Working with branches</h3>
+<p>I did not take the time to see how Chronicle manages branches. I will need to verify that Chronicle and the appconfig module can work with development, staging, and production branches, with maintained divergence. For example, we’re still trying to figure out how to attach visual clients like P4V to the repository and work independently of Chronicle.</p>
+<h2 id="kudos">Kudos</h2>
+<p>I would like to thank the guys at Perforce for their assistance and answering all my questions as I worked with Chronicle, especially Randy Defauw.</p>
+<h2 id="update-06272021">Update 06/27/2021</h2>
+<p>This is the first blog post I have ever written. Paul Hammant, who I had met in other contexts previously, happened to be working out of the ThoughtWorks office in Dallas, TX the very same day I started at ThoughtWorks. He asked me if I knew PHP, which I did, and set me off to explore Perforce Chronicle as a solution for managing configuration.</p>
+<p>I had never written professionally before or been aware of configuration management: I was very lucky to explore a passion space that Paul has worked within for a very long time. I don’t believe I ever gave him a proper thanks. He gave me an opportunity that probably not a lot of people get in their early careers, and it was an invaluable experience that I learned a lot from and think about fairly often.</p>
+<p>The other posts in this series were also written with guidance from Paul:</p>
+<ul>
+<li><a href="/blog/2012/11/16/scm-backed-application-configuration-with-perforce">SCM-Backed Application Configuration with Perforce</a></li>
+<li><a href="/blog/2012/11/20/app-config-app-in-action">App-Config-App in Action</a></li>
+<li><a href="/blog/2012/11/28/promoting-changes-with-app-config-app">Promoting changes with App-Config-App</a></li>
+</ul>
+<p>The subject of configuration as described in these posts is still fresh even after nearly ten years. Even now configuration as code still doesn’t have a perfect solution, though products have become available that make managing configuration easier. Changing configuration in a running process as a general solution remains elusive, as supporting it imposes a lot of constraints on design.</p>
+<p>On a more personal note: today is Pride. This is the first Pride I’ve ever participated in and only in the last two years have I felt safe enough to come out in circles beyond close friends. I was out to Paul but only as a detail I confided in passing. When I was working with Paul on these posts he advised that I should consider relocating to the Bay Area. In January, 2013, I moved to San Francisco. Discovering my own life as a <em>person</em> was set by Paul being brave enough to share a deeply personal piece of advice. I’m so thankful he said it, and I’m glad I listened.</p>
+
+  </div>
+</main>
+
+<footer class="page-footer">
+  <div class="content-bound">
+    <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog">Blog</a>
+  <a href="/resume">Resume</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+    <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
+    <ul class="acks">
+      <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
+      <li>Logo icon made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
+    </ul>
+    <p class="generated">
+      This page was rendered from
+      <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/a96d7a9/site/_posts/2012-11-07-using-perforce-chronicle-for-application-configuration.md">2012-11-07-using-perforce-chronicle-for-application-configuration.md</a>
+      at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/a96d7a9">[a96d7a9] Open graph and twitter cards added and working, removed include tag support, better sitemaps, youtube videos displaying better, fixed broken backgrounds in css</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

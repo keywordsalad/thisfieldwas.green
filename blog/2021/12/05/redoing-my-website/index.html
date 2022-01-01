@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>This Field Was Green - Redoing my website with Haskell and Hakyll</title>
+<link rel="canonical" href="https://thisfieldwas.green/blog/2021/12/05/redoing-my-website">
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
+
+<meta property="og:site_name" content="">
+<meta property="og:title" content="Redoing my website with Haskell and Hakyll">
+<meta property="og:url" content="https://thisfieldwas.green/blog/2021/12/05/redoing-my-website">
+<meta property="og:description" content="">
+<meta property="og:image:url" content="https://thisfieldwas.green/grass_og-image.png">
+
+<meta property="article:published_time" content="2021-12-05T08:08:32-08:00">
+  <meta property="article:modified_time" content="2021-12-05T08:08:32-08:00">
+  <meta property="article:author" content="Logan McGrath">
+  <meta property="article:tag" content="hakyll">
+  <meta property="article:tag" content="Haskell">
+  
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@thisgreenfield">
+<meta name="twitter:title" content="Redoing my website with Haskell and Hakyll">
+
+
+
+<link rel="stylesheet" href="/css/main.css">
+<script src="/js/main.js"></script>
+
+</head>
+<body class="post post-full">
+
+<header class="page-header">
+  <div class="content-bound">
+    <div class="logo-icon"><a href="/"></a></div>
+    <div class="logo-nav">
+      <h1 class="logo"><a href="/">This Field Was Green</a></h1>
+      <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog">Blog</a>
+  <a href="/resume">Resume</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+    </div>
+  </div>
+</header>
+
+<main class="page-content">
+  <div class="content-bound">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2021/12/05/redoing-my-website">Redoing my website with Haskell and Hakyll</a>
+  </h1>
+  <p class="post-published">Posted on December  5, 2021 by Logan McGrath
+  </p>
+    <p class="post-tags">
+      Tags: <a class="tag" href="/tags/hakyll">hakyll</a>, <a class="tag" href="/tags/haskell">Haskell</a>
+    </p>
+</header>
+<p>I’m picking up a COVID project: <em>Redoing my website!</em></p>
+<p>My website prior to 2021 was authored using <a href="http://octopress.org/"><code>octopress</code></a> or <a href="https://jekyllrb.com/"><code>jekyll</code></a>. Truthfully I don’t remember which as I haven’t touched my website in quite a few years. I want to update my homepage and I’m in a bind because I don’t know how to produce a build after I make changes.</p>
+<!--more-->
+<p>Sitting down, I try to size up the amount of housekeeping present here. I can’t quite tell what’s going on with <code>jekyll</code>, and I know that <code>octopress</code> <a href="http://octopress.org/2015/01/15/octopress-3.0-is-coming/">hasn’t been updated</a> for a while. Additionally, I’m several computers removed in time since I last actively worked on my site, so I don’t have the old software handy. This work is starting to look like quite the yak shave to get some software running that I would soon have to update. I don’t mind a <em>good</em> yak shave, however, so I’m going to find a new static site generator.</p>
+<h2 id="wants-in-a-static-site-generator">Wants in a static site generator</h2>
+<ul>
+<li>Support for arbitrary static pages written in either <code>markdown</code> or <code>html</code>.</li>
+<li><code>sass</code> support.</li>
+<li>Blog posts in <code>markdown</code>.</li>
+<li>Listing most recent posts.</li>
+<li>Listing all posts.</li>
+<li>Listing posts by category or tag.</li>
+<li>Some mechanism for authoring drafts and viewing them online.</li>
+</ul>
+<p>Really any static site generator can meet these, but I do <em>enjoy</em> a good yak shave. <a href="https://jaspervdj.be/hakyll/">hakyll</a> in this regard seems like a good fit.</p>
+<h2 id="why-hakyll-specifically">Why <code>hakyll</code>, specifically?</h2>
+<p>Briefly, let me introduce <code>hakyll</code> as I understand it: <code>hakyll</code> is a <code>jekyll</code>-inspired static site generator that provides just enough tools to put together a website. Not to knock it, of course, in reality <code>hakyll</code> is very lean but provides plenty of building blocks to deliver a no-frills blog.</p>
+<p>Naturally the primary value proposition of <code>hakyll</code> for me is the opportunity to use Haskell for a project that isn’t entirely trivial. An <em>enjoyable</em> and <em>good</em> yak shave, if you will!</p>
+<h2 id="how-hakyll-accomplishes-what-i-need">How <code>hakyll</code> accomplishes what I need</h2>
+<h3 id="inputs-and-outputs">Inputs and outputs</h3>
+<p><code>hakyll</code> roughly models a website as a series of transformations between inputs and outputs using the <code>Rules</code> monad.</p>
+<ol type="1">
+<li><code>Rules</code> are initialized by matching file paths by name or pattern as inputs.</li>
+<li>Per input, a <code>Route</code> indicates an output destination.</li>
+<li>When routed, a transformation is applied by means of the <code>Compiler</code> monad.</li>
+</ol>
+<p><strong>Rules for copying images into my site</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource haskell numberLines"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1"></a><span class="ot">images ::</span> <span class="dt">Rules</span> ()</span>
+<span id="cb1-2"><a href="#cb1-2"></a>images <span class="ot">=</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a>  match <span class="st">&quot;images/**&quot;</span> <span class="kw">do</span>        <span class="co">-- 1. match all files in the images folder</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a>    route idRoute             <span class="co">-- 2. output image with the file name as-is</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a>    compile copyFileCompiler  <span class="co">-- 3. copy image file from source to output as-is</span></span></code></pre></div>
+<h3 id="turning-one-thing-into-another">Turning one thing into another</h3>
+<p>Compilers are cool, they’re where all the magic happens! Through compilers I use <code>hakyll</code>’s magic to transform <code>markdown</code> and <code>html</code> into <code>html</code> for viewing in a browser. <code>hakyll</code> out-of-the-box supports multiple input and output formats, and I suspect that in addition to a plain-old technical blog I can also write a really large textbook source in <code>LaTeX</code> and output a <code>pdf</code>.</p>
+<p>I sense that compilers are <code>hakyll</code>’s primary extension point, as I lean on these heavily and develop opinions as I spend time with them.</p>
+<p><code>hakyll</code> very smartly tracks dependencies between each compiled artifact and, like a good modern software, only compiles artifacts when it detects changes. For example, this allows for precompiling templates early in the build pipeline and allowing multiple dependents downstream use the same built artifact.</p>
+<h2 id="so-what-happened">So what happened?</h2>
+<p>My website now uses for its static site generator: Haskell and <code>hakyll</code>!</p>
+<p>I kept a small scratch list of things I <em>knew</em> would happen but didn’t <em>expect</em>:</p>
+<ul>
+<li>Haskell compiles really slow, like <em>really</em> slow.</li>
+<li>Compiled languages are supposed to be more productive but they don’t <em>feel</em> that way.</li>
+<li>Just using plain-old <code>html</code> is a tall order, aka. <em>Transformation Telephone</em>.</li>
+<li>Templating is inexplicably difficult.</li>
+<li>Type inferencing is a real treat until it doesn’t work.</li>
+<li>Using <code>css</code> is still like the Family Guy meme.</li>
+<li>I did not fight functional programming like I expected, I rather experienced it as an invaluable teacher.</li>
+</ul>
+<p>Let me expand on these items.</p>
+<h3 id="haskell-compiles-really-slow-like-really-slow">Haskell compiles really slow, like <em>really</em> slow</h3>
+<p><code>hakyll</code> depends on the <a href="https://hackage.haskell.org/package/pandoc"><code>pandoc</code></a> library for its document processing. It’s very large, and for my particular use case provides much more functionality than my website will ever need. I’m leveraging code highlighting, <code>html</code>, and <code>markdown</code> processing but <code>pandoc</code> (which can be thought of as a <em>pan-document swiss army knife markup processing utility</em> of sorts) can process pretty much everything under the sun and transform it all this-way and that-. From source it takes around 40 minutes to clean-compile on my 2019 MacBook Pro.</p>
+<h3 id="compiled-languages-are-supposed-to-be-more-productive-but-they-dont-feel-that-way">Compiled languages are supposed to be more productive but they don’t <em>feel</em> that way</h3>
+<p>With compiled dependencies, my site takes about two minutes to clean-compile just the executable. That’s at about the upper limit of what I would consider acceptable. Changing a widely depended-on source file and then waiting two minutes for the binary to rebuild is a real grind.</p>
+<p>I never have to worry about a type error at runtime, but I do miss the quick turnaround I had with my Ruby-based site generator. I can’t say whether I was faster or slower in fact, as I wasn’t dealing with a whole class of problems related to typos alone, but it sure doesn’t feel like I’m more productive.</p>
+<p><em>UPDATE:</em> Since working more in content vs. code, <code>hakyll</code> has proven itself very snappy and resilient to errors. I hardly have to think about it as I make edits and experiment with cosmetic touches. I’m still on the fence about productivity in code, but I’m not unhappy.</p>
+<h3 id="just-using-plain-old-html-is-a-tall-order-aka.-transformation-telephone">Just using plain-old <code>html</code> is a tall order, aka. <em>Transformation Telephone</em></h3>
+<p><code>pandoc</code> loses some data fidelity as it transforms markup between formats. I try to use <code>html5</code> semantic tags (<code>&lt;aside&gt;</code>, <code>&lt;figure&gt;</code>, and friends) as I update my existing posts and find out that <code>pandoc</code> processes the <code>html</code> in the <code>markdown</code> source and removes the tags but passes the contents through mostly unchanged. Digging through <code>pandoc</code>’s source code I discover that there is an <a href="https://hackage.haskell.org/package/pandoc-types-1.22.1/docs/Text-Pandoc-Definition.html#t:Block">intermediate representation</a> for all documents that does not itself have the fidelity necessary to retain whether the contents of those tags represent their intended semantics. I don’t feel that I can affect a pull request to add this capability without a very large amount of work whose value serves more than my own ends.</p>
+<h3 id="templating-is-inexplicably-difficult">Templating is inexplicably difficult</h3>
+<p><code>hakyll</code> does not have a good template language. I spend a few months on and off as I can squeeze time out after work so that I can write my own template language. This language provides for me the following capabilities that aren’t present by default or just aren’t very good out of the box:</p>
+<ul>
+<li>Better contexts to retrieve data from compiled items in scope.</li>
+<li>Dotted field accessors along contexts.</li>
+<li>Custom template function declarations.</li>
+<li>Easy layouts driven through both metadata and special syntax.</li>
+<li>Conditionals.</li>
+<li>Loops.</li>
+<li>Default values when absent.</li>
+<li>Context literals.</li>
+<li>List literals.</li>
+<li>Syntax literals (i.e. macros and lazy evaluation).</li>
+<li>Falsy and Truthy values, even <em>undefined</em> values!</li>
+</ul>
+<p>All of these features give me a rather roundabout way of satisfying some of the conveniences of a dynamic language within the very stiff context of a Haskell-powered static site generator. Strapping together my own template language is a surprisingly fun, though difficult itch to scratch, and a very informative experience worth writing about in another post.</p>
+<h3 id="type-inferencing-is-a-real-treat-until-it-doesnt-work">Type inferencing is a real treat until it doesn’t work</h3>
+<p>Sometimes Haskell can’t figure out what I’m trying to tell it to do. I didn’t read any formal documentation on how Haskell’s type inferencing algorithm works specifically (the system derives from <a href="https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system">Hindley-Milner</a>, interesting stuff) but I did develop some intuition over time. Unfortunately words escape me and I can’t seem to explain how it works just yet.</p>
+<p>Occasionally I have to tell Haskell what to do, and there is a syntax for this:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource haskell numberLines"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">-- Haskell doesn&#39;t know that I mean &quot;page&quot; is a `String` and not `[a]`</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>constField <span class="st">&quot;layout&quot;</span> (<span class="st">&quot;page&quot;</span><span class="ot"> ::</span> <span class="dt">String</span>)</span></code></pre></div>
+<p>That particular instance above is due to a <a href="http://dev.stephendiehl.com/hask/#overlappinginstances">footgun</a> I use so that lists of type <code>[a]</code> are treated generally and <code>Strings</code>, which are just <code>[Char]</code>, are treated specially. Haskell can’t tell the difference in this case unless I provide the extra type information.</p>
+<h3 id="using-css-is-still-like-the-family-guy-meme">Using <code>css</code> is still like the Family Guy meme</h3>
+<figure id="family-guy-css-aside" class="image">
+  <p class="content">
+    <a href="/images/redoing-my-website/family-guy-css.gif" class="image-link">
+      <img src="/images/redoing-my-website/family-guy-css.gif"
+        id="family-guy-css"
+        title="<code>css</code>: it's still like this, but it got prettier"
+        alt="<code>css</code>: it's still like this, but it got prettier">
+    </a>
+  </p>
+  <figcaption><code>css</code>: it's still like this, but it got prettier</figcaption>
+</figure>
+<p>I probably haven’t touched <code>css</code> since 2013, which right now is about 8 years ago. It feels the same, with a few upgrades that are in very much the same vein as the old stuff. It’s still weird and clunky, at least to me. For as frustrated as I find myself with it, I am happy with how the site looks considering that I don’t particularly know what I’m doing.</p>
+<p>Despite feeling as though I’m fumbling about, I’m so proud to have figured out how to style my site so that looks great on both desktop and mobile, that it scales across multiple resolutions, but that it especially feels like I did not compromise on aesthetics or functionality. Try looking at this or other pages from desktop or phone, and try especially comparing landscape vs. portrait!</p>
+<p>I am thrilled that all major browsers’ dev tools have greatly matured, have even become on-par with each other. I’m very happy with how enabling these tools are now.</p>
+<h3 id="i-did-not-fight-functional-programming-like-i-expected-i-rather-experienced-it-as-an-invaluable-teacher">I did not fight functional programming like I expected, I rather experienced it as an invaluable teacher</h3>
+<p>I don’t get what the negative fuss about functional programming is. Everything I’ve needed help with is googleable, like everything else in tech. I rather enjoy using Haskell for what is a pretty boring problem solvable by any programming language, and on the whole I’m happy so far with my decision to use it. Learning functional programming benefits from a palate cleanser in order to fully grok, and I’m giving it an earnest shot.</p>
+<p>I’ve picked up some concepts that I imagine will find their way back into how I write code elsewhere:</p>
+<h4 id="abstract-data-types">Abstract data types</h4>
+<p>Abstract data types are the best way of implementing closed polymorphism that I’ve found thus far, and enums in object oriented languages are close enough to simulate them effectively in those languages.</p>
+<p>In my experience, polymorphism dealing with data only needs to extend over a small number of cases. By using abstract data types, I can keep my code variants local to each other, so that adding new variants requires that changes be made in-context. This ensures that no case for a polymorphic change in behavior goes unchecked. I lean on the compiler to tell me if I left any location unhandled.</p>
+<h4 id="type-classes">Type classes</h4>
+<p>Type classes are the best way of implementing open polymorphism that I’ve found thus far, and interfaces in object oriented languages are close enough to simulate them effectively in those languages.</p>
+<p>Contrasting with abstract data types, interfaces provide a facility for extending polymorphism over an open set of cases. As interfaces speak only in terms of operations, they run a much lower risk of introducing variant code paths that could introduce defects related to data.</p>
+<h4 id="rethinking-conventional-object-oriented-programming">Rethinking conventional object-oriented programming</h4>
+<p>I did not find myself reaching into my toolbox for inheritance or class-based polymorphism to solve problems. These two mechanisms are a brittle way of implementing polymorphism, I feel. I wager I could write decent Java without them, as I have been doing this for some time already in other languages.</p>
+<h4 id="changing-the-world">Changing the world</h4>
+<p>Immutability makes reasoning about data flow and change of state across an application really easy and I will leverage this everywhere I that I reasonably can.</p>
+<p>I find my mental model of objects in object-oriented programming changes starkly when I apply immutability to data. As conventionally understood, I imagine a small container of data, an <em>object</em>, which I can modify at-will, via a provided interface of methods, in order to change its state over time. When I apply immutability as a design constraint, the concept of an <em>object</em> as realized here is no longer a possible option.</p>
+<p>Immutability imposes a fundamental change in how business and technical capabilities within code are designed. Instead of objects as methods around mutable data, methods become organized into <em>modules</em> containing <em>functions</em>. Some functions act as <em>entry points</em> into the associated capability, and they receive, usually, an abstract data type as an argument, and construct a new one as a result. Change over time can be observed without modifying state destructively, and entire classes of runtime errors, like data races, are eliminated.</p>
+<p>There are more impacts to the design of an application than I suggest here. I admit any value proposition may appear dubious on its face. Consider for a moment: state within long-running Haskell applications appears as if it were mutating. Designing for immutability thus works in production applications and I am very interested in learning more about the patterns used to support it.</p>
+<h4 id="pattern-matching">Pattern matching</h4>
+<p>Pattern matching and branching conditionally based on the <em>shape</em> of arguments is astoundingly empowering. It elevates data into a first-class position within API design.</p>
+<p>Until recently, I can’t think of any C syntax-inspired language that takes advantage of this concept. Pattern matching may be so enabling, I think, that it might even have a measurable impact on the economy! I wish this was something that could be measured more concretely, but I’m happy even if it’s just a convenience to have.</p>
+<h4 id="encoding-the-effect-in-result">Encoding the effect in result</h4>
+<p>This is perhaps my most unexpected takeaway: Effect types make very clear that as part of the contract of a function that I am calling, some orthogonal quality in addition to a result, including whether or not I receive a result, occurs.</p>
+<ul>
+<li><code>f :: IO a</code> will give me an <code>a</code> if <code>f</code> <em>succeeds</em>. It will also affect external systems in some way, or it might <em>fail</em> due to one. Java engineers might recall method signatures polluted with <code>throws IOException</code>; this is same/same but different.</li>
+<li><code>g :: [a]</code> will give me <em>one or more</em> of <code>a</code> if <code>g</code> <em>succeeds</em>. Effectively, <code>g</code> <em>fails</em> if I receive <em>zero</em> <code>a</code>’s. This is a sort of non-zero nondeterminism of the number of results an operation.</li>
+<li><code>h :: Maybe a</code> will give me <code>Just a</code> if an <code>a</code> exists and it <em>succeeds</em>. It gives me <code>Nothing</code> otherwise and <em>fails</em>. This is encodes an explicit presence or absence of a value. I like to think of <code>Maybe</code> as a <code>null</code> done right.</li>
+<li><code>i :: Either a b</code> will give me <code>Right a</code> if <code>i</code> <em>succeeds</em>. I receive <code>Left b</code> if <code>i</code> <em>fails</em>, which allows me to inspect <code>b</code> for why <code>i</code> may have failed.</li>
+</ul>
+<p><strong>An observation</strong>: each of these effect types encode some notion of <em>success</em> and <em>failure</em>. The <code>Monad</code> typeclass generalizes over these and this enables a high degree of code reuse, independent of specific error handling. Error handling can be pushed out to the edge of the contexts they need to be contained within, which helps keep business logic cleaner. Each of the above effect types implement the <code>Monad</code> typeclass.</p>
+<h2 id="i-rather-like-hakyll-and-haskell">I rather like <code>hakyll</code> and Haskell!</h2>
+<p>I’m really happy with <code>hakyll</code>! I’m also really happy with Haskell. My website is taking some investment, but it’s been worth the effort especially given the quality of the output. I think I’m going to keep this setup for a while yet.</p>
+
+  </div>
+</main>
+
+<footer class="page-footer">
+  <div class="content-bound">
+    <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog">Blog</a>
+  <a href="/resume">Resume</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+    <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
+    <ul class="acks">
+      <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
+      <li>Logo icon made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
+    </ul>
+    <p class="generated">
+      This page was rendered from
+      <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/a96d7a9/site/_posts/2021-12-05-redoing-my-website.md">2021-12-05-redoing-my-website.md</a>
+      at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/a96d7a9">[a96d7a9] Open graph and twitter cards added and working, removed include tag support, better sitemaps, youtube videos displaying better, fixed broken backgrounds in css</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

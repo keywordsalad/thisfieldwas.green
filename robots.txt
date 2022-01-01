@@ -1,0 +1,4 @@
+# Generated from commit 60fa80c
+User-agent: *
+Disallow: https://thisfieldwas.green/drafts/*
+Sitemap: https://thisfieldwas.green/sitemap.xml

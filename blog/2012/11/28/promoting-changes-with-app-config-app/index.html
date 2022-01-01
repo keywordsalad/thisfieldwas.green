@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>This Field Was Green - Promoting changes with App-Config-App</title>
+<link rel="canonical" href="https://thisfieldwas.green/blog/2012/11/28/promoting-changes-with-app-config-app">
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
+
+<meta property="og:site_name" content="">
+<meta property="og:title" content="Promoting changes with App-Config-App">
+<meta property="og:url" content="https://thisfieldwas.green/blog/2012/11/28/promoting-changes-with-app-config-app">
+<meta property="og:description" content="">
+<meta property="og:image:url" content="https://thisfieldwas.green/grass_og-image.png">
+
+<meta property="article:published_time" content="2012-11-28T13:04:00-06:00">
+  <meta property="article:modified_time" content="2012-11-28T13:04:00-06:00">
+  <meta property="article:author" content="Logan McGrath">
+  <meta property="article:tag" content="AngularJS">
+  <meta property="article:tag" content="Perforce">
+  <meta property="article:tag" content="Sinatra">
+  <meta property="article:tag" content="configuration management">
+  
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@thisgreenfield">
+<meta name="twitter:title" content="Promoting changes with App-Config-App">
+
+
+
+<link rel="stylesheet" href="/css/main.css">
+<script src="/js/main.js"></script>
+
+</head>
+<body class="post post-full">
+
+<header class="page-header">
+  <div class="content-bound">
+    <div class="logo-icon"><a href="/"></a></div>
+    <div class="logo-nav">
+      <h1 class="logo"><a href="/">This Field Was Green</a></h1>
+      <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog">Blog</a>
+  <a href="/resume">Resume</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+    </div>
+  </div>
+</header>
+
+<main class="page-content">
+  <div class="content-bound">
+    <header class="post-header">
+  <h1 class="post-title"><a href="/blog/2012/11/28/promoting-changes-with-app-config-app">Promoting changes with App-Config-App</a>
+  </h1>
+  <p class="post-published">Posted on November 28, 2012 by Logan McGrath
+  </p>
+    <p class="post-tags">
+      Tags: <a class="tag" href="/tags/angular-js">AngularJS</a>, <a class="tag" href="/tags/perforce">Perforce</a>, <a class="tag" href="/tags/sinatra">Sinatra</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>
+    </p>
+</header>
+<p>The App-Config-App now lets you promote changes between environments!</p>
+<!--more-->
+<h2 id="how-does-it-work">How does it work?</h2>
+<p>Perforce lets you create mappings to define the relationship between two diverging code branches. This allows for easy integration of changes between the two branches by referencing the name of the mapping.</p>
+<blockquote>
+<p>See <a href="http://www.perforce.com/perforce/doc.current/manuals/p4v/Managing_branch_specifications.html">Perforce’s documentation</a> for more details on the how and why of branch mappings.</p>
+</blockquote>
+<p>The App-Config-App reads these branch mappings in order to create paths for promotion between environments.</p>
+<h2 id="promoting-changes-with-app-config-app">Promoting changes with App-Config-App</h2>
+<p>The App-Config-App <code>setup_example.rb</code> creates four branches with the following mappings:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Mapping        Source    Destination</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>------------------------------------</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dev-qa         dev       qa</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>qa-staging     qa        staging</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>staging-prod   staging   prod</span></code></pre></div>
+<p>If you login to App-Config-App and go to “Promote Changes,” you get an interface showing these relationships:</p>
+<figure id="img-promote-changes-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config3/promote_changes.png" class="image-link">
+      <img src="/images/app-config3/promote_changes.png"
+        id="img-promote-changes"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>Changes between environments can be promoted in either direction along a mapping configuration. The receiving environment accepts all changes (developers would know this as an ‘accept-theirs’ resolution) and you are then allowed to review the changes by clicking on the “Pending Changes” link.</p>
+<p>For example, I’ve promoted changes from “qa” to “dev”:</p>
+<figure id="img-promote-result-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config3/promote_result.png" class="image-link">
+      <img src="/images/app-config3/promote_result.png"
+        id="img-promote-result"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>I can then review the changes by clicking on “Pending Changes”:</p>
+<figure id="img-pending-changes-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config3/pending_changes.png" class="image-link">
+      <img src="/images/app-config3/pending_changes.png"
+        id="img-pending-changes"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>Changes may be edited or reverted before committing them.</p>
+<h2 id="promoting-changes-using-p4v">Promoting changes using P4V</h2>
+<p><a href="http://www.perforce.com/product/components/perforce_visual_client">P4V</a> is the Perforce visual client. Using P4V, you have much greater control over how changes get promoted, but it requires a little more work.</p>
+<p>I’ve connected P4V to my App-Config-App user workspace to perform the same promotion from “qa” to “dev”:</p>
+<figure id="img-config-promotion-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config3/p4v.png" class="image-link">
+      <img src="/images/app-config3/p4v.png"
+        id="img-config-promotion"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>Select the “qa” folder, then from the menu bar go to “Actions” &gt; “Merge/Integrate”. This will bring up a wizard for performing the integration.</p>
+<p>Select the following:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="an">Merge method:</span><span class="co"> &quot;Use branch mapping&quot;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">Branch mapping:</span><span class="co"> &quot;dev-qa&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">Automatically resolve files after merging:</span><span class="co"> checked</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">Resolve option:</span><span class="co"> &quot;Accept source&quot;</span></span></code></pre></div>
+<p>And ensure the direction of integration is “Target” &lt; “Source”:</p>
+<figure id="img-config-integrate-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config3/p4v_integrate.png" class="image-link">
+      <img src="/images/app-config3/p4v_integrate.png"
+        id="img-config-integrate"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>Finally, click “Merge”. If you expand the “dev” folder, you can see the where the changes are:</p>
+<figure id="img-config-results-aside" class="image">
+  <p class="content">
+    <a href="/images/app-config3/p4v_integrate_result.png" class="image-link">
+      <img src="/images/app-config3/p4v_integrate_result.png"
+        id="img-config-results"
+        
+        >
+    </a>
+  </p>
+  
+</figure>
+<p>You are now free to modify the files further before finally committing the changes.</p>
+<h3 id="how-it-compares">How it compares</h3>
+<p>You get greater options when using P4V to promote changes, but producing the same result as App-Config-App’s default behavior is fairly involved. If you aren’t paying attention or don’t know what you’re doing, you might break something :(</p>
+<h2 id="todo"><span class="citation" data-cites="TODO">@TODO</span></h2>
+<h3 id="more-options-for-resolving-changes">More options for resolving changes</h3>
+<p>When you promote changes in App-Config-App, the source changes will overwrite the destination. This behavior reduces the chance for a conflict to happen, but it means you really have to pay attention to what’s changed in the destination config and possibly edit the config further before finally committing it.</p>
+<h3 id="conflict-resolution">Conflict resolution</h3>
+<p>If a conflict occurs after promoting changes, a screen should be available for viewing and editing the conflicting changes.</p>
+<h3 id="better-error-reporting-if-promotion-fails-due-to-permissions">Better error reporting if promotion fails due to permissions</h3>
+<p>Users with read-only access to multiple environments will still be able to promote changes between them. The promotion doesn’t actually occur (the files remain unchanged) but the application doesn’t report any errors when this happens.</p>
+
+  </div>
+</main>
+
+<footer class="page-footer">
+  <div class="content-bound">
+    <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog">Blog</a>
+  <a href="/resume">Resume</a>
+  <a href="/contact">Contact</a>
+</nav>
+
+    <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
+    <ul class="acks">
+      <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
+      <li>Logo icon made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
+    </ul>
+    <p class="generated">
+      This page was rendered from
+      <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/12906a8/site/_posts/2012-11-28-promoting-changes-with-app-config-app.md">2012-11-28-promoting-changes-with-app-config-app.md</a>
+      at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/12906a8">[12906a8] Trying to set up tags</a>.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
