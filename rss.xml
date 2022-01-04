@@ -1,1 +1,92 @@
-feed
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+  <title>This Field Was Green</title>
+  <description>I keep my field green by writing about tech and sometimes life.</description>
+  <link>https://thisfieldwas.green</link>
+  <atom:link href="https://thisfieldwas.green/rss.xml" rel="self" type="application/rss+xml" />
+  <image>
+    <url>https://thisfieldwas.green/images/grass-256x256.png</url>
+    <title>This Field Was Green</title>
+    <link>https://thisfieldwas.green</link>
+  </image>
+  <category>Technology</category>
+  <category>Software Engineering</category>
+  <language>en-US</language>
+  <managingEditor>logan.mcgrath@thisfieldwas.green (Logan McGrath)</managingEditor>
+  <webMaster>logan.mcgrath@thisfieldwas.green (Logan McGrath)</webMaster>
+  <pubDate>Sat, 11 Dec 2021 14:43:25 -0800</pubDate>
+  <lastBuildDate>Wed, 07 Nov 2012 13:54:00 -0600</lastBuildDate>
+  <generator>Hakyll</generator>
+  <copyright>Copyright &#169; 2012-2022 Logan McGrath. All rights reserved.</copyright>
+  <item>
+      <title>Reasons why my website is offline</title>
+      <description>My website comes out of the closet. This is from where I host several of my services, but the uptime is terrible!</description>
+      <dc:creator>Logan McGrath</dc:creator>
+      <link>https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline</link>
+      <guid>https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline</guid>
+      <pubDate>Sat, 11 Dec 2021 14:43:25 -0800</pubDate>
+      <category>self host</category>
+      <category>configuration management</category>
+      <category>tinfoil hat</category>
+      </item>
+  <item>
+      <title>Redoing my website with Haskell and Hakyll</title>
+      <description></description>
+      <dc:creator>Logan McGrath</dc:creator>
+      <link>https://thisfieldwas.green/blog/2021/12/05/redoing-my-website</link>
+      <guid>https://thisfieldwas.green/blog/2021/12/05/redoing-my-website</guid>
+      <pubDate>Sun, 05 Dec 2021 08:08:32 -0800</pubDate>
+      <category>hakyll</category>
+      <category>Haskell</category>
+      </item>
+  <item>
+      <title>Promoting changes with App-Config-App</title>
+      <description></description>
+      <dc:creator>Logan McGrath</dc:creator>
+      <link>https://thisfieldwas.green/blog/2012/11/28/promoting-changes-with-app-config-app</link>
+      <guid>https://thisfieldwas.green/blog/2012/11/28/promoting-changes-with-app-config-app</guid>
+      <pubDate>Wed, 28 Nov 2012 13:04:00 -0600</pubDate>
+      <category>AngularJS</category>
+      <category>Perforce</category>
+      <category>Sinatra</category>
+      <category>configuration management</category>
+      </item>
+  <item>
+      <title>App-Config-App in Action</title>
+      <description></description>
+      <dc:creator>Logan McGrath</dc:creator>
+      <link>https://thisfieldwas.green/blog/2012/11/20/app-config-app-in-action</link>
+      <guid>https://thisfieldwas.green/blog/2012/11/20/app-config-app-in-action</guid>
+      <pubDate>Tue, 20 Nov 2012 17:00:00 -0600</pubDate>
+      <category>AngularJS</category>
+      <category>Perforce</category>
+      <category>Sinatra</category>
+      <category>configuration management</category>
+      </item>
+  <item>
+      <title>SCM-Backed Application Configuration with Perforce</title>
+      <description></description>
+      <dc:creator>Logan McGrath</dc:creator>
+      <link>https://thisfieldwas.green/blog/2012/11/16/scm-backed-application-configuration-with-perforce</link>
+      <guid>https://thisfieldwas.green/blog/2012/11/16/scm-backed-application-configuration-with-perforce</guid>
+      <pubDate>Fri, 16 Nov 2012 17:00:00 -0600</pubDate>
+      <category>configuration management</category>
+      <category>Perforce</category>
+      <category>Sinatra</category>
+      <category>AngularJS</category>
+      </item>
+  <item>
+      <title>Using Perforce Chronicle for application configuration</title>
+      <description></description>
+      <dc:creator>Logan McGrath</dc:creator>
+      <link>https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration</link>
+      <guid>https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration</guid>
+      <pubDate>Wed, 07 Nov 2012 13:54:00 -0600</pubDate>
+      <category>Perforce</category>
+      <category>configuration management</category>
+      </item>
+  </channel>
+</rss>

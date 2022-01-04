@@ -54,7 +54,7 @@ dt {
   font-family: "Times New Roman", serif;
   font-style: italic;
   font-weight: bold;
-  font-size: 1.12em;
+  font-size: 1.125em;
   text-decoration: underline;
 }
 
@@ -116,14 +116,14 @@ a em {
   font-size: inherit;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, .h-style {
   margin: 1rem 0;
   color: darkgreen;
   font-family: "Times New Roman", serif;
   font-style: italic;
   line-height: 1.2;
 }
-h1 a, h1 em, h1 i, h1 strong, h1 b, h2 a, h2 em, h2 i, h2 strong, h2 b, h3 a, h3 em, h3 i, h3 strong, h3 b, h4 a, h4 em, h4 i, h4 strong, h4 b, h5 a, h5 em, h5 i, h5 strong, h5 b, h6 a, h6 em, h6 i, h6 strong, h6 b {
+h1 a, h1 em, h1 i, h1 strong, h1 b, h2 a, h2 em, h2 i, h2 strong, h2 b, h3 a, h3 em, h3 i, h3 strong, h3 b, h4 a, h4 em, h4 i, h4 strong, h4 b, h5 a, h5 em, h5 i, h5 strong, h5 b, h6 a, h6 em, h6 i, h6 strong, h6 b, .h-style a, .h-style em, .h-style i, .h-style strong, .h-style b {
   text-decoration: underline;
 }
 
@@ -132,28 +132,28 @@ section h1 {
   padding: 0.5em 0;
 }
 
-h1 {
-  font-size: 1.5790581481em;
+h1, .h1-size {
+  font-size: 1.6218292236em;
 }
 
-h2 {
-  font-size: 1.4098733466em;
+h2, .h2-size {
+  font-size: 1.4416259766em;
 }
 
-h3 {
-  font-size: 1.258815488em;
+h3, .h3-size {
+  font-size: 1.2814453125em;
 }
 
-h4 {
-  font-size: 1.1239424em;
+h4, .h4-size {
+  font-size: 1.1390625em;
 }
 
-h5 {
-  font-size: 1.00352em;
+h5, .h5-size {
+  font-size: 1.0125em;
 }
 
-h6 {
-  font-size: 0.896em;
+h6, .h6-size {
+  font-size: 0.9em;
 }
 
 * + h1, * + h2, * + h3, * + h4 {
@@ -335,7 +335,6 @@ a code, a code:not(.sourceCode) {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  line-height: 2;
 }
 .tag-cloud .tag {
   --norm: calc(
@@ -356,6 +355,29 @@ a code, a code:not(.sourceCode) {
 }
 .tag-cloud[data-show-count] .tag::after {
   content: " (" attr(data-count) ")";
+}
+
+.view-all-posts {
+  font-size: 150%;
+  font-variant: small-caps;
+}
+
+.latest-post-label {
+  color: #006900;
+  font-weight: bold;
+  font-family: "Times New Roman", serif;
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.read-more {
+  padding-left: 1.6em;
+  background-image: url("/images/grass.svg");
+  background-size: 1.2em 1.2em;
+  background-position: 0 0;
+  background-repeat: no-repeat;
 }
 
 .page-header {
