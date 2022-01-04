@@ -27,7 +27,7 @@ itemFilePath :: Item a -> FilePath
 itemFilePath = toFilePath . itemIdentifier
 
 data TemplateState a = TemplateState
-  { tplContextStack :: [Context a],
+  { tplContextStack :: [(Context a, Context a)],
     tplItemStack :: [Item a],
     tplCallStack :: [String]
   }
@@ -35,7 +35,10 @@ data TemplateState a = TemplateState
 type TemplateRunner a b = StateT (TemplateState a) Compiler b
 
 tplItem :: TemplateRunner a (Item a)
-tplItem = gets $ head . tplItemStack
+tplItem =
+  gets tplItemStack >>= \case
+    [] -> tplFail "tplItem: no Item on stack"
+    (item : _) -> return item
 
 tplModifyItem :: (Item a -> TemplateRunner a (Item a)) -> TemplateRunner a ()
 tplModifyItem f =
@@ -45,19 +48,16 @@ tplModifyItem f =
 
 tplReplaceItem :: Item a -> TemplateRunner a ()
 tplReplaceItem item = do
-  stack <-
-    gets tplItemStack <&> \case
-      [] -> [item]
-      _ : rest -> item : rest
-  modify \s -> s {tplItemStack = stack}
+  void tplPopItem
+  tplPushItem item
 
 tplPopItem :: TemplateRunner a (Item a)
 tplPopItem =
   gets tplItemStack >>= \case
-    [] -> error "tplPopItem: empty stack"
-    x : xs -> do
-      modify \s -> s {tplItemStack = xs}
-      return x
+    [] -> error "tplPopItem: no Item on stack"
+    current : previous -> do
+      modify \s -> s {tplItemStack = previous}
+      return current
 
 tplPopBody :: TemplateRunner a a
 tplPopBody = itemBody <$> tplPopItem
@@ -67,51 +67,65 @@ tplPushItem item = do
   stack <- gets tplItemStack
   modify \s -> s {tplItemStack = item : stack}
 
-tplContext :: TemplateRunner a (Context a)
-tplContext = gets $ head . tplContextStack
-
-tplPushContext :: Context a -> TemplateRunner a ()
-tplPushContext context =
-  modify \s -> s {tplContextStack = context : tplContextStack s}
-
 tplWithItem :: Item a -> TemplateRunner a b -> TemplateRunner a b
 tplWithItem item f = do
-  stack <- gets tplItemStack
-  modify' \s -> s {tplItemStack = item : stack}
+  tplPushItem item
   x <- f
-  modify' \s -> s {tplItemStack = stack}
+  void tplPopItem
   return x
+
+tplContext :: TemplateRunner a (Context a)
+tplContext =
+  gets tplContextStack >>= \case
+    [] -> tplFail "tplContext: no Context on stack"
+    ((_, catted) : _) -> return catted
+
+tplPushContext :: Context a -> TemplateRunner a ()
+tplPushContext context = do
+  stack <-
+    gets tplContextStack <&> \case
+      [] -> [(context, context)]
+      stack@((_, cattedParent) : _) -> (context, context <> cattedParent) : stack
+  modify \s -> s {tplContextStack = stack}
+
+tplPopContext :: TemplateRunner a (Context a)
+tplPopContext =
+  gets tplContextStack >>= \case
+    [] -> tplFail "tplPopContext: no Context on stack"
+    ((current, _) : previous) -> do
+      modify \s ->
+        s
+          { tplContextStack = previous
+          }
+      return current
 
 -- | Place context within a given scope.
 tplWithContext :: Context a -> TemplateRunner a b -> TemplateRunner a b
-tplWithContext context f =
-  gets tplContextStack >>= \stack -> do
-    let head' = case stack of
-          (next : _) -> context <> next
-          [] -> context
-    -- temporarily push the new context onto the stack
-    modify' \s -> s {tplContextStack = head' : stack}
-    x <- f
-    -- pop the new context off the stack
-    modify' \s -> s {tplContextStack = stack}
-    return x
+tplWithContext context f = do
+  tplPushContext context
+  x <- f
+  void tplPopContext
+  return x
 
+-- | Get a value from the context by name and convert it.
 tplGet :: (FromValue v a) => String -> TemplateRunner a v
-tplGet k =
+tplGet name =
   tplContext
-    >>= flip unContext k
+    >>= flip unContext name
     >>= fromValue
+
+-- | Get a value from a specific item's context by name and convert it.
+tplGetWithItemContext :: (FromValue v a) => Item a -> Context a -> String -> TemplateRunner a v
+tplGetWithItemContext item context name =
+  tplWithItem item $ tplWithContext context $ tplGet name
 
 -- | Place context in global scope.
 tplPut :: Context a -> TemplateRunner a ()
 tplPut context = do
-  contextStack <- gets tplContextStack
-  let init' = init contextStack
-      last' = last contextStack
-  -- prepend the new context to the root context
-  modify' \s -> s {tplContextStack = init' <> [context <> last']}
-  return ()
+  stack <- fmap (second (context <>)) <$> gets tplContextStack
+  modify' \s -> s {tplContextStack = stack}
 
+-- | Perform an action within the scope of a call.
 tplWithCall :: String -> TemplateRunner a b -> TemplateRunner a b
 tplWithCall call f = do
   stack <- gets tplCallStack
@@ -120,20 +134,25 @@ tplWithCall call f = do
   modify' \s -> s {tplCallStack = stack}
   return x
 
+-- | Perform an action within the scope of a field call.
 tplWithField :: String -> TemplateRunner a b -> TemplateRunner a b
 tplWithField field' f = do
   file <- itemFilePath <$> tplItem
-  tplWithCall (show field' ++ " in " ++ file) f
+  tplWithCall ("field " ++ show field' ++ " in " ++ file) f
 
+-- | Fail with an error message and trace.
 tplFail :: String -> TemplateRunner a b
-tplFail message = fail =<< tplTraced message
+tplFail = fail <=< tplTraced
 
+-- | Fail with a no-result message and trace.
 tplTried :: String -> TemplateRunner a b
-tplTried = lift . noResult
+tplTried = lift . noResult <=< tplTraced
 
+-- | Return the current call stack, with the most recent call first.
 tplTrace :: TemplateRunner a [String]
 tplTrace = gets tplCallStack
 
+-- | Get a formatted trace message with the most recent call first.
 tplTraced :: String -> TemplateRunner a String
 tplTraced message = do
   trace <- tplTrace
@@ -143,17 +162,20 @@ tplTraced message = do
 field :: (IntoValue v a) => String -> (Item a -> TemplateRunner a v) -> Context a
 field key f = Context f'
   where
-    f' k
-      | k == key = tplWithField k do
-        i <- tplItem
-        intoValue <$> f i
-      | otherwise = lift . noResult $ "tried " ++ show key
+    f' k =
+      tplWithField key $
+        if k == key
+          then do
+            i <- tplItem
+            intoValue <$> f i
+          else do
+            tplTried $ "key " ++ show k ++ " did not match field " ++ show key
 
 -- | Reports missing field.
 missingField :: Context a
 missingField = Context f
   where
-    f key = lift . noResult $ "missing " ++ show key
+    f key = tplTried $ "missing " ++ show key
 
 -- | Const-valued field, returns the same @val@ per @key@.
 constField :: (IntoValue v a) => String -> v -> Context a
@@ -161,6 +183,10 @@ constField key val = field key f
   where
     constResult = return val
     f _ = tplWithCall key constResult
+
+-- | Creates a field containing a list of items.
+itemsField :: String -> Context a -> [Item a] -> Context a
+itemsField key context items = constField key $ itemListValue context items
 
 -- | Mapping of function @g@ after context @f@.
 mapField :: (FromValue v a, IntoValue w a) => (v -> w) -> Context a -> Context a
@@ -189,7 +215,7 @@ hashMapField m = Context f
   where
     m' = intoValue <$> m
     f k = tplWithCall "hashMap" $ maybe (tried k) return (HashMap.lookup k m')
-    tried k = lift . noResult $ "tried " ++ show k ++ " from hashmap of keys " ++ show (HashMap.keys m')
+    tried k = tplTried $ "tried " ++ show k ++ " from hashmap of keys " ++ show (HashMap.keys m')
 
 forItemField :: (IntoValue v a) => String -> [Identifier] -> (Item a -> TemplateRunner a v) -> Context a
 forItemField key ids f = field key f'
@@ -234,6 +260,7 @@ instance IntoContext Object a where
       ic :: [(String, ContextValue a)] -> Context a
       ic = intoContext
 
+-- | ContextValues can hold certain types of data within a context.
 data ContextValue a
   = EmptyValue
   | UndefinedValue String (Item a) [String] [String]

@@ -155,7 +155,7 @@ Hosting my website and source code myself feels very empowering. I feel as if I 
 
 {{img id: "closet-computer-in-context",
       title: "Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.",
-      src: "/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024.png"}}
+      src: "/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png"}}
 
 I severely took for granted the uptime that a third party service could give me. It’s making me rethink what the total cost of what third party hosting actually looks like, not only in terms of dollars and nebulous ideals, but more importantly in terms of peace of mind. Terms such as _will the promotion committee be able to see that writeup I referred them to?_ I would absolutely benefit from hosting my website from my _bastion server_ instead, but perhaps after I reread `linode`'s service agreements to allay my confounding mind.
 

@@ -5,6 +5,10 @@
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{{#if noindex-}}
+<meta name="robots" content="noindex">
+<meta name="googlebot" content="noindex">
+{{#end-}}
 <title>{{siteTitle}}{{#if title}} - {{title}}{{#end}}</title>
 <link rel="canonical" href="{{absUrl}}">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="{{siteRoot}}/favicon.ico">

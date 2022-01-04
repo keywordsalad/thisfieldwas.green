@@ -13,7 +13,7 @@ homePage siteContext =
       recentPosts <- fmap (take 5) $ recentFirst =<< loadPublishedPosts
       getResourceBody >>= applyTemplates do
         applyContext $
-          constField "recentPosts" (itemListValue siteContext recentPosts)
+          itemsField "recentPosts" siteContext recentPosts
             <> teaserField "teaser" publishedPostsSnapshot
             <> siteContext
         applyContent

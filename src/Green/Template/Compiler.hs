@@ -85,12 +85,17 @@ applyAltBlock guard' bs alts mdef =
 eval :: Expression -> TemplateRunner a (ContextValue a)
 eval = \case
   NameExpression name pos -> do
-    (context, item, trace) <- liftA3 (,,) tplContext tplItem tplTrace
+    (context, item, trace) <-
+      liftA3 (,,) tplContext tplItem tplTrace `catchError` \e -> do
+        tplFail $ "Caught error in template: " ++ show e ++ " near " ++ show pos
     s <- get
-    lift $
-      evalStateT (unContext context name) s `compilerCatch` \case
-        CompilationFailure ne -> compilerThrow (NonEmpty.toList ne)
-        CompilationNoResult ss -> return $ UndefinedValue name item (show pos : trace) ss
+    (x, s') <-
+      lift $
+        runStateT (unContext context name) s `compilerCatch` \case
+          CompilationFailure ne -> compilerThrow (NonEmpty.toList ne)
+          CompilationNoResult ss -> return (UndefinedValue name item (show pos : trace) ss, s) -- TODO figure out how to get state changes to persist if value comes back empty
+    put s'
+    return x
   StringExpression s _ -> return $ intoValue s
   IntExpression n _ -> return $ intoValue n
   DoubleExpression x _ -> return $ intoValue x
@@ -106,10 +111,9 @@ eval = \case
         s <- get
         (x, s') <-
           lift $
-            compilerTry (runStateT (unContext target' name) s) >>= \case
-              Left (CompilationFailure errors) -> compilerThrow (NonEmpty.toList errors)
-              Left (CompilationNoResult _) -> return (EmptyValue, s) -- TODO figure out how to get state changes to persist if value comes back empty
-              Right xs -> return xs
+            runStateT (unContext target' name) s `compilerCatch` \case
+              CompilationFailure errors -> compilerThrow (NonEmpty.toList errors)
+              CompilationNoResult _ -> return (EmptyValue, s) -- TODO figure out how to get state changes to persist if value comes back empty
         put s'
         return x
       EmptyValue -> return EmptyValue

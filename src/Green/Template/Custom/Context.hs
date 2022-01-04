@@ -41,6 +41,7 @@ customContext config = self
           defaultFields,
           constField "currentTime" currentTime,
           constField "siteTitle" (info ^. siteTitle),
+          constField "siteDescription" (info ^. siteDescription),
           constField "siteRoot" (info ^. siteRoot),
           constField "authorEmail" (info ^. siteAuthorEmail),
           constField "authorName" (info ^. siteAuthorName),
@@ -50,7 +51,8 @@ customContext config = self
           constField "twitterHandle" (info ^. siteTwitterHandle),
           constField "githubProfile" (info ^. siteGitHubProfile),
           constField "giteaProfile" (info ^. siteGiteaProfile),
-          constField "useSocial" True
+          constField "useSocial" True,
+          constField "article" False
         ]
     currentTime =
       formatTime

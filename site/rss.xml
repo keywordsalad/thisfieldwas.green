@@ -1,0 +1,44 @@
+---
+changefreq: weekly
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+  <title>{{siteTitle | escapeHtml}}</title>
+  <description>{{siteDescription | escapeHtml}}</description>
+  <link>{{siteRoot}}</link>
+  <atom:link href="{{absUrl | escapeHtmlUri}}" rel="self" type="application/rss+xml" />
+  <image>
+    <url>{{siteRoot}}/images/grass-256x256.png</url>
+    <title>{{siteTitle}}</title>
+    <link>{{siteRoot}}</link>
+  </image>
+  <category>Technology</category>
+  <category>Software Engineering</category>
+  <language>en-US</language>
+  <managingEditor>{{authorEmail | escapeHtml}} ({{authorName | escapeHtml}})</managingEditor>
+  <webMaster>{{authorEmail | escapeHtml}} ({{authorName | escapeHtml}})</webMaster>
+  <pubDate>{{lastPublished | dateAs rfc822}}</pubDate>
+  <lastBuildDate>{{lastUpdated | dateAs rfc822}}</lastBuildDate>
+  <generator>Hakyll</generator>
+  <copyright>Copyright &#169; 2012-{{currentTime | dateAs '%Y'}} Logan McGrath. All rights reserved.</copyright>
+  {{#for posts-}}
+    <item>
+      <title>{{title | escapeHtml}}</title>
+      <description>{{description | escapeHtml}}</description>
+      <dc:creator>{{author | escapeHtml}}</dc:creator>
+      <link>{{absUrl | escapeHtml}}</link>
+      <guid>{{absUrl | escapeHtml}}</guid>
+      <pubDate>{{published | dateAs rfc822}}</pubDate>
+      {{#for categoryList-}}
+      <category>{{item | escapeHtml}}</category>
+      {{#end-}}
+      {{#for tagList-}}
+      <category>{{item | escapeHtml}}</category>
+      {{#end-}}
+    </item>
+  {{#end-}}
+</channel>
+</rss>

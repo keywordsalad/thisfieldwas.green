@@ -1,6 +1,7 @@
 default: &default
   site-info: &default-site-info
     title: This Field Was Green
+    description: I keep my field green by writing about tech and sometimes life.
     root: http://localhost:8000
     author-name: Logan McGrath
     author-email: logan.mcgrath@thisfieldwas.green

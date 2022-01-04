@@ -1,0 +1,22 @@
+.view-all-posts {
+  font-size: 150%;
+  font-variant: small-caps;
+}
+
+.latest-post-label {
+  color: $text-color-dark;
+  font-weight: bold;
+  font-family: $font-family-serif;
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.read-more {
+  padding-left: 1.6em;
+  background-image: url("/images/grass.svg");
+  background-size: 1.2em 1.2em;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+}

@@ -1,13 +1,18 @@
 module Green.Site.Images where
 
 import Green.Common
-import Hakyll ((.||.))
+import Hakyll
 
 images :: Rules ()
 images =
-  match ("images/**/*.png" .||. "images/**/*.jpg" .||. "images/**/*.gif") do
+  match ("images/**" .&&. blacklist) do
     route idRoute
     compile copyFileCompiler
+  where
+    blacklist =
+      foldl1 (.||.) . fmap complement $
+        [ "*.xcf"
+        ]
 
 -- images :: SiteConfig -> Rules ()
 -- images config = do

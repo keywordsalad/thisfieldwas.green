@@ -11,7 +11,7 @@
         <lastmod>{{
             updated
                 | default date
-                | default currentDate
+                | default currentTime
                 | dateAs robotTime
             }}</lastmod>
         <changefreq>{{changefreq | default "monthly"}}</changefreq>

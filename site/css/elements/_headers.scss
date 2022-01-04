@@ -1,6 +1,6 @@
 @import "containers";
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, .h-style {
   @include block;
   color: $header-color;
   font-family: $header-font-family;
@@ -24,22 +24,22 @@ section h1 {
   @return $factor;
 }
 
-h1 {
+h1, .h1-size {
   font-size: header-size-factor(6) * 1em;
 }
-h2 {
+h2, .h2-size {
   font-size: header-size-factor(5) * 1em;
 }
-h3 {
+h3, .h3-size {
   font-size: header-size-factor(4) * 1em;
 }
-h4 {
+h4, .h4-size {
   font-size: header-size-factor(3) * 1em;
 }
-h5 {
+h5, .h5-size {
   font-size: header-size-factor(2) * 1em;
 }
-h6 {
+h6, .h6-size {
   font-size: header-size-factor(1) * 1em;
 }
 

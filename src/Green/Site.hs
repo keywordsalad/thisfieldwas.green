@@ -29,6 +29,6 @@ site config = do
     pages context
     blog context
     code
-    feed
+    feed config context
     sitemap context
     robotsTxt context

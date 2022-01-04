@@ -1,4 +1,4 @@
-module Green.Template.Custom.DateField (dateFields) where
+module Green.Template.Custom.DateField (dateFields, getLastModifiedDate, normalizedTime, normalizedFormat) where
 
 import Data.List (tails)
 import Data.String.Utils
@@ -17,6 +17,7 @@ dateFields config =
       constField "shortDate" (displayFormat ^. displayDateShortFormat),
       constField "timeOnly" (displayFormat ^. displayTimeFormat),
       constField "robotTime" (displayFormat ^. displayRobotTime),
+      constField "rfc822" rfc822DateFormat,
       dateFormatField "dateAs" timeLocale
     ]
   where
@@ -50,6 +51,13 @@ updatedField :: String -> TimeLocale -> Context a
 updatedField key timeLocale = field key f
   where
     f = tplWithCall key . lift . dateFromMetadata timeLocale ["updated"]
+
+getLastModifiedDate :: TimeLocale -> Item a -> Compiler ZonedTime
+getLastModifiedDate timeLocale item = do
+  dateString <-
+    dateFromMetadata timeLocale ["updated", "published", "date"] item
+      <|> dateFromFilePath timeLocale item
+  parseTimeM' timeLocale "%Y-%m-%dT%H:%M:%S%Ez" dateString
 
 dateFromMetadata :: TimeLocale -> [String] -> Item a -> Compiler String
 dateFromMetadata timeLocale sourceKeys item =
@@ -92,16 +100,20 @@ normalizedTime :: TimeLocale -> ZonedTime -> String
 normalizedTime = flip formatTime normalizedFormat
 
 normalizedFormat :: String
-normalizedFormat = "%Y-%m-%dT%H:%M:%S%EZ"
+normalizedFormat = "%Y-%m-%dT%H:%M:%S%Ez"
+
+rfc822DateFormat :: String
+rfc822DateFormat = "%a, %d %b %Y %H:%M:%S %Z"
 
 metadataDateFormats :: [String]
 metadataDateFormats =
   [ "%Y-%m-%d",
     normalizedFormat,
     "%Y-%m-%dT%H:%M:%S",
-    "%Y-%m-%d %H:%M:%S%EZ",
+    "%Y-%m-%d %H:%M:%S %EZ",
+    "%Y-%m-%d %H:%M:%S%Ez",
     "%Y-%m-%d %H:%M:%S",
-    "%a, %d %b %Y %H:%M:%S %EZ",
+    rfc822DateFormat,
     "%a, %d %b %Y %H:%M:%S",
     "%B %e, %Y %l:%M %p %EZ",
     "%B %e, %Y %l:%M %p",

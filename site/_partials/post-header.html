@@ -1,8 +1,8 @@
 <header class="post-header">
   <{{headerLevel}} class="post-title">
-    {{-#if latestPost}}Latest Post: {{#end-}}
     <a href="{{url}}">{{title}}</a>
   </{{headerLevel}}>
+  {{-#if indicateLatest}}<p class="latest-post-label">Latest Post!</p>{{#end-}}
   <p class="post-published">
     {{-#if published-}}
       Posted on {{published | dateAs shortDate}}

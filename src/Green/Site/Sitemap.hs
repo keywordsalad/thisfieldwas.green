@@ -24,15 +24,17 @@ sitemapContext siteContext = do
   blogPage <- H.load "blog.html" :: Compiler (Item String)
   posts <- H.recentFirst =<< loadPublishedPosts
   pages <- H.loadAll pagesPattern :: Compiler [Item String]
+  feeds <- H.loadAll ("rss.xml" .||. "atom.xml") :: Compiler [Item String]
   let allPages =
         pages
           <> [blogPage]
+          <> feeds
           <> categoriesPages
           <> tagsPages
           <> posts
       context =
         constField "updated" (latestPostUpdated posts)
-          <> constField "pages" (itemListValue context allPages)
+          <> itemsField "pages" context allPages
           <> siteContext
   return context
   where

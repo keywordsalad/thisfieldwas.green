@@ -132,18 +132,6 @@ data SiteConfig = SiteConfig
 
 makeLenses ''SiteConfig
 
-siteFeedConfiguration :: SimpleGetter SiteConfig FeedConfiguration
-siteFeedConfiguration = to f
-  where
-    f siteConfig =
-      FeedConfiguration
-        { feedTitle = siteConfig ^. siteInfo . siteTitle,
-          feedRoot = siteConfig ^. siteInfo . siteRoot,
-          feedAuthorName = siteConfig ^. siteInfo . siteAuthorName,
-          feedAuthorEmail = siteConfig ^. siteInfo . siteAuthorEmail,
-          feedDescription = siteConfig ^. siteInfo . siteDescription
-        }
-
 siteDestinationDirectory :: Lens' SiteConfig FilePath
 siteDestinationDirectory = siteHakyllConfiguration . destinationDirectoryL
 

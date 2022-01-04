@@ -28,8 +28,7 @@ _verify-prerequisites () {
   _help-line "Compile the site generator and generate the site"
   stack build
   stack exec site build
-  ⚡favicon
-  ⚡default_og_image
+  ⚡favicons
 }
 
 ⚡clean () {
@@ -142,31 +141,23 @@ _verify-prerequisites () {
   echo "Copied to clipboard: $DATE"
 }
 
-⚡favicon () {
-  _help-line "Generate favicon from grass.svg"
+⚡favicons () {
+  _help-line "Generate favicon and og:image from grass.svg"
   src_file="$(pwd)/site/images/grass.svg"
-  out_file="$(pwd)/_site/favicon.ico"
+  out_dir="$(pwd)/_site/images"
+  mkdir -p "$out_dir"
 
-  mkdir -p _cache/favicon_tmp
-  pushd _cache/favicon_tmp
-
-  sizes=(16 32 48 64 96 128 256)
+  sizes=(16 32 48 64 96 128 256 512 1024)
+  out_files=()
   for x in ${sizes[@]}; do
-    inkscape -w $x -h $x -b "aliceblue" -o $x.png "$src_file"
+    out_file="$out_dir/grass-${x}x${x}.png"
+    out_files+=("$out_file")
+    inkscape -w $x -h $x -b "aliceblue" -o "$out_file" "$src_file"
+    identify "$out_file"
   done
 
-  files=("${sizes[@]/%/.png}")
-  convert "${files[@]}" "$out_file"
-  identify "$out_file"
-  popd
-}
-
-⚡default_og_image () {
-  _help-line "Generate og:image for open graph"
-  src_file="$(pwd)/site/images/grass.svg"
-  out_file="$(pwd)/_site/grass_og-image.png"
-  inkscape -w 1024 -h 1024 -b "aliceblue" -o "$out_file" "$src_file"
-  identify "$out_file"
+  convert "${out_files[@]}" "$(pwd)/_site/favicon.ico"
+  identify "$(pwd)/_site/favicon.ico"
 }
 
 source ⚡

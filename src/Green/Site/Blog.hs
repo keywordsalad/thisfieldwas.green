@@ -54,7 +54,7 @@ archives context = do
       publishedPosts <- H.recentFirst =<< loadPublishedPosts
       getResourceBody >>= applyTemplates do
         applyContext $
-          constField "posts" (itemListValue (postContext <> context) publishedPosts)
+          itemsField "posts" postContext publishedPosts
             <> context
         applyContent
         applyLayout
@@ -67,7 +67,8 @@ draftsIndex context = do
       draftPosts <- H.recentFirst =<< loadDraftPosts
       getResourceBody >>= applyTemplates do
         applyContext $
-          constField "posts" (itemListValue (postContext <> context) draftPosts)
+          itemsField "posts" postContext draftPosts
+            <> constField "noindex" True
             <> context
         applyContent
         applyLayout
@@ -96,7 +97,10 @@ drafts context = do
     route draftsRoute
     compile $
       getResourceBody >>= applyTemplates do
-        applyContext $ postContext <> context
+        applyContext $
+          postContext
+            <> constField "noindex" True
+            <> context
         applyContent
         saveSnapshots [draftPostsSnapshot]
         applyLayout
@@ -118,7 +122,7 @@ categoriesPages categories context =
         applyContext $
           constField "category" category
             <> constField "title" ("Posts under \"" ++ category ++ "\"")
-            <> constField "posts" (itemListValue (postContext <> context) categoryPosts)
+            <> itemsField "posts" postContext categoryPosts
             <> constField "layout" ("page" :: String)
             <> context
         applyTemplate "_templates/posts-under-category.html"
@@ -135,7 +139,7 @@ tagsPages tags context =
         applyContext $
           constField "tag" tag
             <> constField "title" ("Posts tagged \"" ++ tag ++ "\"")
-            <> constField "posts" (itemListValue (postContext <> context) tagPosts)
+            <> itemsField "posts" postContext tagPosts
             <> constField "layout" ("page" :: String)
             <> context
         applyTemplate "_templates/posts-under-tag.html"
@@ -147,7 +151,7 @@ postContext =
   categoryLinksField "categoryLinks"
     <> tagLinksField "tagLinks"
     <> tagListField "tagList"
-    <> tagListField "categoryList"
+    <> categoryListField "categoryList"
     <> constField "article" True
 
 recentPostsContext :: Compiler (Context String)
@@ -156,8 +160,8 @@ recentPostsContext = do
   let latestPost = take 1 recentPosts
       previousPosts = drop 1 recentPosts
   return $
-    constField "latestPost" (itemListValue teaserContext latestPost)
-      <> constField "previousPosts" (itemListValue teaserContext previousPosts)
+    itemsField "latestPost" teaserContext latestPost
+      <> itemsField "previousPosts" teaserContext previousPosts
 
 teaserContext :: Context String
 teaserContext = teaserField "teaser" publishedPostsSnapshot
@@ -181,3 +185,6 @@ dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))
 
 tagListField :: String -> Context String
 tagListField key = field key $ lift . getTags . itemIdentifier
+
+categoryListField :: String -> Context String
+categoryListField key = field key $ lift . getCategory . itemIdentifier
