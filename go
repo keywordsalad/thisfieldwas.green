@@ -100,7 +100,6 @@ _verify-prerequisites () {
 
   git tag -a "$tag" -m "Build on $(date) generated from $sha"
   git push origin "$tag"
-  popd
 
   rsync -ahp * closet.oflogan.xyz:/usr/share/nginx/thisfieldwas.green/
   popd
