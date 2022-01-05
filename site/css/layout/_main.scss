@@ -3,4 +3,8 @@
 .page-content {
   @include layout-section;
   padding-bottom: 1.2em;
+
+  h1, .hard-section {
+    text-decoration: underline;
+  }
 }

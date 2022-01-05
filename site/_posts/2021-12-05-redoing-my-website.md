@@ -36,21 +36,21 @@ Briefly, let me introduce `hakyll` as I understand it: `hakyll` is a `jekyll`-in
 
 Naturally the primary value proposition of `hakyll` for me is the opportunity to use Haskell for a project that isn't entirely trivial. An _enjoyable_ and _good_ yak shave, if you will!
 
-### Shaving a yak for `hakyll`
+### How to shave a yak for `hakyll`
 
-If I want a sweater that's made using a nice wool, specific stitch, and particular fit, then I'm probably going to knit the sweater myself. The sweater may require that I learn about or perform any number of new things. Like how to shave a yak for wool so that I can spin the nice yarn I need to knit the sweater how I would like. I like to call this manual resolution of recursive dependencies a _yak shave_.
+If I want a sweater that's made using a nice wool, specific stitch, and tailored to a particular fit and style, then I'm probably going to knit the sweater myself. The sweater may require that I learn about or perform any number of new things. Like how to shave a yak for wool so that I can spin the nice wool for the yarn that I will need to knit the sweater how I would like. I like to call this manual resolution of recursive dependencies a _yak shave_ when they require me to create primitive components myself.
 
-Obviously I could purchase wool yarn. But what if I _want_ to be shaving a yak?
+Obviously I could purchase wool yarn. Perhaps instead, in addition to knitting a sweater I hope to learn how to shave a yak in the process. I believe the experinece would be valuable, and I would have a sweater made to my own specifications by my own hands.
 
-I would like to call attention to a related and well-known cognitive bias known as the [IKEA Effect](https://en.wikipedia.org/wiki/IKEA_effect). Per its name, this bias manifests in consumers of flat pack furniture: when an item of furniture has been _successfully_ assembled, a consumer will value it artificially higher than a piece of furniture of similar quality that could have been purchased already assembled.
+I would like to call attention to a related and well-known cognitive bias known as the [IKEA Effect](https://en.wikipedia.org/wiki/IKEA_effect). Per its name, this bias manifests in consumers of flat pack furniture: consumers will place an artificially higher value on furniture requiring manual assembly than on furniture of similar materials and build quality that is already assembled. Consumers thus will not only spend more money on flat pack furniture, they will also feel personally accomplished when they have _successfully_ assembled it.
 
-A _good_ yak shave is related to the IKEA Effect in that the work required to create the outputs is itself an output: learning being the largest work item. I have shaved many yaks, as, unlike assembling IKEA furniture, I enjoy shaving yaks. I cherish my yaks, especially the hairier ones, and I pain to part with them.
+Key requirements for a _good yak shave_ are _learning_ and _value not realized elsewhere_. Inflated value therefore may be objective in the case of a _yak shave_, in contrast with the IKEA Effect. I personally have shaved many yaks, as unlike assembling IKEA furniture, I enjoy shaving yaks. I especially cherish my hairier yaks and hold on to them as tokens of accomplishment.
 
-While my use of _yak shave_ above may imply that I greatly enjoy over-engineering solutions, this is not the case. There is another side to the yak shave, and that is a manual resolution of recursive dependencies when there really should just be a single dependency. Thus I apply the phrase _this is turning into a yak shave_ when I have found myself shaving a yak when I would have much rather bought a sweater. This phrase gets some use around the office particularly, and as yaks are reputed to be high maintenance beasts, sweaters are promptly substituted as I find them.
+My use of _yak shave_ above may imply that I delight in over-building solutions, but I assure that this is not the case. There also exists the inverse of the _good yak shave_, and for that I employ the phrase _this is turning into a yak shave_ when I have found myself shaving a yak when what I really wanted was to buy a sweater. This phrase gets some use with tech that should "just work", like _desktop Linux&trade;_, and I get particularly good mileage out of it at the office. Naturally, as yaks are big hairy beasts predisposed to high maintenance, sweaters are promptly substituted as I find them.
 
-As a rule: _Never shave a yak when the sweater is flatly the better, available option._ The same could be said of yaks as I could have reworked my website in something like [COBOL ON COGS](http://www.coboloncogs.org/INDEX.HTM).
+As a rule: _I never shave a yak when the sweater is flatly the better, available option_. The same could be said of yaks themselves as I could be reworking my website with something like [COBOL ON COGS](http://www.coboloncogs.org/INDEX.HTM) rather than `hakyll`. What looks like a good _yak shave_ also risks simply becoming an endless shave with each stroke of the buzzers revealing yet another yak buried beneath the wool. There's no shame in going back for a sweater instead, though. Yaks are big, hairy beasts after all.
 
-A good yak shave gives me something abstract and something concrete. I love to learn a new skill or technology and have a usable artifact to show for it, especially when the ongoing shave to maintain it isn't too much overhead. I hope with `hakyll` that Haskell will force me to learn some new programming tricks and techniques. I also don't know what to expect in terms of modern frontend tech. I don't know how much yak I will need to shave for my website, but not knowing is half the fun!
+A _good yak shave_ gives me something abstract and something concrete. I love to learn a new skill or technology and have a usable artifact to show for it, especially when the ongoing shave to maintain it isn't too much overhead. I hope with `hakyll` that using Haskell will force me to learn some new programming techniques and tricks, and that I will relearn how to work with the simpler side of modern frontend web development. I don't know yet how much yak this will require me to shave, but not knowing is half the fun!
 
 ## How `hakyll` accomplishes what I need
 
@@ -79,6 +79,10 @@ Compilers are cool, they're where all the magic happens! Through compilers I use
 I sense that compilers are `hakyll`'s primary extension point, as I lean on these heavily and develop opinions as I spend time with them.
 
 `hakyll` very smartly tracks dependencies between each compiled artifact and, like a good modern software, only compiles artifacts when it detects changes. For example, this allows for precompiling templates early in the build pipeline and allowing multiple dependents downstream use the same built artifact.
+
+### Just touching lightly
+
+I won't be performing a deep dive into how `hakyll` works in this post or providing a tutorial, though I will expand on my experience later. The remainder of my post stands as a postmortem and summary of my experience transitioning to using `hakyll` as my site generator.
 
 ## So what happened?
 

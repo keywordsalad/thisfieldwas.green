@@ -6,43 +6,45 @@
   padding-bottom: 0.5rem;
   border-top: $border-regular;
   border-bottom: $border-ginormous;
-  line-height: 1.2;
-
+  font-size: $text-font-size-tiny;
   $margin: 0.3rem 0;
 
   .main-nav {
     margin: $margin;
+
+    a {
+      text-decoration: none;
+    }
   }
 
   .copyright {
     font-size: $text-font-size-tiny;
+    color: $text-color-light;
     margin: $margin;
-    margin-bottom: 0.6rem;
   }
 
   .acks {
     font-size: $text-font-size-miniscule;
     color: $text-color-light;
     margin: $margin;
-    padding-left: 1em;
+    padding: 0;
+    list-style: none;
 
     li {
-      margin: 0;
+      padding-left: 1.2em;
+      background-image: url("/images/grass.svg");
+      background-size: 1em 1em;
+      background-repeat: no-repeat;
+      background-position: 0 0.05em;
     }
 
-    @include media(">=tablet") {
-      & {
-        display: flex;
-        list-style: none;
-        padding: 0;
-      }
+    @include media('>=tablet') {
       li {
-        padding-right: 0.3rem;
+        display: inline-block;
       }
+
       li + li {
-        border-left: $border-thin;
-        border-color: $text-color-light;
-        padding-left: 0.3rem;
+        margin-left: 0.4em;
       }
     }
   }
