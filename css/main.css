@@ -54,7 +54,7 @@ dt {
   font-family: "Times New Roman", serif;
   font-style: italic;
   font-weight: bold;
-  font-size: 1.125em;
+  font-size: 1.14em;
   text-decoration: underline;
 }
 
@@ -132,32 +132,32 @@ section h1 {
   padding: 0.5em 0;
 }
 
-h1, .h1-size {
-  font-size: 1.6218292236em;
+h1 {
+  font-size: 1.7559780991em;
 }
 
-h2, .h2-size {
-  font-size: 1.4416259766em;
+h2 {
+  font-size: 1.5403316659em;
 }
 
-h3, .h3-size {
-  font-size: 1.2814453125em;
+h3 {
+  font-size: 1.351168128em;
 }
 
-h4, .h4-size {
-  font-size: 1.1390625em;
+h4 {
+  font-size: 1.1852352em;
 }
 
-h5, .h5-size {
-  font-size: 1.0125em;
+h5 {
+  font-size: 1.03968em;
 }
 
-h6, .h6-size {
-  font-size: 0.9em;
+h6 {
+  font-size: 0.912em;
 }
 
 * + h1, * + h2, * + h3, * + h4 {
-  margin-top: 1.2em;
+  margin-top: 1.4em;
 }
 
 h1 + h2, h2 + h3, h3 + h4 {
@@ -362,16 +362,6 @@ a code, a code:not(.sourceCode) {
   font-variant: small-caps;
 }
 
-.latest-post-label {
-  color: #006900;
-  font-weight: bold;
-  font-family: "Times New Roman", serif;
-  font-size: 1.2rem;
-  font-style: italic;
-  line-height: 1.2;
-  margin: 0;
-}
-
 .read-more {
   padding-left: 1.6em;
   background-image: url("/images/grass.svg");
@@ -398,7 +388,7 @@ a code, a code:not(.sourceCode) {
   margin: 0 auto;
   display: grid;
   grid-template-areas: "logo-nav logo-icon";
-  grid-template-columns: auto 2.5rem;
+  grid-template-columns: auto 3rem;
   padding: 0.5rem;
 }
 .page-header .content-bound .logo-nav {
@@ -407,21 +397,21 @@ a code, a code:not(.sourceCode) {
 }
 .page-header .content-bound .logo-icon {
   grid-area: logo-icon;
-  grid-column: 2/rem(2.5rem);
+  grid-column: 2/rem(3rem);
   display: block;
   background-image: url("/images/grass.svg");
-  background-size: 2.5rem;
+  background-size: 3rem;
 }
 .page-header .content-bound .logo-icon, .page-header .content-bound .logo-icon > a {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 3rem;
   display: block;
 }
 .page-header .content-bound .logo {
   margin: 0 0 0.25rem;
   padding: 0;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   text-align: left;
 }
 .page-header .content-bound .logo a {
@@ -433,6 +423,7 @@ a code, a code:not(.sourceCode) {
   margin: 0;
   padding: 0 1rem;
   clear: both;
+  padding-bottom: 1.2em;
 }
 .page-content::after {
   content: "";
@@ -457,18 +448,16 @@ a code, a code:not(.sourceCode) {
   display: list-item;
   list-style: none;
   float: left;
-  font-size: 0.9rem;
   line-height: 1.2;
 }
 .main-nav a + a {
   margin-left: 0.5rem;
   padding-left: 0.5rem;
-  border-left: 0.1rem solid #005000;
 }
 @media (max-width: 767px) {
   .main-nav a + a {
-    margin-left: 0.2rem;
-    padding-left: 0.2rem;
+    margin-left: 0.5rem;
+    padding-left: 0.5rem;
     border-left: none;
   }
 }
@@ -502,21 +491,28 @@ a code, a code:not(.sourceCode) {
   margin-bottom: 0.6rem;
 }
 .page-footer .acks {
-  display: flex;
   font-size: 0.8rem;
   color: slategray;
   margin: 0.3rem 0;
-  padding: 0;
-  list-style: none;
+  padding-left: 1em;
 }
 .page-footer .acks li {
   margin: 0;
-  padding-right: 0.3rem;
 }
-.page-footer .acks li + li {
-  border-left: 0.1rem solid #005000;
-  border-color: slategray;
-  padding-left: 0.3rem;
+@media (min-width: 768px) {
+  .page-footer .acks {
+    display: flex;
+    list-style: none;
+    padding: 0;
+  }
+  .page-footer .acks li {
+    padding-right: 0.3rem;
+  }
+  .page-footer .acks li + li {
+    border-left: 0.1rem solid #005000;
+    border-color: slategray;
+    padding-left: 0.3rem;
+  }
 }
 .page-footer .generated {
   font-size: 0.8rem;
@@ -527,23 +523,38 @@ a code, a code:not(.sourceCode) {
 .post-title {
   margin-bottom: 0.25rem;
 }
-
-.post-published {
-  color: slategray;
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
+.post-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.post-title a:hover {
+  text-decoration: underline;
+  color: dodgerblue;
 }
 
-.post-categories, .post-tags {
-  font-size: 0.9rem;
-  margin: 0.25rem 0;
-}
-.post-categories a, .post-tags a {
-  color: #a33;
-}
-
-.post-categories {
+.latest-post-label {
+  color: darkred;
+  font-family: "Times New Roman", serif;
   font-style: italic;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  margin: 0 0 0.25em 0;
+}
+
+.post-meta {
+  font-size: 0.9rem;
+}
+.post-meta p {
+  margin: 0;
+}
+.post-meta .post-published {
+  color: slategray;
+}
+.post-meta .post-categories {
+  font-style: italic;
+}
+.post-meta .post-categories a, .post-meta .post-tags a {
+  color: indianred;
 }
 
 .teaser-list .teaser-item {
@@ -557,7 +568,7 @@ a code, a code:not(.sourceCode) {
   counter-reset: heading_l2;
 }
 .post-full h2::before {
-  content: counter(heading_l2) " - ";
+  content: counter(heading_l2) ". ";
   counter-increment: heading_l2;
   user-select: none;
 }
@@ -565,7 +576,7 @@ a code, a code:not(.sourceCode) {
   counter-reset: heading_l3;
 }
 .post-full h3::before {
-  content: counter(heading_l2) "." counter(heading_l3) " - ";
+  content: counter(heading_l2) "." counter(heading_l3) ". ";
   counter-increment: heading_l3;
   user-select: none;
 }
@@ -573,7 +584,7 @@ a code, a code:not(.sourceCode) {
   counter-reset: heading_l4;
 }
 .post-full h4::before {
-  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) " - ";
+  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) ". ";
   counter-increment: heading_l4;
   user-select: none;
 }
@@ -581,7 +592,7 @@ a code, a code:not(.sourceCode) {
   counter-reset: heading_l5;
 }
 .post-full h5::before {
-  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) " - ";
+  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) ". ";
   counter-increment: heading_l5;
   user-select: none;
 }
@@ -589,7 +600,7 @@ a code, a code:not(.sourceCode) {
   counter-reset: heading_l6;
 }
 .post-full h6::before {
-  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) "." counter(heading_l6) " - ";
+  content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) "." counter(heading_l6) ". ";
   counter-increment: heading_l6;
   user-select: none;
 }
