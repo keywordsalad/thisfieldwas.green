@@ -435,6 +435,9 @@ a code, a code:not(.sourceCode) {
   padding: 0 0.5rem;
   margin: 0 auto;
 }
+.page-content h1, .page-content .hard-section {
+  text-decoration: underline;
+}
 
 .main-nav {
   margin: 0;
@@ -448,6 +451,7 @@ a code, a code:not(.sourceCode) {
   display: list-item;
   list-style: none;
   float: left;
+  font-size: 0.9rem;
   line-height: 1.2;
 }
 .main-nav a + a {
@@ -470,7 +474,7 @@ a code, a code:not(.sourceCode) {
   padding-bottom: 0.5rem;
   border-top: 0.2rem solid #005000;
   border-bottom: 0.5rem solid #005000;
-  line-height: 1.2;
+  font-size: 0.85rem;
 }
 .page-footer::after {
   content: "";
@@ -485,33 +489,34 @@ a code, a code:not(.sourceCode) {
 .page-footer .main-nav {
   margin: 0.3rem 0;
 }
+.page-footer .main-nav a {
+  text-decoration: none;
+}
 .page-footer .copyright {
   font-size: 0.85rem;
+  color: slategray;
   margin: 0.3rem 0;
-  margin-bottom: 0.6rem;
 }
 .page-footer .acks {
   font-size: 0.8rem;
   color: slategray;
   margin: 0.3rem 0;
-  padding-left: 1em;
+  padding: 0;
+  list-style: none;
 }
 .page-footer .acks li {
-  margin: 0;
+  padding-left: 1.2em;
+  background-image: url("/images/grass.svg");
+  background-size: 1em 1em;
+  background-repeat: no-repeat;
+  background-position: 0 0.05em;
 }
 @media (min-width: 768px) {
-  .page-footer .acks {
-    display: flex;
-    list-style: none;
-    padding: 0;
-  }
   .page-footer .acks li {
-    padding-right: 0.3rem;
+    display: inline-block;
   }
   .page-footer .acks li + li {
-    border-left: 0.1rem solid #005000;
-    border-color: slategray;
-    padding-left: 0.3rem;
+    margin-left: 0.4em;
   }
 }
 .page-footer .generated {
@@ -536,6 +541,7 @@ a code, a code:not(.sourceCode) {
   color: darkred;
   font-family: "Times New Roman", serif;
   font-style: italic;
+  font-weight: bold;
   font-size: 1.2rem;
   line-height: 1.2;
   margin: 0 0 0.25em 0;
@@ -573,6 +579,7 @@ a code, a code:not(.sourceCode) {
   user-select: none;
 }
 .post-full h2 {
+  text-decoration: underline;
   counter-reset: heading_l3;
 }
 .post-full h3::before {
