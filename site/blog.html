@@ -1,5 +1,5 @@
 ---
-title: Keeping This Field Green
+title: Writing about the greenest things
 description: The latest and greenest of things I've written about
 bodyClass: blog
 layout: page
@@ -14,6 +14,15 @@ changefreq: weekly
   <p class="read-more"><a href="{{url}}">Read more...</a></p>
 {{-#end}}
 
+<h2>Other Recent Posts</h2>
+{{#for previousPosts-}}
+  {{#with headerLevel: "h3"}}
+    {{partial "post-header"}}
+  {{#end}}
+  {{-teaser}}
+  <p class="read-more"><a href="{{url}}">Read more...</a></p>
+{{#end-}}
+
 <p class="view-all-posts"><a href="{{getUrl 'archives.html'}}">View all posts</a></p>
 
 {{#if categoryCloud-}}
@@ -23,13 +32,4 @@ changefreq: weekly
 {{#if tagCloud-}}
 <h2>Tags</h2>
 <p class="tag-cloud" data-show-count>{{tagCloud}}</p>
-{{#end-}}
-
-<h2>Other Recent Posts</h2>
-{{#for previousPosts-}}
-  {{#with headerLevel: "h3"}}
-    {{partial "post-header"}}
-  {{#end}}
-  {{-teaser}}
-  <p class="read-more"><a href="{{url}}">Read more...</a></p>
 {{#end-}}

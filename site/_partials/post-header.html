@@ -1,24 +1,28 @@
-<header class="post-header">
-  <{{headerLevel}} class="post-title">
-    <a href="{{url}}">{{title}}</a>
-  </{{headerLevel}}>
-  {{-#if indicateLatest}}<p class="latest-post-label">Latest Post!</p>{{#end-}}
+<{{headerLevel}} class="post-title">
+  <a href="{{url}}">{{title}}</a>
+</{{headerLevel}}>
+{{#if indicateLatest-}}
+  <p class="latest-post-label">Latest Post!</p>
+{{#end-}}
+<div class="post-meta">
   <p class="post-published">
-    {{-#if published-}}
+    {{#if published-}}
       Posted on {{published | dateAs shortDate}}
-    {{-#else-}}
+    {{#else-}}
       Drafted on {{date | dateAs shortDate}}
-    {{-#end}}
-    {{-#if author}} by {{author}}{{#end}}
+    {{#end-}}
+    {{#if author-}}
+      by {{author}}
+    {{#end-}}
   </p>
-  {{-#if categoryLinks}}
+  {{#if categoryLinks-}}
     <p class="post-categories">
       Posted in {{categoryLinks}}
     </p>
-  {{-#end}}
-  {{-#if tags}}
+  {{#end-}}
+  {{#if tags-}}
     <p class="post-tags">
       Tags: {{tagLinks}}
     </p>
-  {{-#end}}
-</header>
+  {{#end-}}
+</div>

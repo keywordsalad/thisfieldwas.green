@@ -21,22 +21,29 @@
   }
 
   .acks {
-    display: flex;
     font-size: $text-font-size-miniscule;
     color: $text-color-light;
     margin: $margin;
-    padding: 0;
-    list-style: none;
+    padding-left: 1em;
 
     li {
       margin: 0;
-      padding-right: 0.3rem;
     }
 
-    li + li {
-      border-left: $border-thin;
-      border-color: $text-color-light;
-      padding-left: 0.3rem;
+    @include media(">=tablet") {
+      & {
+        display: flex;
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        padding-right: 0.3rem;
+      }
+      li + li {
+        border-left: $border-thin;
+        border-color: $text-color-light;
+        padding-left: 0.3rem;
+      }
     }
   }
 

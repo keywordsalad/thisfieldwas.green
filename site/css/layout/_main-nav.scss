@@ -5,16 +5,15 @@
     display: list-item;
     list-style: none;
     float: left;
-    font-size: $text-font-size-small;
     line-height: 1.2;
     & + a {
       margin-left: 0.5rem;
       padding-left: 0.5rem;
-      border-left: $border-thin;
+      // border-left: $border-thin;
       @include media("<tablet") {
-        margin-left: 0.2rem;
-        padding-left: 0.2rem;
-        border-left: none
+        margin-left: 0.5rem;
+        padding-left: 0.5rem;
+        border-left: none;
       }
     }
   }

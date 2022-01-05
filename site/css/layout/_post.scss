@@ -1,23 +1,44 @@
 .post-title {
   margin-bottom: 0.25rem;
-}
 
-.post-published {
-  color: $text-color-light;
-  margin: 0.25rem 0;
-  font-size: $text-font-size-small;
-}
-
-.post-categories, .post-tags {
-  font-size: $text-font-size-small;
-  margin: 0.25rem 0;
   a {
-    color: #a33;
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      color: $text-color-hyperlink;
+    }
   }
 }
 
-.post-categories {
+.latest-post-label {
+  color: $text-color-emphasize;
+  font-family: $font-family-serif;
   font-style: italic;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  margin: 0 0 0.25em 0;
+}
+
+.post-meta {
+  font-size: $text-font-size-small;
+
+  p {
+    margin: 0;
+  }
+
+  .post-published {
+    color: $text-color-light;
+  }
+
+  .post-categories {
+    font-style: italic;
+  }
+
+  .post-categories a, .post-tags a {
+    color: $text-color-hyperlink-complement;
+  }
 }
 
 .teaser-list {
@@ -33,7 +54,7 @@
   counter-reset: heading_l2;
 
   h2::before {
-    content: counter(heading_l2) " - ";
+    content: counter(heading_l2) ". ";
     counter-increment: heading_l2;
     user-select: none;
   }
@@ -42,7 +63,7 @@
   }
 
   h3::before {
-    content: counter(heading_l2) "." counter(heading_l3) " - ";
+    content: counter(heading_l2) "." counter(heading_l3) ". ";
     counter-increment: heading_l3;
     user-select: none;
   }
@@ -51,7 +72,7 @@
   }
 
   h4::before {
-    content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) " - ";
+    content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) ". ";
     counter-increment: heading_l4;
     user-select: none;
   }
@@ -60,7 +81,7 @@
   }
 
   h5::before {
-    content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) " - ";
+    content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) ". ";
     counter-increment: heading_l5;
     user-select: none;
   }
@@ -69,7 +90,7 @@
   }
 
   h6::before {
-    content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) "." counter(heading_l6) " - ";
+    content: counter(heading_l2) "." counter(heading_l3) "." counter(heading_l4) "." counter(heading_l5) "." counter(heading_l6) ". ";
     counter-increment: heading_l6;
     user-select: none;
   }
