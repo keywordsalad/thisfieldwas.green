@@ -27,6 +27,7 @@ changefreq: weekly
         <name>{{author | escapeHtml}}</name>
         {{#if email}}<email>{{email | escapeHtml}}</email>{{#end-}}
       </author>
+      <content type="html">{{body | escapeHtml}}</content
     </entry>
   {{#end-}}
 </feed>
