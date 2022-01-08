@@ -13,7 +13,7 @@ where
 import Data.Binary
 import qualified Data.ByteString.Char8 as Char8
 import Data.List.NonEmpty (NonEmpty)
-import Data.Yaml as Y (ToJSON (..), object, (.=))
+import Data.Yaml (ToJSON (..), object, (.=))
 import Data.Yaml.Pretty (defConfig, encodePretty)
 import GHC.Generics (Generic)
 import Green.Common
