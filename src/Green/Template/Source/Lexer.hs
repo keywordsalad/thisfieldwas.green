@@ -258,7 +258,7 @@ data Token
   | IntToken Int SourcePos
   | DoubleToken Double SourcePos
   | TextToken String SourcePos
-  deriving stock (Eq)
+  deriving (Eq)
 
 instance Show Token where
   show t = case t of
@@ -299,7 +299,7 @@ data TokenTag
   | EndToken
   | ElseToken
   | TurnOffToken
-  deriving stock (Eq)
+  deriving (Eq)
 
 tokenTagName :: TokenTag -> String
 tokenTagName = \case

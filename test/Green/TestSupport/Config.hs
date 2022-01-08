@@ -31,13 +31,19 @@ defaultSiteConfigWith hakyllConfig =
   SiteConfig
     { _siteHakyllConfiguration = hakyllConfig,
       _siteEnv = [],
-      _siteRoot = "/",
-      _siteTitle = "This Old Blog",
-      _siteDescription = "An old blog full of stuff",
-      _siteAuthorName = "Old Blogger",
-      _siteAuthorEmail = "blogger@thisold.blog",
-      _siteLinkedInProfile = "https://linkedin.com/in/xyz1abc2def3ghi4jkl5mno6pqr7stu8vw",
-      _siteGiteaWebUrl = "https://bitsof.thisold.blog/blogger/blog",
+      _siteInfo =
+        SiteInfo
+          { _siteRoot = "/",
+            _siteTitle = "This Old Blog",
+            _siteDescription = "An old blog full of stuff",
+            _siteAuthorName = "Old Blogger",
+            _siteAuthorEmail = "blogger@thisold.blog",
+            _siteLinkedInProfile = "https://linkedin.com/in/xyz1abc2def3ghi4jkl5mno6pqr7stu8vw",
+            _siteTwitterProfile = "https://twitter.com/thisold.blog",
+            _siteGitHubProfile = "https://github.com/thisold.blog",
+            _siteGiteaProfile = "https://bitsof.thisold.blog/blogger",
+            _siteGiteaWebUrl = "https://bitsof.thisold.blog/blogger/blog"
+          },
       _siteCurrentTime = fromJust defaultTestTime,
       _siteTimeLocale = defaultTimeLocale,
       _siteDisplayFormat =
@@ -45,6 +51,8 @@ defaultSiteConfigWith hakyllConfig =
           { _displayDateLongFormat = "%B %e, %Y %l:%M %P %EZ",
             _displayDateShortFormat = "%B %e, %Y",
             _displayTimeFormat = "%l:%M %p %EZ",
+            _displayRobotDate = "%Y-%m-%d",
+            _displayRobotTime = "%Y-%m-%dT%H:%M:%S%Ez",
             _displayImageWidths = [320, 768, 1024, 1920, 3840]
           },
       _siteDebug = defaultSiteDebug

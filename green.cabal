@@ -76,7 +76,6 @@ library
       DeriveFunctor
       DeriveGeneric
       DeriveTraversable
-      DerivingStrategies
       DoAndIfThenElse
       EmptyDataDecls
       ExistentialQuantification
@@ -106,7 +105,7 @@ library
       TypeSynonymInstances
       UndecidableInstances
       ViewPatterns
-  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns
+  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns
   build-depends:
       MissingH
     , aeson
@@ -153,7 +152,6 @@ executable author
       DeriveFunctor
       DeriveGeneric
       DeriveTraversable
-      DerivingStrategies
       DoAndIfThenElse
       EmptyDataDecls
       ExistentialQuantification
@@ -183,7 +181,7 @@ executable author
       TypeSynonymInstances
       UndecidableInstances
       ViewPatterns
-  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14 && <5
     , green
@@ -207,7 +205,6 @@ executable site
       DeriveFunctor
       DeriveGeneric
       DeriveTraversable
-      DerivingStrategies
       DoAndIfThenElse
       EmptyDataDecls
       ExistentialQuantification
@@ -237,7 +234,7 @@ executable site
       TypeSynonymInstances
       UndecidableInstances
       ViewPatterns
-  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14 && <5
     , green
@@ -274,7 +271,6 @@ test-suite test
       DeriveFunctor
       DeriveGeneric
       DeriveTraversable
-      DerivingStrategies
       DoAndIfThenElse
       EmptyDataDecls
       ExistentialQuantification
@@ -304,7 +300,7 @@ test-suite test
       TypeSynonymInstances
       UndecidableInstances
       ViewPatterns
-  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-deriving-strategies -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -fprint-potential-instances -Wall -Werror -Wcompat -Widentities -Wincomplete-patterns -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wname-shadowing -Wpartial-fields -Wredundant-constraints -Wunused-packages -Wunused-type-patterns -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14 && <5
     , containers

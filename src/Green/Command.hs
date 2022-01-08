@@ -7,13 +7,13 @@ import Options.Applicative
 data AuthorCommand
   = CreateDraft CreateDraftOpts
   | PublishPost FilePath
-  deriving stock (Show, Eq)
+  deriving (Show, Eq)
 
 data CreateDraftOpts = CreateDraftOpts
   { draftTitle :: String,
     draftCategory :: Maybe String
   }
-  deriving stock (Show, Eq)
+  deriving (Show, Eq)
 
 authorCommands :: String -> ParserInfo AuthorCommand
 authorCommands progName = authorOptions

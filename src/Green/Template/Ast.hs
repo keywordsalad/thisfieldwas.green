@@ -7,20 +7,24 @@ module Green.Template.Ast
     DefaultBlock (..),
     Expression (..),
     getExpressionPos,
-    PrettyPrint (prettyPrint),
   )
 where
 
 import Data.Binary
+import qualified Data.ByteString.Char8 as Char8
 import Data.List.NonEmpty (NonEmpty)
-import qualified Data.List.NonEmpty as NonEmpty
-import GHC.Generics
+import Data.Yaml as Y (ToJSON (..), object, (.=))
+import Data.Yaml.Pretty (defConfig, encodePretty)
+import GHC.Generics (Generic)
 import Green.Common
 import Text.Parsec hiding (getPosition)
 import Text.Parsec.Pos
 
+showJSON :: (ToJSON a) => a -> String
+showJSON = Char8.unpack . encodePretty defConfig . toJSON
+
 data Template = Template [Block] FilePath
-  deriving stock (Show, Generic)
+  deriving (Generic)
 
 instance Binary Template where
   get = Template <$> get <*> get
@@ -32,6 +36,11 @@ instance Binary Template where
 instance Writable Template where
   write _ _ = return ()
 
+instance ToJSON Template
+
+instance Show Template where
+  show = showJSON
+
 data Block
   = TextBlock String SourcePos
   | ExpressionBlock Expression SourcePos
@@ -41,7 +50,7 @@ data Block
       (NonEmpty ApplyBlock)
       (Maybe DefaultBlock)
       SourcePos
-  deriving stock (Show, Generic)
+  deriving (Generic)
 
 getBlockName :: Block -> String
 getBlockName = \case
@@ -90,8 +99,44 @@ instance Binary Block where
       AltBlock blocks default' _ -> put blocks >> put default'
     put $ BinaryPos (getBlockPos block)
 
+instance ToJSON Block where
+  toJSON = \case
+    TextBlock text pos ->
+      object
+        [ "type" .= ("TextBlock" :: String),
+          "text" .= text,
+          "pos" .= show pos
+        ]
+    ExpressionBlock expression pos ->
+      object
+        [ "type" .= ("ExpressionBlock" :: String),
+          "expression" .= expression,
+          "pos" .= show pos
+        ]
+    CommentBlock text pos ->
+      object
+        [ "type" .= ("CommentBlock" :: String),
+          "text" .= text,
+          "pos" .= show pos
+        ]
+    ChromeBlock expression blocks _ ->
+      object
+        [ "type" .= ("ChromeBlock" :: String),
+          "expression" .= expression,
+          "blocks" .= blocks
+        ]
+    AltBlock blocks default' _ ->
+      object
+        [ "type" .= ("AltBlock" :: String),
+          "blocks" .= blocks,
+          "default" .= default'
+        ]
+
+instance Show Block where
+  show = showJSON
+
 newtype BinaryPos = BinaryPos SourcePos
-  deriving stock (Show)
+  deriving (Show)
 
 unBinaryPos :: BinaryPos -> SourcePos
 unBinaryPos (BinaryPos pos) = pos
@@ -105,7 +150,7 @@ instance Binary BinaryPos where
     put $ sourceColumn pos
 
 data ApplyBlock = ApplyBlock Expression [Block] SourcePos
-  deriving stock (Show, Generic)
+  deriving (Generic)
 
 instance Binary ApplyBlock where
   get = do
@@ -118,8 +163,20 @@ instance Binary ApplyBlock where
     put blocks
     put $ BinaryPos pos
 
+instance ToJSON ApplyBlock where
+  toJSON (ApplyBlock expression blocks pos) =
+    object
+      [ "type" .= ("ApplyBlock" :: String),
+        "expression" .= expression,
+        "blocks" .= blocks,
+        "pos" .= show pos
+      ]
+
+instance Show ApplyBlock where
+  show = showJSON
+
 data DefaultBlock = DefaultBlock [Block] SourcePos
-  deriving stock (Show, Generic)
+  deriving (Generic)
 
 instance Binary DefaultBlock where
   get = do
@@ -130,6 +187,17 @@ instance Binary DefaultBlock where
   put (DefaultBlock blocks pos) = do
     put blocks
     put $ BinaryPos pos
+
+instance ToJSON DefaultBlock where
+  toJSON (DefaultBlock blocks pos) =
+    object
+      [ "type" .= ("DefaultBlock" :: String),
+        "blocks" .= blocks,
+        "pos" .= show pos
+      ]
+
+instance Show DefaultBlock where
+  show = showJSON
 
 data Expression
   = NameExpression String SourcePos -- name, id
@@ -142,7 +210,7 @@ data Expression
   | FilterExpression Expression Expression SourcePos -- arg | fn
   | ContextExpression [(String, Expression)] SourcePos -- { name0: value0, name1: value1 }
   | ListExpression [Expression] SourcePos -- [a, b, c]
-  deriving stock (Show, Generic)
+  deriving (Generic)
 
 getExpressionPos :: Expression -> SourcePos
 getExpressionPos = \case
@@ -203,169 +271,71 @@ instance Binary Expression where
       ListExpression values _ -> put values
     put $ BinaryPos (getExpressionPos expression)
 
-indent :: Int -> String
-indent level = mconcat $ replicate level "  "
-
-class PrettyPrint a where
-  prettyPrint :: a -> String
-  prettyPrint item =
-    prettyPrint' 0 item ++ "\n"
-
-  prettyPrint' :: Int -> a -> String
-  prettyPrint' level item =
-    indent level ++ prettyIndented' (level + 1) item
-
-  prettyLabel' :: Int -> String -> a -> String
-  prettyLabel' level label' item =
-    indent level ++ label' ++ ": " ++ prettyIndented' (level + 1) item
-
-  prettyIndented' :: Int -> a -> String
-
-instance PrettyPrint SourcePos where
-  prettyIndented' _ pos = "in " ++ show pos
-
-instance (PrettyPrint a) => PrettyPrint (String, a) where
-  prettyIndented' level (label', item) =
-    show label' ++ " -> " ++ prettyIndented' level item
-
-instance (PrettyPrint a) => PrettyPrint (Maybe a) where
-  prettyIndented' level = \case
-    Just item -> prettyIndented' level item
-    Nothing -> "Nothing"
-
-instance (PrettyPrint a) => PrettyPrint [a] where
-  prettyIndented' level items
-    | null items = "[]"
-    | otherwise =
-      "[\n"
-        ++ (intercalate ",\n" (prettyPrint' (level + 1) <$> items) ++ "\n")
-        ++ (indent level ++ "]")
-
-instance PrettyPrint Template where
-  prettyIndented' level (Template blocks pos) =
-    intercalate "\n" $
-      [ "Template in " ++ show pos,
-        prettyLabel' level "blocks" blocks
-      ]
-
-instance PrettyPrint Block where
-  prettyIndented' level = \case
-    ExpressionBlock expression pos ->
-      intercalate "\n" $
-        [ "ExpressionBlock",
-          pl "expression" expression,
-          pp pos
-        ]
-    TextBlock text pos ->
-      intercalate "\n" $
-        [ "TextBlock",
-          prettyText text,
-          pp pos
-        ]
-    CommentBlock comment pos ->
-      intercalate "\n" $
-        [ "CommentBlock",
-          prettyText comment,
-          pp pos
-        ]
-    ChromeBlock expression blocks pos ->
-      intercalate "\n" $
-        [ "ChromeBlock",
-          pl "expression" expression,
-          pl "blocks" blocks,
-          pp pos
-        ]
-    AltBlock blocks defaultBlock pos ->
-      intercalate "\n" $
-        [ "AltBlock",
-          pl "blocks" (NonEmpty.toList blocks),
-          pl "default" defaultBlock,
-          pp pos
-        ]
-    where
-      prettyText text = unlines $ (indent level ++) <$> lines text
-      pp = prettyPrint' level
-      pl :: (PrettyPrint a) => String -> a -> String
-      pl = prettyLabel' level
-
-instance PrettyPrint ApplyBlock where
-  prettyIndented' level (ApplyBlock expression blocks pos) =
-    intercalate "\n" $
-      [ "ApplyBlock",
-        prettyLabel' level "guard" expression,
-        prettyLabel' level "blocks" blocks,
-        prettyPrint' level pos
-      ]
-
-instance PrettyPrint DefaultBlock where
-  prettyIndented' level (DefaultBlock blocks pos) =
-    intercalate "\n" $
-      [ "DefaultBlock",
-        prettyLabel' level "blocks" blocks,
-        prettyPrint' level pos
-      ]
-
-instance PrettyPrint Expression where
-  prettyIndented' level = \case
-    NameExpression name pos ->
-      intercalate "\n" $
-        [ "NameExpression " ++ show name,
-          pp pos
+instance ToJSON Expression where
+  toJSON = \case
+    NameExpression value pos ->
+      object
+        [ "type" .= ("NameExpression" :: String),
+          "value" .= value,
+          "pos" .= show pos
         ]
     StringExpression value pos ->
-      intercalate "\n" $
-        [ "StringExpression " ++ show value,
-          pp pos
+      object
+        [ "type" .= ("StringExpression" :: String),
+          "value" .= value,
+          "pos" .= show pos
         ]
     IntExpression value pos ->
-      intercalate "\n" $
-        [ "IntExpression " ++ show value,
-          pp pos
+      object
+        [ "type" .= ("IntExpression" :: String),
+          "value" .= value,
+          "pos" .= show pos
         ]
     DoubleExpression value pos ->
-      intercalate "\n" $
-        [ "DoubleExpression " ++ show value,
-          pp pos
+      object
+        [ "type" .= ("DoubleExpression" :: String),
+          "value" .= value,
+          "pos" .= show pos
         ]
     BoolExpression value pos ->
-      intercalate "\n" $
-        [ "BoolExpression " ++ show value,
-          pp pos
+      object
+        [ "type" .= ("BoolExpression" :: String),
+          "value" .= value,
+          "pos" .= show pos
         ]
-    ApplyExpression f x pos ->
-      intercalate "\n" $
-        [ "ApplyExpression",
-          pl "fn" f,
-          pl "arg" x,
-          pp pos
+    ApplyExpression fn arg pos ->
+      object
+        [ "type" .= ("ApplyExpression" :: String),
+          "fn" .= fn,
+          "arg" .= arg,
+          "pos" .= show pos
         ]
     AccessExpression target field pos ->
-      intercalate "\n" $
-        [ "AccessExpression",
-          pl "target" target,
-          pl "field" field,
-          pp pos
+      object
+        [ "type" .= ("AccessExpression" :: String),
+          "target" .= target,
+          "field" .= field,
+          "pos" .= show pos
         ]
-    FilterExpression x f pos ->
-      intercalate "\n" $
-        [ "FilterExpression",
-          pl "arg" x,
-          pl "filter" f,
-          pp pos
+    FilterExpression arg fn pos ->
+      object
+        [ "type" .= ("FilterExpression" :: String),
+          "arg" .= arg,
+          "fn" .= fn,
+          "pos" .= show pos
         ]
-    ContextExpression context pos ->
-      intercalate "\n" $
-        [ "ContextExpression",
-          pp context,
-          pp pos
+    ContextExpression pairs pos ->
+      object
+        [ "type" .= ("ContextExpression" :: String),
+          "pairs" .= pairs,
+          "pos" .= show pos
         ]
     ListExpression values pos ->
-      intercalate "\n" $
-        [ "ListExpression",
-          pp values,
-          pp pos
+      object
+        [ "type" .= ("ListExpression" :: String),
+          "values" .= values,
+          "pos" .= show pos
         ]
-    where
-      pp :: (PrettyPrint a) => a -> String
-      pp = prettyPrint' level
-      pl = prettyLabel' level
+
+instance Show Expression where
+  show = showJSON

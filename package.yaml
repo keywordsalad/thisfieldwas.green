@@ -92,7 +92,6 @@ default-extensions:
   - DeriveFunctor
   - DeriveGeneric
   - DeriveTraversable
-  - DerivingStrategies
   - DoAndIfThenElse
   - EmptyDataDecls
   - ExistentialQuantification
@@ -132,7 +131,6 @@ ghc-options:
   - -Wincomplete-patterns
   - -Wincomplete-record-updates
   - -Wincomplete-uni-patterns
-  - -Wmissing-deriving-strategies
   - -Wmissing-home-modules
   - -Wname-shadowing
   - -Wpartial-fields

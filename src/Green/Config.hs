@@ -13,7 +13,7 @@ data SiteDebug = SiteDebug
   { _debugPreview :: Bool,
     _debugInflateCss :: Bool
   }
-  deriving stock (Show)
+  deriving (Show)
 
 makeLenses ''SiteDebug
 
@@ -49,7 +49,7 @@ data SiteInfo = SiteInfo
     _siteGiteaProfile :: String,
     _siteGiteaWebUrl :: String
   }
-  deriving stock (Show)
+  deriving (Show)
 
 makeLenses ''SiteInfo
 
@@ -95,7 +95,7 @@ data SiteDisplayFormat = SiteDisplayFormat
     _displayRobotTime :: String,
     _displayImageWidths :: [Int]
   }
-  deriving stock (Show)
+  deriving (Show)
 
 makeLenses ''SiteDisplayFormat
 

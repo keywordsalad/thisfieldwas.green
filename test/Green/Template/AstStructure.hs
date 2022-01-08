@@ -18,19 +18,19 @@ instance (Functor f, AstStructure a b) => AstStructure (f a) (f b) where
   intoAstStructure = fmap intoAstStructure
 
 newtype Template' = Template' [Block']
-  deriving stock (Eq, Show)
+  deriving (Eq, Show)
 
 instance AstStructure Template Template' where
   intoAstStructure (Template blocks' _) = Template' (intoAstStructure blocks')
 
 data ApplyBlock' = ApplyBlock' Expression' [Block']
-  deriving stock (Eq, Show)
+  deriving (Eq, Show)
 
 instance AstStructure ApplyBlock ApplyBlock' where
   intoAstStructure (ApplyBlock e bs _) = ApplyBlock' (intoAstStructure e) (intoAstStructure <$> bs)
 
 data DefaultBlock' = DefaultBlock' [Block']
-  deriving stock (Eq, Show)
+  deriving (Eq, Show)
 
 instance AstStructure DefaultBlock DefaultBlock' where
   intoAstStructure (DefaultBlock bs _) = DefaultBlock' (intoAstStructure <$> bs)
@@ -41,7 +41,7 @@ data Block'
   | CommentBlock' String
   | ChromeBlock' Expression' [Block']
   | AltBlock' [ApplyBlock'] (Maybe DefaultBlock')
-  deriving stock (Eq, Show)
+  deriving (Eq, Show)
 
 instance AstStructure Block Block' where
   intoAstStructure = \case
@@ -62,7 +62,7 @@ data Expression'
   | FilterExpression' Expression' Expression'
   | ContextExpression' [(String, Expression')]
   | ListExpression' [Expression']
-  deriving stock (Eq, Show)
+  deriving (Eq, Show)
 
 instance AstStructure Expression Expression' where
   intoAstStructure = \case
@@ -102,7 +102,7 @@ data Token'
   | IntToken' Int
   | DoubleToken' Double
   | TextToken' String
-  deriving stock (Eq, Show)
+  deriving (Eq, Show)
 
 instance AstStructure Token Token' where
   intoAstStructure = \case

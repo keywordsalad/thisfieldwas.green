@@ -21,7 +21,7 @@ data LexerMode
   = TextMode
   | BlockMode
   | FencedMode Int
-  deriving stock (Show)
+  deriving (Show)
 
 runParser :: (Stream s Identity t) => Parsec s ParserState a -> SourceName -> s -> Either ParseError a
 runParser = runParserWith state

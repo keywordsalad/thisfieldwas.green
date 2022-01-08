@@ -13,7 +13,7 @@ data GitFile = GitFile
     gitFileIsFromSource :: Bool,
     gitFileIsChanged :: Bool
   }
-  deriving stock (Generic)
+  deriving (Generic)
 
 instance Binary GitFile where
   get = GitFile <$> get <*> get <*> get
