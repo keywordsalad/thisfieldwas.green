@@ -224,7 +224,7 @@ aside figcaption, figure figcaption {
 }
 
 code {
-  font-family: "Courier", "Courier New", monospace;
+  font-family: "Courier New", "Courier", monospace;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
