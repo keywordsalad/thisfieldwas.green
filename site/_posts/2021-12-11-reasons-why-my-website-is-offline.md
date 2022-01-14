@@ -5,7 +5,7 @@ description: >-
   services, but the uptime is terrible!
 author: Logan McGrath
 comments: false
-published: 2021-12-11T14:43:25-08:00
+published: 2021-12-11T14:43:25-0800
 tags: self host, configuration management, tinfoil hat
 layout: post
 twitter:
