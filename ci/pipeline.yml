@@ -11,10 +11,12 @@ jobs:
       inputs:
         - name: site-repo
       run:
-        path: cp
+        path: sh
         args:
-        - site-repo
-        - prebaked-site-repo/ci/prebake-site/site-repo
+        - -cx
+        - |
+          set -eux
+          cp site-repo prebaked-site-repo/ci/prebake-site/site-repo
   - get: oci-build-task
   - task: build-image
     image: oci-build-task
@@ -78,7 +80,6 @@ resources:
   type: registry-image
   source:
     repository: registry:5000/tfwg/prebaked-site
-    insecure: true
 - name: oci-build-task
   type: registry-image
   source:
