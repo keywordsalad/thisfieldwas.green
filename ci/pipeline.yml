@@ -1,0 +1,85 @@
+jobs:
+- name: prebake-site
+  plan:
+  - get: prebaked-site-repo
+    params: { depth: 1 }
+    trigger: true
+  - get: site-repo
+  - task: copy-site-repo
+    config:
+      platform: linux
+      inputs:
+        - name: site-repo
+      run:
+        path: cp
+        args:
+        - site-repo
+        - prebaked-site-repo/ci/prebake-site/site-repo
+  - get: oci-build-task
+  - task: build-image
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      inputs:
+      - name: prebaked-site-repo
+      outputs:
+      - name: image
+      params:
+        CONTEXT: prebaked-site-repo/ci/prebake-site/Dockerfile
+        UNPACK_ROOTFS: true
+      run:
+        path: build
+  - put: prebaked-site
+    params:
+      image: image/image.tar
+
+- name: build-and-test-site
+  plan:
+  - get: prebaked-site
+    trigger: true
+  - get: site-repo
+    params: { depth: 1 }
+    trigger: true
+  - task: build-and-test
+    image: prebaked-site
+    config:
+      platform: linux
+      inputs:
+      - name: site-repo
+      outputs:
+      - name: site-build
+      run:
+        path: sh
+        args:
+        - -cx
+        - |
+          set -eux
+          cd site-repo
+          ./go build
+          ./go test
+
+resources:
+- name: site-repo
+  type: git
+  source:
+    uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
+    branch: main
+- name: prebaked-site-repo
+  type: git
+  source:
+    uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
+    branch: main
+    paths:
+    - ci/prebake-site/Dockerfile
+    - package.yaml
+    - stack.yaml
+- name: prebaked-site
+  type: registry-image
+  source:
+    repository: registry:5000/tfwg/prebaked-site
+    insecure: true
+- name: oci-build-task
+  type: registry-image
+  source:
+    repository: concourse/oci-build-task
