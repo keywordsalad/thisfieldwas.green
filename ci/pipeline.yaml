@@ -1,0 +1,22 @@
+resources:
+- name: site-drafts
+  type: git
+  source:
+    uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
+    branch: drafts
+- name: haskell-image
+  type: registry-image
+  source:
+    repository: haskell
+    tag: '8.10.7'
+
+jobs:
+- name: build-site-job
+  plan:
+  - get: site-drafts
+    params: { depth: 1 }
+    trigger: true
+  - get: haskell-image
+  - task: build-site-task
+    image: haskell-image
+    file: ./site-drafts/ci/tasks/build-site.yaml
