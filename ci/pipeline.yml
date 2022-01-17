@@ -2,21 +2,8 @@ jobs:
 - name: prebake-site
   plan:
   - get: prebaked-site-repo
-    params: { depth: 1 }
     trigger: true
   - get: site-repo
-  - task: copy-site-repo
-    config:
-      platform: linux
-      inputs:
-        - name: site-repo
-      run:
-        path: sh
-        args:
-        - -cx
-        - |
-          set -eux
-          cp site-repo prebaked-site-repo/ci/prebake-site/site-repo
   - get: oci-build-task
   - task: build-image
     image: oci-build-task
@@ -25,10 +12,11 @@ jobs:
       platform: linux
       inputs:
       - name: prebaked-site-repo
+      - name: site-repo
       outputs:
       - name: image
       params:
-        CONTEXT: prebaked-site-repo/ci/prebake-site/Dockerfile
+        DOCKERFILE: prebaked-site-repo/ci/prebake-site/Dockerfile
         UNPACK_ROOTFS: true
       run:
         path: build
@@ -79,7 +67,7 @@ resources:
 - name: prebaked-site
   type: registry-image
   source:
-    repository: registry:5000/tfwg/prebaked-site
+    repository: registry.thisfieldwas.green/tfwg/prebaked-site
 - name: oci-build-task
   type: registry-image
   source:

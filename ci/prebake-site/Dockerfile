@@ -1,4 +1,4 @@
-FROM archlinux:base
+FROM archlinux:latest
 
 RUN set -eux; \
   pacman -S --noconfirm git imagemagick inkscape; \
