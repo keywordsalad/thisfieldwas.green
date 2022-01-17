@@ -1,7 +1,7 @@
 FROM archlinux:latest
 
 RUN set -eux; \
-  pacman -S --noconfirm git imagemagick inkscape; \
+  pacman -Sy --noconfirm git imagemagick inkscape; \
   git clone https://aur.archlinux.org/pacaur.git; \
   pushd pacaur; \
   makepkg -si; \
