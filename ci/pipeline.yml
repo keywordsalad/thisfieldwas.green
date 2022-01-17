@@ -29,7 +29,6 @@ jobs:
   - get: prebaked-site
     trigger: true
   - get: site-repo
-    params: { depth: 1 }
     trigger: true
   - task: build-and-test
     image: prebaked-site
