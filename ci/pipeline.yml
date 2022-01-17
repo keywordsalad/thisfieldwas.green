@@ -62,6 +62,7 @@ jobs:
     trigger: true
   - get: oci-build-task
   - task: build-image
+    image: oci-build-task
     privileged: true
     config:
       platform: linux
