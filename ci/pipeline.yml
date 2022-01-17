@@ -85,6 +85,7 @@ resources:
 # Site source code
 - name: site-repo
   type: git
+  icon: git
   source:
     uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
@@ -92,10 +93,12 @@ resources:
 # Docker image with site library dependencies pre-built
 - name: site-prebaked-image
   type: registry-image
+  icon: language-haskell
   source:
     repository: registry.thisfieldwas.green/tfwg/site-prebaked-image
 - name: site-prebaked-image-repo
   type: git
+  icon: git
   source:
     uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
@@ -107,10 +110,12 @@ resources:
 # Docker image with software dependencies installed
 - name: site-base-image
   type: registry-image
+  icon: arch
   source:
     repository: registry.thisfieldwas.green/tfwg/site-base-image
 - name: site-base-image-repo
   type: git
+  icon: git
   source:
     uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
@@ -120,5 +125,6 @@ resources:
 # Docker image used to create other docker images
 - name: oci-build-task
   type: registry-image
+  icon: docker
   source:
     repository: concourse/oci-build-task
