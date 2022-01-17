@@ -1,37 +1,16 @@
+###############################################################################
 jobs:
-- name: prebake-site
-  plan:
-  - get: prebaked-site-repo
-    trigger: true
-  - get: site-repo
-  - get: oci-build-task
-  - task: build-image
-    image: oci-build-task
-    privileged: true
-    config:
-      platform: linux
-      inputs:
-      - name: prebaked-site-repo
-      - name: site-repo
-      outputs:
-      - name: image
-      params:
-        DOCKERFILE: prebaked-site-repo/ci/prebake-site/Dockerfile
-        UNPACK_ROOTFS: true
-      run:
-        path: build
-  - put: prebaked-site
-    params:
-      image: image/image.tar
+###############################################################################
 
+# Build and test the site
 - name: build-and-test-site
   plan:
-  - get: prebaked-site
+  - get: site-prebaked-image
     trigger: true
   - get: site-repo
     trigger: true
   - task: build-and-test
-    image: prebaked-site
+    image: site-prebaked-image
     config:
       platform: linux
       inputs:
@@ -48,25 +27,97 @@ jobs:
           ./go build
           ./go test
 
+# Create the docker image with the library dependencies pre-built
+- name: site-prebaked-image-job
+  plan:
+  - get: site-prebaked-image-repo
+    trigger: true
+  - get: site-base-image
+    trigger: true
+  - get: site-repo
+  - get: oci-build-task
+  - task: build-image
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      inputs:
+      - name: site-prebaked-image-repo
+      - name: site-repo
+      outputs:
+      - name: image
+      params:
+        DOCKERFILE: site-prebaked-image-repo/ci/site-prebaked-image/Dockerfile
+        UNPACK_ROOTFS: true
+      run:
+        path: build
+  - put: site-prebaked-image
+    params:
+      image: image/image.tar
+
+# Create the base docker image
+- name: site-base-image-job
+  plan:
+  - get: site-base-image-repo
+    trigger: true
+  - get: oci-build-task
+  - task: build-image
+    privileged: true
+    config:
+      platform: linux
+      inputs:
+      - name: site-base-image-repo
+      outputs:
+      - name: image
+      params:
+        DOCKERFILE: ci/site-base-image/Dockerfile
+        UNPACK_ROOTFS: true
+      run:
+        path: build
+  - put: site-base-image
+    params:
+      image: image/image.tar
+
+###############################################################################
 resources:
+###############################################################################
+
+# Site source code
 - name: site-repo
   type: git
   source:
     uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
-- name: prebaked-site-repo
+
+# Docker image with site library dependencies pre-built
+- name: site-prebaked-image
+  type: registry-image
+  source:
+    repository: registry.thisfieldwas.green/tfwg/site-prebaked-image
+- name: site-prebaked-image-repo
   type: git
   source:
     uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
     paths:
-    - ci/prebake-site/Dockerfile
+    - ci/site-prebaked-image/*
     - package.yaml
     - stack.yaml
-- name: prebaked-site
+
+# Docker image with software dependencies installed
+- name: site-base-image
   type: registry-image
   source:
-    repository: registry.thisfieldwas.green/tfwg/prebaked-site
+    repository: registry.thisfieldwas.green/tfwg/site-base-image
+- name: site-base-image-repo
+  type: git
+  source:
+    uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
+    branch: main
+    paths:
+    - ci/site-base-image/*
+
+# Docker image used to create other docker images
 - name: oci-build-task
   type: registry-image
   source:
