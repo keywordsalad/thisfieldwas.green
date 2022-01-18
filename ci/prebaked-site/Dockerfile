@@ -1,4 +1,4 @@
-FROM registry.thisfieldwas.green/tfwg/stack
+FROM registry.thisfieldwas.green/tfwg/site-base-image:latest
 
 COPY site-repo /site-repo
 

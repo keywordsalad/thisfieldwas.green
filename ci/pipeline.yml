@@ -47,7 +47,7 @@ jobs:
       outputs:
       - name: image
       params:
-        DOCKERFILE: site-prebaked-image-repo/ci/site-prebaked-image/Dockerfile
+        DOCKERFILE: site-prebaked-image-repo/ci/prebaked-site/Dockerfile
         UNPACK_ROOTFS: true
       run:
         path: build
@@ -71,7 +71,7 @@ jobs:
       outputs:
       - name: image
       params:
-        DOCKERFILE: ci/site-base-image/Dockerfile
+        DOCKERFILE: site-base-image-repo/ci/base-site/Dockerfile
         UNPACK_ROOTFS: true
       run:
         path: build
@@ -90,13 +90,18 @@ resources:
   source:
     uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
+    ignore_paths:
+    - ci/*
+    - package.yaml
+    - stack.yaml
 
 # Docker image with site library dependencies pre-built
 - name: site-prebaked-image
   type: registry-image
-  icon: language-haskell
+  icon: docker
   source:
-    repository: registry.thisfieldwas.green/tfwg/site-prebaked-image
+    repository: registry.thisfieldwas.green/tfwg/prebaked-site
+    tag: latest
 - name: site-prebaked-image-repo
   type: git
   icon: git
@@ -104,16 +109,17 @@ resources:
     uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
     paths:
-    - ci/site-prebaked-image/*
+    - ci/prebaked-site/*
     - package.yaml
     - stack.yaml
 
 # Docker image with software dependencies installed
 - name: site-base-image
   type: registry-image
-  icon: arch
+  icon: docker
   source:
-    repository: registry.thisfieldwas.green/tfwg/site-base-image
+    repository: registry.thisfieldwas.green/tfwg/base-site
+    tag: latest
 - name: site-base-image-repo
   type: git
   icon: git
@@ -121,7 +127,7 @@ resources:
     uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
     paths:
-    - ci/site-base-image/*
+    - ci/base-site/*
 
 # Docker image used to create other docker images
 - name: oci-build-task
