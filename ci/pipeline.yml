@@ -4,6 +4,9 @@ jobs:
 
 # Build and test the site
 - name: build-and-test-site
+  max_in_flight: 1
+  public: true
+  interruptible: true
   plan:
   - get: site-prebaked-image
     trigger: true
@@ -29,6 +32,9 @@ jobs:
 
 # Create the docker image with the library dependencies pre-built
 - name: site-prebaked-image-job
+  max_in_flight: 1
+  public: true
+  interruptible: true
   plan:
   - get: site-prebaked-image-repo
     trigger: true
@@ -57,6 +63,9 @@ jobs:
 
 # Create the base docker image
 - name: site-base-image-job
+  max_in_flight: 1
+  public: true
+  interruptible: true
   plan:
   - get: site-base-image-repo
     trigger: true
