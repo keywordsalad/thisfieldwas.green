@@ -109,8 +109,9 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: registry.thisfieldwas.green/tfwg/prebaked-site
+    repository: registry:5000/tfwg/prebaked-site
     tag: latest
+    insecure: true
 - name: site-prebaked-image-repo
   type: git
   icon: git
@@ -127,8 +128,9 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: registry.thisfieldwas.green/tfwg/base-site
+    repository: registry:5000/tfwg/base-site
     tag: latest
+    insecure: true
 - name: site-base-image-repo
   type: git
   icon: git
