@@ -111,7 +111,6 @@ resources:
   source:
     repository: registry:5000/tfwg/prebaked-site
     tag: latest
-    insecure: true
 - name: site-prebaked-image-repo
   type: git
   icon: git
@@ -130,7 +129,6 @@ resources:
   source:
     repository: registry:5000/tfwg/base-site
     tag: latest
-    insecure: true
 - name: site-base-image-repo
   type: git
   icon: git
