@@ -23,27 +23,27 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 ## Terminology
 
-**Expressions** are values that are described by some type A.
+**Expressions** are values that are described by some type `A`.
 
-**Functions** are a _special case_ of expressions that map some type A to some type B, such that they are described by A => B or "A to B".
+**Functions** are a _special case_ of expressions that map some type `A` to some type `B`, such that they are described by `A => B` read as _A to B_.
 
-**Terms** are unitary expressions that are composed by no more than an identifier. For example, in the declaration map(fa: F[A])(f: A => B) the terms are fa and f. Term may also describe a type named by a variable as these types are also unitary, such as the argument A in F[A].
+**Terms** are unitary expressions that are composed by no more than an identifier. For example, in the declaration `map(fa: F[A])(f: A => B)` the terms are `fa` and `f`. **Term** may also describe a type named by a variable as these types are also unitary, such as the argument `A` in `F[A]`.
 
-**Lifting** describes any term A becoming wrapped in a context F such that A => F[A]. A **lifted** term or expression already has the form F[A].
+**Lifting** describes any term `A` becoming wrapped in a context `F` such that `A => F[A]`. A **lifted** term or expression already has the form `F[A]`.
 
-**Composition** describes chaining the output of a function f: A => B to the input of function g: B => C such that a new function h: A => C may defined as h := g . f or "g after f". This alternative definition "h(x) = g(f(x))" explicitly demonstrates applying the function g after applying function f to argument x.
+**Composition** describes chaining the output of a function `f: A => B` to the input of function `g: B => C` such that a new function `h: A => C` may defined as `h := g ∘ f` read as _h is g after f_. This alternative definition `h(x) = g(f(x))` explicitly demonstrates applying the function `g` after applying function `f` to argument `x`.
 
-**Side effects** occur when a mapping of A => B maps to a different member of type B for any number of times the same member of A has been mapped to B. This means that A => B is nondeterministic. An extreme example of such a function is a random number generator rng: () => Int as it maps solitary unit () to all members of type Int if applied enough times. Reading from a file can be driven by side effects as the contents of the file may change, and interacting with any system over the network implies changing these systems’ states, as in databases and third-party API’s. Cases such as "divide by zero" and "Exceptions" constitute a secondary output of a function and are treated as side effects as they impose an additional layer of protection to prevent or recover from them.
+**Side effects** occur when a mapping of `A => B` maps to a different member of type `B` for any number of times the same member of `A` has been mapped to `B`. This means that `A => B` is nondeterministic. An extreme example of such a function is a random number generator `rng: () => Int` as it maps solitary unit `()` to all members of type `Int`. Reading from a file can be driven by side effects as the contents of the file may change between reads. Interacting with any system over the network implies changing these systems’ states, as in databases and third-party API’s. Cases such as _divide by zero_ errors and `Exceptions` constitute a secondary output of a function as they impose an additional layer of protection to prevent or recover from them.
 
 ## Functions and Complexity
 
 _Functions are the backbone of functional programming._
 
-Given a function f: A => B and another g: B => C: a third function h: A => C may be composed of g . f, read as "g after f". Programs may be modeled as a function f: A => B, where f is composed of enumerable smaller functions, building the necessary mappings to generate the desired program output.
+Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `g ∘ f` or _g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of enumerable smaller functions, building the necessary mappings to generate the desired program output.
 
-While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have effects that dictate how they are received and sent, as database queries may return non deterministic responses and an error might occur when performing a direct deposit. 
+While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs not present in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have effects that dictate how they are received and sent, as database queries may return non deterministic responses and an error might occur when performing a direct deposit. 
 
-Effects impose complexity on code. Can you think of how complexity occurs in a server application?
+_Effects impose complexity on code._ Can you think of how complexity occurs in a server application?
 
 * Configuration comes from any number of sources, both when starting the application and during runtime. 
 * Database queries each need to be protected against errors and checked if any occur. Each type requires different handling.
@@ -52,7 +52,7 @@ Effects impose complexity on code. Can you think of how complexity occurs in a s
 * Errors need to be logged.
 * Metrics need to be gathered.
 
-How is this complexity handled?
+How might complexity appear in code?
 
 * Configuration may be read when starting from the environment or from config files. At runtime a database might be used.
 * Database queries are surrounded by exception handling, and only handled insofar as the compiler requires.
@@ -63,106 +63,138 @@ How is this complexity handled?
 
 These complexities can be described in terms of effects. Each of the following effects center on some dimension of nondeterminism:
 
-* Time and Async: API calls and network
-* IO: File and network
-* Presence or absence
-* Length: Database queries
-* Correct or incorrect: Input validation
-* Implicit input: Configuration
-* Implicit output: Logging and metrics
-* State: Change over time
+* **Time and Async**: API calls and network
+* **IO**: File and network
+* **Presence or absence**
+* **Length**: Database queries
+* **Correct or incorrect**: Input validation
+* **Implicit input**: Configuration
+* **Implicit output**: Logging and metrics
+* **State**: Change over time
 
 The actual list of effects is enumerable, but these ones are common. Fortunately there are ways to model subsets and contain the scope of their impact so that code is less complex. 
 
-Previously I described function composition as a simple case of h: g . f. Functors, Applicatives, and Monads address a particular kind of function composition, the composition of functional effects, which I will demonstrate in the following sections.
+Previously I described function composition as a simple case of `h := g ∘ f`. Functors, Applicatives, and Monads address a particular kind of function composition, _the composition of functional effects_, which I will demonstrate in the following sections.
 
 ## Contexts and Effects
 
-Let me start with a vague term: _Context_. What is a context? A context is a setting within which some term A might be produced. Contexts in Scala may be neatly represented by a letter and brackets such as F[_] when the type of the term is unknown, and F[A] when the term is known to be of type A. Other letters work nicely of course, as do proper names, as in Option[Int].
+Let me start with a vague term: _Context_. What is a context? A context is a setting within which some term `A` might be produced. 
 
-Each kind of context carries with it a set of effects. These effects are modeled by specific contexts as if they were gremlins pulling at levers that determine how their terms may be produced. Names of contexts can hint at the effects they model, and with some intuition you may be able to figure out what each context’s effects may be.
+> Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` when the type of the term is unknown, and `F[A]` when the term is known to be of type `A`. Other letters work nicely of course, as do proper names, as in `Option[Int]`.
 
-Here are some common contexts and some of their effects:
+Each kind of context carries with it a set of _effects_. Effects are modeled by specific contexts that determine how their terms may be produced. Names of contexts can hint at the effects they model, and with some intuition you may be able to figure out what each context’s effects may be.
+
+_Here are some common contexts and some of their effects:_
 
 Some easy ones:
 
-* Option[A]: Presence or absence of term A.
-* Either[A, B]: Presence of term B if valid, term A if invalid (B is the term you want).
-* List[A]: Nondeterminism of sort, cardinality, and length of term A.
+* `Option[A]`: Presence or absence of some instance of term `A`.
+* `Either[A, B]`: Conventionally treated as term `B` if valid, term `A` if invalid (`B` is the term you want).
+* `List[A]`: Nondeterminism of sort, cardinality, and length of term `A`.
 
 Two hard ones:
 
-* Future[A]: Asynchronous and temporal nondeterminism of term A.
-    * Term A may be here already, at some point in the future, or may never arrive at all.
-    * Term A must be acquired from the outside world via processes that rely on side effects.
-    * External factors may interrupt the acquisition of term A.
-* IO[A]: External nondeterminism of term A.
-    * Term A may be here already, eventually, or never.
-    * Term A must be acquired from the outside world via processes that rely on side effects. 
-    * External factors may interrupt the acquisition of term A.
+* `Future[A]`: Asynchronous and temporal nondeterminism of term `A`.
+    * Term `A` may be here already, at some point in the future, or may never arrive at all.
+    * Term `A` must be acquired from the outside world via processes that rely on side effects.
+    * External factors may interrupt the acquisition of term `A`.
+* `IO[A]`: External nondeterminism of term `A`.
+    * Term `A` may be here already, eventually, or never.
+    * Term `A` must be acquired from the outside world via processes that rely on side effects. 
+    * External factors may interrupt the acquisition of term `A`.
+    * Execution must await term `A` before it continues.
 
 Some of the specialized ones:
 
-* ReaderT[F, A]: Reading of nondeterministic implicit inputs.
+* `ReaderT[F, A]`: Reading of nondeterministic implicit inputs in the context of `F`.
     * Propagation of configuration usually leverages this effect.
-* WriterT[F, A]: Writing of nondeterministic implicit outputs.
+* `WriterT[F, A]`: Writing of nondeterministic implicit outputs in the context of `F`.
     * Logging usually leverages this effect.
-* StateT[F, A]: Nondeterministic implicit inputs and outputs.
+* `StateT[F, A]`: Nondeterministic implicit inputs and outputs in the context of `F`.
     * Models state changing over time.
 
-Each of these contexts have two shared qualities in that they produce some term A and their effects dictate how term A is produced. But with such a wide array of effects, and with so little overlap between each context, how can A be consumed in a general manner?
+Each of these contexts have two shared qualities in that they produce some term `A` and their effects _dictate_ how term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can `A` be consumed in a manner unburdened of complexity?
 
-In order to generalize contexts, the key differentiator between them must be abstracted: effects. By shedding effects as an implementation detail, the consumption of a term A becomes a shared interface. How is that interface exposed?
+In order to generalize contexts, the key differentiator between them must be abstracted: _effects_. By shedding effects as an implementation detail, the consumption of a term `A` becomes a shared capability. How is that interface exposed?
 
-Motivating Functors
+## Motivating Functors
 
-For any context F[_], it produces some term A. If you have a function A => B, how would you apply it to a term produced by the context? That would require extracting the term, right? Specifically, you can’t do this: 
+For any context `F[_]`, it produces some term `A`. If you have a function `A => B`, how would you apply it to a term produced by the context? That would require extracting the term, right? Specifically, you can’t do this: 
 
-(pseudo code)
+```scala
+// (pseudo code)
+
+// given a context producing term A
 val fa: F[A]
-def f(x: A): B = ???
+
+// given a function A => B
+def f(x: A): B
+
+// try to apply the function
+
 f(fa) // compile error!
+```
 
-Recall from the previous section, contexts only share two qualities: that they might produce a term, and that they have effects. After abstracting effects, contexts do not expose an obvious shared interface to extract the term.  Consider the following definitions for Option, Either, and List:
+Recall from the previous section, contexts only share two qualities: that they produce a term, and that they have effects. After abstracting effects, contexts do not expose an obvious shared interface to extract the term.  Consider the following definitions for `Option`, `Either`, and `List`:
 
+```scala
 sealed trait Option[+A] {
+
   def get: A
-  def isNone: Boolean = this == None
+  
   def isSome: Boolean = !isNone
+  
+  def isNone: Boolean = this == None
 }
+
+case class Some[A](override val get: A) extends Option[A]
+
 case object None extends Option[Nothing] {
+
   def get: A = throw new Exception()
 }
-case class Some[A](get: A) extends Option[A]
+
+////////////
 
 sealed trait Either[A, B] {
-  def getLeft: A = this match {
+
+  def left: A = this match {
     case Left(x) => x
     case Right(_) => throw new Exception()
   }
-  def getRight: B = this match {
+  
+  def right: B = this match {
     case Left(_) => throw new Exception()
     case Right(y) => y
   }
+  
+  def isRight: Boolean = !isLeft
+  
   def isLeft: Boolean = this match {
     case Left(_) => true
     case Right(_) => false
   }
-  def isRight: Boolean = !isLeft
 }
-case class Left[A, B](getLeft: A) extends Either[A, B]
-case class Right[A, B](getRight: B) extends Either[A, B]
+
+case class Right[A, B](override val right: B) extends Either[A, B]
+
+case class Left[A, B](override val left: A) extends Either[A, B]
+
+////////////
 
 sealed trait List[+A] {
+
   def isNil: Boolean = this == Nil
-  def head: A
-  def tail: List[A]
+  
+  def head: A = throw new Exception
+  
+  def tail: List[A] = throw new Exception
 }
-case object Nil extends List[Nothing] {
-  def head: Nothing = throw new Exception()
-  def tail: Nothing = throw new Exception()
-}
-case class ::[A](head: A, tail: List[A]) extends List[A]
+
+case object Nil extends List[Nothing]
+
+case class ::[A](override val head: A, override val tail: List[A]) extends List[A]
+```
 
 Both Option and Either have roughly the same shape in that there either is or isn’t an instance of the desired term. Because of this, an extract(): F[A] => B operation is possible as it means the same thing between both of them, and extracting fails if there’s no term. In object oriented programming, Option and Either might share such an interface:
 
