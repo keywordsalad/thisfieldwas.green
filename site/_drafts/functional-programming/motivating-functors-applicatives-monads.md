@@ -196,8 +196,9 @@ case object Nil extends List[Nothing]
 case class ::[A](override val head: A, override val tail: List[A]) extends List[A]
 ```
 
-Both Option and Either have roughly the same shape in that there either is or isn’t an instance of the desired term. Because of this, an extract(): F[A] => B operation is possible as it means the same thing between both of them, and extracting fails if there’s no term. In object oriented programming, Option and Either might share such an interface:
+Both `Option` and `Either` have roughly the same shape in that there either is or isn’t an instance of the desired term. Because of this, an `extract(): F[A] => A` operation is possible as it means the same thing between both of them: it either gets the instance of term `A` or fails. In object oriented programming, `Option` and `Either` might share such an interface:
 
+```scala
 trait Extractable[A] {
   def extract(): A
 }
@@ -209,11 +210,15 @@ sealed trait Either[A, B] extends Extractable[B] {
   // ..
   override def extract(): B = getRight
 }
+```
 
-But what about a List?
+### But what about a `List`?
 
-What does it mean to extract() the term A from a List such that it means the same thing as in Option and Either? As in Option and Either there is a notion of presence and absence, but presence implies one to many instances of term A and not just one. A solution inspired by object oriented programming might change the interface thusly:
+What does it mean to `extract()` the term `A` from a `List` such that it means the same thing as in `Option` and `Either`? 
 
+As in `Option` and `Either` there is a notion of presence and absence, but presence in `List` implies one to many instances of term `A`. A solution inspired by object oriented programming might change the interface thusly:
+
+```scala
 trait Extractable[A] {
   def extract(): Seq[A]
 }
@@ -229,49 +234,55 @@ sealed trait List[A, B] extends Extractable[A] {
   // …
   override def extract(): Seq[A] = this
 }
+```
 
-This interface however is not coherent. Absence as a behavior is preserved in Option and Either, but in a list extract() could return an empty list and whether that can be interpreted as absence is ambiguous. This interface also imposes the effects of List upon all client code using it. You would probably be very unhappy using this interface in your own code.
+This interface however is not coherent. Absence as a behavior is preserved in `Option` and `Either`, but in `List` however `extract()` could return an empty `Seq` and whether that can be interpreted as absence is ambiguous. This interface also imposes the effects of `List` upon all client code using it. You would probably be very unhappy using this interface in your own code.
 
-This interface also doesn’t make sense when trying to apply it to Future: an extract() function is by its own signature a blocking call, and you probably want something that is properly asynchronous.
+When applied to `Future`, the `extract()` function is by its own signature a blocking call. You probably want something that is properly asynchronous.
 
-Option, Either, List, Future, and IO all have different effects that dictate how term A might be produced. An axiom from object oriented programming would be to abstract what changes. Thus you have to shed the effects as implementation details. How might that impact extracting the term A?
+`Option`, `Either`, `List`, `Future`, and `IO` all have different effects that dictate how term `A` is produced. An axiom from object oriented programming would be to abstract what changes. Therefore you have to shed effects as implementation details. How might that impact extracting the term `A`?
 
-The answer: extraction cannot be generalized. All you know is that there a some term A. So how would you consume term A?
+The answer: _extraction cannot be generalized_. All you know is that there is term `A`. How would you consume term `A` if it can't be extracted?
 
-There is a way to consume the term by using an abstraction called a Functor. What is a Functor? A Functor is a simple structure, a single function called map():
+There is an abstraction called a Functor that allows you to consume term `A`. A Functor is a simple structure, a single function called `map()`:
 
+```scala
 def map(fa: F[A])(f: A => B): F[B]
+```
 
-What map() does is _lift_ the function A => B into the context so that it becomes F[A] => F[B], giving back F[B].
+What `map()` does is _lift_ the function `f: A => B` into the context so that it becomes `F[A] => F[B]`, giving back `F[B]`.
 
-This lifting of functions that map() performs is coherent across contexts. You can apply A => B to a List just as easily as you can an IO and the results of both operations are predictable. Your List[A] becomes List[B] and your IO[A] becomes IO[B].
+This _lifting_ of functions that `map()` performs is coherent across contexts. You can apply `f: A => B` to any `List[A]` just as you can an `IO[A]` and the results of both operations are predictable. Your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
 
-How would you consume the term produced by a Future or an Option? You would also use a Functor.
+How would you consume the term produced by `Future` or `Option`? You would also use a Functor.
 
-What this enables is your function A => B to be used with any Functor regardless of its specific effects. Your function A => B is immediately reusable, and this means is that you already know how to use other Functors.
+What this enables is your function `f: A => B` to be used with any Functor regardless of its specific effects. Your function `f: A => B` is immediately reusable, and this means is that you already know how to use other Functors.
 
-### Why does map() return F[B]?
+### Why does `map()` return `F[B]`?
 
-Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting a term mean if you’re using a context like Option? What about Future? Would their effects change how extraction of a term would work? Lists contain more than one instance of a term, after all!
+Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting a term mean if you’re using a context like `Option`? What about `Future`? Would their effects change how extraction of a term would work? 
+
+Extracting _the_ term from `List` flatly doesn't make sense as it has the effect of an unknowm number of instances.
 
 Because there is no way to generalize extracting a term from a context, Functors don’t allow you to operate on contexts in such a way that the term can "escape" them. Extracting terms is implementation-specific, so this capability is not generalized. 
 
-Most importantly, by keeping all operations against terms within the context, the context’s specific effects remain abstracted. Asynchronous operations with Future remain asynchronous, the length of a List remains nondeterministic, and an Option may or may not do anything.
+Most importantly, by keeping all operations against terms within the context, the context’s specific effects remain abstracted. Asynchronous operations with `Future` remain asynchronous, the length of `List` remains nondeterministic, and `Option` may or may not be present.
 
-### F[A] must produce some term A
+### `F[A]` must produce some term `A`
 
-I stated above: _"For any context F[_], it must produce some term of type A."_ If the context were guaranteed to have an instance of a term of type A then you should be able to consume it with your function A => B, right?
+I stated above: _"For any context `F[_]`, it produces some term `A`."_ If a context were guaranteed to have an instance of a term `A` then you should be able to consume it with your function `f: A => B`, right?
 
-But what if there’s nothing there, as in there are zero instances of a term of type A? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the map() function above doesn’t do anything because there isn’t anything to do. If you try to map() an F[A] with A => B then it returns a void F[B] as there’s "nothing here". It also does this without having used A => B to get there.
+But what if there’s nothing there, as in there are zero instances of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map()` function above doesn’t do anything because there isn’t anything to do. If you try to `map()` an `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". It  does this without having used `f: A => B` to get there.
 
-This behavior is referred to as _short-circuiting_ and it is a key feature of all Functors, Applicatives, and Monads. It is exploited in particular to enable control flow and error handling, which I will expand on later.
+This behavior is referred to as _short-circuiting_ and it is a key feature of all Functors, Applicatives, and Monads. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on later.
 
-Option and Either are two prime examples of short-circuiting in Functors. An Option will only map() if its term is present, and an Either will only map if its term is valid.
+`Option` and `Either` are two prime examples of short-circuiting in Functors. An `Option[A]` will only `map()` an instance od its term is present, and an `Either[A, B]` will only `map()` if an instance of the desired term is present.
 
 ### Specific examples of Functors
 
 Each context of course must provide its own implementation of map() in order for it to be a Functor. Below I outline some examples against a definition of Functor:
 
+```scala
 trait Functor[F[_]] {
   def map[A, B](fa: F[A])(f: A => B)
 }
@@ -314,6 +325,7 @@ def map(fa: List[A])(f: A => B): List[B] =
     case x :: tail => f(x) :: map(tail)(f)
     case Nil => Nil // void
   }
+```
 
 Each of these show remarkable similarities, and this isn’t uncommon across data structures. Note in particular how Lists are recursive, with the base case representing void. Functor implementations are more complex in contexts such as Futures and IO because they are working with complex state and side effects.
 
