@@ -117,11 +117,11 @@ Each kind of context carries with it a set of _effects_. Effects are modeled by 
 
 **Higher-order contexts:**
 
-* `ReaderT[F, A]`: Reading of nondeterministic implicit inputs in the context of `F`.
+* `ReaderT[F, A]`: Reading of implicit inputs in the context of `F`.
     * Propagation of configuration usually leverages this effect.
-* `WriterT[F, A]`: Writing of nondeterministic implicit outputs in the context of `F`.
+* `WriterT[F, A]`: Writing of implicit outputs in the context of `F`.
     * Logging usually leverages this effect.
-* `StateT[F, A]`: Nondeterministic implicit inputs and outputs in the context of `F`.
+* `StateT[F, A]`: Modifying implicit inputs and outputs in the context of `F`.
     * Models state changing over time.
 
 Each of these contexts have two shared qualities in that they _produce some term `A`_ and their effects dictate _how term `A` is produced_. But with such a wide array of effects, and with so little overlap between each context, how can `A` be consumed in a manner unburdened of complexity?
@@ -275,7 +275,7 @@ Functors _preserve structure_ by keeping operations within the context. For exam
 
 In both cases, the output of `map()` produces an identifiable `List[B]` and `BinaryTree[B]`. The values internally may change, as they have been mapped over by a function, and `BinaryTree[B]` specifically may rebalance itself. What matters here is that the structures are coherent and identifiable.
 
-Compare with iteration using a `for` loop
+Compare with iteration using a `for` loop:
 
 ```{.text .nowrap .numberLines}
 [1, 2, 3, 4] -> for(x) -> x={1, 2, 3, 4}
