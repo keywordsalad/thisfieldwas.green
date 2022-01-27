@@ -289,6 +289,8 @@ Compare with iteration using a `for` loop:
 
 Iteration thus _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any guarantees are purely manual. The term _procedural_ describes the steps required to preserve or create structure from this operation.
 
+This isn't to say that functional programming is only about iteration and loops. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future` you will destroy its asynchronous structure and potentially harm the performance of your application.
+
 ### Context `F[A]` must produce some term `A`
 
 I stated above: _"For any context `F[_]`, it produces some term `A`."_ If a context were guaranteed to have an instance of a term `A` then you should be able to consume it with your function `f: A => B`, right?
