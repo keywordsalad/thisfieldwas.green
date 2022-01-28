@@ -152,14 +152,14 @@ sealed trait Option[+A] {
   def isSome: Boolean = !isNone
   def isNone: Boolean = this == None
 }
-case class Some[A](override val get: A) extends Option[A]
+case class Some[+A](override val get: A) extends Option[A]
 case object None extends Option[Nothing]
 ```
 
 **`Either[A, B]`** (by convention) models failure with term `A` and success with term `B`. Term `B` is the instance you want:
 
 ```{.scala .numberLines}
-sealed trait Either[A, B] {
+sealed trait Either[+A, +B] {
   def left: A = this match {
     case Left(x) => x
     case Right(_) => throw new Exception()
@@ -174,8 +174,8 @@ sealed trait Either[A, B] {
     case Right(_) => false
   }
 }
-case class Right[A, B](override val right: B) extends Either[A, B]
-case class Left[A, B](override val left: A) extends Either[A, B]
+case class Right[+A, +B](override val right: B) extends Either[A, B]
+case class Left[+A, +B](override val left: A) extends Either[A, B]
 ```
 
 **`List[A]`** models zero or more instances of term `A`, with an unknown sort and cardinality:
@@ -185,9 +185,14 @@ sealed trait List[+A] {
   def isNil: Boolean = this == Nil
   def head: A = throw new Exception
   def tail: List[A] = throw new Exception
+  def ::[B >: A](newHead: B): List[B] = newHead :: this
 }
 case class ::[A](override val head: A, override val tail: List[A]) extends List[A]
 case object Nil extends List[Nothing]
+
+object List {
+  def apply[+A](values: A*): List[A] = values.foldRight(Nil)(_ :: _)
+}
 ```
 
 ### Extracting the instance of the term `A`
@@ -303,88 +308,182 @@ This behavior is referred to as _short-circuiting_ and it is a key feature of al
 
 ### Becoming a Functor
 
-Each context of course must provide its own implementation of `map()` in order for it to be a Functor. Below I outline some examples against a definition of Functor:
+Each context of course must provide its own implementation of `map()` in order for it to be used as a Functor. The functionality of a Functor is not inherited, however, as some contexts might be defined in third-party code where they may not be modified. To circumvent this restriction, Functor implementations are provided via typeclasses. Any type that has the shape `F[_]` may become a functor by implementing the following typeclass:
 
 ```{.scala .numberLines}
 trait Functor[F[_]] {
   def map[A, B](fa: F[A])(f: A => B): F[B]
 }
-
-implicit val optionFunctor = new Functor[Option] {
-  def map[A, B](fa: Option[A])(f: A => B): Option[B] =
-    fa match {
-      case Some(x) => Some(f(x)) // apply map
-      case None => None // void
-    }
+object Functor {
+  def apply[F[_]: Functor[F]]: Functor[F] = implicitly[Functor[F]]
 }
-
-implicit def eitherFunctor[X] = new Functor[Either[X, *]] {
-  def map[A, B](fa: Either[X, A])(f: A => B): Either[X, B] =
-    fa match {
-      case Left(x) => Left(x) // void
-      case Right(y) => Right(f(y)) // apply map
-    }
-}
-
-implicit val listFunctor = new Functor[List] {
-  def map[A, B](fa: List[A])(f: A => B): List[B] =
-    fa match {
-      case head :: tail => f(head) :: map(tail)(f) // apply map, recurse
-      case Nil => Nil // void
-    }
+object FunctorSyntax {
+  implicit class FunctorOps[F[_]](val fa: F[A]) extends AnyVal {
+    def map[B](f: A => B)(implicitly F: Functor[F]): F[B] = F.map(fa)(f)
+  }
 }
 ```
 
-Each of these show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO` and `Future` because they are managing side effects.
+Instances of the Functor typeclass simply extend the typeclass trait and are made available implicitly:
+
+```{.scala .numberLines}
+object FunctorInstances {
+  implicit val optionFunctor = new Functor[Option] {
+    def map[A, B](fa: Option[A])(f: A => B): Option[B] =
+      fa match {
+        case Some(x) => Some(f(x)) // apply map
+        case None => None // void
+      }
+  }
+  implicit def eitherFunctor[X] = new Functor[Either[X, *]] {
+    def map[A, B](fa: Either[X, A])(f: A => B): Either[X, B] =
+      fa match {
+        case Left(x) => Left(x) // void
+        case Right(y) => Right(f(y)) // apply map
+      }
+  }
+  implicit val listFunctor = new Functor[List] {
+    def map[A, B](fa: List[A])(f: A => B): List[B] =
+      fa match {
+        case head :: tail => f(head) :: map(tail)(f) // apply map, recurse
+        case Nil => Nil // void
+      }
+  }
+}
+```
+
+Each of these instances show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO` and `Future` because they are managing side effects.
 
 Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable these. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, A]`, `Left` may be used to carry error state in its term `X`. `Left` being able to carry its own term is one of `Either`’s specific effects.
 
-Functors allow for the following function definitions:
+Defining a `fizzBuzz()` function that uses a Functor looks like this:
 
-EXAMPLES
+```{.scala .numberLines}
+import Functor
+import FunctorOps._
+def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
+  context.map {
+    case x if x % 3 == 0 && x % 5 == 0 => "fizzbuzz"
+    case x if x % 3 == 0 => "fizz"
+    case x if x % 3 == 0 => "buzz"
+    case x => x.toString
+  }
+```
+
+And then `fizzBuzz()` may be used for all contexts implementing the Functor typeclass:
+
+```{.scala .numberLines}
+import FunctorInstances._
+
+println(fizzBuzz(Some(3)))
+// => Some("fizz")
+println(fizzBuzz(None))
+// => None
+
+println(fizzBuzz(Right(5)))
+// => Right("buzz")
+println(fizzBuzz(Left("no fizz or buzz")))
+// => Left("no fizz or buzz")
+
+println(fizzBuzz(List(1, 2, 3, 4, 5, 15)))
+// => List("1", "2", "fizz", "4", "buzz", "fizzbuzz")
+println(fizzBuzz(List()))
+// => List()
+```
 
 ## Motivating Applicatives
 
-Functors permits you to consume a term via map():
+Functors permits you to consume a term via `map()`:
 
+```{.scala .numberLines}
 def map(fa: F[A])(f: A => B): F[B]
+```
 
-Consider for a moment: with a Functor you are able to work within the scope of a single term within a context. But what happens if you have two contexts and you want to operate on the terms from both?
+Consider for a moment: with a Functor you are able to work within the scope of a term within a single context. But what happens if you have two contexts and you want to operate on the terms from each at the same time?
 
-Take for example these two contexts and the function signature for product:
+Take for example these two contexts and the function signature for `combine()`:
 
+```{.scala .numberLines}
 val fa: F[A]
 val fb: F[B]
 
-def product(a: A)(b: B): (A, B)
+def combine(x: A, y: B): C
+```
 
-How do you apply product() to the terms produced by the two contexts? This is what motivates Applicatives.
+How do you apply `combine()` to the terms `A` and `B` produced by the two contexts? This is what motivates Applicatives.
 
-Like a Functor, an Applicative is also a structure. It requires a Functor, and defines two more functions.
+**Applicatives** are an abstraction that allow you to consume terms `A` and `B` in parallel. They are also known by their more formal name _Applicative Functor_ as they are a _special case_ of Functor. Like Functors, they are also a simple structure and define two functions:
 
-A constructor with which an term may be lifted into a context:
-* def pure(a: A): F[A]
+1. A constructor to _lift_ a term into the context:
 
-A function that is able to apply a function lifted into a context to a lifted term:
-* def ap(ff: F[A => B])(fa: F[A]): F[B]
+    ```{.scala .numberLines}
+    def pure(a: A): F[A]
+    ```
 
-These two functions together enable sequencing the consumption of terms so that their products may be worked with together. I will demonstrate how this works by defining these for Option:
+    The name `pure()` might feel alien. You can remember the name by thinking of it like this: By taking an instance of term `A`, `ap()` gives you back a context with a present instance of the term `A`, which makes it a _non void_, _valid_, or _**pure**_ context.
 
-def pure(a: A): Option[A] =
-  Some(a)
+2. A function that is able to apply a _lifted function_ to a _lifted term_:
 
-def ap(ff: Option[A => B])(fa: Option[A]): Option[B] =
-  ff match {
-    case Some(f) => fa match {
-      case Some(x) => Some(f(x))
-      case None => None
-    case None => None
+    ```{.scala .numberLines}
+    def ap(ff: F[A => B])(fa: F[A]): F[B]
+    ```
+
+    The name of the function `ap()` is _apply_, but it is written _ap_ as it has its roots in higher math, where names are frequently one letter.
+
+Here is an example of the two functions defined for the `Option` context:
+
+```{.scala .numberLines}
+def pure(a: A): Option[A] = Some(a)
+
+def ap(ff: Option[A => B])(fa: Option[A]): Option[B] = {
+  (ff, fa) match {
+    case (Some(f), Some(x)) => Some(f(x))
+    case _ => None // void
   }
+```
 
-And then to define product():
+Notice that Applicatives also respect a _void_ effect like a Functor does with some specialization: _both_ terms must be present as otherwise there would be no function to apply or no term to apply the function to. Applicative `ap()` thus is an all-or-nothing operation.
 
-def product(fa: F[A])(fb: F[B]): F[(A, B)] =
-    ap(ap(pure(x => y => (x, y)))(fa))(fb)
+Applicatives permit the definition of a higher-order function called `product()` function may be defined in terms of both `pure()` and `ap()`. It is the parallel analog to Functor's `map()` function:
+
+```{.scala .numberLines}
+def product(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
+    ap(ap(pure(x => y => f(x, y)))(fa))(fb)
+```
+
+The function argument to `product()` given is lifted into the context `F` where it may be applied to the terms produced by the first two contexts `A` and `B`. If either `A` or `B` are absent, then `f` is not applied and a _void_ `F[C]` is returned.
+
+With this `product()` function, you are able to apply `combine()` to the terms produced by both contexts:
+
+```{.scala .numberLines}
+// pseudocode
+val fa: F[A]
+val fb: F[B]
+
+def combine(x: A, y: B): C
+
+product(fa)(fb)(combine)
+// => F[C]
+```
+
+### Becoming an Applicative
+
+Like Functor, each context must provide its own implementation of `pure()` and `ap()` in order for it to be used as an Applicative. Any type that has the shape `F[_]` may become an Applicative by implementing the following typeclass:
+
+```{.scala .numberLines}
+trait Applicative[F[_]] {
+  def pure[A](a: A): F[A]
+}
+object Applicative {
+  def apply[F[_]: Applicative[F]]: Applicative[F] = implicitly[Applicative[F]]
+}
+object ApplicativeSyntax {
+  implicit class ApplicativeOps[F[_]](val fa: F[A]) extends AnyVal {
+    def ap[B](f: A => B)(implicitly F: Applicative[F]): F[B] = F.map(fa)(f)
+  }
+}
+```
+
 
 ### Motivating Monads
 
