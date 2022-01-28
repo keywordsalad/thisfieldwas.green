@@ -473,17 +473,17 @@ Like Functor, each context must provide its own implementation of `pure()` and `
 ```{.scala .numberLines}
 trait Applicative[F[_]] {
   def pure[A](a: A): F[A]
+  def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
 }
 object Applicative {
   def apply[F[_]: Applicative[F]]: Applicative[F] = implicitly[Applicative[F]]
 }
 object ApplicativeSyntax {
-  implicit class ApplicativeOps[F[_]](val fa: F[A]) extends AnyVal {
-    def ap[B](f: A => B)(implicitly F: Applicative[F]): F[B] = F.map(fa)(f)
+  implicit class ApplicativeOps[F[_], A, B](val ff: F[A => B]) extends AnyVal {
+    def ap[A](fa: F[A])(implicitly F: Applicative[F]): F[B] = F.ap(ff)(fa)
   }
 }
 ```
-
 
 ### Motivating Monads
 
