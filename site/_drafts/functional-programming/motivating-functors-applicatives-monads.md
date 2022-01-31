@@ -82,7 +82,68 @@ These complexities can be described in terms of effects. Each of the following e
 * **Implicit output**: Logging and metrics
 * **State**: Change over time
 
-The actual list of effects is innumerable, but these ones are common. Fortunately there are ways to model subsets and contain the scope of their impact so that code is less complex.
+The actual list of effects is innumerable, but these ones are common. 
+
+### Demonstrating effects in code
+
+Take for example this code from a hypothetical payroll system:
+
+```{.java .numberLines}
+EmployeeRepo employeeRepo;
+BankAchClient achClient;
+PayCalculator payCalc;
+
+bool runPayroll(employeeId: Long) {
+    Employee employee = employeeRepo.find(employeeId)
+    if (employee == null) {
+        Logger.error("Missing employee " + employeeId.toString());
+        return false;
+    }
+    Paycheck paycheck = payCalc.calculatePaycheck(employee);
+    if (paycheck == null) {
+        Logger.error("No paycheck for " + employeeId.toString());
+        return false;
+    }
+    String companyAcctNo = PayrollConfig.get("companyAcctNo");
+    String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
+    String response = achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck);
+    return response.equals("SUCCESS");
+}
+```
+
+The code above demonstrates complexity in the dimensions of:
+
+* **Absence** as the employee may not be found nor their paycheck calculated.
+* **Async IO** where database queries and network calls may be blocking.
+* **Validation** by reading the response returned by the bank.
+* **Implicit inputs** through configuration of the company's banking information.
+* **Implicit outputs** through logging and allowing exceptions to bubble up from database and network operations.
+* This function's output is also _unclear_ as `false` can mean failure for any reason, but exceptions can also occur.
+
+Fortunately there are ways to model subsets of these effects and contain the scope of their impact so that code is less complex. An example in Scala psuedocode might appear as the following:
+
+```{.scala .numberLines}
+def runPayroll(employeeId: Long): PayrollEffect =
+  for {
+    employee <- employeeRepo.find(employee).flatMap {
+      case Some(e) => pure(e)
+      case None    => fail(EmployeeMissing)
+    }
+    paycheck <- payCalc.calculatePaycheck(employee) match {
+      case Some(p) => pure(p)
+      case None    => fail(PaycheckMissing)
+    }
+    companyAcctNo <- getConfig("companyAccountNo")
+    companyRoutingNo <- getConfig("companyRoutingNo")
+    response <- achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck)
+      .flatMap {
+        case "SUCCESS" => pure(PayrollDeposited)
+        case msg       => fail(PayrollError(msg))
+      }
+  } yield response
+```
+
+This code looks the same, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away most effects by making explicit all possible outcomes and allowing for async IO. The flow of execution through this code is not performed procedurally: instead flow is controlled by declaring where errors occcur and the effect abstraction short-circuits itself. This abstraction of effects coupled with explicit typing allows for safer code. But how are abstractions over effects created?
 
 Previously I described function composition as a simple case of `h := g ∘ f`. Functors, Applicatives, and Monads address a particular kind of function composition, **composition of functional effects**, which I will demonstrate in the following sections.
 
