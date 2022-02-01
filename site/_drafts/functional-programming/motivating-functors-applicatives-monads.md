@@ -506,16 +506,16 @@ def ap(ff: Option[A => B])(fa: Option[A]): Option[B] = {
 
 Notice that Applicatives also respect a _void_ effect like a Functor does with some specialization: _both_ terms must be present as otherwise there would be no function to apply or no term to apply the function to. Applicative `ap()` thus is an all-or-nothing operation.
 
-Applicatives permit the definition of a higher-order function called `product()` function may be defined in terms of both `pure()` and `ap()`. It is the parallel analog to Functor's `map()` function:
+Applicatives permit the definition of a higher-order function called `map2()` which may be defined in terms of both `pure()` and `ap()`. It is the parallel analog to Functor's `map()` function:
 
 ```{.scala .numberLines}
-def product(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
-    ap(ap(pure(x => y => f(x, y)))(fa))(fb)
+def map2(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
+  ap(map(fa)(a => b => f(a, b)))(fb)
 ```
 
-The function argument to `product()` given is lifted into the context `F` where it may be applied to the terms produced by the first two contexts `A` and `B`. If either `A` or `B` are absent, then `f` is not applied and a _void_ `F[C]` is returned.
+The function argument to `map2()` is lifted into the context `F` where it may be applied to the terms produced by the first two contexts `A` and `B`. If either `A` or `B` are absent, then `f` is not applied and a _void_ `F[C]` is returned.
 
-With this `product()` function, you are able to apply `combine()` to the terms produced by both contexts:
+With this `map2()` function, you are able to apply `combine()` to the terms produced by both contexts:
 
 ```{.scala .numberLines}
 // pseudocode
@@ -524,29 +524,59 @@ val fb: F[B]
 
 def combine(x: A, y: B): C
 
-product(fa)(fb)(combine)
+map2(fa)(fb)(combine)
 // => F[C]
 ```
 
 ### Becoming an Applicative
 
-Like Functor, each context must provide its own implementation of `pure()` and `ap()` in order for it to be used as an Applicative. Any type that has the shape `F[_]` may become an Applicative by implementing the following typeclass:
+Like Functor, each context must provide its own implementation of `pure()` and `ap()` in order for it to be used as an Applicative. Any type with the shape of `F[_]` may become an Applicative by implementing the following typeclass:
 
 ```{.scala .numberLines}
-trait Applicative[F[_]] {
+trait Applicative[F[_]] extends Functor[F[_]] {
   def pure[A](a: A): F[A]
   def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
 
-  // Applicative instances get this function for free!
-  def product(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
-    ap(ap(pure(x => y => f(x, y)))(fa))(fb)
+  // Applicative instances get map() for free!
+  def map(fa: F[A])(f: A => B): F[B] =
+    ap(pure(f))(fa)
+
+  // Applicative instances get map2() for free!
+  def map2(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
+    ap(map(fa)(a => b => f(a, b)))(fb)
 }
 object Applicative {
   def apply[F[_]: Applicative[F]]: Applicative[F] = implicitly[Applicative[F]]
 }
-object ApplicativeSyntax {
-  implicit class ApplicativeOps[F[_], A, B](val ff: F[A => B]) extends AnyVal {
-    def ap[A](fa: F[A])(implicitly F: Applicative[F]): F[B] = F.ap(ff)(fa)
+```
+
+Notice that Applicatives build on top of Functors. In the above typeclass, `map()` and `map2()` are provided default implementations in terms of `pure()` and `ap()`. Instances may override these functions if they choose. Our Functor instances from before may now be upgraded to Applicatives:
+
+```{.scala .numberLines}
+object ApplicativeInstances {
+  implicit val optionApplicative: Applicative[Option] = new Applicative[Option] {
+    def pure[A](a: A): Option[A] = Some(a)
+    def ap[A, B](ff: Option[A => B])(fa: Option[A]): Option[B] =
+      (ff, fa) match {
+        case (Some(f), Some(a)) => Some(f(a))
+        case _ => None
+      }
+  }
+  implicit def eitherApplicative[X]: Applicative[Either[X, *]] = new Applicative[Either[X, *]] {
+    def pure[A](a: A): Either[X, A] = Right(a)
+    def ap[A, B](ff: Either[X, A => B])(fa: Either[X, A]): Either[X, B] =
+      (ff, fa) match {
+        case (Right(f), Right(a)) => Right(f(a))
+        case (x, _) => x
+      }
+  }
+  implicit val listApplicative: Applicative[List] = new Applicative[List] {
+    def pure[A](a: A): List[A] = List(a)
+    def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] =
+      (ff, fa) match {
+        case (f :: ffTail, a :: faTail) => f(a) :: ap(ffTail)(faTail)
+        case _ => Nil
+      }
   }
 }
 ```
