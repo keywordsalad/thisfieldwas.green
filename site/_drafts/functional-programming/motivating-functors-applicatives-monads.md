@@ -553,7 +553,7 @@ object ApplicativeSyntax {
 
 ## Motivating Monads
 
-Functors give you `map()` so that you may consume a term from a single context. Applicatives give you `pure()` and `ap()` so that you may consume terms from two or more contexts in parallel. But what if you want to sequence consumption of contexts? Functors for example will only ever operate in the scope of a single context and Applicatives only consume from two contexts in parallel, reducing them into one. At no point do Functors or Applicatives themselves allow you to alter the state of the context.
+Functors give you `map()` so that you may consume a term from a single context. Applicatives give you `pure()` and `ap()` so that you may consume terms from two or more contexts in parallel. But what if you want to sequence consumption of terms? Functors for example will only ever operate in the scope of a single context, and Applicatives only consume from contexts in parallel. Neither Functors nor Applicatives allow you to alter the state of the context such that downstream operations are dependent upon them succeeding.
 
 Concretely, at some point in your program you will want to write code that operates against the result of a previous operation and decide whether to continue:
 
@@ -619,14 +619,14 @@ def depositTwentyBucks(): Future[DepositResponse] =
     case Some(userId) =>
       getUser(userId).flatMap {
         case None => fail(UserNotFound)
-        case Some(user) => 
+        case Some(user) =>
           if (!sessionIsValid(user)) {
             fail(RequireUserLogin)
           } else {
             getBankAccount(user).flatMap {
-              case None => 
+              case None =>
                 fail(BankAccountNotFound)
-              case Some(bankAccount) => 
+              case Some(bankAccount) =>
                 bankService.depositMoney(bankAccount, "$20")
           }
         )
@@ -658,10 +658,10 @@ def cond(success: Boolean, trueCase: => F, falseCase: => F): F =
 
 This code is markedly different, and demonstrates a few features:
 
-* Each logical instruction is on its own line and branching logic has practically disappeared from the primary operation. 
-* Each instruction is dependent upon the previous instruction succeeding and the entire operation short-circuits on failure. 
-* Concretely the Monad being used here is a `Future`, which is asynchronous. At no point in the code is complexity imposed by using asynchronous operations. 
-* Explicit branching is moved to dedicated, generalized functions which provide mechanisms for injecting different contexts by condition. 
+* Each logical instruction is on its own line and branching logic has practically disappeared from the primary operation.
+* Each instruction is dependent upon the previous instruction succeeding and the entire operation short-circuits on failure.
+* Concretely the Monad being used here is a `Future`, which is asynchronous. At no point in the code is complexity imposed by using asynchronous operations.
+* Explicit branching is moved to dedicated, generalized functions which provide mechanisms for injecting different contexts by condition.
 
 How does this code look to you?
 
