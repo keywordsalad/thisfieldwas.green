@@ -82,7 +82,7 @@ These complexities can be described in terms of effects. Each of the following e
 * **Implicit output**: Logging and metrics
 * **State**: Change over time
 
-The actual list of effects is innumerable, but these ones are common. 
+The actual list of effects is innumerable, but these ones are common.
 
 ### Demonstrating effects in code
 
@@ -93,7 +93,7 @@ EmployeeRepo employeeRepo;
 BankAchClient achClient;
 PayCalculator payCalc;
 
-bool runPayroll(employeeId: Long) {
+bool runPayroll(long employeeId) {
     Employee employee = employeeRepo.find(employeeId)
     if (employee == null) {
         Logger.error("Missing employee " + employeeId.toString());
@@ -385,7 +385,7 @@ object FunctorSyntax {
 }
 ```
 
-Instances of the Functor typeclass simply extend the typeclass trait and are made available implicitly:
+Instances of the Functor typeclass simply extend the typeclass trait as implicits so that they may be imported:
 
 ```{.scala .numberLines}
 object FunctorInstances {
@@ -434,6 +434,7 @@ def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
 And then `fizzBuzz()` may be used for all contexts implementing the Functor typeclass:
 
 ```{.scala .numberLines}
+// import the Functor instance implicits
 import FunctorInstances._
 
 println(fizzBuzz(Some(3)))
@@ -535,6 +536,10 @@ Like Functor, each context must provide its own implementation of `pure()` and `
 trait Applicative[F[_]] {
   def pure[A](a: A): F[A]
   def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
+
+  // Applicative instances get this function for free!
+  def product(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
+    ap(ap(pure(x => y => f(x, y)))(fa))(fb)
 }
 object Applicative {
   def apply[F[_]: Applicative[F]]: Applicative[F] = implicitly[Applicative[F]]
@@ -546,9 +551,121 @@ object ApplicativeSyntax {
 }
 ```
 
-### Motivating Monads
+## Motivating Monads
 
-Functors give you map() so that you may consume a term from a single context. Applicatives give you pure() and ap() so that you may consume terms from two or more contexts. But what if one of your functions returns a context itself? You can use A => B for either map() or with ap() if you lift it with pure(). But what if you’re function is A => F[B]?
+Functors give you `map()` so that you may consume a term from a single context. Applicatives give you `pure()` and `ap()` so that you may consume terms from two or more contexts in parallel. But what if you want to sequence consumption of contexts? Functors for example will only ever operate in the scope of a single context and Applicatives only consume from two contexts in parallel, reducing them into one. At no point do Functors or Applicatives themselves allow you to alter the state of the context.
+
+Concretely, at some point in your program you will want to write code that operates against the result of a previous operation and decide whether to continue:
+
+```{.scala .numberLines}
+val userId = session("userId")
+if (!userId) {
+  redirect("/login")
+} else {
+  val user = getUser(userId)
+  if (!user) {
+    redirect("/error", message = "User not found")
+  } else if (!sessionIsValid(user)) {
+    redirect("/login")
+  } else {
+    bankAccount = getBankAccount(user)
+    if (!bankAccount) {
+      display("/error", message = "User doesn't have bank account")
+    } else if (!bankService.depositMoney(bankAccount, "$20")) {
+      display("/error", message = "Failed to deposit money")
+    } else {
+      display("/success", message = "Got the money!")
+    }
+  }
+}
+```
+
+As you can see from the above, this code deposits $20 only if:
+
+   1. There is a user ID present in the session.
+   2. The user exists.
+   3. The user has a valid session.
+   4. The user has a bank account.
+   5. The bank service successfully deposits money into the account.
+
+There is a great deal of branching logic in this code that separates success and failure cases as the result of previous operations. This _imperative_ sequencing of operations requires that you manually short-circuit the program if a previous operation fails. This sequencing is what motivates Monads.
+
+**Monads** are an abstraction that permit the sequencing of operations. Recall that `map()` accepts a function `f: A => B` as one of its arguments. Monads are a _special case_ of Functor that arise when the term `B` in `f: A => B` is known to have the shape `F[_]`. Specifically, the term `B` itself is an instance of the same context `F`. Consequently, when `map()` is applied with a function `f: A => F[B]` you will receive a nested context `F[F[B]]`. How would you specialize `map()` such that you receive `F[B]` instead?
+
+Monads, like Functors, are a simple structure and define a single function `join()` which joins a nested context with the outer context, or in other words, it _flattens_ the context:
+
+```{.scala .numberLines}
+def join(ffb: F[F[B]]): F[B]
+```
+
+With the `join()` function, Monad provides a default implementation of `flatMap()` which allows for composing operations in the same manner as `map()` and `ap()`:
+
+```{.scala .numberLines}
+def flatMap(fa: F[A])(f: A => F[B]): F[B] =
+  join(map(fa)(f))
+```
+
+What these two functions enable is a capability like `map()` in that term `A` may be consumed with a provided function `f: A => F[B]` and specialized in that new contexts such as `F[B]` may be created as the result of their operation. Two key capabilities are enabled:
+
+* _Imperative programming_ where subsequent operations are dependent upon the results of previous operations.
+* _Control flow_ by exploiting the _void effect_ as Monads allow you to inject a void context to short-circuit an operation.
+
+Armed with Monads the previous code may be rewritten using Scala's for-comprehension, a syntax sugar over `flatMap()` and `map()`:
+
+```{.scala .numberLines}
+def depositTwentyBucks(): Future[DepositResponse] =
+  session("userId") match {
+    case None => fail(RequireUserLogin)
+    case Some(userId) =>
+      getUser(userId).flatMap {
+        case None => fail(UserNotFound)
+        case Some(user) => 
+          if (!sessionIsValid(user)) {
+            fail(RequireUserLogin)
+          } else {
+            getBankAccount(user).flatMap {
+              case None => 
+                fail(BankAccountNotFound)
+              case Some(bankAccount) => 
+                bankService.depositMoney(bankAccount, "$20")
+          }
+        )
+      )
+```
+
+This code seems a bit hard on the eyes, doesn't it? The deep `>` shape of the code is referred to as the _pyramid of death_ and is an unfortunate feature of `flatMap()`-heavy code. There is still branching logic as two contexts `Option` and `Future` are being used simultaneously. However, Monads and Monad-like structures are so common in Scala that there is a special syntax for this kind of code, and with a little refactoring the code may be cleaned:
+
+```{.scala .numberLines}
+def depositTwentyBucks(): Future[DepositResponse] =
+  for {
+    userId <- someOrElse(session("userId"), fail(RequireUserLogin))
+    user <- getUser(userId).flatMap(someOrElse(_, fail(UserNotFound)))
+    _ <- cond(sessionIsValid(user), (), fail(RequireUserLogin))
+    bankAccount <- getBankAccount(user).flatMap(someOrElse(_, fail(BankAccountNotFound)))
+    result <- bankService.depositMoney(bankAccount, "$20")
+  } yield result
+
+def someOrElse[F[_]: Applicative](opt: Option[A], defaultCtx: => F[A]): F[A] =
+  opt match {
+    case Some(x) => Applicative[F].pure(x)
+    case None    => defaultCtx
+  }
+
+def cond(success: Boolean, trueCase: => F, falseCase: => F): F =
+  if (success) trueCase
+  else falseCase
+```
+
+This code is markedly different, and demonstrates a few features:
+
+* Each logical instruction is on its own line and branching logic has practically disappeared from the primary operation. 
+* Each instruction is dependent upon the previous instruction succeeding and the entire operation short-circuits on failure. 
+* Concretely the Monad being used here is a `Future`, which is asynchronous. At no point in the code is complexity imposed by using asynchronous operations. 
+* Explicit branching is moved to dedicated, generalized functions which provide mechanisms for injecting different contexts by condition. 
+
+How does this code look to you?
+
+### Becoming a Monad
 
 ## Functors, Applicatives, and Monads: A philosophical perspective
 
