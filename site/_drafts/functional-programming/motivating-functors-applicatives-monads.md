@@ -663,7 +663,7 @@ def depositTwentyBucks(): Future[DepositResponse] =
       )
 ```
 
-This code seems a bit hard on the eyes, doesn't it? The deep `>` shape of the code is referred to as the _pyramid of death_ and is an unfortunate feature of `flatMap()`-heavy code. There is still branching logic as two contexts `Option` and `Future` are being used simultaneously. However, Monads and Monad-like structures are so common in Scala that there is a special syntax for this kind of code, and with a little refactoring the code may be cleaned:
+This code seems a bit hard on the eyes, doesn't it? The deep `>` or _V_ shape of the code is referred to as the _pyramid of death_ and is an unfortunate feature of `flatMap()`-heavy code. There is still branching logic as two contexts `Option` and `Future` are being used simultaneously. However, Monads and Monad-like structures are so common in Scala that there is a special syntax for this kind of code, and with a little refactoring the code may be brought into a flattened layout:
 
 ```{.scala .numberLines}
 def depositTwentyBucks(): Future[DepositResponse] =
@@ -675,13 +675,13 @@ def depositTwentyBucks(): Future[DepositResponse] =
     result <- bankService.depositMoney(bankAccount, "$20")
   } yield result
 
-def someOrElse[F[_]: Applicative](opt: Option[A], defaultCtx: => F[A]): F[A] =
+def someOrElse[F[_]: Applicative, A](opt: Option[A], defaultCtx: => F[A]): F[A] =
   opt match {
     case Some(x) => Applicative[F].pure(x)
     case None    => defaultCtx
   }
 
-def cond(success: Boolean, trueCase: => F, falseCase: => F): F =
+def cond[A](success: Boolean, trueCase: => A, falseCase: => A): A =
   if (success) trueCase
   else falseCase
 ```
@@ -691,11 +691,26 @@ This code is markedly different, and demonstrates a few features:
 * Each logical instruction is on its own line and branching logic has practically disappeared from the primary operation.
 * Each instruction is dependent upon the previous instruction succeeding and the entire operation short-circuits on failure.
 * Concretely the Monad being used here is a `Future`, which is asynchronous. At no point in the code is complexity imposed by using asynchronous operations.
-* Explicit branching is moved to dedicated, generalized functions which provide mechanisms for injecting different contexts by condition.
+* Explicit branching is moved to dedicated generalized functions which provide mechanisms for injecting different contexts by condition.
 
 How does this code look to you?
 
 ### Becoming a Monad
+
+Like Functor and Applicative, each context must provide their own implementation of `flatten()` in order for it to be used as a Monad. Any type with the shape `F[_]` may become a Monad by implementing the following typeclass:
+
+```{.scala .numberLines}
+trait Monad[F[_]] extends Applicative[F] {
+
+  def join[A](ffa: F[F[A]]): F[A]
+
+  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] =
+    join(map(fa)(f))
+
+  def ap[A, B](ff: F[A => B])(fa: F[A]): F[B] =
+    map()
+}
+```
 
 ## Functors, Applicatives, and Monads: A philosophical perspective
 
