@@ -353,7 +353,7 @@ Compare with iteration using a `for` loop:
  1   3 5   7
 ```
 
-Iteration thus _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any guarantees are purely manual. The term _procedural_ describes the steps required to preserve or create structure from this operation.
+Iteration thus _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any guarantees are purely manual. Structure is discontinuous and to rebuild it requires following _procedural_ steps.
 
 This isn't to say that functional programming is only about iteration and loops. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future` you will destroy its asynchronous structure and potentially harm the performance of your application.
 
@@ -361,11 +361,11 @@ This isn't to say that functional programming is only about iteration and loops.
 
 I stated above: _"For any context `F[_]`, it produces some term `A`."_ If a context were guaranteed to have an instance of a term `A` then you should be able to consume it with your function `f: A => B`, right?
 
-But what if there’s nothing there, as in there are _zero instances_ of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map()` function above doesn’t do anything because there isn’t anything to do. If you try to `map()` an `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". It does this without having used `f: A => B` to get there.
+But what if there’s nothing there, as in there are _zero instances_ of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void effect_, then the `map()` function above doesn’t do anything because there isn’t anything to do. If you try to `map()` an `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". It does this without having used `f: A => B` to get there.
 
 This behavior is referred to as _short-circuiting_ and it is a key feature of all Functors, Applicatives, and Monads. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on later.
 
-`Option` and `Either` are two prime examples of short-circuiting in Functors. An `Option[A]` will only `map()` an instance of its term is present, and an `Either[A, B]` will only `map()` if an instance of the desired term `B` is present.
+`Option` and `Either` are two prime examples of short-circuiting in Functors. An `Option[A]` will only `map()` an instance of its term is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
 
 ### Becoming a Functor
 
@@ -504,7 +504,7 @@ def ap(ff: Option[A => B])(fa: Option[A]): Option[B] = {
   }
 ```
 
-Notice that Applicatives also respect a _void_ effect like a Functor does with some specialization: _both_ terms must be present as otherwise there would be no function to apply or no term to apply the function to. Applicative `ap()` thus is an all-or-nothing operation.
+Notice that Applicatives also respect a _void effect_ like a Functor does with some specialization: _both_ terms must be present as otherwise there would be no function to apply or no term to apply the function to. Applicative `ap()` thus is an all-or-nothing operation.
 
 Applicatives permit the definition of a higher-order function called `map2()` which may be defined in terms of both `pure()` and `ap()`. It is the parallel analog to Functor's `map()` function:
 
@@ -618,29 +618,22 @@ As you can see from the above, this code deposits $20 only if:
    4. The user has a bank account.
    5. The bank service successfully deposits money into the account.
 
-There is a great deal of branching logic in this code that separates success and failure cases as the result of previous operations. This _imperative_ sequencing of operations requires that you manually short-circuit the program if a previous operation fails. This sequencing is what motivates Monads.
+There is a great deal of branching logic in this code that separates success and failure cases as the result of previous operations. This _imperative_ sequencing of operations requires that you manually short-circuit the program if a previous operation fails. This requirement to sequence operations is what motivates Monads.
 
 **Monads** are an abstraction that permit the sequencing of operations. Recall that `map()` accepts a function `f: A => B` as one of its arguments. Monads are a _special case_ of Functor that arise when the term `B` in `f: A => B` is known to have the shape `F[_]`. Specifically, the term `B` itself is an instance of the same context `F`. Consequently, when `map()` is applied with a function `f: A => F[B]` you will receive a nested context `F[F[B]]`. How would you specialize `map()` such that you receive `F[B]` instead?
 
-Monads, like Functors, are a simple structure and define a single function `join()` which joins a nested context with the outer context, or in other words, it _flattens_ the context:
+Monads, like Functors, are a simple structure and define a single function `flatMap()` which joins a nested context with the outer context, or in other words, it _flattens_ the context after it has been mapped:
 
 ```{.scala .numberLines}
-def join(ffb: F[F[B]]): F[B]
+def flatMap(fa: F[A])(f: A => F[B]): F[B]
 ```
 
-With the `join()` function, Monad provides a default implementation of `flatMap()` which allows for composing operations in the same manner as `map()` and `ap()`:
-
-```{.scala .numberLines}
-def flatMap(fa: F[A])(f: A => F[B]): F[B] =
-  join(map(fa)(f))
-```
-
-What these two functions enable is a capability like `map()` in that term `A` may be consumed with a provided function `f: A => F[B]` and specialized in that new contexts such as `F[B]` may be created as the result of their operation. Two key capabilities are enabled:
+What this function enables is a capability like `map()` in that term `A` may be consumed with a provided function `f: A => F[B]` and specialized in that new contexts such as `F[B]` may be created as the result of their operation. Two key capabilities are enabled:
 
 * _Imperative programming_ where subsequent operations are dependent upon the results of previous operations.
 * _Control flow_ by exploiting the _void effect_ as Monads allow you to inject a void context to short-circuit an operation.
 
-Armed with Monads the previous code may be rewritten using Scala's for-comprehension, a syntax sugar over `flatMap()` and `map()`:
+Armed with Monads the previous code may be rewritten using `flatMap()`:
 
 ```{.scala .numberLines}
 def depositTwentyBucks(): Future[DepositResponse] =
@@ -663,7 +656,7 @@ def depositTwentyBucks(): Future[DepositResponse] =
       )
 ```
 
-This code seems a bit hard on the eyes, doesn't it? The deep `>` or _V_ shape of the code is referred to as the _pyramid of death_ and is an unfortunate feature of `flatMap()`-heavy code. There is still branching logic as two contexts `Option` and `Future` are being used simultaneously. However, Monads and Monad-like structures are so common in Scala that there is a special syntax for this kind of code, and with a little refactoring the code may be brought into a flattened layout:
+This code seems a bit hard on the eyes, doesn't it? The deep `>` or _V_ shape of the code is referred to as the _pyramid of death_ and is an unfortunate feature of `flatMap()`-heavy code. There is still branching logic as two contexts, `Option` and `Future`, are being used simultaneously. However, Monads and Monad-like structures are so common in Scala that there is a special syntax for this kind of code, and with a little refactoring the code may be brought into a flattened layout:
 
 ```{.scala .numberLines}
 def depositTwentyBucks(): Future[DepositResponse] =
@@ -697,20 +690,58 @@ How does this code look to you?
 
 ### Becoming a Monad
 
-Like Functor and Applicative, each context must provide their own implementation of `flatten()` in order for it to be used as a Monad. Any type with the shape `F[_]` may become a Monad by implementing the following typeclass:
+Like Functor and Applicative, each context must provide their own implementation of `flatMap()` in order for it to be used as a Monad. Any type with the shape `F[_]` may become a Monad by implementing the following typeclass:
 
 ```{.scala .numberLines}
 trait Monad[F[_]] extends Applicative[F] {
 
-  def join[A](ffa: F[F[A]]): F[A]
+  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
 
-  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] =
-    join(map(fa)(f))
-
-  def ap[A, B](ff: F[A => B])(fa: F[A]): F[B] =
-    map()
+  def flatten[A](ffa: F[F[A]]): F[A] =
+    flatMap(ffa)(fa => fa)
+}
+object Monad {
+  
+  def apply[F[_]: Monad]: Monad[F] = implicitly[Monad[F]]
+}
+object MonadSyntax {
+  implicit class MonadOps[F[_], A](fa: F[A]) extends AnyVal {
+    def flatMap[B](f: A => F[B])(implicit F: Monad[F]): F[B] =
+      F.flatMap(fa)(f)
+  }
 }
 ```
+
+Notice that Monads build on top of Applicatives. In the above typeclass, `flatMap()` is provided a default implementation in terms of `map()` and `join()`. Instances may override this function if they choose. Our Applicative instances from before may now be upgraded to Monads:
+
+```{.scala .numberLines}
+object MonadInstances {
+  implicit val optionMonad: Monad[Option] = new Monad[Option] {
+    def flatMap[A](fa: Option[A])(f: A => F[B]): Option[B] =
+      ffa match {
+        case Some(a) => f(a)
+        case None => None
+      }
+    // ...
+  }
+  implicit def eitherApplicative[X]: Applicative[Either[X, *]] = new Applicative[Either[X, *]] {
+    def flatMap[A, B](fa: Either[X, A])(f: A => Either[X, B]): Either[X, B] =
+      fa match {
+        case Right(a) => f(a)
+        case Left(x) => Left(x)
+      }
+    // ...
+  }
+  implicit val listApplicative: Applicative[List] = new Applicative[List] {
+    def pure[A](a: A): List[A] = List(a)
+    def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] =
+      (ff, fa) match {
+        case (f :: ffTail, a :: faTail) => f(a) :: ap(ffTail)(faTail)
+        case _ => Nil
+      }
+  }
+}
+
 
 ## Functors, Applicatives, and Monads: A philosophical perspective
 
