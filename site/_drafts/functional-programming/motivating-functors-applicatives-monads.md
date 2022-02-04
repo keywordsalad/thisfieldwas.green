@@ -249,6 +249,9 @@ sealed trait List[+A] {
   def head: A = throw new Exception
   def tail: List[A] = throw new Exception
   def ::[B >: A](newHead: B): List[B] = newHead :: this
+  def ++[B >: A](newTail: B): List[B] =
+    if (isNil) newTail
+    else head :: (tail ++ newTail)
 }
 case class ::[A](override val head: A, override val tail: List[A]) extends List[A]
 case object Nil extends List[Nothing]
@@ -696,14 +699,17 @@ Like Functor and Applicative, each context must provide their own implementation
 
 ```{.scala .numberLines}
 trait Monad[F[_]] extends Applicative[F] {
-
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
 
-  def flatten[A](ffa: F[F[A]]): F[A] =
+  // Monad instances get join() for free!
+  def join[A](ffa: F[F[A]]): F[A] =
     flatMap(ffa)(fa => fa)
+
+  // Monad instances get ap() for free!
+  override def ap[A, B](ff: F[A => B])(fa: F[A]): F[B] =
+    flatMap(ff)(f => map(fa)(f))
 }
 object Monad {
-  
   def apply[F[_]: Monad]: Monad[F] = implicitly[Monad[F]]
 }
 object MonadSyntax {
@@ -719,31 +725,30 @@ Notice that Monads build on top of Applicatives. In the above typeclass, `flatMa
 ```{.scala .numberLines}
 object MonadInstances {
   implicit val optionMonad: Monad[Option] = new Monad[Option] {
+    def pure[A](a: A): Option[A] = Some(A)
     def flatMap[A](fa: Option[A])(f: A => F[B]): Option[B] =
       ffa match {
         case Some(a) => f(a)
         case None => None
       }
-    // ...
   }
   implicit def eitherApplicative[X]: Applicative[Either[X, *]] = new Applicative[Either[X, *]] {
+    def pure[A](a: A): Either[X, A] = Right(a)
     def flatMap[A, B](fa: Either[X, A])(f: A => Either[X, B]): Either[X, B] =
       fa match {
         case Right(a) => f(a)
         case Left(x) => Left(x)
       }
-    // ...
   }
   implicit val listApplicative: Applicative[List] = new Applicative[List] {
     def pure[A](a: A): List[A] = List(a)
-    def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] =
-      (ff, fa) match {
-        case (f :: ffTail, a :: faTail) => f(a) :: ap(ffTail)(faTail)
-        case _ => Nil
+    def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] =
+      fa match {
+        case head :: tail => f(a)
+        case Left(x) => Left(x)
       }
   }
 }
-
 
 ## Functors, Applicatives, and Monads: A philosophical perspective
 
