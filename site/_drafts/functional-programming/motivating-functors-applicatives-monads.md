@@ -49,7 +49,15 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h := g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, building the necessary mappings to generate the desired program output.
 
-While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs _not present in the program's signature_ of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These _implicit inputs and outputs_ have **effects** that dictate how they are received and sent: database queries may return non deterministic responses and an error might occur when performing a direct deposit.
+While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs _not present in the program's signature_ of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These _implicit inputs and outputs_ have **effects** that dictate how they are received and sent. For example database queries may return non deterministic responses and an error might occur when performing a direct deposit. 
+
+Faults, errors, and nondetermism as effects of these operations are effectively opaque in functions modeled as simple input and output, as in `getUser: Int => User`. The signature of this function requires a sort of _tribal knowledge_ in order for the programmer to be aware of what effects may dictate how a `User` is retrieved:
+
+* An associated `User` may not be found.
+* The returned `User` may change between function applications.
+* The database or network may fault and the function generates an exception that must be handled.
+
+You might be thinking that these cases are a given when working with database code, and that _is_ tribal knowledge. These cases are _effects_ that dictate the circumstances under which a `User` might be produced and can be modeled accordingly as part of the typed API of `getUser`.
 
 ### Effects impose complexity on code.
 
@@ -160,7 +168,7 @@ Each kind of context carries with it a set of _effects_. Effects are modeled by 
 **Contexts representing presence:**
 
 * `Option[A]`: Presence or absence of some instance of term `A`.
-* `Either[A, B]`: Conventionally treated as term `B` if valid, term `A` if invalid (`B` is the term you want).
+* `Either[X, A]`: Conventionally treated as term `A` if valid, term `X` if invalid.
 * `List[A]`: Nondeterminism of sort, cardinality, and length of term `A`.
 
 **Contexts representing acquisition:**
@@ -217,26 +225,20 @@ case class Some[+A](override val get: A) extends Option[A]
 case object None extends Option[Nothing]
 ```
 
-**`Either[A, B]`** (by convention) models failure with term `A` and success with term `B`. Term `B` is the instance you want:
+**`Either[X, A]`** by convention models failure with term `X` and success with term `A`:
 
 ```{.scala .numberLines}
-sealed trait Either[+A, +B] {
-  def left: A = this match {
-    case Left(x) => x
-    case Right(_) => throw new Exception()
-  }
-  def right: B = this match {
-    case Left(_) => throw new Exception()
-    case Right(y) => y
-  }
+sealed trait Either[+X, +A] {
+  def left: X = throw new Exception()
+  def right: A = throw new Exception()
   def isRight: Boolean = !isLeft
   def isLeft: Boolean = this match {
     case Left(_) => true
     case Right(_) => false
   }
 }
-case class Right[+A, +B](override val right: B) extends Either[A, B]
-case class Left[+A, +B](override val left: A) extends Either[A, B]
+case class Left[+X, +A](override val left: X) extends Either[X, A]
+case class Right[+X, +A](override val right: A) extends Either[X, A]
 ```
 
 **`List[A]`** models zero or more instances of term `A`, with an unknown sort and cardinality:
