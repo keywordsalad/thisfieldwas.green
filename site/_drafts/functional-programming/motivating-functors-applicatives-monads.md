@@ -27,21 +27,27 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Functions** are a _special case_ of expressions that map some type `A` to some type `B`. They are described by `f: A => B`, read as _f is A to B_.
 
-**Terms** are unitary expressions that are composed by no more than an identifier. For example, in the declaration `map(fa: F[A])(f: A => B)` the terms are `fa` and `f`. **Term** also describes a type named by a variable as these types are also unitary, such as the type argument `A` in `F[A]`.
+**Terms** are identifiers naming unitary or indivisible variables and types. For example, in the declaration `map[A, B](fa: F[A])(f: A => B)` the variable terms are `fa` and `f`, and the type terms are `A` and `B`. Types such as the argument `A` in `F[A]` are also terms.
 
-**Lifting** describes any term `A` becoming wrapped in a context `F` such that `A => F[A]`. A **lifted** term or expression already has the form `F[A]`.
+**Lifting** describes any term `A` becoming wrapped in a context `F` such that `lift: A => F[A]`. A **lifted** term or expression already has the form `F[A]`.
 
 **Composition** describes chaining the output of a function `f: A => B` to the input of function `g: B => C` such that a new function `h: A => C` may defined as `h := g ∘ f`, read as _h is g after f_.
 
-* This alternative notation in Scala `def h(x: A): C = g(f(x))` explicitly defines `h` as an application of the function `g` _after_ an application of the function `f` to argument `x`.
+* This alternative notation in Scala 
+  
+    ```{.scala .numberLines}
+    def h[A, C](x: A): C = g(f(x))
+    ``` 
+  
+    explicitly defines `h` as an application of the function `g` _after_ `f` is applied to argument `x`.
 
 **Nondeterminism** occurs when a function `f: A => B` maps to a different member of type `B` for any number of times the same member of `A` has been applied. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
 
-* An extreme example of a nondeterministic function is a random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external to the function's signature_.
-* Reading from a file is driven by side effects in the same way, as the contents of the file may change between reads.
+* An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external to the function's signature_.
+* Interacting with disk resources is affected by the state of resources on the disk as the contents of these resources may change out of band. For example, reading the same file via `read: FilePath => String` is affected when the contents of the file change on disk. Reading and writing to sockets are inherently side-effecting.
 * Interacting with any system over the network implies affecting and being affected by these systems’ states, as in databases and third-party API’s.
 * Side effects also include **faults** such as the _divide by zero error_, thrown exceptions, and panics as they constitute secondary **implicit outputs** of a function. They impose an additional layer of protection to prevent or recover from them.
-* Exceptions and panics are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some secondary **implicit input** influences the outcome. In contrast, a _division by zero error_ only occurs if the input divisor is `0`; it normally is not treated as a side effect for this reason.
+* Exceptions and panics are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some secondary **implicit input** may influence the outcome. In contrast, a _division by zero error_ only occurs if the input divisor is `0`; it normally is not treated as a side effect for this reason.
 
 ## Functions and Complexity
 
@@ -49,9 +55,9 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h := g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, building the necessary mappings to generate the desired program output.
 
-While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs _not present in the program's signature_ of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These _implicit inputs and outputs_ have **effects** that dictate how they are received and sent. For example database queries may return non deterministic responses and an error might occur when performing a direct deposit. 
+While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs _not present in the program's signature_ of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These _implicit inputs and outputs_ have **effects** that dictate how their associated functions produce their outputs. For example database queries may return non deterministic responses and an error might occur when performing a direct deposit. 
 
-Faults, errors, and nondetermism as effects of these operations are effectively opaque in functions modeled as simple input and output, as in `getUser: Int => User`. The signature of this function requires a sort of _tribal knowledge_ in order for the programmer to be aware of what effects may dictate how a `User` is retrieved:
+Faults, errors, and nondetermism as effects of these operations are effectively opaque in functions modeled as simple input and output, as in `getUser: Int => User`. The signature of this function requires a sort of _tribal knowledge_ in order for the programmer to be aware of what effects may dictate how a `User` is produced from it:
 
 * An associated `User` may not be found.
 * The returned `User` may change between function applications.
@@ -64,7 +70,7 @@ You might be thinking that these cases are a given when working with database co
 Can you think of how complexity occurs in a server application?
 
 * Configuration comes from any number of sources, both when starting the application and during runtime.
-* Database queries each need to be protected against errors and checked if any occur. Each type requires different handling.
+* Database queries each need to be protected against errors and checked if any occur. Each error type requires different handling.
 * External API calls will respond in an indeterminate amount of time, if at all.
 * Transforming API responses is fraught with surprises. No data coming from an external source is safe.
 * Errors need to be logged.
@@ -73,8 +79,10 @@ Can you think of how complexity occurs in a server application?
 How might complexity appear in code?
 
 * Configuration may be read when starting from the environment or from config files. At runtime a database might be used.
+* Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a query fails.
 * Database queries are surrounded by exception handling, and only handled insofar as the compiler requires.
 * API calls require asynchronous IO.
+* External API calls can fail for many reasons. Different types of failures may dictate aborting the current operation or retrying it.
 * API responses are validated and transformed into domain objects.
 * Logging libraries are used to track errors, and might require file system or network access.
 * Metrics libraries are used and require network access.
@@ -83,10 +91,10 @@ These complexities can be described in terms of effects. Each of the following e
 
 * **Time and Async**: API calls and network
 * **IO**: File and network
-* **Presence or absence**
+* **Presence**: Expected outputs may not exist
 * **Length**: Database queries
-* **Correct or incorrect**: Input validation
-* **Implicit input**: Configuration
+* **Correct**: Input sanitization and validation
+* **Implicit input**: Configuration, feature flags and ramps
 * **Implicit output**: Logging and metrics
 * **State**: Change over time
 
