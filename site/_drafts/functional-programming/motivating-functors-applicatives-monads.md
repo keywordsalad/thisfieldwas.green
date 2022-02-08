@@ -27,19 +27,15 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Functions** are a _special case_ of expressions that map some type `A` to some type `B`. They are described by `f: A => B`, read as _f is A to B_.
 
-**Terms** are identifiers naming unitary or indivisible variables and types. For example, in the declaration `map[A, B](fa: F[A])(f: A => B)` the variable terms are `fa` and `f`, and the type terms are `A` and `B`. Types such as the argument `A` in `F[A]` are also terms.
+**Terms** are identifiers naming unitary or indivisible variables and types.
 
-**Lifting** describes any term `A` becoming wrapped in a context `F` such that `lift: A => F[A]`. A **lifted** term or expression already has the form `F[A]`.
+  * For example, in the declaration `def map[A, B](fa: F[A])(f: A => B): F[B]`{.scala} the variable terms are `fa` and `f`, and the type terms are `A` and `B`.
+
+**Lifting** describes any term `A` becoming wrapped in a context `F[_]` such that `lift: A => F[A]`. A **lifted** term or expression already has the form `F[A]`.
 
 **Composition** describes chaining the output of a function `f: A => B` to the input of function `g: B => C` such that a new function `h: A => C` may defined as `h := g ∘ f`, read as _h is g after f_.
 
-* This alternative notation in Scala
-
-    ```scala
-    def h[A, C](x: A): C = g(f(x))
-    ```
-
-    explicitly defines `h` as an application of the function `g` _after_ `f` is applied to argument `x`.
+* This alternative notation in Scala `def h[A, C](x: A): C = g(f(x))`{.scala} explicitly defines `h` as an application of the function `g` _after_ `f` is applied to argument `x`.
 
 **Nondeterminism** occurs when a function `f: A => B` maps to a different member of type `B` for any number of times the same member of `A` has been applied. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
 
@@ -141,7 +137,7 @@ The code above demonstrates complexity in the dimensions of:
 Fortunately there are ways to model subsets of these effects and contain the scope of their impact so that code is less complex. An example in Scala psuedocode might appear as the following:
 
 :::{.numberLines}
-```.scala
+```scala
 def runPayroll(employeeId: Long): PayrollEffect =
   for {
     employee <- employeeRepo.find(employee).flatMap {
@@ -180,7 +176,7 @@ Each kind of context carries with it a set of _effects_. Effects are modeled by 
 **Contexts representing presence:**
 
 * `Option[A]`: Presence or absence of some instance of term `A`.
-* `Either[X, A]`: Conventionally treated as term `A` if valid, term `X` if invalid.
+* `Either[X, A]`:{.scala} Conventionally treated as term `A` if valid, term `X` if invalid.
 * `List[A]`: Nondeterminism of sort, cardinality, and length of term `A`.
 
 **Contexts representing acquisition:**
@@ -283,7 +279,7 @@ object List {
 
 ### Extracting the instance of the term `A`
 
-Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, an operation of the form `extract(): F[A] => A` is possible as it means the same thing between both of them: `extract()` either gets the existing instance of the term `A` or it fails. In object oriented programming, `Option[A]` and `Either[X, A]` might share such an interface:
+Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, an operation `def extract(): F[A] => A` is possible as it means the same thing between both of them: `extract()` either gets the existing instance of the term `A` or it fails. In object oriented programming, `Option[A]` and `Either[X, A]` might share such an interface:
 
 :::{.numberLines}
 ```scala
@@ -328,7 +324,7 @@ When applied to `Future[A]`, the `extract()` function is by its own signature a 
 
 ### Abstracting over effects
 
-`Option`, `Either`, `List`, `Future`, and `IO` all have different effects that dictate how term `A` is produced. An axiom from object oriented programming would be to abstract what changes. Therefore you have to shed effects as implementation details. How might that impact extracting the term `A`?
+`Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` all have different effects that dictate how term `A` is produced. An axiom from object oriented programming would be to abstract what changes. Therefore you have to shed effects as implementation details. How might that impact extracting the term `A`?
 
 The answer: _extraction cannot be generalized_. All you know is that there is term `A`. How would you consume term `A` if it can't be extracted?
 
@@ -340,7 +336,7 @@ def map(fa: F[A])(f: A => B): F[B]
 ```
 :::
 
-What `map()` does is _lift_ the function `f: A => B` into the context so that it becomes `F[A] => F[B]`, giving back `F[B]`.
+What `map()` {.scala}does is _lift_ the function `f: A => B` into the context so that it becomes `F[A] => F[B]`, giving back `F[B]`.
 
 This _lifting_ of functions that `map()` performs is _coherent_ across contexts. You can apply `f: A => B` to any `List[A]` just as you can an `IO[A]` and the results of both operations are predictable. Your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
 
@@ -350,13 +346,13 @@ What this enables is your function `f: A => B` to be used with any Functor regar
 
 ### Why does the Functor's `map()` return `F[B]`?
 
-Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting a term mean if you’re using a context like `Option`? What about `Future`? Would their effects change how extraction of a term would work?
+Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting a term mean if you’re using a context like `Option[A]`? What about `Future[A]`? Would their effects change how extraction of a term would work?
 
-Extracting _the_ term from `List` flatly doesn't make sense as it has the effect of an unknowm number of instances.
+Extracting _the_ term from `List[A]` flatly doesn't make sense as it has the effect of an unknowm number of instances.
 
 Because there is no way to generalize extracting a term from a context, Functors don’t allow you to operate on contexts in such a way that the term can "escape" them. Extracting terms is implementation-specific, so this capability is not generalized.
 
-Most importantly, by keeping all operations against terms within the context, the context’s specific effects remain abstracted. Asynchronous operations with `Future` remain asynchronous, the length of `List` remains nondeterministic, and `Option` may or may not be present.
+Most importantly, by keeping all operations against terms within the context, the context’s specific effects remain abstracted. Asynchronous operations with `Future[A]` remain asynchronous, the length of `List[A]` remains nondeterministic, and `Option[A]` may or may not be present.
 
 Functors _preserve structure_ by keeping operations within the context. For example, applying `map()` on a `List[A]` or `BinaryTree[A]`:
 
@@ -390,7 +386,7 @@ Compare with iteration using a `for` loop:
 
 Iteration thus _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any guarantees are purely manual. Structure is discontinuous and to rebuild it requires following _procedural_ steps.
 
-This isn't to say that functional programming is only about iteration and loops. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future` you will destroy its asynchronous structure and potentially harm the performance of your application.
+This isn't to say that functional programming is only about iteration and loops. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your application.
 
 ### Context `F[A]` must produce some term `A`
 
@@ -400,7 +396,7 @@ But what if there’s nothing there, as in there are _zero instances_ of term `A
 
 This behavior is referred to as _short-circuiting_ and it is a key feature of all Functors, Applicatives, and Monads. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on later.
 
-`Option` and `Either` are two prime examples of short-circuiting in Functors. An `Option[A]` will only `map()` an instance of its term is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
+`Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in Functors. An `Option[A]` will only `map()` an instance of its term `A` is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
 
 ### Becoming a Functor
 
@@ -452,9 +448,9 @@ object FunctorInstances {
 ```
 :::
 
-Each of these instances show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO` and `Future` because they are managing side effects.
+Each of these instances show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. The complexities imposed by each of these contexts is completely abstracted, allowing function `f: A => B` to operate unburdened by effects with focus on specific application logic.
 
-Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable these. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, A]`, `Left` may be used to carry error state in its term `X`. `Left` being able to carry its own term is one of `Either`’s specific effects.
+Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable these. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry error state in its term `X`. `Left[X, _]` being able to carry its own term is one of `Either[X, _]`’s specific effects.
 
 Defining a `fizzBuzz()` function that uses a Functor looks like this:
 
@@ -523,27 +519,23 @@ How do you apply `combine()` to the terms `A` and `B` produced by the two contex
 
 **Applicatives** are an abstraction that allow you to consume terms `A` and `B` in parallel. They are also known by their more formal name _Applicative Functor_ as they are a _special case_ of Functor. Like Functors, they are also a simple structure and define two functions:
 
-1. A constructor to _lift_ a term into the context:
+1. A constructor to _lift_ a term into the context called `pure()`:
 
-    :::{.numberLines}
     ```scala
     def pure(a: A): F[A]
     ```
-    :::
 
     The name `pure()` might feel alien. You can remember the name by thinking of it like this: By taking an instance of term `A`, `ap()` gives you back a context with a present instance of the term `A`, which makes it a _non void_, _valid_, or _**pure**_ context.
 
-2. A function that is able to apply a _lifted function_ to a _lifted term_:
+2. A function that is able to apply a _lifted function_ to a _lifted term_ called `ap()`:
 
-    :::{.numberLines}
     ```scala
     def ap(ff: F[A => B])(fa: F[A]): F[B]
     ```
-    :::
 
-    The name of the function `ap()` is _apply_, but it is written _ap_ as it has its roots in higher math, where names are frequently one letter.
+    The proper name of the function `ap()` is _apply_, but it is written _ap_.
 
-Here is an example of the two functions defined for the `Option` context:
+Here is an example of the two functions defined for the `Option[_]` context:
 
 :::{.numberLines}
 ```scala
@@ -568,7 +560,7 @@ def map2(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
 ```
 :::
 
-The function argument to `map2()` is lifted into the context `F` where it may be applied to the terms produced by the first two contexts `A` and `B`. If either `A` or `B` are absent, then `f` is not applied and a _void_ `F[C]` is returned.
+The function argument to `map2()` is lifted into the context `F[_]` where it may be applied to the terms produced by the first two contexts `A` and `B`. If either `A` or `B` are absent, then `f` is not applied and a _void_ `F[C]` is returned.
 
 With this `map2()` function, you are able to apply `combine()` to the terms produced by both contexts:
 
@@ -683,7 +675,7 @@ As you can see from the above, this code deposits $20 only if:
 
 There is a great deal of branching logic in this code that separates success and failure cases as the result of previous operations. This _imperative_ sequencing of operations requires that you manually short-circuit the program if a previous operation fails. This requirement to sequence operations is what motivates Monads.
 
-**Monads** are an abstraction that permit the sequencing of operations. Recall that `map()` accepts a function `f: A => B` as one of its arguments. Monads are a _special case_ of Functor that arise when the term `B` in `f: A => B` is known to have the shape `F[_]`. Specifically, the term `B` itself is an instance of the same context `F`. Consequently, when `map()` is applied with a function `f: A => F[B]` you will receive a nested context `F[F[B]]`. How would you specialize `map()` such that you receive `F[B]` instead?
+**Monads** are an abstraction that permit the sequencing of operations. Recall that `map()` accepts a function `f: A => B` as one of its arguments. Monads are a _special case_ of Functor that arise when the term `B` in `f: A => B` is known to have the shape `F[_]`. Specifically, the term `B` itself is an instance of the same context `F[_]`. In the general case, when `map()` is applied with a function `f: A => F[B]` you will receive a nested context `F[F[B]]`. How would you specialize `map()` such that you receive `F[B]` instead?
 
 Monads, like Functors, are a simple structure and define a single function `flatMap()` which joins a nested context with the outer context, or in other words, it _flattens_ the context after it has been mapped:
 
@@ -717,13 +709,13 @@ def depositTwentyBucks(): Future[DepositResponse] =
                 fail(BankAccountNotFound)
               case Some(bankAccount) =>
                 bankService.depositMoney(bankAccount, "$20")
+            }
           }
-        )
-      )
+      }
 ```
 :::
 
-This code seems a bit hard on the eyes, doesn't it? The deep `>` or _V_ shape of the code is referred to as the _pyramid of death_ and is an unfortunate feature of `flatMap()`-heavy code. There is still branching logic as two contexts, `Option` and `Future`, are being used simultaneously. However, Monads and Monad-like structures are so common in Scala that there is a special syntax for this kind of code, and with a little refactoring the code may be brought into a flattened layout:
+This code seems a bit hard on the eyes, doesn't it? The deep _V_ shape of the code is referred to as the _pyramid of death_ and is an unfortunate feature of `flatMap()`-heavy code. There is still branching logic as two contexts, `Option[_]` and `Future[_]`, are being used simultaneously. However, Monads and Monad-like structures are so common in Scala that there is a special syntax for this kind of code, and with a little refactoring the code may be brought into a flattened layout:
 
 :::{.numberLines}
 ```scala
@@ -752,8 +744,9 @@ This code is markedly different, and demonstrates a few features:
 
 * Each logical instruction is on its own line and branching logic has practically disappeared from the primary operation.
 * Each instruction is dependent upon the previous instruction succeeding and the entire operation short-circuits on failure.
-* Concretely the Monad being used here is a `Future`{.scala}, which is asynchronous. At no point in the code is complexity imposed by using asynchronous operations.
+* Concretely the Monad being used here is a `Future[_]`, which is asynchronous. At no point in the code is complexity imposed by using asynchronous operations.
 * Explicit branching is moved to dedicated generalized functions which provide mechanisms for injecting different contexts by condition.
+* Instances of the `Option[_]` context are destroyed in order to advance logic. These specific examples demonstrate a valid use-case for destroying contexts.
 
 How does this code look to you?
 
