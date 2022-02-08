@@ -846,13 +846,3 @@ object MonadInstances {
 }
 ```
 :::
-
-## Functors, Applicatives, and Monads: A philosophical perspective
-
-The term `A` borne by any context `F[A]` is in a philosophical sense a _monad_. I think this is a key concept that no Monad tutorial I’ve read online had made a connection with: that when we work with Monads we only care about the singular, indivisible term `A` that they produce. Specifically I call this out because what I’m going to outline reinforces the Monad as a concept and hopefully wraps the name in a little meaning.
-
-If you're operating in some context of code that has been abstracted such that you only know that the context is a Monad and nothing more, then you don’t have any reason to believe that you are operating on anything other than a singular, indivisible term `A`. It does not matter that the code when used is always reified using a `List` as its context, as the code your provide to `map()` and `flatMap()` still operates as though it were executing against a singular instance of term `A`.
-
-The term `A` of the Monad is singular and indivisible. It is the sole focus of your code when you use it, and any context around it is purely abstract and circumstance.
-
-And if there’s "nothing here"? It doesn’t matter, and you don’t have to worry because that code isn’t running anyway.
