@@ -53,6 +53,8 @@ Side effects also include **faults** such as the _divide by zero error_, thrown 
 
 Exceptions and panics are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some secondary **implicit input** may influence the outcome. In contrast, a _division by zero error_ only occurs if the input divisor is `0`; it normally is not treated as a side effect for this reason.
 
+Consider for a moment, how might complexity in programs be reduced?
+
 ### Modeling complexity
 
 Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h := g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, building the necessary mappings to generate the desired program output.
@@ -69,9 +71,9 @@ You might be thinking that these cases are a given when working with database co
 
 ### Effects impose complexity on code
 
-Can you think of how complexity occurs in a server application?
+Can you think of how complexity occurs in a server program?
 
-* Configuration comes from any number of sources, both when starting the application and during runtime.
+* Configuration comes from any number of sources, both when starting the program and during runtime.
 * Database queries each need to be protected against errors and checked if any occur. Each error type requires different handling.
 * External API calls will respond in an indeterminate amount of time, if at all.
 * Transforming API responses is fraught with surprises. No data coming from an external source is safe.
@@ -391,7 +393,7 @@ Compare with iteration using a `for` loop:
 
 Iteration thus _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
 
-This isn't to say that functional programming is only about iteration and loops versus `map()`. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your application.
+This isn't to say that functional programming is only about iteration and loops versus `map()`. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your program.
 
 > Where the type of your context is important, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default value otherwise. Similarly, the runtime managing asynchronous `Future`s will create and destroy structure as part of its normal operation. An example of destructive operations against `Option` appears later.
 
@@ -455,7 +457,7 @@ object FunctorInstances {
 ```
 :::
 
-Each of these instances show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. The complexities imposed by each of these contexts is completely abstracted, allowing function `f: A => B` to operate unburdened by effects with focus on specific application logic.
+Each of these instances show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. The complexities imposed by each of these contexts is completely abstracted, allowing function `f: A => B` to operate unburdened by effects with focus on specific program logic.
 
 Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry error state in its term `X`. `Left[X, _]` being able to carry its own term is one of `Either[X, _]`’s specific effects.
 
@@ -501,7 +503,7 @@ println(fizzBuzz(List()))
 ```
 :::
 
-By using Functors, the `fizzBuzz()` function is free to focus on its specific program logic: 
+By using Functors, the `fizzBuzz()` function is free to focus on its specific program logic:
 
 * Return "fizz" when `x` is divisible by `3`
 * Return "buzz" when `x` is divisible by `5`
