@@ -514,7 +514,7 @@ At no point is `fizzBuzz()` burdened by the effects of the context it executes w
 
 ## Motivating Applicatives
 
-Functors permits you to consume a term via `map()`:
+Functors permit you to consume a term via `map()`:
 
 :::{.numberLines .nowrap}
 ```scala
