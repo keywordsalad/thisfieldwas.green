@@ -194,14 +194,14 @@ Each kind of context carries with it a set of _effects_. Effects are modeled by 
 
 **Higher-order contexts:**
 
-* `ReaderT[F, A]`: Reading of implicit inputs in the context of `F`.
+* `ReaderT[F, A]`: Reading of implicit inputs in the context of `F[_]`.
     * Propagation of configuration usually leverages this effect.
-* `WriterT[F, A]`: Writing of implicit outputs in the context of `F`.
+* `WriterT[F, A]`: Writing of implicit outputs in the context of `F[_]`.
     * Logging usually leverages this effect.
-* `StateT[F, A]`: Modifying implicit inputs and outputs in the context of `F`.
+* `StateT[F, A]`: Modifying implicit inputs and outputs in the context of `F[_]`.
     * Models state changing over time.
 
-Each of these contexts have two shared qualities in that they _produce some term `A`_ and their effects dictate _how term `A` is produced_. But with such a wide array of effects, and with so little overlap between each context, how can `A` be consumed in a manner unburdened of complexity?
+Each of these contexts have two shared qualities in that they _produce_ some term `A` and their effects dictate _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can `A` be consumed in a manner unburdened of complexity?
 
 In order to generalize contexts, the key differentiator between them must be abstracted: **effects**. By shedding effects as an _implementation detail_, the consumption of a term `A` becomes a shared capability. How is that interface exposed?
 
@@ -221,7 +221,7 @@ f(fa) // compile error!
 ```
 :::
 
-Recall from the previous section, contexts only share two qualities: that they produce a term, and that they have effects. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for `Option`, `Either`, and `List`:
+Recall from the previous section, contexts only share two qualities: that they produce a term, and that they have effects. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for `Option[A]`, `Either[X, A]`, and `List[A]`:
 
 **`Option[A]`** models the presence or absence of an instance of term `A`:
 
@@ -229,8 +229,7 @@ Recall from the previous section, contexts only share two qualities: that they p
 ```scala
 sealed trait Option[+A] {
   def get: A = throw new Exception()
-  def isSome: Boolean = !isNone
-  def isNone: Boolean = this == None
+  def isSome: Boolean = this != None
 }
 case class Some[+A](override val get: A) extends Option[A]
 case object None extends Option[Nothing]
@@ -244,10 +243,9 @@ case object None extends Option[Nothing]
 sealed trait Either[+X, +A] {
   def left: X = throw new Exception()
   def right: A = throw new Exception()
-  def isRight: Boolean = !isLeft
-  def isLeft: Boolean = this match {
-    case Left(_) => true
-    case Right(_) => false
+  def isRight: Boolean = this match {
+    case _: Right => true
+    case _ => false
   }
 }
 case class Left[+X, +A](override val left: X) extends Either[X, A]
@@ -260,13 +258,14 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 :::{.numberLines}
 ```scala
 sealed trait List[+A] {
+  def head: A = throw new Exception()
+  def tail: List[A] = throw new Exception()
   def isNil: Boolean = this == Nil
-  def head: A = throw new Exception
-  def tail: List[A] = throw new Exception
   def ::[B >: A](newHead: B): List[B] = newHead :: this
-  def ++[B >: A](newTail: B): List[B] =
-    if (isNil) newTail
-    else head :: (tail ++ newTail)
+  def ++[B >: A](newTail: B): List[B] = this match {
+    case h :: t => h :: (t ++ newTail)
+    case Nil => newTail
+  }
 }
 case class ::[A](override val head: A, override val tail: List[A]) extends List[A]
 case object Nil extends List[Nothing]
@@ -336,9 +335,9 @@ def map(fa: F[A])(f: A => B): F[B]
 ```
 :::
 
-What `map()` {.scala}does is _lift_ the function `f: A => B` into the context so that it becomes `F[A] => F[B]`, giving back `F[B]`.
+What `map()` does is _lift_ the function `f: A => B` into the context so that it becomes `F[A] => F[B]`, giving back `F[B]`.
 
-This _lifting_ of functions that `map()` performs is _coherent_ across contexts. You can apply `f: A => B` to any `List[A]` just as you can an `IO[A]` and the results of both operations are predictable. Your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
+This _lifting_ of functions that `map()` performs is _coherent_ across contexts. You can apply `f: A => B` to any `List[A]` just as you can an `IO[A]` and the results of both operations are predictable: your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
 
 How would you consume the term produced by `Future` or `Option`? You would also use a Functor.
 
@@ -388,6 +387,8 @@ Iteration thus _destroys structure_. In order to get a `List[B]` back you would 
 
 This isn't to say that functional programming is only about iteration and loops. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your application.
 
+> Where the type of your context is important, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default value otherwise. Similarly, the runtime managing asynchronous `Future`s will create and destroy structure as part of its normal operation. An example of destructive operations against `Option` appears later.
+
 ### Context `F[A]` must produce some term `A`
 
 I stated above: _"For any context `F[_]`, it produces some term `A`."_ If a context were guaranteed to have an instance of a term `A` then you should be able to consume it with your function `f: A => B`, right?
@@ -400,7 +401,7 @@ This behavior is referred to as _short-circuiting_ and it is a key feature of al
 
 ### Becoming a Functor
 
-Each context of course must provide its own implementation of `map()` in order for it to be used as a Functor. The functionality of a Functor is not inherited, however, as some contexts might be defined in third-party code where they may not be modified. To circumvent this restriction, Functor implementations are provided via typeclasses. Any type that has the shape `F[_]` may become a functor by implementing the following typeclass:
+Each context of course must provide its own implementation of `map()` in order for it to be used as a Functor. Functor implementations in Scala are provided via typeclasses. Any type that has the shape `F[_]` may become a functor by implementing the following typeclass:
 
 :::{.numberLines}
 ```scala
@@ -412,7 +413,7 @@ object Functor {
 }
 object FunctorSyntax {
   implicit class FunctorOps[F[_]](val fa: F[A]) extends AnyVal {
-    def map[B](f: A => B)(implicitly F: Functor[F]): F[B] = F.map(fa)(f)
+    def map[B](f: A => B)(implicit F: Functor[F]): F[B] = F.map(fa)(f)
   }
 }
 ```
@@ -450,7 +451,9 @@ object FunctorInstances {
 
 Each of these instances show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. The complexities imposed by each of these contexts is completely abstracted, allowing function `f: A => B` to operate unburdened by effects with focus on specific application logic.
 
-Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable these. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry error state in its term `X`. `Left[X, _]` being able to carry its own term is one of `Either[X, _]`’s specific effects.
+Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry error state in its term `X`. `Left[X, _]` being able to carry its own term is one of `Either[X, _]`’s specific effects.
+
+#### Using `map()` as a general abstraction
 
 Defining a `fizzBuzz()` function that uses a Functor looks like this:
 
@@ -543,7 +546,7 @@ def pure(a: A): Option[A] = Some(a)
 
 def ap(ff: Option[A => B])(fa: Option[A]): Option[B] = {
   (ff, fa) match {
-    case (Some(f), Some(x)) => Some(f(x))
+    case (Some(f), Some(a)) => Some(f(a))
     case _ => None // void
   }
 ```
@@ -636,7 +639,7 @@ object ApplicativeInstances {
 
 ## Motivating Monads
 
-Functors give you `map()` so that you may consume a term from a single context. Applicatives give you `pure()` and `ap()` so that you may consume terms from two or more contexts in parallel. But what if you want to sequence consumption of terms? Functors for example will only ever operate in the scope of a single context, and Applicatives only consume from contexts in parallel. Neither Functors nor Applicatives allow you to alter the state of the context such that downstream operations are dependent upon them succeeding.
+Functors give you `map()` so that you may consume a term from a single context. Applicatives give you `pure()` and `ap()` so that you may consume terms from two or more contexts in parallel. But what if you want to sequence consumption of terms? Functors for example only consume from the scope of a single context, and Applicatives only consume from contexts in parallel. Neither Functors nor Applicatives allow you to alter the state of the context such that downstream operations are dependent upon previous operations succeeding.
 
 Concretely, at some point in your program you will want to write code that operates against the result of a previous operation and decide whether to continue:
 
@@ -746,7 +749,7 @@ This code is markedly different, and demonstrates a few features:
 * Each instruction is dependent upon the previous instruction succeeding and the entire operation short-circuits on failure.
 * Concretely the Monad being used here is a `Future[_]`, which is asynchronous. At no point in the code is complexity imposed by using asynchronous operations.
 * Explicit branching is moved to dedicated generalized functions which provide mechanisms for injecting different contexts by condition.
-* Instances of the `Option[_]` context are destroyed in order to advance logic. These specific examples demonstrate a valid use-case for destroying contexts.
+* Instances of the `Option[_]` context are destroyed in order to advance logic. These specific examples demonstrate a valid use case for destroying contexts.
 
 How does this code look to you?
 
@@ -779,33 +782,48 @@ object MonadSyntax {
 ```
 :::
 
-Notice that Monads build on top of Applicatives. In the above typeclass, `flatMap()` is provided a default implementation in terms of `map()` and `join()`. Instances may override this function if they choose. Our Applicative instances from before may now be upgraded to Monads:
+Notice that Monads build on top of Applicatives. In the above typeclass, `join()` is provided a default implementation in terms of `flatMap()`, and `ap()` in terms of `flatMap()` and `map()`. Instances may override these functions if they choose, and in particular must override either `map()` or `ap()`. Our Applicative instances from before may now be upgraded to Monads:
 
 :::{.numberLines}
 ```scala
 object MonadInstances {
   implicit val optionMonad: Monad[Option] = new Monad[Option] {
     def pure[A](a: A): Option[A] = Some(A)
+    def map[A, B](fa: Option[A])(f: A => B): F[B] = 
+      fa match {
+        case Some(a) => Some(f(a))
+        case None => None
+      }
     def flatMap[A](fa: Option[A])(f: A => F[B]): Option[B] =
-      ffa match {
+      fa match {
         case Some(a) => f(a)
         case None => None
       }
   }
-  implicit def eitherApplicative[X]: Applicative[Either[X, *]] = new Applicative[Either[X, *]] {
+  implicit def eitherMonad[X]: Monad[Either[X, *]] = new Monad[Either[X, *]] {
     def pure[A](a: A): Either[X, A] = Right(a)
+    def map[A, B](fa: Either[X, A])(f: A => B): F[B] =
+      fa match {
+        case Right(a) => Right(f(a))
+        case Left(x) => Left(x)
+      }
     def flatMap[A, B](fa: Either[X, A])(f: A => Either[X, B]): Either[X, B] =
       fa match {
         case Right(a) => f(a)
         case Left(x) => Left(x)
       }
   }
-  implicit val listApplicative: Applicative[List] = new Applicative[List] {
+  implicit val listMonad: Monad[List] = new Monad[List] {
     def pure[A](a: A): List[A] = List(a)
+    def map[A, B](fa: List[A])(f: A => B): F[B] =
+      fa match {
+        case a :: ta => f(a) :: map(ta)(f)
+        case Nil => Nil
+      }
     def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] =
       fa match {
-        case head :: tail => f(a)
-        case Left(x) => Left(x)
+        case a :: ta => f(a) ++ map(ta)(f)
+        case Nil => Nil
       }
   }
 }
