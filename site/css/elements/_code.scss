@@ -1,7 +1,14 @@
 code {
-  font-family: $code-font-family;
+  color: $code-color;
+  text-decoration: none;
   white-space: pre-wrap;
   word-wrap: break-word;
+
+  &:not(.sourceCode) {
+    color: teal;
+    font-family: inherit;
+    text-decoration: underline;
+  }
 
   // keyword
   .kw, .cf {
@@ -10,7 +17,7 @@ code {
   }
 
   .op {
-    color: orangered;
+    color: indianred;
   }
 
   .ot {
@@ -23,7 +30,7 @@ code {
 
   // function
   .fu {
-    color: blueviolet;
+    color: seagreen;
   }
 
   .st {
@@ -52,7 +59,7 @@ code {
   }
 }
 
-div.sourceCode, pre.sourceCode {
+div.sourceCode {
   margin: 0;
   padding: 0;
 }
@@ -60,59 +67,60 @@ div.sourceCode, pre.sourceCode {
 pre.sourceCode {
   margin: 1em 0;
   padding: 0;
-}
 
-code.sourceCode {
-  display: block;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-
-  .numberLines & {
-    counter-reset: line-number;
-  }
-
-  > span {
+  code.sourceCode {
     display: block;
-
-    &:first-child {
-      padding-top: 0.3em;
-    }
-    &:last-child {
-      padding-bottom: 0.3em;
-    }
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    font-family: $code-font-family;
+    font-size: $code-font-size;
 
     .numberLines & {
-      counter-increment: line-number;
-      &:hover {
-        background-color: $code-color-highlight-hover;
+      counter-reset: line-number;
+    }
+
+    > span {
+      display: block;
+
+      &:first-child {
+        padding-top: 0.3em;
       }
-      &:target {
-        background-color: $code-color-highlight;
+      &:last-child {
+        padding-bottom: 0.3em;
       }
 
       > a:first-child {
-        &::before {
-          display: inline-block;
+        display: inline-block;
+      }
+
+      .numberLines & {
+        counter-increment: line-number;
+        &:hover {
+          background-color: $code-color-highlight-hover;
+        }
+        &:target {
+          background-color: $code-color-highlight;
+        }
+
+        > a:first-child {
           width: 2em;
           padding: 0 0.5em 0 0;
           margin: 0 0.5em 0 0;
           border-right: $border-thin;
           text-align: right;
-          content: counter(line-number);
           user-select: none;
+          &::before {
+            content: counter(line-number);
+          }
         }
       }
     }
   }
 }
 
-code:not(.sourceCode) {
-  color: $code-color;
-}
-
-a code, a code:not(.sourceCode) {
+a code:not(.sourceCode) {
   color: $code-color-hyperlink;
 }
 

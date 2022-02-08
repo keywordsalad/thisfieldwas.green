@@ -51,7 +51,6 @@ dl {
 }
 
 dt {
-  margin: 1.2em 0 0;
   color: $header-color;
   font-family: $header-font-family;
   font-style: italic;
@@ -61,7 +60,8 @@ dt {
 }
 
 dd {
-  margin: 0 0 0 1.5em;
+  @include block;
+  margin-left: 1.5em;
 }
 
 blockquote {

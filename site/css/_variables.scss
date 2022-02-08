@@ -2,8 +2,8 @@
 
 $signature-green: darkgreen;
 
-$font-family-sans-serif: "Helvetica", "Arial", sans-serif;
-$font-family-serif: "Times New Roman", serif;
+$font-family-sans-serif: "Noto Sans", sans-serif;
+$font-family-serif: "Noto Serif", serif;
 
 $root-background: aliceblue;
 $root-font-family: $font-family-sans-serif;
@@ -22,16 +22,17 @@ $text-color-dark: color.adjust($signature-green, $lightness: 1%);
 $text-color-light: slategray;
 $text-color-hyperlink: dodgerblue;
 $text-color-hyperlink-complement: indianred;
-$text-color-emphasize: darkred;
+$text-color-emphasize: saddlebrown;
 $text-font-size: $root-font-size;
 $text-font-size-small: $text-font-size * 0.9;
 $text-font-size-tiny: $text-font-size * 0.85;
 $text-font-size-miniscule: $text-font-size * 0.8;
 $text-font-size-large: $text-font-size * 1.1;
 
-$code-font-family: "Courier New", "Courier", monospace;
-$code-font-size: 1em;
-$code-color: indianred;
+$code-font-family: "Noto Sans Mono", monospace;
+$code-font-size: 0.9em;
+$code-color: steelblue;
+$code-color-inline: saddlebrown;
 $code-color-highlight: gold;
 $code-color-highlight-hover: yellow;
 $code-color-hyperlink: $text-color-hyperlink;

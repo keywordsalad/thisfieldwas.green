@@ -13,6 +13,7 @@ import Green.Site.Js
 import Green.Site.Pages
 import Green.Site.Robots
 import Green.Site.Sitemap
+import Green.Site.Static
 import Green.Site.Templates
 import Green.Template.Custom.Context
 
@@ -29,6 +30,7 @@ site config = do
     pages context
     blog context
     code
+    static
     feed config context
     sitemap context
     robotsTxt context

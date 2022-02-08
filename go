@@ -27,7 +27,7 @@ _verify-prerequisites () {
 ⚡build () {
   _help-line "Compile the site generator and generate the site"
   stack build
-  stack exec site build
+  stack exec site build -- "$@"
   ⚡favicons
 }
 
@@ -45,25 +45,25 @@ _verify-prerequisites () {
 ⚡rebuild () {
   _help-line "Clean and then rebuild the generated site"
   ⚡clean
-  ⚡build
+  ⚡build "$@"
 }
 
 ⚡rebuild_all () {
   _help-line "Clean and then rebuild both the generated site and the site generator binary"
   ⚡clean_all
-  ⚡build
+  ⚡build "$@"
 }
 
 ⚡watch () {
   _help-line "Build the site generator, generate the site, and then run the preview server"
   ⚡build
-  stack exec site watch
+  stack exec site watch -- "$@"
 }
 
 ⚡rewatch() {
   _help-line "Rebuild the site generator, regenerate the site, and then run the preview server"
   ⚡rebuild
-  stack exec site watch
+  stack exec site watch -- "$@"
 }
 
 ⚡kill() {

@@ -20,6 +20,7 @@ readerOpts =
     { readerExtensions =
         foldl (flip ($)) (readerExtensions defaultHakyllReaderOptions) $
           [ enableExtension Ext_smart,
+            enableExtension Ext_inline_code_attributes,
             disableExtension Ext_markdown_in_html_blocks
           ]
     }

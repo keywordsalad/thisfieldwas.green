@@ -42,6 +42,7 @@ library
       Green.Site.Pages
       Green.Site.Robots
       Green.Site.Sitemap
+      Green.Site.Static
       Green.Site.Templates
       Green.Template
       Green.Template.Ast
