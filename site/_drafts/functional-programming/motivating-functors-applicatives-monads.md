@@ -176,7 +176,7 @@ Each kind of context carries with it a set of _effects_. Effects are modeled by 
 **Contexts representing presence:**
 
 * `Option[A]`: Presence or absence of some instance of term `A`.
-* `Either[X, A]`:{.scala} Conventionally treated as term `A` if valid, term `X` if invalid.
+* `Either[X, A]`: Conventionally treated as term `A` if valid, term `X` if invalid.
 * `List[A]`: Nondeterminism of sort, cardinality, and length of term `A`.
 
 **Contexts representing acquisition:**
