@@ -100,7 +100,7 @@ The actual list of effects is innumerable, but these ones are common.
 
 Take for example this code from a hypothetical payroll system:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```java
 EmployeeRepo employeeRepo;
 BankAchClient achClient;
@@ -136,7 +136,7 @@ The code above demonstrates complexity in the dimensions of:
 
 Fortunately there are ways to model subsets of these effects and contain the scope of their impact so that code is less complex. An example in Scala psuedocode might appear as the following:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 def runPayroll(employeeId: Long): PayrollEffect =
   for {
@@ -209,7 +209,7 @@ In order to generalize contexts, the key differentiator between them must be abs
 
 **For any context `F[_]`, it produces some term `A`.** If you have a function `f: A => B`, how would you apply it to a term produced by the context `F[A]`? That would require extracting the term, right? Specifically, you can’t apply the function directly to the context:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 // (pseudo code)
 // given a context producing term A
@@ -225,7 +225,7 @@ Recall from the previous section, contexts only share two qualities: that they p
 
 **`Option[A]`** models the presence or absence of an instance of term `A`:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 sealed trait Option[+A] {
   def get: A = throw new Exception()
@@ -238,7 +238,7 @@ case object None extends Option[Nothing]
 
 **`Either[X, A]`** by convention models failure with term `X` and success with term `A`:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 sealed trait Either[+X, +A] {
   def left: X = throw new Exception()
@@ -255,7 +255,7 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 
 **`List[A]`** models zero or more instances of term `A`, with an unknown sort and cardinality:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 sealed trait List[+A] {
   def head: A = throw new Exception()
@@ -280,7 +280,7 @@ object List {
 
 Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, an operation `def extract(): F[A] => A` is possible as it means the same thing between both of them: `extract()` either gets the existing instance of the term `A` or it fails. In object oriented programming, `Option[A]` and `Either[X, A]` might share such an interface:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 trait Extractable[A] {
   def extract(): A
@@ -300,7 +300,7 @@ What does it mean to `extract()` the term `A` from a `List[A]` such that it mean
 
 As in `Option[A]` and `Either[A]` there is a notion of the presence or absence of an instance of the term `A`, but presence in `List[A]` implies one or more instances. A solution inspired by object oriented programming might change the interface thusly:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 trait Extractable[A] {
   def extract(): Seq[A]
@@ -329,7 +329,7 @@ The answer: _extraction cannot be generalized_. All you know is that there is te
 
 **Functors** are an abstraction that allow you to consume term `A`. A Functor is a simple structure, a single function called `map()`:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 def map(fa: F[A])(f: A => B): F[B]
 ```
@@ -403,7 +403,7 @@ This behavior is referred to as _short-circuiting_ and it is a key feature of al
 
 Each context of course must provide its own implementation of `map()` in order for it to be used as a Functor. Functor implementations in Scala are provided via typeclasses. Any type that has the shape `F[_]` may become a functor by implementing the following typeclass:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 trait Functor[F[_]] {
   def map[A, B](fa: F[A])(f: A => B): F[B]
@@ -421,7 +421,7 @@ object FunctorSyntax {
 
 Instances of the Functor typeclass simply extend the typeclass trait as implicits so that they may be imported:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 object FunctorInstances {
   implicit val optionFunctor = new Functor[Option] {
@@ -457,7 +457,7 @@ Can you see how Functors enable control flow and short-circuiting? The void case
 
 Defining a `fizzBuzz()` function that uses a Functor looks like this:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 import Functor
 import FunctorOps._
@@ -473,7 +473,7 @@ def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
 
 And then `fizzBuzz()` may be used for all contexts implementing the Functor typeclass:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 // import the Functor instance implicits
 import FunctorInstances._
@@ -499,7 +499,7 @@ println(fizzBuzz(List()))
 
 Functors permits you to consume a term via `map()`:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 def map(fa: F[A])(f: A => B): F[B]
 ```
@@ -509,7 +509,7 @@ Consider for a moment: with a Functor you are able to work within the scope of a
 
 Take for example these two contexts and the function signature for `combine()`:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 val fa: F[A]
 val fb: F[B]
@@ -540,7 +540,7 @@ How do you apply `combine()` to the terms `A` and `B` produced by the two contex
 
 Here is an example of the two functions defined for the `Option[_]` context:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 def pure(a: A): Option[A] = Some(a)
 
@@ -556,7 +556,7 @@ Notice that Applicatives also respect a _void effect_ like a Functor does with s
 
 Applicatives permit the definition of a higher-order function called `map2()` which may be defined in terms of both `pure()` and `ap()`. It is the parallel analog to Functor's `map()` function:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 def map2(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
   ap(map(fa)(a => b => f(a, b)))(fb)
@@ -567,7 +567,7 @@ The function argument to `map2()` is lifted into the context `F[_]` where it may
 
 With this `map2()` function, you are able to apply `combine()` to the terms produced by both contexts:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 // pseudocode
 val fa: F[A]
@@ -584,7 +584,7 @@ map2(fa)(fb)(combine)
 
 Like Functor, each context must provide its own implementation of `pure()` and `ap()` in order for it to be used as an Applicative. Any type with the shape of `F[_]` may become an Applicative by implementing the following typeclass:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 trait Applicative[F[_]] extends Functor[F[_]] {
   def pure[A](a: A): F[A]
@@ -606,7 +606,7 @@ object Applicative {
 
 Notice that Applicatives build on top of Functors. In the above typeclass, `map()` and `map2()` are provided default implementations in terms of `pure()` and `ap()`. Instances may override these functions if they choose. Our Functor instances from before may now be upgraded to Applicatives:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 object ApplicativeInstances {
   implicit val optionApplicative: Applicative[Option] = new Applicative[Option] {
@@ -643,7 +643,7 @@ Functors give you `map()` so that you may consume a term from a single context. 
 
 Concretely, at some point in your program you will want to write code that operates against the result of a previous operation and decide whether to continue:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 val userId = session("userId")
 if (!userId) {
@@ -682,7 +682,7 @@ There is a great deal of branching logic in this code that separates success and
 
 Monads, like Functors, are a simple structure and define a single function `flatMap()` which joins a nested context with the outer context, or in other words, it _flattens_ the context after it has been mapped:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 def flatMap(fa: F[A])(f: A => F[B]): F[B]
 ```
@@ -695,7 +695,7 @@ What this function enables is a capability like `map()` in that term `A` may be 
 
 Armed with Monads the previous code may be rewritten using `flatMap()`:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 def depositTwentyBucks(): Future[DepositResponse] =
   session("userId") match {
@@ -720,7 +720,7 @@ def depositTwentyBucks(): Future[DepositResponse] =
 
 This code seems a bit hard on the eyes, doesn't it? The deep _V_ shape of the code is referred to as the _pyramid of death_ and is an unfortunate feature of `flatMap()`-heavy code. There is still branching logic as two contexts, `Option[_]` and `Future[_]`, are being used simultaneously. However, Monads and Monad-like structures are so common in Scala that there is a special syntax for this kind of code, and with a little refactoring the code may be brought into a flattened layout:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 def depositTwentyBucks(): Future[DepositResponse] =
   for {
@@ -757,7 +757,7 @@ How does this code look to you?
 
 Like Functor and Applicative, each context must provide their own implementation of `flatMap()` in order for it to be used as a Monad. Any type with the shape `F[_]` may become a Monad by implementing the following typeclass:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 trait Monad[F[_]] extends Applicative[F] {
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
@@ -784,12 +784,12 @@ object MonadSyntax {
 
 Notice that Monads build on top of Applicatives. In the above typeclass, `join()` is provided a default implementation in terms of `flatMap()`, and `ap()` in terms of `flatMap()` and `map()`. Instances may override these functions if they choose, and in particular must override either `map()` or `ap()`. Our Applicative instances from before may now be upgraded to Monads:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 object MonadInstances {
   implicit val optionMonad: Monad[Option] = new Monad[Option] {
     def pure[A](a: A): Option[A] = Some(A)
-    def map[A, B](fa: Option[A])(f: A => B): F[B] = 
+    def map[A, B](fa: Option[A])(f: A => B): F[B] =
       fa match {
         case Some(a) => Some(f(a))
         case None => None
@@ -836,6 +836,6 @@ The term `A` borne by any context `F[A]` is in a philosophical sense a _monad_. 
 
 If you're operating in some context of code that has been abstracted such that you only know that the context is a Monad and nothing more, then you don’t have any reason to believe that you are operating on anything other than a singular, indivisible term `A`. It does not matter that the code when used is always reified using a `List` as its context, as the code your provide to `map()` and `flatMap()` still operates as though it were executing against a singular instance of term `A`.
 
-The term `A` of the Monad is singular and indivisible. It is the sole focus of your code when you use it, and any context around it is purely abstract and circumstance. 
+The term `A` of the Monad is singular and indivisible. It is the sole focus of your code when you use it, and any context around it is purely abstract and circumstance.
 
 And if there’s "nothing here"? It doesn’t matter, and you don’t have to worry because that code isn’t running anyway.
