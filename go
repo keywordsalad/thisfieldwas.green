@@ -80,16 +80,11 @@ _verify-prerequisites () {
   fi
   ⚡test_sync "main"
 
-  if [ ! -d _site ] || [ -z "$(ls -A _site)" ]; then
-    git clone --branch _site "$(git config --get remote.origin.url)" _site
-  fi
-
   sha="$(git log -1 HEAD --pretty=format:%h)"
   tag="$(date +'publish_%Y.%m.%d_%H.%M.%S')_$sha"
 
-  pushd ./_site
-  ⚡test_sync "_site"
-  popd
+  rm -rf _site
+  git clone --branch _site "$(git config --get remote.origin.url)" _site
 
   SITE_ENV=prod ⚡rebuild
 
