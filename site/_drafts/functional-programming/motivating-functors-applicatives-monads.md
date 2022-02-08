@@ -37,23 +37,29 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 * This alternative notation in Scala `def h[A, C](x: A): C = g(f(x))`{.scala} explicitly defines `h` as an application of the function `g` _after_ `f` is applied to argument `x`.
 
+## Complexity in programming
+
+Complexity is imposed by the _nondeterministic nature_ of programs in the real world.
+
 **Nondeterminism** occurs when a function `f: A => B` maps to a different member of type `B` for any number of times the same member of `A` has been applied. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
 
-* An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external to the function's signature_.
-* Interacting with disk resources is affected by the state of resources on the disk as the contents of these resources may change out of band. For example, reading the same file via `read: FilePath => String` is affected when the contents of the file change on disk. Reading and writing to sockets are inherently side-effecting.
-* Interacting with any system over the network implies affecting and being affected by these systems’ states, as in databases and third-party API’s.
-* Side effects also include **faults** such as the _divide by zero error_, thrown exceptions, and panics as they constitute secondary **implicit outputs** of a function. They impose an additional layer of protection to prevent or recover from them.
-* Exceptions and panics are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some secondary **implicit input** may influence the outcome. In contrast, a _division by zero error_ only occurs if the input divisor is `0`; it normally is not treated as a side effect for this reason.
+An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external to the function's signature_.
 
-## Functions and Complexity
+Interacting with disk resources is affected by the state of resources on the disk as the contents of these resources may change out of band. For example, reading the same file via `read: FilePath => String` is affected when the contents of the file change on disk. Reading and writing to sockets are inherently side-effecting.
 
-### Functions are the backbone of functional programming
+Interacting with any system over the network implies affecting and being affected by these systems’ states, as in databases and third-party API’s.
+
+Side effects also include **faults** such as the _divide by zero error_, thrown exceptions, and panics as they constitute secondary **implicit outputs** of a function. They impose an additional layer of protection to prevent or recover from them.
+
+Exceptions and panics are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some secondary **implicit input** may influence the outcome. In contrast, a _division by zero error_ only occurs if the input divisor is `0`; it normally is not treated as a side effect for this reason.
+
+### Modeling complexity
 
 Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h := g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, building the necessary mappings to generate the desired program output.
 
-While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs _not present in the program's signature_ of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These _implicit inputs and outputs_ have **effects** that dictate how their associated functions produce their outputs. For example database queries may return non deterministic responses and an error might occur when performing a direct deposit.
+While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs _not present in the program's signature_ of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These _implicit inputs and outputs_ have **effects** that dictate how their associated functions produce their outputs. For example database queries may return nondeterministic responses and an error might occur when performing a direct deposit.
 
-Faults, errors, and nondetermism as effects of these operations are effectively opaque in functions modeled as simple input and output, as in `getUser: Int => User`. The signature of this function requires a sort of _tribal knowledge_ in order for the programmer to be aware of what effects may dictate how a `User` is produced from it:
+Faults, errors, and nondeterminism as effects of these operations are opaque in functions modeled as simple input and output, as in `getUser: Int => User`. The signature of this function requires a sort of _tribal knowledge_ in order for the programmer to be aware of what effects may dictate how a `User` is produced from it:
 
 * An associated `User` may not be found.
 * The returned `User` may change between function applications.
@@ -61,7 +67,7 @@ Faults, errors, and nondetermism as effects of these operations are effectively 
 
 You might be thinking that these cases are a given when working with database code, and that _is_ tribal knowledge. These cases are _effects_ that dictate the circumstances under which a `User` might be produced and can be modeled accordingly as part of the typed API of `getUser`.
 
-### Effects impose complexity on code.
+### Effects impose complexity on code
 
 Can you think of how complexity occurs in a server application?
 
@@ -74,12 +80,12 @@ Can you think of how complexity occurs in a server application?
 
 How might complexity appear in code?
 
-* Configuration may be read when starting from the environment or from config files. At runtime a database might be used.
+* When a program starts, it may be read configuration from the environment, database, or files. Configuration may also be a continuous process at runtime.
 * Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a query fails.
-* Database queries are surrounded by exception handling, and only handled insofar as the compiler requires.
+* Database queries are surrounded by exception handling and recovery.
 * API calls require asynchronous IO.
 * External API calls can fail for many reasons. Different types of failures may dictate aborting the current operation or retrying it.
-* API responses are validated and transformed into domain objects.
+* API responses are validated and transformed into domain objects. Sometimes the responses are an unexpected format.
 * Logging libraries are used to track errors, and might require file system or network access.
 * Metrics libraries are used and require network access.
 
@@ -163,7 +169,7 @@ This code looks the same, doesn't it? What hides between the lines here is a cus
 
 Previously I described function composition as a simple case of `h := g ∘ f`. Functors, Applicatives, and Monads address a particular kind of function composition, **composition of functional effects**, which I will demonstrate in the following sections.
 
-## Contexts and Effects
+## Contexts and effects
 
 Let me start with a vague term: **Context**. What is a context? A context is a setting within which some term `A` might be produced.
 
@@ -383,9 +389,9 @@ Compare with iteration using a `for` loop:
 ```
 :::
 
-Iteration thus _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any guarantees are purely manual. Structure is discontinuous and to rebuild it requires following _procedural_ steps.
+Iteration thus _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
 
-This isn't to say that functional programming is only about iteration and loops. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your application.
+This isn't to say that functional programming is only about iteration and loops versus `map()`. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your application.
 
 > Where the type of your context is important, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default value otherwise. Similarly, the runtime managing asynchronous `Future`s will create and destroy structure as part of its normal operation. An example of destructive operations against `Option` appears later.
 
@@ -397,7 +403,7 @@ But what if there’s nothing there, as in there are _zero instances_ of term `A
 
 This behavior is referred to as _short-circuiting_ and it is a key feature of all Functors, Applicatives, and Monads. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on later.
 
-`Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in Functors. An `Option[A]` will only `map()` an instance of its term `A` is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
+`Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in Functors. An `Option[A]` will only `map()` an instance of its term `A` if it is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
 
 ### Becoming a Functor
 
@@ -435,13 +441,13 @@ object FunctorInstances {
     def map[A, B](fa: Either[X, A])(f: A => B): Either[X, B] =
       fa match {
         case Left(x) => Left(x) // void
-        case Right(y) => Right(f(y)) // apply map
+        case Right(a) => Right(f(a)) // apply map
       }
   }
   implicit val listFunctor = new Functor[List] {
     def map[A, B](fa: List[A])(f: A => B): List[B] =
       fa match {
-        case head :: tail => f(head) :: map(tail)(f) // apply map, recurse
+        case a :: at => f(a) :: map(at)(f) // apply map, recurse
         case Nil => Nil // void
       }
   }
@@ -460,7 +466,7 @@ Defining a `fizzBuzz()` function that uses a Functor looks like this:
 :::{.numberLines .nowrap}
 ```scala
 import Functor
-import FunctorOps._
+import FunctorSyntax._
 def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
   context.map {
     case x if x % 3 == 0 && x % 5 == 0 => "fizzbuzz"
@@ -494,6 +500,15 @@ println(fizzBuzz(List()))
 // => List()
 ```
 :::
+
+By using Functors, the `fizzBuzz()` function is free to focus on its specific program logic: 
+
+* Return "fizz" when `x` is divisible by `3`
+* Return "buzz" when `x` is divisible by `5`
+* Return "fizzbuzz" when `x` is divisible by both `3` and `5`
+* Return `x` as a `String` otherwise
+
+At no point is `fizzBuzz()` burdened by the effects of the context it executes within.
 
 ## Motivating Applicatives
 
