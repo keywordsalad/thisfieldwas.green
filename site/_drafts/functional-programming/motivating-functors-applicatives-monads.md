@@ -339,11 +339,11 @@ What `map()` does is _lift_ the function `f: A => B` into the context so that it
 
 This _lifting_ of functions that `map()` performs is _coherent_ across contexts. You can apply `f: A => B` to any `List[A]` just as you can an `IO[A]` and the results of both operations are predictable: your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
 
-How would you consume the term produced by `Future` or `Option`? You would also use a Functor.
+How would you consume the term produced by `Future[A]` or `Option[A]`? You would also use a Functor.
 
 What this enables is your function `f: A => B` to be used with any Functor regardless of its specific effects. Your function `f: A => B` is immediately reusable, and this means is that you already know how to use other Functors.
 
-### Why does the Functor's `map()` return `F[B]`?
+### Why does the Functor's `map()` function return `F[B]`?
 
 Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting a term mean if you’re using a context like `Option[A]`? What about `Future[A]`? Would their effects change how extraction of a term would work?
 
