@@ -153,6 +153,7 @@ postContext =
     <> tagListField "tagList"
     <> categoryListField "categoryList"
     <> constField "article" True
+    <> namedMetadataField "title"
 
 recentPostsContext :: Compiler (Context String)
 recentPostsContext = do

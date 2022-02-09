@@ -74,18 +74,20 @@ forField :: Context String
 forField = functionField2 "for" f
   where
     f (items :: ContextValue String) (blocks :: [Block]) = do
-      (context, items') <-
-        g items
-          `catchError` (\_ -> g' items)
-          `catchError` (\_ -> return (mempty, []))
-      h context items' blocks
-    g (x :: ContextValue String) = do
+      getAsItems items
+        `catchError` (\_ -> getAsStrings items)
+        `catchError` (\_ -> return (mempty, []))
+        >>= uncurry (applyForLoop blocks)
+    --
+    getAsItems (x :: ContextValue String) = do
       fromValue x :: TemplateRunner String (Context String, [Item String])
-    g' (x :: ContextValue String) = do
-      items <- fromValue x :: TemplateRunner String [String]
-      items' <- forM items \item -> itemSetBody item <$> tplItem
-      return (bodyField "item", items')
-    h context items blocks
+    --
+    getAsStrings (x :: ContextValue String) = do
+      bodies <- fromValue x :: TemplateRunner String [String]
+      items <- forM bodies \body -> itemSetBody body <$> tplItem
+      return (bodyField "item", items)
+    --
+    applyForLoop blocks context items
       | null items = return Nothing
       | otherwise = tplWithContext context do
         Just . mconcat <$> forM items \item ->
@@ -199,7 +201,14 @@ teaserField key snapshot = field key f
 metadataPriorityField :: String -> [String] -> Context a
 metadataPriorityField key priorityKeys = field key f
   where
-    f item = lift $ foldl (<|>) (noResult "") (flip getMetadataField item <$> priorityKeys)
+    f item =
+      lift $
+        (foldl (<|>))
+          (noResult $ "Metadata priority key " ++ show key ++ " from set " ++ show priorityKeys)
+          (flip getMetadataField item <$> priorityKeys)
+
+namedMetadataField :: String -> Context String
+namedMetadataField key = field key $ lift . getMetadataField key
 
 putField :: forall a. String -> Context a
 putField key = functionField key tplPut
