@@ -6,7 +6,7 @@ description: >-
 author: Logan McGrath
 comments: false
 published: 2021-12-11T14:43:25-0800
-tags: self host, configuration management, tinfoil hat
+tags: self host, configuration management, tinfoil hat, duct tape
 layout: post
 twitter:
   image: /images/reasons-my-website-is-offline/coming-out-of-the-closet-512x512.png
