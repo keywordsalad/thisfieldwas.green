@@ -459,7 +459,7 @@ The three instances show remarkable similarities, and this isn’t uncommon acro
 
 Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry error state in its term `X`. This satisfies the "either" effect between `Left[X, A]` for failure and `Right[X, A]` for success.
 
-> I like to think of `Right` as being "the right one I want." This pun is why `Either` is conventionally leveraged for the effect of correct vs. incorrect.
+> I like to think of `Right` as being "the right one I want." This pun is why `Either` is conventionally leveraged for the effect of correct vs. incorrect or success vs. failure.
 
 #### Using `map()` as a general abstraction
 
@@ -510,7 +510,7 @@ By using Functors, the `fizzBuzz()` function is free to focus on its specific pr
 * Return "fizzbuzz" when `x` is divisible by both `3` and `5`
 * Return `x` as a `String` otherwise
 
-At no point is `fizzBuzz()` burdened by the effects of the context it executes within.
+At no point is `fizzBuzz()` burdened by the effects of the context it executes against.
 
 ## Motivating Applicatives
 
@@ -545,7 +545,7 @@ How do you apply `combine()` to the terms `A` and `B` produced by the two contex
     def pure(a: A): F[A]
     ```
 
-    The name `pure()` might feel alien. You can remember the name by thinking of it like this: By taking an instance of term `A`, `ap()` gives you back a context with a present instance of the term `A`, which makes it a _non void_, _valid_, or _**pure**_ context.
+    The name `pure()` might feel alien. You can remember the name by thinking of it like this: By taking an instance of term `A`, `pure()` gives you back a context with a present instance of the term `A`, which makes it a _non void_, _valid_, or _**pure**_ context.
 
 2. A function that is able to apply a _lifted function_ to a _lifted term_ called `ap()`:
 
@@ -571,7 +571,7 @@ def ap(ff: Option[A => B])(fa: Option[A]): Option[B] = {
 
 Notice that Applicatives also respect a _void effect_ like a Functor does with some specialization: _both_ terms must be present as otherwise there would be no function to apply or no term to apply the function to. Applicative `ap()` thus is an all-or-nothing operation.
 
-Applicatives permit the definition of a higher-order function called `map2()` which may be defined in terms of both `pure()` and `ap()`. It is the parallel analog to Functor's `map()` function:
+Applicatives permit the definition of a higher-order function called `map2()` which may be defined in terms of both `map()` and `ap()`. It is the parallel analog to Functor's serial `map()` function:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -580,7 +580,7 @@ def map2(fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
 ```
 :::
 
-The function argument to `map2()` is lifted into the context `F[_]` where it may be applied to the terms produced by the first two contexts `A` and `B`. If either `A` or `B` are absent, then `f` is not applied and a _void_ `F[C]` is returned.
+The function argument to `map2()` is lifted into the context `F[_]` where it may be applied to the terms produced by the two contexts `A` and `B`. If either `A` or `B` are absent, then `f` is not applied and a _void_ `F[C]` is returned.
 
 With this `map2()` function, you are able to apply `combine()` to the terms produced by both contexts:
 
@@ -653,6 +653,14 @@ object ApplicativeInstances {
 }
 ```
 :::
+
+Regarding `ap()` and `map2()`: have you noticed their resemblance to a `zip()` function? This is most apparent in `List[_]`'s implementation of `ap()` as the list stops "zipping" once one of the two lists has run out.
+
+Having this "zipping" characteristic enables _parallel_ consumption of terms, whereas Functors enable _serial_ consumption. This difference is key particularly when working with `Future[_]`'s. Can you guess why? 
+
+By enabling parallel consumption of terms, an Applicative implementation of `Future[_]` _executes them in parallel_. This abstraction enables simple concurrency in your programs and you get this benefit with no effort beyond using functions defined against Applicative contexts.
+
+Armed with both serial and parallel means of consuming terms you are able to write programs that more or less take an input and produce some output. These two abstractions allow you to compose effectful operations, but they don't allow you to dictate whether your program should continue executing. Take error handling, for example. Recall how Functors and Applicatives short-circuit? How do you short-circuit them?
 
 ## Motivating Monads
 
