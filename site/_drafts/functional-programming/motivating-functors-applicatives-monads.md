@@ -45,7 +45,7 @@ Complexity is imposed by the _nondeterministic nature_ of programs in the real w
 
 An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external to the function's signature_.
 
-Interacting with disk resources is affected by the state of resources on the disk as the contents of these resources may change out of band. For example, reading the same file via `read: FilePath => String` is affected when the contents of the file change on disk. Reading and writing to sockets are inherently side-effecting.
+Interacting with disk resources is affected by the state of resources on the disk as the contents of these resources may change out of band. For example, reading the same file via `read: FilePath => String` is affected when the contents of the file change on disk. Operations that read and write to sockets are inherently side-effecting.
 
 Interacting with any system over the network implies affecting and being affected by these systems’ states, as in databases and third-party API’s.
 
@@ -53,13 +53,15 @@ Side effects also include **faults** such as the _divide by zero error_, thrown 
 
 Exceptions and panics are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some secondary **implicit input** may influence the outcome. In contrast, a _division by zero error_ only occurs if the input divisor is `0`; it normally is not treated as a side effect for this reason.
 
-Consider for a moment, how might complexity in programs be reduced?
+Nondeterminism is not defined by mere disk IO and external state. Some operations may produce an unknown number of results relative to their input. A simple example is a function `toBits: Int => [Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input value. Being coupled with IO, database queries exhibit nondeterminism in the number of rows they return, and in what sort and cardinality the rows have.
+
+Nondeterminisim makes programs complex. Consider for a moment: nondeterminism is complex, but side effects are what allpw our programs to be useful in the real world. How might complexity in programs be reduced if they must also be nondeterministic?
 
 ### Modeling complexity
 
 Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h := g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, building the necessary mappings to generate the desired program output.
 
-While the interface of a program may be modeled as an input mapped to an output, many functions internally must interact with implicit inputs and outputs _not present in the program's signature_ of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These _implicit inputs and outputs_ have **effects** that dictate how their associated functions produce their outputs. For example database queries may return nondeterministic responses and an error might occur when performing a direct deposit.
+While the interface of the program `prog` models a simple input mapped to an output, many functions in real world programs must internally interact with implicit inputs and outputs _not present in the program's signature_ of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These _implicit inputs and outputs_ have **effects** that dictate how their associated functions produce their outputs. For example, database queries may return nondeterministic responses and an error might occur when performing a direct deposit.
 
 Faults, errors, and nondeterminism as effects of these operations are opaque in functions modeled as simple input and output, as in `getUser: Int => User`. The signature of this function requires a sort of _tribal knowledge_ in order for the programmer to be aware of what effects may dictate how a `User` is produced from it:
 
@@ -67,11 +69,11 @@ Faults, errors, and nondeterminism as effects of these operations are opaque in 
 * The returned `User` may change between function applications.
 * The database or network may fault and the function generates an exception that must be handled.
 
-You might be thinking that these cases are a given when working with database code, and that _is_ tribal knowledge. These cases are **effects** that dictate the circumstances under which a `User` might be produced and can be modeled accordingly as part of the typed API of `getUser`. I will explain in depth shortly, but let's first consider other forms of complexity.
+You might be thinking that these cases are a given when working with database code, and that _is_ tribal knowledge. These cases are **effects** that dictate the circumstances under which a `User` may be produced and can be modeled accordingly as part of the typed API of `getUser`. I will explain how this modeling works later; first we will consider how to characterize complexity.
 
 ### Effects impose complexity on code
 
-Can you think of some program functions that necesitate complexity?
+Can you think of some program capabilities that necesitate complexity?
 
 * Configuration comes from any number of sources, both when starting the program and during runtime.
 * Database queries each need to be protected against errors and checked if any occur. Each error type requires different handling.
@@ -84,7 +86,7 @@ How might this complexity be handled in code?
 
 * When a program starts, it may read configuration from the environment, a database, or files. Configuration may also be a continuous process at runtime, which may affect the entire architecture of the program.
 * Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails.
-* Database queries are surrounded by code handling exceptions and recovering from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors.
+* Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors.
 * API calls require async IO in order to be performant. Async IO "infects" entire codebases requiring its capability.
 * External API calls can fail for any reason. Different types of failures may dictate aborting the associated operation or retrying it. As in database queries, exception handling may be deferred to the minefield.
 * API responses are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring meticulous validation logic and recovery from malformed responses.
@@ -93,14 +95,14 @@ How might this complexity be handled in code?
 
 These complexities can be characterized in terms of **effects**. Each of the following effects center on some dimension of nondeterminism:
 
-* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files
-* **IO** as in synchronous operations against disk access and network boundaries
-* **Presence** as some functions may not produce anything for some inputs
-* **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input
-* **Correctness** requiring sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls
-* **Implicit input** in the form of configuration, feature flags and ramps, or other inputs that aren't themselves explicitly provided as part of an API boundary or client interaction
-* **Implicit output** in the form of logging and metrics, as well as exceptions and other faults
-* **State** representing change over time and how it propagates across a program's architecture
+* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files.
+* **IO** as in synchronous operations against disk access and network boundaries.
+* **Presence** as some functions may not produce anything for some inputs.
+* **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input.
+* **Correctness** requiring sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls.
+* **Implicit input** in the form of configuration, feature flags and ramps, or other inputs that aren't themselves explicitly provided as part of an API boundary or client interaction.
+* **Implicit output** in the form of logging and metrics, as well as exceptions and other faults.
+* **State** representing change over time and how it propagates across a program's architecture.
 
 The actual list of effects is innumerable, but these ones are common.
 
@@ -135,11 +137,11 @@ boolean runPayroll(long employeeId) {
 
 The code above demonstrates complexity in the dimensions of:
 
-* **Synchronous IO** as database queries and network calls are implicitly synchronous
-* **Presence** as a `User` may not be found or their `Paycheck` not calculated
-* **Correctness** where the `"SUCCESS"` response from the `achClient` is the only check, any other responses are simply not handled
-* **Implicit input** where the company's bank routing and account numbers are read from an external location
-* **Implicit output** where logging occurs but swallows errors, resulting in opaque `false` return cases, exceptions also occur in a number of cases directly within the code but may also bubble up from database and network operations
+* **Synchronous IO** as database queries and network calls are implicitly synchronous.
+* **Presence** as a `User` may not be found or their `Paycheck` not calculated.
+* **Correctness** where the `"SUCCESS"` response from the `achClient` is the only check, any other responses are simply not handled.
+* **Implicit input** where the company's bank routing and account numbers are read from an external location.
+* **Implicit output** where logging occurs but swallows errors, resulting in opaque `false` return cases, exceptions also occur in a number of cases directly within the code but may also bubble up from database and network operations.
 
 Fortunately there are ways to model sets of these effects and contain the scope of their impact so that code is less complex. Rewriting the above code using an effect model may look like this:
 
@@ -147,8 +149,8 @@ Fortunately there are ways to model sets of these effects and contain the scope 
 ```scala
 def runPayroll(employeeId: Long): PayrollEffect[()] =
   for {
-    employee <- employeeRepo.find(employee).pureOr(fail(EmployeeMissing))
-    paycheck <- payCalc.calculatePaycheck(employee).pureOr(fail(PaycheckMissing))
+    employee <- employeeRepo.find(employee).sequenceA.getOr(fail(EmployeeMissing))
+    paycheck <- payCalc.calculatePaycheck(employee).sequenceA.getOr(fail(PaycheckMissing))
     companyAcctNo <- getConfig("companyAccountNo")
     companyRoutingNo <- getConfig("companyRoutingNo")
     response <- achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck)
@@ -162,7 +164,7 @@ def runPayroll(employeeId: Long): PayrollEffect[()] =
 
 This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, aysnc IO, and implicit input and output. This code is thus unburdened of most complexity. 
 
-You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occcur and the effect abstraction short-circuits itself should any operation go awry. 
+You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occcur and the main operation short-circuits itself should any inner operation go awry. 
 
 This abstraction of effects allows for safer code that better focuses on the business logic at-hand. But how are abstractions over effects created?
 
@@ -170,7 +172,7 @@ Previously I described function composition as a simple case of `h := g ∘ f`. 
 
 ## Contexts and effects
 
-Let me start with a vague term: **Context**. What is a context? A context is a setting within which some term `A` might be produced.
+Let me start with a vague term: **Context**. What is a context? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the context of `F[A]`.
 
 > Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` when the type of the term is unknown, and `F[A]` when the term is known to be of type `A`. Other letters work nicely of course, as do proper names, as in `Option[Int]`.
 
@@ -184,21 +186,22 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 * `Either[X, A]`: Conventionally treated as term `A` if valid, term `X` if invalid. Getting the wrong term causes a fault.
 * `List[A]`: Nondeterminism of sort, cardinality, and length of term `A`. There are zero to many many instances of term `A`, and trying get an `A` from an empty list causes a fault.
 
-**Contexts representing acquisition:**
+**Contexts representing side-effects:**
 
 * `IO[A]`: External nondeterminism of an instance of term `A`.
     * The instance may be here already, eventually, or never.
     * The instance is acquired externally from the program via processes that rely on and are influenced by side effects.
-    * Faults may interrupt the acquisition of the instance.
     * Execution must await the instance before it may continue.
+    * Faults may interrupt the acquisition of the instance.
     * Getting the instance causes a fault if acquisition has failed.
-* `Future[A]`: Asynchronouz and temporal nondeterminism of an instance of term `A`.
+* `Future[A]`: Asynchronous and temporal nondeterminism of an instance of term `A`.
     * The instance may be here already, eventually, or never.
     * The instance is acquired externally from the program via processes that rely on and are influenced by side effects.
+    * Execution may be suspended, awaited, or run in parallel with any number of other `Future[_]`'s. This allows for task management against limited computing resources.
     * Faults may interrupt the acquisition of the instance.
-    * Execution may be suspended, awaited, or run in parallel of any number of other `Future[_]`'s.
+    * Getting the instance causes a fault if acquisition is incomplete or has failed.
 
-**Higher-order contexts:**
+**Contexts representing implicit input and output:**
 
 * `ReaderT[F, A]`: Reading of implicit inputs in the context of `F[_]`.
     * Propagation of configuration usually leverages this effect by abstracting how instances of configuration values are acquired.
@@ -207,13 +210,13 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 * `StateT[F, A]`: Modifying implicit inputs and outputs in the context of `F[_]`.
     * Models state changing over time in an otherwise-immutable context.
 
-Each of these contexts have two shared qualities in that they _produce_ some term `A` and their effects dictate _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term `A` be consumed in a manner unburdened of complexity?
+Each of these contexts have two shared qualities in that they _produce_ some term `A` and that their effects dictate _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term `A` be consumed in a manner unburdened of complexity?
 
 In order to generalize contexts, the key differentiator between them must be abstracted: **effects**. By shedding effects as an _implementation detail_, the production of term `A` remains a shared characteristic that can be accessed by a general interface. By what interface would term `A` be consumed?
 
 ## Motivating Functors
 
-**For any context `F[_]`, it produces some term `A`.** If you have a function `f: A => B`, how would you apply it to the term produced by the context `F[A]`? That would require extracting the term, right? Specifically, you can’t apply the function directly to the context:
+**For any context `F[_]`, it produces some term `A`.** If you have a function `f: A => B`, how would you apply it to the term produced by the context `F[A]`? That would require extracting the term, right? Specifically, you can’t apply the following function directly to the context:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -227,9 +230,9 @@ f(fa) // compile error!
 ```
 :::
 
-Recall from the previous section, contexts only share two qualities: that they produce a term, and that they have effects. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for `Option[A]`, `Either[X, A]`, and `List[A]`:
+Recall from the previous section, contexts share two qualities: that they produce a term, and that they have effects dictating how the term is produced. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for `Option[A]`, `Either[X, A]`, and `List[A]`:
 
-**`Option[A]`** models the presence or absence of an instance of term `A`:
+**`Option[A]`** models the presence or absence of an instance of term `A`. It is the effect of _zero or one_ of term `A`:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -242,7 +245,7 @@ case object None extends Option[Nothing]
 ```
 :::
 
-**`Either[X, A]`** by convention models failure with term `X` and success with term `A`:
+**`Either[X, A]`** by convention models failure with term `X` and success with term `A`. It is the effect of being _either_ `Right`'s instance of term `A` when successful, or `Left`'s (or more appropriately, _Wrong_) instance of term `X` when failed:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -259,7 +262,7 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 ```
 :::
 
-**`List[A]`** models zero or more instances of term `A`:
+**`List[A]`** models _zero to many_ instances of term `A`. It is the effect of an unknown number, sort, and cardinality of instances:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -284,7 +287,7 @@ object List {
 
 ### Extracting the instance of the term `A`
 
-Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, an operation `extract(): F[A] => A` is possible as it means the same thing between both of them: `extract()` either gets the existing instance of the term `A` or it faults. In object oriented programming, `Option[A]` and `Either[X, A]` might share such an interface:
+Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, an operation `extract(): F[A] => A` is possible as it means the same thing between both of them: `extract()` either gets the existing instance of the term `A` or it faults. In object oriented programming, `Option[A]` and `Either[X, A]` might expose such an interface:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -304,7 +307,7 @@ sealed trait Either[X, A] extends Extractable[A] {
 
 How do you `extract()` the term `A` from a `List[A]` such that it means the same thing as in `Option[A]` and `Either[X, A]`?
 
-As in `Option[A]` and `Either[X, A]` there is a notion of the presence or absence of an instance of the term `A`, but presence in `List[A]` implies one or more instances. A solution inspired by object oriented programming might change the interface thusly:
+As in `Option[A]` and `Either[X, A]` there is a notion of the presence or absence of an instance of the term `A`, but presence in `List[A]` implies _one to many_ instances. A solution inspired by object oriented programming might change the interface thusly:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -323,17 +326,17 @@ sealed trait List[A] extends Extractable[A] {
 ```
 :::
 
-This interface however is _not coherent_. Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]` and whether that can be interpreted as absence is ambiguous, requiring client code to decide at the call site what absence means. This interface also imposes the effects of `List[A]`, specifically length, cardinality, and sort, upon all client code using it. You would probably be very unhappy using this interface in your own code.
+This interface however _is not coherent_. Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]` and whether that can be interpreted as absence is ambiguous. This requires client code to decide at the call site what absence means. This interface also imposes the effects of `List[A]`, specifically length, upon all client code using it. You would probably be very unhappy using this interface in your own code.
 
-But what about implementing `extract()` for `Future[A]`? When applied to `Future[A]`, the `extract()` function is by its own signature a blocking call. You probably want something that is properly asynchronous.
+But what about implementing `extract()` for `Future[A]`? When applied to `Future[A]`, the `extract()` function is by its own signature a blocking call. You want your dependency on `A` to be properly asynchronous.
 
 ### Abstracting over effects
 
-`Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` all have different effects that dictate how term `A` is produced. Following an axiom from object oriented programming: _abstract what changes_. Therefore you have to shed effects as implementation details. How might that impact extracting the term `A`?
+`Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` all have different effects that dictate how term `A` is produced. To follow an axiom from object oriented programming: _abstract what changes_, therefore you have to shed effects as an implementation detail. How might that impact extracting the term `A`?
 
-The answer is unsatisfying: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence?
+You may be unsatisfied by the answer: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence? Functors solve this problem.
 
-**Functors** are an abstraction that allow you to consume term `A`. A Functor is a simple structure, a single function called `map()`:
+**Functors** are an abstraction that allow you to consume term `A` within the context of `F[A]`. A Functor is a simple structure, a single function called `map()`:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -343,21 +346,21 @@ def map(fa: F[A])(f: A => B): F[B]
 
 What `map()` does is _lift_ the function `f: A => B` into the context so that it becomes `F[A] => F[B]`, giving back `F[B]`.
 
-This _lifting_ of functions that `map()` performs is _coherent_ across contexts. You can apply `f: A => B` to any `List[A]` just as you can an `IO[A]` and the results of both operations are predictable: your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
+This _lifting_ of functions that `map()` performs _is coherent_ across contexts. With `map()` you can apply `f: A => B` to any `List[A]` just as you can any `IO[A]`. The results of both operations are predictable: your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
 
 How would you consume the term produced by `Future[A]` or `Option[A]`? You would also use a Functor.
 
-What this enables is your function `f: A => B` to be used with any Functor regardless of its specific effects. Your function `f: A => B` is immediately reusable and can be unit tested in isolation.
+What this enables is your function `f: A => B` to be used with any Functor regardless of its specific effects. Your function `f: A => B` is immediately reusable across all contexts and can be unit tested in isolation  of effects.
 
 ### Why does the Functor's `map()` function return `F[B]`?
 
-Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting a term mean if you’re using a context like `Option[A]`? What about `Future[A]`? Would their effects change how extraction of a term would work?
+Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting the term mean if you’re using a context like `Option[A]`? What about `Future[A]`? Would their effects change how extraction of the term would work?
 
 Extracting _the_ term from `List[A]` flatly doesn't make sense as it has the effect of an unknowm number of instances.
 
 Because there is no way to generalize extracting a term from a context, Functors don’t allow you to operate on contexts in such a way that an instance of the term can "escape" them. Extracting terms is implementation-specific, so this capability is not generalized.
 
-Most importantly, by keeping all operations against terms within the context, the context’s specific effects remain abstracted. Asynchronous operations with `Future[A]` remain asynchronous, the length of `List[A]` remains nondeterministic, and `Option[A]` may or may not be present.
+Most importantly, by keeping all operations against terms within their context, the context’s specific effects remain abstracted. Asynchronous operations with `Future[A]` remain asynchronous, the length of `List[A]` remains unknown, and `Option[A]` may or may not be present.
 
 Functors _preserve structure_ by keeping operations within the context. For example, applying `map()` on a `List[A]` or `BinaryTree[A]`:
 
@@ -373,7 +376,7 @@ Functors _preserve structure_ by keeping operations within the context. For exam
 ```
 :::
 
-In both cases, the output of `map()` produces an identifiable `List[B]` and `BinaryTree[B]`. The values internally may change, as they have been mapped over by a function, and `BinaryTree[B]` specifically may rebalance itself. What matters here is that the structures are coherent and identifiable, and our `map()`'ed function is usable between each.
+The application of `map()` produces each a new and identifiable `List[B]` and `BinaryTree[B]`. The values internally may change, as they have been mapped over by a function, and `BinaryTree[B]` specifically may rebalance itself. What matters here is that the structures are coherent and identifiable, and also that our `map()`'ed function is usable between each.
 
 Compare with iteration using a `for` loop:
 
@@ -391,9 +394,9 @@ Compare with iteration using a `for` loop:
 
 Iteration thus _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
 
-This isn't to say that functional programming is only about iteration and loops versus `map()`. Can you think of other operations that might destroy structure? For example if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your program.
+This isn't to say that functional programming is only about iteration and loops versus `map()`. Can you think of other operations that might destroy structure? For example, if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your program.
 
-> Where the type of your context is important, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default value otherwise. Similarly, the runtime managing asynchronous `Future`s will create and destroy structure as part of its normal operation. An example of destructive operations against `Option` appears later.
+> Where the type of your context is known, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default instance otherwise. Similarly, the runtime managing asynchronous `Future`s will create and destroy their structure as part of its normal operation. An example of destructive operations against `Option` appears later.
 
 ### Context `F[A]` must produce some term `A`
 
@@ -407,7 +410,7 @@ This behavior is referred to as _short-circuiting_ and it is a key feature of al
 
 ### Becoming a Functor
 
-Each context of course must provide its own implementation of `map()` in order for it to be used as a Functor. Functor implementations in Scala are provided via typeclasses. Any type that has the shape `F[_]` may become a functor by implementing the following typeclass:
+Each context of course must provide its own implementation of `map()` in order for it to be used as a Functor. Functor implementations in Scala are provided via typeclasses. Any type that has the shape `F[_]` may become a Functor by implementing the following typeclass:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -425,7 +428,7 @@ object FunctorSyntax {
 ```
 :::
 
-Instances of the Functor typeclass simply extend the typeclass trait and make themselves abailable implicitly:
+Instances of the Functor typeclass simply extend the typeclass trait and make themselves available implicitly:
 
 :::{.numberLines .nowrap}
 ```scala
