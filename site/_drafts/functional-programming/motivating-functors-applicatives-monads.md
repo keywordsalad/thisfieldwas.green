@@ -55,7 +55,7 @@ Exceptions and panics are fully nondeterministic as there is no single input tha
 
 Nondeterminism is not defined by mere disk IO and external state. Some operations may produce an unknown number of results relative to their input. A simple example is a function `toBits: Int => [Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input value. Being coupled with IO, database queries exhibit nondeterminism in the number of rows they return, and in what sort and cardinality the rows have.
 
-Nondeterminisim makes programs complex. Consider for a moment: nondeterminism is complex, but side effects are what allpw our programs to be useful in the real world. How might complexity in programs be reduced if they must also be nondeterministic?
+Nondeterminism makes programs complex. Consider for a moment: nondeterminism is complex, but side effects are what allow our programs to be useful in the real world. How might complexity in programs be reduced if they must also be nondeterministic?
 
 ### Modeling complexity
 
@@ -73,7 +73,7 @@ You might be thinking that these cases are a given when working with database co
 
 ### Effects impose complexity on code
 
-Can you think of some program capabilities that necesitate complexity?
+Can you think of some program capabilities that necessitate complexity?
 
 * Configuration comes from any number of sources, both when starting the program and during runtime.
 * Database queries each need to be protected against errors and checked if any occur. Each error type requires different handling.
@@ -162,9 +162,9 @@ def runPayroll(employeeId: Long): PayrollEffect[()] =
 ```
 :::
 
-This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, aysnc IO, and implicit input and output. This code is thus unburdened of most complexity. 
+This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, async IO, and implicit input and output. This code is thus unburdened of most complexity.
 
-You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occcur and the main operation short-circuits itself should any inner operation go awry. 
+You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occur and the main operation short-circuits itself should any inner operation go awry.
 
 This abstraction of effects allows for safer code that better focuses on the business logic at-hand. But how are abstractions over effects created?
 
@@ -356,7 +356,7 @@ What this enables is your function `f: A => B` to be used with any Functor regar
 
 Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting the term mean if you’re using a context like `Option[A]`? What about `Future[A]`? Would their effects change how extraction of the term would work?
 
-Extracting _the_ term from `List[A]` flatly doesn't make sense as it has the effect of an unknowm number of instances.
+Extracting _the_ term from `List[A]` flatly doesn't make sense as it has the effect of an unknown number of instances.
 
 Because there is no way to generalize extracting a term from a context, Functors don’t allow you to operate on contexts in such a way that an instance of the term can "escape" them. Extracting terms is implementation-specific, so this capability is not generalized.
 
@@ -376,7 +376,7 @@ Functors _preserve structure_ by keeping operations within the context. For exam
 ```
 :::
 
-The application of `map()` produces each a new and identifiable `List[B]` and `BinaryTree[B]`. The values internally may change, as they have been mapped over by a function, and `BinaryTree[B]` specifically may rebalance itself. What matters here is that the structures are coherent and identifiable, and also that our `map()`'ed function is usable between each.
+The application of `map()` produces each a new and identifiable `List[B]` and `BinaryTree[B]`. The values internally may change, as they have been mapped over by a function, and `BinaryTree[B]` specifically may re-balance itself. What matters here is that the structures are coherent and identifiable, and also that our `map()`'ed function is usable between each.
 
 Compare with iteration using a `for` loop:
 
@@ -589,7 +589,7 @@ With this `map2()` function, you are able to apply `combine()` to the terms prod
 
 :::{.numberLines .nowrap}
 ```scala
-// pseudocode
+// pseudo code
 val fa: F[A]
 val fb: F[B]
 
@@ -659,7 +659,7 @@ object ApplicativeInstances {
 
 Regarding `ap()` and `map2()`: have you noticed their resemblance to a `zip()` function? This is most apparent in `List[_]`'s implementation of `ap()` as the list stops "zipping" once one of the two lists has run out.
 
-Having this "zipping" characteristic enables _parallel_ consumption of terms, whereas Functors enable _serial_ consumption. This difference is key particularly when working with `Future[_]`'s. Can you guess why? 
+Having this "zipping" characteristic enables _parallel_ consumption of terms, whereas Functors enable _serial_ consumption. This difference is key particularly when working with `Future[_]`'s. Can you guess why?
 
 By enabling parallel consumption of terms, an Applicative implementation of `Future[_]` _executes them in parallel_. This abstraction enables simple concurrency in your programs and you get this benefit with no effort beyond using functions defined against Applicative contexts.
 
