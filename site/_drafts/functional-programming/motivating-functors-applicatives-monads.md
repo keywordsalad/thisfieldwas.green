@@ -7,6 +7,12 @@ tags: functional programming, programming, scala
 layout: post
 ---
 
+**I'M SPLITTING THIS APART BECAUSE IT'S LONG**
+
+* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism/functors.md"}}
+
+**ORIGINAL MATERIAL FOLLOWS:**
+
 What’s a Functor? An Applicative? Or a Monad? The internet is teeming with articles that answer some facet of their character, but few provide a concrete motivation for why these structures exist or appear in the forms that they do.
 
 In this article, I will demonstrate the motivation of Functors, Applicatives, and Monads.
