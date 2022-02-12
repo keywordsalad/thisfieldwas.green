@@ -9,7 +9,7 @@ layout: post
 
 **I'M SPLITTING THIS APART BECAUSE IT'S LONG**
 
-* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism/functors.md"}}
+* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-with-functors.md"}}
 
 **ORIGINAL MATERIAL FOLLOWS:**
 
@@ -368,7 +368,7 @@ Recall that contexts generally do not permit extracting terms. Think for a momen
 
 Extracting _the_ term from `List[A]` flatly doesn't make sense as it has the effect of an unknown number of instances.
 
-Because there is no way to generalize extracting a term from a context, Functors don’t allow you to operate on contexts in such a way that an instance of the term can "escape" them. 
+Because there is no way to generalize extracting a term from a context, Functors don’t allow you to operate on contexts in such a way that an instance of the term can "escape" them.
 
 Most importantly, by keeping all operations against terms within their context, the context’s specific effects remain abstracted. Asynchronous operations with `Future[A]` remain asynchronous, the length of `List[A]` remains unknown, and `Option[A]` may or may not be present.
 
@@ -479,7 +479,7 @@ type Id[A] = A // see how sneaky the context definition is?
 
 object FunctorInstances {
   implicit val idFunctor: Functor[Id] = new Functor[Id] {
-    def map[A, B](fa: Id[A])(f: A => B): F[B] = 
+    def map[A, B](fa: Id[A])(f: A => B): F[B] =
       f(fa) // map always applies!
   }
 }

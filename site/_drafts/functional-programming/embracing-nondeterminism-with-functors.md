@@ -1,5 +1,6 @@
 ---
-title: "Embracing Nondeterminism in Functional Programs: Functors"
+title: Embracing Nondeterminism with Functors
+description: Embracing nondeterminism in functional programs using Functors
 author: Logan McGrath
 comments: false
 date: 2022-01-24T17:14:03-0800
@@ -9,7 +10,9 @@ layout: post
 
 What’s a Functor? An Applicative? Or a Monad? The internet is teeming with articles that answer some facet of their character, but few provide a concrete motivation for why these structures exist or appear in the forms that they do.
 
-In this article I will:
+<!--more-->
+
+In this post I will:
 
 * Demonstrate nondeterminism and complexity as the motivators for the use of Functors, Applicatives, and Monads as **design patterns** in functional programming.
 * Provide **effects** as a model for characterizing nondeterminism and complexity in programs.
@@ -42,7 +45,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 **Composition** describes chaining the output of a function `f: A => B` to the input of function `g: B => C` such that a new function `h: A => C` may defined as `h := g ∘ f`, read as _h is g after f_.
 
 * This alternative notation in Scala concretely defines `h` as an application of the function `g` _after_ `f` is applied to argument `z`.
-    
+
     ```scala
     def f(x: A): B
     def g(y: B): C
@@ -116,7 +119,7 @@ These complexities can be characterized in terms of **effects**. Each of the fol
 * **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input.
 * **Correctness** requiring sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls.
 * **Implicit input** in the form of configuration, feature flags and ramps, A/B test assignment, or other inputs that aren't themselves explicitly provided as part of an API boundary or client interaction.
-* **Implicit output** in the form of logging and metrics, as well as exceptions and other faults. 
+* **Implicit output** in the form of logging and metrics, as well as exceptions and other faults.
 * **State** representing change over time and how it propagates across a program's architecture. Implicit inputs and outputs together constitute a form of state.
 
 The actual list of effects is innumerable, but these ones are common.
@@ -491,7 +494,7 @@ type Id[A] = A // see how sneaky the context definition is?
 
 object FunctorInstances {
   implicit val idFunctor: Functor[Id] = new Functor[Id] {
-    def map[A, B](fa: Id[A])(f: A => B): F[B] = 
+    def map[A, B](fa: Id[A])(f: A => B): F[B] =
       f(fa) // map always applies!
   }
 }
@@ -576,6 +579,6 @@ def combine(x: A, y: B): C
 ```
 :::
 
-How do you apply `combine()` to the terms `A` and `B` produced by the two contexts? 
+How do you apply `combine()` to the terms `A` and `B` produced by the two contexts?
 
 In my next post, we will explore how Applicatives enable working within more than one context at the same time, and the many ways that you will be able to exploit this capability.
