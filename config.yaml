@@ -45,3 +45,9 @@ review:
   site-info:
     <<: *default-site-info
     root: https://review.thisfieldwas.green
+
+preview:
+  <<: *default
+  site-info:
+    <<: *default-site-info
+    root: https://preview.thisfieldwas.green
