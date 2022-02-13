@@ -112,7 +112,7 @@ How might supporting these capabilities cause complexity appear in code?
 * Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors. Rows returned by queries will have an unknown length, sort, and cardinality.
 * API calls to external systems require async IO in order for programs to be performant. Async IO "infects" entire codebases requiring its capability.
 * External API calls can fail for any reason. Different types of failures may dictate aborting the associated operation or retrying it. As in database queries, exception handling may be deferred to the minefield.
-* External inpuy and API responses are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring meticulous validation logic and recovery from malformed responses.
+* External input and API responses are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring meticulous validation logic and recovery from malformed responses.
 * Logging libraries are used to report errors and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
 * Metrics libraries may be used and require network access, possibly also async IO.
 * Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails. A/B testing requires deterministically persisting identities' sessions within their assigned variants.
@@ -207,8 +207,8 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 **Elementary contexts representing dimensions of presence:**
 
 * `Option[A]`: Presence, absence, or _optionality_ of some instance of term `A`. Getting the term `A` when there is no instance causes a fault.
-* `Either[X, A]`: Conventionally treated as _either_ term `A` if valid, term `X` if invalid. Getting the wrong term causes a fault.
-* `List[A]`: Unknown sort, cardinality, and length of term `A`. There are zero to many many instances of term `A`, and trying get an `A` from an empty list causes a fault.
+* `Either[X, A]`: Conventionally treated as _either_ term `A` if valid _or_ term `X` if invalid. Getting the wrong term causes a fault.
+* `List[A]`: _Unknown_ sort, cardinality, and length of term `A`. Trying get an `A` from an empty list or from beyond the end of it causes a fault.
 
 **Contexts representing side-effects:**
 
@@ -269,7 +269,7 @@ case object None extends Option[Nothing]
 ```
 :::
 
-**`Either[X, A]`** by convention models failure with term `X` and success with term `A`. It is the effect of being _either_ `Right`'s instance of term `A` when successful, or `Left`'s instance of term `X` when failed:
+**`Either[X, A]`** by convention models failure with term `X` and success with term `A`. It is the effect of being _either_ `Right`'s term `A` when successful _or_ `Left`'s term `X` when failed:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -286,7 +286,7 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 ```
 :::
 
-**`List[A]`** models _zero to many_ instances of term `A`. It is the effect of an unknown number, sort, and cardinality of instances:
+**`List[A]`** models _zero to many_ instances of term `A`. It is the effect of an _unknown_ number, sort, and cardinality of instances:
 
 :::{.numberLines .nowrap}
 ```scala
