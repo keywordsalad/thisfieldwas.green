@@ -572,23 +572,26 @@ In order to be a Functor, a context must satisfy two laws:
 
 1. Preservation of identity functions:
 
-    
-    ```{.scala .nowrap}
-    context.map(x => x) == context
+    :::{.numberLines .nowrap}
+    ```scala
+    context.map(id) == id(context)
     ```
+    :::
 
 2. Preservation of function composition:
 
-    ```{.scala .nowrap}
+    :::{.numberLines .nowrap}
+    ```scala
     context.map(g ∘ f) == context.map(f).map(g)
     ```
+    :::
 
 Here are the two laws applied against Scala's builtin `List` type, which defines its own `map()`operation:
 
 :::{.numberLines .nowrap}
 ```scala
 def preservesIdentityFunctions(list: List[Int]): Unit = 
-  assert(list.map(x => x) == list)
+  assert(list.map(identity(_)) == identity(list))
   
 def preservesFunctionComposition(list: List[Int]): Unit = {
   val f: Int => Int = _ + 3
