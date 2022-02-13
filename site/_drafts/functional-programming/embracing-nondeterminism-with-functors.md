@@ -494,7 +494,7 @@ Can you see how Functors enable control flow and short-circuiting? The void case
 
 Contrasting with void-effects, here's what the Functor instance for `Id[_]` looks like:
 
-:::{.numberLines}
+:::{.numberLines .nowrap}
 ```scala
 type Id[A] = A // see how sneaky the context definition is?
 
