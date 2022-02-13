@@ -562,7 +562,7 @@ At no point is `fizzBuzz()` burdened by the effects of the context it executes a
 
 You might be thinking that lists and arrays in the wild already have a `map()` operation available. `Promise`s in JavaScript also have their own `map()`. You've probably been using Functors for a while and never realized!
 
-Functors as a formal abstraction API find their use in cases where the specific kind of the context is unimportant. However, you might observe that the _shape_ of a Functor appears in many places without being _called_ a Functor. Using `map()` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map()` operations are Functors because Functors emerge from settings where stuff exists under some circumstances.
+Functors as a formal abstraction API find their use in cases where the specific kind of the context is unimportant. However, you might observe that the _shape_ of a Functor appears in many places without being _called_ a Functor. Using `map()` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map()` operations are Functors because Functors arise from settings where stuff exists under some circumstances.
 
 ### Functor laws
 
@@ -573,22 +573,20 @@ In order to be a Functor, a context must satisfy two laws:
 1. Preservation of identity functions:
 
     
-    ```scala
+    ```{.scala .nowrap}
     context.map(x => x) == context
     ```
 
 2. Preservation of function composition:
 
-    ```scala
+    ```{.scala .nowrap}
     context.map(g ∘ f) == context.map(f).map(g)
     ```
 
-Here are the two laws applied against Scala's builtin `List` typw, which defines its own `map()`:
+Here are the two laws applied against Scala's builtin `List` type, which defines its own `map()`operation:
 
-:::{.numberLines, .nowrap}
+:::{.numberLines .nowrap}
 ```scala
-// demonstrated against Scala's List
-
 def preservesIdentityFunctions(list: List[Int]): Unit = 
   assert(list.map(x => x) == list)
   
