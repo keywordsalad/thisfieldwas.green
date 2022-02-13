@@ -9,6 +9,6 @@ layout: post
 
 **I'M SPLITTING THIS APART BECAUSE IT'S LONG**
 
-* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-with-functors.md"}}
-* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-with-applicatives.md"}}
-* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-with-monads.md"}}
+* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-part-1.md"}}
+* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-part-2.md"}}
+* {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-part-3.md"}}

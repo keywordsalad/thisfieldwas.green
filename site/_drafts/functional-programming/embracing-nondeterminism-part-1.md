@@ -1,11 +1,17 @@
 ---
-title: Embracing Nondeterminism with Functors
-description: Embracing nondeterminism in functional programs using Functors
+title: "Embracing Nondeterminism Part I: Contexts and Effects"
+description: Embracing nondeterminism in functional programming by way of modeling complexity as effects within execution contexts.
 author: Logan McGrath
 comments: false
 date: 2022-01-24T17:14:03-0800
 tags: functional programming, programming, scala, design patterns
 layout: post
+twitter:
+  image: /images/tags/functional-programming/function-input-output-512x512.png
+og:
+  image:
+    url: /images/tags/functional-programming/function-input-output-512x512.png
+    alt: Embracing nondeterminism in functional programming by way of modeling complexity as effects within execution contexts.
 ---
 
 What’s a Functor? An Applicative? Or a Monad? The internet is teeming with articles that answer some facet of their character, but few provide a concrete motivation for why these structures exist or appear in the forms that they do.
@@ -37,11 +43,11 @@ Where there is conceptual overlap with object oriented programming, I will lever
 **Terms** are identifiers naming unitary or indivisible variables and types.
 
   * For example, in the declaration:
-      
+
       ```scala
       def map[A, B](fa: F[A])(f: A => B): F[B]
       ```
-      
+
       The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
 
 **Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_.
@@ -106,7 +112,7 @@ Can you think of some program capabilities that necessitate complexity?
 * Performance monitoring
 * Feature flags, ramps, and A/B testing
 
-How might supporting these capabilities cause complexity appear in code?
+How might supporting these capabilities cause complexity to appear in code?
 
 * When a program starts, it may read configuration from the environment, a database, or files. Configuration may also be a continuous process at runtime, which may affect the entire architecture of the program.
 * Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors. Rows returned by queries will have an unknown length, sort, and cardinality.
@@ -123,7 +129,7 @@ _These complexities can be characterized in terms of **effects**._ Each of the f
 * **IO** as in synchronous operations against disk access and network boundaries.
 * **Presence** as some functions may not produce anything for some inputs.
 * **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input.
-* **Correctness** requiring sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls.
+* **Correctness** requires sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls.
 * **Implicit input** in the form of configuration, feature flags and ramps, A/B test assignment, or other inputs that aren't themselves explicitly provided as part of an API boundary or client interaction.
 * **Implicit output** in the form of logging and metrics, as well as exceptions and other faults.
 * **State** representing change over time and how it propagates across a program's architecture. Implicit inputs and outputs together constitute a form of state.
@@ -208,11 +214,11 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 
 * `Option[A]`: Presence, absence, or _optionality_ of some instance of term `A`. Getting the term `A` when there is no instance causes a fault.
 * `Either[X, A]`: Conventionally treated as _either_ term `A` if valid _or_ term `X` if invalid. Getting the wrong term causes a fault.
-* `List[A]`: _Unknown_ sort, cardinality, and length of term `A`. Trying get an `A` from an empty list or from beyond the end of it causes a fault.
+* `List[A]`: _Unknown_ sort, cardinality, and length of term `A`. Getting an `A` from an empty list or from beyond the end of it causes a fault.
 
 **Contexts representing side-effects:**
 
-* `IO[A]`: Externally-aqcuired term `A`.
+* `IO[A]`: Externally-acquired term `A`.
     * The instance may be here already, eventually, or never. Execution awaits the instance until it arrives or a fault occurs.
     * The instance is acquired externally from the program via processes that rely on and are influenced by side effects.
     * Faults may interrupt the acquisition of the instance.
@@ -249,7 +255,7 @@ val fa: F[A]
 // given a function A => B
 def f(x: A): B
 // try to apply the function
-f(fa) 
+f(fa)
 // compile error!
 ```
 :::
@@ -362,7 +368,7 @@ What about implementing `extract()` for `Future[A]`? When applied to `Future[A]`
 
 You may be unsatisfied by the answer: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence? Functors solve this problem.
 
-**Functors** are an abstraction that allow you to consume term `A` within the context of `F[A]`. A Functor is a simple structure, a typeclass which provides a single function called `map()`:
+**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A Functor is a simple structure, a typeclass which provides a single function called `map()`:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -488,7 +494,7 @@ object FunctorInstances {
 
 These three instances for `Option[_]`, `Either[X, _]`, and `List[_]` show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. The complexities imposed by each of these contexts are completely abstracted, allowing function `f: A => B` to operate unburdened by effects with a focus on specific program logic.
 
-Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry error state in its term `X`. This satisfies the _either_ effect between `Left[X, A]` for failure and `Right[X, A]` for success.
+Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry some error state in its term `X`. This satisfies the _either_ effect between `Left[X, A]` for failure and `Right[X, A]` for success.
 
 > You can think of `Right`'s term as being "the right instance you want" because it's "correct". _Right?_ This pun is why `Either` is conventionally leveraged for the effect of correct vs. incorrect or success vs. failure.
 
@@ -586,9 +592,9 @@ Here are the two laws applied against Scala's builtin `List` type, which defines
 
 :::{.numberLines .nowrap}
 ```scala
-def preservesIdentityFunctions(list: List[Int]): Unit = 
+def preservesIdentityFunctions(list: List[Int]): Unit =
   assert(list.map(identity(_)) == identity(list))
-  
+
 def preservesFunctionComposition(list: List[Int]): Unit = {
   val f: Int => Int = _ + 3
   val g: Int => Double = _ / 17.0
@@ -605,7 +611,7 @@ preservesFunctionComposition(nil)
 ```
 :::
 
-Functors need obey only these two laws. These laws assert that Functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be universally regarded as the _context of effects_.
+Functors need only to obey these two laws. These laws assert that Functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be universally regarded as the _context of effects_.
 
 This means, ideally, that `map()` is the same regardless of context.
 

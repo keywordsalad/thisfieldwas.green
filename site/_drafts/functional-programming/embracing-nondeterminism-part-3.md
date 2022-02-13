@@ -1,5 +1,5 @@
 ---
-title: Embracing Nondeterminism with Monads
+title: "Embracing Nondeterminism Part III: Imperative Programming"
 author: Logan McGrath
 comments: false
 date: 2022-01-24T17:14:03-0800

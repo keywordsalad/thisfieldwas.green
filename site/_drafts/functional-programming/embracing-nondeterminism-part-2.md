@@ -1,5 +1,5 @@
 ---
-title: Embracing Nondeterminism with Applicatives
+title: "Embracing Nondeterminism Part II: Contexts in Parallel"
 author: Logan McGrath
 comments: false
 date: 2022-01-24T17:14:03-0800
