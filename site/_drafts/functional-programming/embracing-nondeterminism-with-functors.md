@@ -558,11 +558,61 @@ By using Functors, the `fizzBuzz()` function is free to focus on its specific pr
 
 At no point is `fizzBuzz()` burdened by the effects of the context it executes against.
 
-### Using map() as a specific abstraction
+## Functors are universal
 
-TODO
+You might be thinking that lists and arrays in the wild already have a `map()` operation available. `Promise`s in JavaScript also have their own `map()`. You've probably been using Functors for a while and never realized!
 
-## Specializing abstraction over effects
+Functors as a formal abstraction API find their use in cases where the specific kind of the context is unimportant. However, you might observe that the _shape_ of a Functor appears in many places without being _called_ a Functor. Using `map()` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map()` operations are Functors because Functors emerge from settings where stuff exists under some circumstances.
+
+### Functor laws
+
+The universality of Functors has a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). In fact, this definition can be applied to any structure that has the shape of a Functor to assert that they are well-behaved.
+
+In order to be a Functor, a context must satisfy two laws:
+
+1. Preservation of identity functions:
+
+    
+    ```scala
+    context.map(x => x) == context
+    ```
+
+2. Preservation of function composition:
+
+    ```scala
+    context.map(g ∘ f) == context.map(f).map(g)
+    ```
+
+Here are the two laws applied against Scala's builtin `List` typw, which defines its own `map()`:
+
+:::{.numberLines, .nowrap}
+```scala
+// demonstrated against Scala's List
+
+def preservesIdentityFunctions(list: List[Int]): Unit = 
+  assert(list.map(x => x) == list)
+  
+def preservesFunctionComposition(list: List[Int]): Unit = {
+  val f: Int => Int = _ + 3
+  val g: Int => Double = _ / 17.0
+  assert(list.map(g compose f) == list.map(f).map(g))
+}
+
+val listOf3 = List(1, 2, 3)
+preservesIdentityFunctions(listOf3)
+preservesFunctionComposition(listOf3)
+
+val nil = List()
+preservesIdentityFunctions(nil)
+preservesFunctionComposition(nil)
+```
+:::
+
+Functors need obey only these two laws. These laws assert that Functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be universally regarded as the _context of effects_.
+
+This means, ideally, that `map()` is the same regardless of context.
+
+## Building upon Functors
 
 In this post I introduced Functors as an elementary abstraction which permit you to consume term `A` within some context `F[A]` via `map()`:
 
@@ -587,4 +637,4 @@ def combine(x: A, y: B): C
 
 How do you apply `combine()` to the terms `A` and `B` produced by the contexts?
 
-In my next post, we will explore how Applicatives enable working within more than one context at the same time, and the many ways that you will be able to exploit this capability.
+In my next post, we will explore how **Applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability.
