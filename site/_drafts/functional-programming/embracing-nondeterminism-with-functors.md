@@ -582,7 +582,7 @@ In order to be a Functor, a context must satisfy two laws:
     context.map(g ∘ f) == context.map(f).map(g)
     ```
 
-Here are the two laws applied against Scala's builtin `List` type, which defines its own `map()`operation:
+Here are the two laws applied against Scala's builtin `List` type, which defines its own `map()` operation:
 
 :::{.numberLines .nowrap}
 ```scala
