@@ -366,7 +366,7 @@ You may be unsatisfied by the answer: _extraction cannot be generalized_. All yo
 
 :::{.numberLines .nowrap}
 ```scala
-trait Functor[F_]] {
+trait Functor[F[_]] {
   def map[A, B](fa: F[A])(f: A => B): F[B]
 }
 object Functor {
