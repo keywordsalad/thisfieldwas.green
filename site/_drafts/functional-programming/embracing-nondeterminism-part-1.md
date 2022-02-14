@@ -50,7 +50,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
       The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
 
-**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_.
+**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_. **Contexts** are like containers; they are more formally defined in following sections.
 
 **Lowering** describes extracting a term `A` from a context `F[A]` such that `lower: F[A] => A`.
 
