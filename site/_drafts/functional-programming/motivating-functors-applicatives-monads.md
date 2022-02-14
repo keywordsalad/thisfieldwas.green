@@ -12,3 +12,5 @@ layout: post
 * {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-part-1.md"}}
 * {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-part-2.md"}}
 * {{linkedTitle "_drafts/functional-programming/embracing-nondeterminism-part-3.md"}}
+
+<!--more-->

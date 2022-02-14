@@ -7,6 +7,8 @@ tags: functional programming, programming, scala, design patterns
 layout: post
 ---
 
+<!--more-->
+
 ## Motivating Monads
 
 Functors give you `map()` so that you may consume a term from a single context. Applicatives give you `pure()` and `ap()` so that you may consume terms from two or more contexts in parallel. But what if you want to sequence consumption of terms? Functors for example only consume from the scope of a single context, and Applicatives only consume from contexts in parallel. Neither Functors nor Applicatives allow you to alter the state of the context such that downstream operations are dependent upon previous operations succeeding.

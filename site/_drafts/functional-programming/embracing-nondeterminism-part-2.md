@@ -7,6 +7,8 @@ tags: functional programming, programming, scala, design patterns
 layout: post
 ---
 
+<!--more-->
+
 ## Motivating Applicatives
 
 Functors permit you to consume a term via `map()`:
