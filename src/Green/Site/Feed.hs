@@ -22,7 +22,7 @@ feed config context = do
 feedCompiler :: SiteConfig -> Context String -> Compiler (Item String)
 feedCompiler config context = do
   -- get the posts
-  posts <- recentFirst =<< loadPublishedPosts
+  posts <- recentFirst =<< loadPublishedPosts (config ^. sitePreview)
   -- estimate the most recent change
   lastUpdatedUTCs <- mapM (getLastModifiedDate $ config ^. siteTimeLocale) posts
   let lastUpdatedZT = maybeHead $ sortOn zonedTimeToUTC lastUpdatedUTCs

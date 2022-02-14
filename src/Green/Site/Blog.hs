@@ -2,25 +2,29 @@ module Green.Site.Blog where
 
 import Green.Common
 import Green.Compiler (loadExistingSnapshots)
+import Green.Config
 import Green.Route
 import Green.Template
 import Green.Template.Custom
 import qualified Hakyll as H
+import System.FilePath
 
-buildBlogCategories :: (H.MonadMetadata m) => m Tags
-buildBlogCategories = buildCategories "_posts/**" makeCategoryId
+buildBlogCategories :: (H.MonadMetadata m) => Bool -> m Tags
+buildBlogCategories preview = buildCategories (postsPattern preview) makeCategoryId
 
-buildBlogTags :: (H.MonadMetadata m) => m Tags
-buildBlogTags = buildTags "_posts/**" makeTagId
+buildBlogTags :: (H.MonadMetadata m) => Bool -> m Tags
+buildBlogTags preview = buildTags (postsPattern preview) makeTagId
 
-blog :: Context String -> Rules ()
-blog context = do
-  categories <- buildBlogCategories
-  tags <- buildBlogTags
+blog :: SiteConfig -> Context String -> Rules ()
+blog config context = do
+  let preview = config ^. sitePreview
+  categories <- buildBlogCategories preview
+  tags <- buildBlogTags preview
 
-  blogHome tags categories context
+  blogHome preview tags categories context
   posts context
-  archives context
+  previews config context
+  archives preview context
 
   tagsPages tags context
   categoriesPages categories context
@@ -28,14 +32,14 @@ blog context = do
   draftsIndex context
   drafts context
 
-blogHome :: Tags -> Tags -> Context String -> Rules ()
-blogHome tags categories context =
+blogHome :: Bool -> Tags -> Tags -> Context String -> Rules ()
+blogHome preview tags categories context =
   match "blog.html" do
     route indexRoute
     compile do
       categoryCloud <- renderTagCloud categories
       tagCloud <- renderTagCloud tags
-      recentPosts <- recentPostsContext
+      recentPosts <- recentPostsContext preview
       getResourceBody >>= applyTemplates do
         applyContext $
           constField "tagCloud" tagCloud
@@ -46,12 +50,12 @@ blogHome tags categories context =
         applyContent
         applyLayout
 
-archives :: Context String -> Rules ()
-archives context = do
+archives :: Bool -> Context String -> Rules ()
+archives preview context = do
   match "archives.html" do
     route indexRoute
     compile do
-      publishedPosts <- H.recentFirst =<< loadPublishedPosts
+      publishedPosts <- H.recentFirst =<< loadPublishedPosts preview
       getResourceBody >>= applyTemplates do
         applyContext $
           itemsField "posts" postContext publishedPosts
@@ -81,13 +85,45 @@ posts context = do
       getResourceBody >>= applyTemplates do
         applyContext $ postContext <> context
         applyContent
-        saveSnapshots [publishedPostsSnapshot]
+        saveSnapshots ["content"]
         applyLayout
 
 postsRoute :: Routes
 postsRoute =
   subRoute "^_posts/" "blog/"
     `composeRoutes` dateRoute
+    `composeRoutes` setExtension "html"
+    `composeRoutes` indexRoute
+
+previews :: SiteConfig -> Context String -> Rules ()
+previews config context
+  | config ^. sitePreview = do
+    match "_drafts/**" $ version "preview" do
+      route $ previewRoute (config ^. siteTimeLocale)
+      compile $
+        getResourceBody >>= applyTemplates do
+          applyContext $ postContext <> context
+          applyContent
+          saveSnapshots ["content"]
+          applyLayout
+  | otherwise = return ()
+
+previewRoute :: TimeLocale -> Routes
+previewRoute timeLocale =
+  subRoute "^_drafts/" "blog/"
+    `composeRoutes` metadataRoute
+      ( \m ->
+          customRoute
+            ( \id' ->
+                let dirName = takeDirectory $ toFilePath id'
+                    baseName = takeBaseName $ toFilePath id'
+                    date =
+                      formatTime timeLocale "%Y/%m/%d" . fromJust $
+                        dateFromMetadata timeLocale ["published", "date"] m
+                          >>= parseTimeM' timeLocale normalizedFormat
+                 in dirName </> date </> baseName
+            )
+      )
     `composeRoutes` setExtension "html"
     `composeRoutes` indexRoute
 
@@ -102,7 +138,7 @@ drafts context = do
             <> constField "noindex" True
             <> context
         applyContent
-        saveSnapshots [draftPostsSnapshot]
+        saveSnapshots ["content"]
         applyLayout
 
 draftsRoute :: Routes
@@ -155,9 +191,9 @@ postContext =
     <> constField "article" True
     <> namedMetadataField "title"
 
-recentPostsContext :: Compiler (Context String)
-recentPostsContext = do
-  recentPosts <- fmap (take 5) . H.recentFirst =<< loadPublishedPosts
+recentPostsContext :: Bool -> Compiler (Context String)
+recentPostsContext preview = do
+  recentPosts <- fmap (take 5) . H.recentFirst =<< loadPublishedPosts preview
   let latestPost = take 1 recentPosts
       previousPosts = drop 1 recentPosts
   return $
@@ -165,19 +201,18 @@ recentPostsContext = do
       <> itemsField "previousPosts" teaserContext previousPosts
 
 teaserContext :: Context String
-teaserContext = teaserField "teaser" publishedPostsSnapshot
+teaserContext = teaserField "teaser" "content"
 
-loadPublishedPosts :: Compiler [Item String]
-loadPublishedPosts = loadExistingSnapshots "_posts/**" publishedPostsSnapshot
+loadPublishedPosts :: Bool -> Compiler [Item String]
+loadPublishedPosts preview = loadExistingSnapshots (postsPattern preview) "content"
+
+postsPattern :: Bool -> Pattern
+postsPattern = \case
+  True -> "_posts/**" .||. ("_drafts/**" .&&. hasVersion "preview")
+  False -> "_posts/**"
 
 loadDraftPosts :: Compiler [Item String]
-loadDraftPosts = loadExistingSnapshots "_drafts/**" draftPostsSnapshot
-
-publishedPostsSnapshot :: String
-publishedPostsSnapshot = "_publishedPosts"
-
-draftPostsSnapshot :: String
-draftPostsSnapshot = "_draftPosts"
+loadDraftPosts = loadExistingSnapshots ("_drafts/**" .&&. hasNoVersion) "content"
 
 dateRoute :: Routes
 dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))

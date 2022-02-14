@@ -1,4 +1,4 @@
-module Green.Template.Custom.DateField (dateFields, getLastModifiedDate, normalizedTime, normalizedFormat) where
+module Green.Template.Custom.DateField where
 
 import Data.List (tails)
 import Data.String.Utils
@@ -36,41 +36,45 @@ dateFormatField key timeLocale = functionField2 key f
 dateField :: String -> TimeLocale -> ZonedTime -> Context a
 dateField key timeLocale currentTime = field key f
   where
-    f item =
+    f item = do
+      metadata <- lift . getMetadata $ itemIdentifier item
       tplWithCall key . lift $
-        dateFromMetadata timeLocale ["date", "published"] item
-          <|> dateFromFilePath timeLocale item
-          <|> return (formatTime timeLocale "%Y-%m-%dT%H:%M:%S%Ez" currentTime)
+        do
+          let maybeDateString = dateFromMetadata timeLocale ["date", "published"] metadata
+          maybe (dateFromFilePath timeLocale item) return maybeDateString
+            <|> return (formatTime timeLocale "%Y-%m-%dT%H:%M:%S%Ez" currentTime)
 
 publishedField :: String -> TimeLocale -> Context a
 publishedField key timeLocale = field key f
   where
-    f = tplWithCall key . lift . dateFromMetadata timeLocale ["published"]
+    f =
+      lift . getMetadata . itemIdentifier
+        >=> tplWithCall key . lift
+          . maybe (noResult $ "Tried published field " ++ show key) return
+          . dateFromMetadata timeLocale ["published", "date"]
 
 updatedField :: String -> TimeLocale -> Context a
 updatedField key timeLocale = field key f
   where
-    f = tplWithCall key . lift . dateFromMetadata timeLocale ["updated"]
+    f =
+      lift . getMetadata . itemIdentifier
+        >=> tplWithCall key . lift
+          . maybe (noResult $ "Tried updated field " ++ show key) return
+          . dateFromMetadata timeLocale ["updated", "published", "date"]
 
 getLastModifiedDate :: TimeLocale -> Item a -> Compiler ZonedTime
 getLastModifiedDate timeLocale item = do
-  dateString <-
-    dateFromMetadata timeLocale ["updated", "published", "date"] item
-      <|> dateFromFilePath timeLocale item
+  metadata <- getMetadata $ itemIdentifier item
+  let maybeDateString = dateFromMetadata timeLocale ["updated", "published", "date"] metadata
+  dateString <- maybe (dateFromFilePath timeLocale item) return maybeDateString
   parseTimeM' timeLocale "%Y-%m-%dT%H:%M:%S%Ez" dateString
 
-dateFromMetadata :: TimeLocale -> [String] -> Item a -> Compiler String
-dateFromMetadata timeLocale sourceKeys item =
+dateFromMetadata :: TimeLocale -> [String] -> Metadata -> Maybe String
+dateFromMetadata timeLocale sourceKeys metadata =
   firstAlt $ findDate <$> sourceKeys
   where
-    id' = itemIdentifier item
-    findDate sourceKey = do
-      metadata <- getMetadata id'
-      let maybeDate = lookupString sourceKey metadata
-      debugCompiler $ "Source key " ++ show sourceKey ++ " returned " ++ show maybeDate ++ " for date from metadata"
-      let notFound = noResult $ "tried date from metadata key " ++ show sourceKey
-      let maybeFrozenDate = serializeTime =<< maybeDate
-      maybe notFound return maybeFrozenDate
+    findDate sourceKey =
+      serializeTime =<< lookupString sourceKey metadata
     serializeTime dateString = do
       date <- firstAlt (parse dateString <$> metadataDateFormats)
       return $ normalizedTime timeLocale date

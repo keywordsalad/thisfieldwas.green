@@ -52,8 +52,10 @@ import Hakyll
     cached,
     compile,
     composeRoutes,
+    constRoute,
     copyFileCompiler,
     create,
+    customRoute,
     debugCompiler,
     escapeHtml,
     fromFilePath,
@@ -65,6 +67,8 @@ import Hakyll
     getResourceString,
     getRoute,
     gsubRoute,
+    hasNoVersion,
+    hasVersion,
     idRoute,
     itemSetBody,
     load,
@@ -76,6 +80,7 @@ import Hakyll
     makePatternDependency,
     match,
     matchRoute,
+    metadataRoute,
     noResult,
     relativizeUrls,
     route,
@@ -88,6 +93,8 @@ import Hakyll
     version,
     withErrorMessage,
     withItemBody,
+    (.&&.),
+    (.||.),
   )
 import Lens.Micro hiding ((<&>))
 import Lens.Micro.TH

@@ -2,7 +2,6 @@ module Green.Site.Templates where
 
 import Green.Common
 import Green.Template
-import Hakyll.Core.Identifier.Pattern ((.||.))
 
 templates :: Rules Dependency
 templates = do

@@ -1,28 +1,29 @@
 module Green.Site.Sitemap where
 
 import Green.Common
+import Green.Config
 import Green.Site.Blog (buildBlogCategories, buildBlogTags, loadPublishedPosts)
 import Green.Template
 import Green.Template.Custom
-import Hakyll ((.||.))
 import qualified Hakyll as H
 
-sitemap :: Context String -> Rules ()
-sitemap siteContext =
+sitemap :: SiteConfig -> Context String -> Rules ()
+sitemap config siteContext =
   match "sitemap.xml" do
+    let preview = config ^. sitePreview
     route idRoute
     compile do
-      context <- sitemapContext siteContext
+      context <- sitemapContext preview siteContext
       getResourceBody >>= applyTemplates do
         applyContext context
         applyAsTemplate
 
-sitemapContext :: Context String -> Compiler (Context String)
-sitemapContext siteContext = do
-  categoriesPages <- H.loadAll . tagsPattern =<< buildBlogCategories :: Compiler [Item String]
-  tagsPages <- H.loadAll . tagsPattern =<< buildBlogTags :: Compiler [Item String]
+sitemapContext :: Bool -> Context String -> Compiler (Context String)
+sitemapContext preview siteContext = do
+  categoriesPages <- H.loadAll . tagsPattern =<< buildBlogCategories preview :: Compiler [Item String]
+  tagsPages <- H.loadAll . tagsPattern =<< buildBlogTags preview :: Compiler [Item String]
   blogPage <- H.load "blog.html" :: Compiler (Item String)
-  posts <- H.recentFirst =<< loadPublishedPosts
+  posts <- H.recentFirst =<< loadPublishedPosts preview
   pages <- H.loadAll pagesPattern :: Compiler [Item String]
   feeds <- H.loadAll ("rss.xml" .||. "atom.xml") :: Compiler [Item String]
   let allPages =
