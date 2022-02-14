@@ -208,7 +208,7 @@ loadPublishedPosts preview = loadExistingSnapshots (postsPattern preview) "conte
 
 postsPattern :: Bool -> Pattern
 postsPattern = \case
-  True -> "_posts/**" .||. ("_drafts/**" .&&. hasVersion "preview")
+  True -> "_posts/**" .||. "_drafts/**"
   False -> "_posts/**"
 
 loadDraftPosts :: Compiler [Item String]
