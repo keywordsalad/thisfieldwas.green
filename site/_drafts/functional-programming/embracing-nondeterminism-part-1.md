@@ -14,15 +14,15 @@ og:
     alt: Embracing nondeterminism in functional programming by way of modeling complexity as effects within execution contexts.
 ---
 
-What’s a Functor? An Applicative? Or a Monad? The internet is teeming with articles that answer some facet of their character, but few provide a concrete motivation for why these structures exist or appear in the forms that they do.
+What’s a functor? An applicative? Or a monad? The internet is teeming with articles that answer some facet of their character, but few provide a concrete motivation for why these structures exist or appear in the forms that they do.
 
 <!--more-->
 
 In this post I will:
 
-* Demonstrate nondeterminism and complexity as the motivators for the use of Functors, Applicatives, and Monads as **design patterns** in functional programming.
+* Demonstrate nondeterminism and complexity as the motivators for the use of functors, applicatives, and monads as **design patterns** in functional programming.
 * Provide **effects** as a model for characterizing nondeterminism and complexity in programs.
-* Demonstrate the use of Functors as an elementary design pattern for abstracting complexity.
+* Demonstrate the use of functors as an elementary design pattern for abstracting complexity.
 
 > The code that accompanies this post may be found [here]().
 
@@ -198,7 +198,7 @@ You may notice that there are no return statements for error cases: the flow of 
 
 This abstraction of effects allows for safer code that better focuses on the business logic at-hand. But how are abstractions over effects created?
 
-Previously I described programs as a case of function composition: `h := g ∘ f`. Functors, Applicatives, and Monads address a special case of function composition, the **composition of functional effects**. In the following section I will demonstrate abstracting the elementary effects of presence.
+Previously I described programs as a case of function composition: `h := g ∘ f`. Functors, applicatives, and monads address a special case of function composition, the **composition of functional effects**. In the following section I will demonstrate abstracting the elementary effects of presence.
 
 ## Contexts and effects
 
@@ -362,13 +362,13 @@ _This interface however is not coherent._ Faulting on absence is preserved as a 
 
 What about implementing `extract()` for `Future[A]`? When applied to `Future[A]`, the `extract()` function is by its own signature a blocking call. You want your dependency on `A` to be properly asynchronous.
 
-## Motivating Functors as a design pattern
+## Motivating functors as a design pattern
 
 `Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` all have different effects that dictate how term `A` is produced. You must follow an axiom from object oriented programming: _abstract what changes_. Therefore you have to shed effects as an implementation detail. How might that impact lowering the term `A`?
 
 You may be unsatisfied by the answer: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence? Functors solve this problem.
 
-**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A Functor is a simple structure, a typeclass which provides a single function called `map()`:
+**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure, single function called `map()`. Functors in Scala may be formally defined using the `Functor` typeclass:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -385,17 +385,17 @@ What `map()` does is _lift_ the function `f: A => B` into the context so that it
 
 This _lifting_ of functions that `map()` performs is _coherent across contexts_. With `map()` you can apply `f: A => B` to any `List[A]` just as you can any `IO[A]`. The results of both operations are predictable: your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
 
-How would you consume the term produced by `Future[A]` or `Option[A]`? You would also use a Functor.
+How would you consume the term produced by `Future[A]` or `Option[A]`? You would also use a functor.
 
-What this enables is your function `f: A => B` to be used with any Functor regardless of its specific effects. Your function `f: A => B` is immediately reusable across all contexts and can be unit tested in isolation  of effects.
+What this enables is your function `f: A => B` to be used with any functor regardless of its specific effects. Your function `f: A => B` is immediately reusable across all contexts and can be unit tested in isolation  of effects.
 
-### Why does the Functor's `map()` function return `F[B]`?
+### Why does the `map()` function return `F[B]`?
 
 Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting the term mean if you’re using a context like `Option[A]`? What about `Future[A]`? Would their effects change how extraction of the term would work?
 
 Extracting _the_ term from `List[A]` flatly doesn't make sense as it has the effect of an unknown number of instances.
 
-Because there is no way to generalize extracting a term from a context, Functors don’t allow you to operate on contexts in such a way that an instance of the term can "escape" them.
+Because there is no way to generalize extracting a term from a context, functors don’t allow you to operate on contexts in such a way that an instance of the term can "escape" them.
 
 Most importantly, by keeping all operations against terms within their context, the context’s specific effects remain abstracted. Asynchronous operations with `Future[A]` remain asynchronous, the length of `List[A]` remains unknown, and `Option[A]` may or may not be present.
 
@@ -441,15 +441,15 @@ Recall my statement from above: _"For any context `F[_]`, it produces some term 
 
 But what if there’s nothing there, as in there are _zero_ instances of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map()` function above doesn’t do anything because there isn’t anything to do. If you try to `map()` a void `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". It does this without having used `f: A => B` to get there.
 
-This behavior is referred to as _short-circuiting_ and it is a key feature of Functors, Applicatives, and Monads that encode some notion of void. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on in later parts.
+This behavior is referred to as _short-circuiting_ and it is a key feature of functors, applicatives, and monads that encode some notion of void. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on in later parts.
 
-> `Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in Functors. An `Option[A]` will only `map()` an instance of its term `A` if it is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
+> `Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in functors. An `Option[A]` will only `map()` an instance of its term `A` if it is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
 >
 > In contrast, the `Id[A]` context has the effect of the _identity_ of term `A`. To put it plainly, `Id[A]` is _the instance_ of term `A`. As the instance is always present, this context never short-circuits.
 
-## Implementing a Functor
+## Implementing a functor in Scala
 
-Each context of course must provide its own implementation of `map()` in order for it to be used as a Functor. Functor implementations in Scala are provided via typeclasses, and any type that has the shape `F[_]` may become a Functor by implementing the typeclass from above:
+Each context of course must provide its own implementation of `map()` in order for it to be used as a functor. Functor implementations in Scala are provided via typeclasses, and any type that has the shape `F[_]` may become a functor by implementing the `Functor` typeclass from above:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -462,7 +462,7 @@ object Functor {
 ```
 :::
 
-Instances of the Functor typeclass simply implement this trait and make themselves available implicitly:
+Instances of the `Functor` typeclass simply implement this trait and make themselves available implicitly:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -492,13 +492,13 @@ object FunctorInstances {
 ```
 :::
 
-These three instances for `Option[_]`, `Either[X, _]`, and `List[_]` show remarkable similarities, and this isn’t uncommon across Functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Functor implementations are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. The complexities imposed by each of these contexts are completely abstracted, allowing function `f: A => B` to operate unburdened by effects with a focus on specific program logic.
+These three instances for `Option[_]`, `Either[X, _]`, and `List[_]` show remarkable similarities, and this isn’t uncommon across functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Implementations of `Functor` are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. What is key is that the complexities imposed by each of these contexts are completely abstracted, allowing function `f: A => B` to operate unburdened by effects with a focus on specific program logic.
 
-Can you see how Functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry some error state in its term `X`. This satisfies the _either_ effect between `Left[X, A]` for failure and `Right[X, A]` for success.
+Can you see how functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry some error state in its term `X`. This satisfies the _either_ effect between `Left[X, A]` for failure and `Right[X, A]` for success.
 
 > You can think of `Right`'s term as being "the right instance you want" because it's "correct". _Right?_ This pun is why `Either` is conventionally leveraged for the effect of correct vs. incorrect or success vs. failure.
 
-Contrasting with void-effects, here's what the Functor instance for `Id[_]` looks like:
+Contrasting with void-effects, here's what the `Functor` instance for `Id[_]` looks like:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -513,9 +513,9 @@ object FunctorInstances {
 ```
 :::
 
-### Using `map()` as a general abstraction
+### Using functors as a general abstraction
 
-Defining a `fizzBuzz()` function that uses a Functor looks like this:
+Defining a `fizzBuzz()` function that uses a functor looks like this:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -531,7 +531,7 @@ def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
 ```
 :::
 
-And then `fizzBuzz()` may be used for all contexts implementing the Functor typeclass:
+And then `fizzBuzz()` may be used for all contexts implementing the `Functor` typeclass:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -555,7 +555,7 @@ println(fizzBuzz(List()))
 ```
 :::
 
-By using Functors, the `fizzBuzz()` function is free to focus on its specific program logic:
+By using functors, the `fizzBuzz()` function is free to focus on its specific program logic:
 
 * Return "fizz" when `x` is divisible by `3`
 * Return "buzz" when `x` is divisible by `5`
@@ -566,15 +566,15 @@ At no point is `fizzBuzz()` burdened by the effects of the context it executes a
 
 ## Functors are universal
 
-You might be thinking that lists and arrays in the wild already have a `map()` operation available. `Promise`s in JavaScript also have their own `map()`. You've probably been using Functors for a while and never realized!
+You might be thinking that lists and arrays in the wild already have a `map()` operation available. `Promise`s in JavaScript also have their own `map()`. You've probably been using functors for a while and never realized!
 
-Functors as a formal abstraction API find their use in cases where the specific kind of the context is unimportant. However, you might observe that the _shape_ of a Functor appears in many places without being _called_ a Functor. Using `map()` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map()` operations are Functors because Functors arise from settings where stuff exists under some circumstances.
+Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, find their strongest use in cases where the concrete type of the context is unimportant. However, you might observe that the _shape_ of functors appears in many places without being _called_ a functor. Using `map()` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map()` operations may be functors because _functors arise from settings where stuff exists under some circumstances_.
 
 ### Functor laws
 
-The universality of Functors has a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). In fact, this definition can be applied to any structure that has the shape of a Functor to assert that they are well-behaved.
+The universality of functors has a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). In fact, this definition can be applied to any structure that has the shape of a functor to assert that they are well-behaved when used as functors.
 
-In order to be a Functor, a context must satisfy two laws:
+In order to be a functor, a context defining a `map()` function must satisfy two laws:
 
 1. Preservation of identity functions:
 
@@ -611,13 +611,13 @@ preservesFunctionComposition(nil)
 ```
 :::
 
-Functors need only to obey these two laws. These laws assert that Functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be universally regarded as the _context of effects_.
+Functors need only to obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be universally regarded as the _context of effects_.
 
 This means, ideally, that `map()` is the same regardless of context.
 
-## Building upon Functors
+## Building upon functors
 
-In this post I introduced Functors as an elementary abstraction which permit you to consume term `A` within some context `F[A]` via `map()`:
+In this post I introduced functors as an elementary abstraction which permit you to consume term `A` within some context `F[A]` via `map()`:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -625,7 +625,7 @@ def map[A, B](fa: F[A])(f: A => B): F[B]
 ```
 :::
 
-This simple abstraction is enabling on its own, as it frees the logic in function `f` from the burden of complexity present in the context of `F[_]`. However this is only an _elementary_ abstraction. Consider for a moment: with a Functor you are able to work against the term produced by a single context. But what happens if you require terms produced from two or more contexts?
+This simple abstraction is enabling on its own, as it frees the logic in function `f` from the burden of complexity present in the context of `F[_]`. However this is only an _elementary_ abstraction. Consider for a moment: with a functor you are able to work against the term produced by a single context. But what happens if you require terms produced from two or more contexts?
 
 Take for example these two instances of the context `F[_]` and the function signature for `combine()`:
 
@@ -640,4 +640,4 @@ def combine(x: A, y: B): C
 
 How do you apply `combine()` to the terms `A` and `B` produced by the contexts?
 
-In my next post, we will explore how **Applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability.
+In my next post, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability.
