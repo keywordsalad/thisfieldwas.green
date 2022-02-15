@@ -92,13 +92,13 @@ Given a function `f: A => B` and another `g: B => C`: a third function `h: A => 
 
 Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** that dictate how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. These effects determine how and whether payday is successfully produced.
 
-Faults, errors, and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getUser: Int => User`. The signature of this function requires _tribal knowledge_ in order for you to be aware of what effects may dictate how a `User` is produced from it. For example:
+Faults, errors, and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getUser: Int => User`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may dictate how a `User` is produced from it. For example:
 
 * An associated `User` may not be found.
 * The returned `User` may change between applications of the same `Int`.
 * The database or network may fault and the function generates an exception that must be handled.
 
-You might be thinking that these cases are a given when working with database code, and that _is_ tribal knowledge. These cases are **effects** that dictate the circumstances under which a `User` may be produced and can be modeled accordingly as part of the typed API of `getUser`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
+You might be thinking that these cases are a given when working with database code, and that _requires_ tacit knowledge. These cases are **effects** that dictate the circumstances under which a `User` may be produced and can be modeled accordingly as part of the typed API of `getUser`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
 
 ### Modeling complexity
 
@@ -572,7 +572,7 @@ Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, 
 
 ### Functor laws
 
-That so many functors appear in the wild is no coincidence. Functors as a universal construction have a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). In fact, this definition can be applied to any structures that have the shape of a functor to assert that they behave as functors.
+That so many functors appear in the wild is no coincidence. Functors even have a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). This definition can be applied to any structures that have the shape of a functor to assert that they behave as functors.
 
 In order to be a functor, a context defining a `map()` function must satisfy two laws:
 
@@ -611,9 +611,9 @@ preservesFunctionComposition(nil)
 ```
 :::
 
-Functors need only obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be universally regarded as the _context of effects_.
+Functors need only obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be abstractly regarded as the _context of effects_.
 
-Because of this verifiable definition, functors as a design pattern represent a truly transferrable concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written in the same language.
+Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written in the same language.
 
 What this means, ideally, is that `map()` is the same regardless of context.
 
