@@ -28,7 +28,7 @@ In this post I will:
 
 ## Conventions
 
-I will provide Scala code for concrete examples.
+I will provide Scala code for concrete examples and note where different. Abstract examples will borrow notation that looks like "math".
 
 Terminology will leverage common functional programming vocabulary.
 
@@ -49,12 +49,14 @@ Where there is conceptual overlap with object oriented programming, I will lever
       ```
 
       The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
+      
+**Contexts** are like containers in that they hold some stuff. They are noted using `F[_]` with an underscore where the type of stuff is unknown, and `F[A]` where the stuff is known to be of type `A`. They are more concretely defined in following sections.
 
-**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_. **Contexts** are like containers; they are more formally defined in following sections.
+**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _lift is A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_.
 
-**Lowering** describes extracting a term `A` from a context `F[A]` such that `lower: F[A] => A`.
+**Lowering** describes extracting a term `A` from a context `F[A]` such that `lower: F[A] => A`, read as _lower is F of A to A_.
 
-**Composition** describes chaining the output of a function `f: A => B` to the input of function `g: B => C` such that a new function `h: A => C` may defined as `h := g ∘ f`, read as _h is g after f_.
+**Composition** describes chaining the output of a function `f: A => B` to the input of a function `g: B => C` such that a new function `h: A => C` may defined as `h := g ∘ f`, read as _h is g after f_.
 
 * This alternative notation in Scala concretely defines `h` as an application of the function `g` _after_ `f` is applied to argument `x`.
 
@@ -72,17 +74,17 @@ Nondeterminism as a _dependence on factors other than initial state and input_ a
 
 > An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external_ to the function's signature.
 
-Nondeterminism as _dimensions of unknown quantities_ arise in functions returning types such as lists or potentially `null` values. These outputs have unknown length and presence respectively, and require special handling. _This means that nondeterminism is not defined by disk IO and external state alone._ 
+Nondeterminism as _dimensions of unknown quantities_ arise in functions returning types such as lists or potentially `null` values. These outputs have unknown length and presence respectively, and require special handling. _This means that nondeterminism is not defined by disk IO and external state alone._
 
 > A simple example is a function `toBits: Int => [Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
 
-Side effects also include **faults** such as the _divide by zero error_, thrown exceptions, and panics as they constitute **implicit outputs** of a function. They impose an additional layer of protection to prevent or recover from them.
+The dimension of unknown **implicit outputs** includes **faults** such as the _divide by zero error_, panics, and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Panics and exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
 
-Exceptions and panics are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
+> In contrast with most faults, a _divide by zero error_ only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
 
-> In contrast with most exceptions and faults, a _divide by zero error_ only occurs if the input divisor is `0`. It normally is not treated as a side effect in practice for this reason.
+_Nondeterminism creates complex code because it imposes special cases that must be managed._ Side effects are what make our programs useful in the real world, which requires that we _embrace_ nondeterminism.
 
-Nondeterminism creates complex code because it imposes special cases that must be managed. Side effects are what make our programs useful in the real world, which requires that we _embrace_ nondeterminism. _How might complexity in programs be reduced if they must also be nondeterministic?_
+_How might complexity in programs be reduced if they must also be nondeterministic?_
 
 ### Implied complexity
 
@@ -90,13 +92,13 @@ Given a function `f: A => B` and another `g: B => C`: a third function `h: A => 
 
 Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** that dictate how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. These effects determine how and whether payday is successfully produced.
 
-Faults, errors, and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getUser: Int => User`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may dictate how a `User` is produced from it. For example:
+Faults, errors, and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may dictate how an `Employee` is produced from it. For example:
 
-* An associated `User` may not be found.
-* The returned `User` may change between applications of the same `Int`.
+* An associated `Employee` may not be found.
+* The returned `Employee` may change between applications of the same `Int` employee ID.
 * The database or network may fault and the function generates an exception that must be handled.
 
-You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are **effects** that dictate the circumstances under which a `User` may be produced and can be modeled accordingly as part of the typed API of `getUser`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
+You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are **effects** that dictate the circumstances under which an `Employee` may be produced and can be modeled accordingly as part of the typed API of `getEmployee`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
 
 ### Modeling complexity
 
@@ -109,6 +111,7 @@ Can you think of some program capabilities that necessitate complexity?
 * Error handling
 * Performance monitoring
 * Feature flags, ramps, and A/B testing
+* Retries and back-off strategies
 
 How might supporting these capabilities cause complexity to appear in code?
 
@@ -120,6 +123,7 @@ How might supporting these capabilities cause complexity to appear in code?
 * Logging libraries are used to report errors and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
 * Metrics libraries may be used and require network access, possibly also async IO.
 * Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails. A/B testing requires deterministically persisting identities' sessions within their assigned variants.
+* Retries using exponential back-off must retain their previous retry interval and apply a random jitter in order to calculate their next one.
 
 _These complexities can be characterized in terms of **effects**._ Each of the following effects center on some dimension of nondeterminism:
 
@@ -136,7 +140,7 @@ The actual list of effects is innumerable, but these ones are common.
 
 ### Demonstrating effects in code
 
-Take for example this code from a hypothetical payroll system:
+Take for example this Java code from a hypothetical payroll system:
 
 :::{.numberLines .nowrap}
 ```java
