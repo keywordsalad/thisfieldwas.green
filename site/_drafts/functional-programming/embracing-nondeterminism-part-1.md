@@ -66,25 +66,23 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 ## Complexity in programming
 
-Complexity is imposed by the _nondeterministic nature_ of programs in the real world.
+Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any unknown quantity along some dimension requires specific handling in code, which creates complexity and draws focus away from business logic.
 
-**Nondeterminism** occurs when a function `f: A => B` maps to a different member of `B` for any number of times the same member of `A` has been applied. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
+Nondeterminism as a _dependence on factors other than initial state and input_ arises when a function `f: A => B` maps to a different member of `B` for any number of times the same member of `A` has been applied. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
 
-An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external_ to the function's signature.
+> An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external_ to the function's signature.
 
-Interactions with disk resources are affected by the state of resources on disk as the contents of these resources may change out of band. For example, reading the same file via `read: FilePath => String` is affected when the file is modified. Operations that read and write to sockets are intended to be side-effecting.
+Nondeterminism as _dimensions of unknown quantities_ arise in functions returning types such as lists or potentially `null` values. These outputs have unknown length and presence respectively, and require special handling. _This means that nondeterminism is not defined by disk IO and external state alone._ 
 
-Interactions with any system over the network imply affecting and being affected by these systems’ states, as in databases, other services, and external API’s.
+> A simple example is a function `toBits: Int => [Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
 
 Side effects also include **faults** such as the _divide by zero error_, thrown exceptions, and panics as they constitute **implicit outputs** of a function. They impose an additional layer of protection to prevent or recover from them.
 
 Exceptions and panics are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
 
-> In contrast with most exceptions and faults, a _divide by zero error_ only occurs if the input divisor is `0`; it normally is not treated as a side effect in practice for this reason.
+> In contrast with most exceptions and faults, a _divide by zero error_ only occurs if the input divisor is `0`. It normally is not treated as a side effect in practice for this reason.
 
-Nondeterminism is not defined by disk IO and external state alone. Some operations may produce an unknown number of results relative to their input. A simple example is a function `toBits: Int => [Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument. In practice, `toBits` is nondeterministic because of its results' unknown quantity.
-
-Nondeterminism and unknowns require complexity in code. Side effects are what make our programs useful in the real world, which requires that we _embrace_ nondeterminism. _How might complexity in programs be reduced if they must also be nondeterministic?_
+Nondeterminism creates complex code because it imposes special cases that must be managed. Side effects are what make our programs useful in the real world, which requires that we _embrace_ nondeterminism. _How might complexity in programs be reduced if they must also be nondeterministic?_
 
 ### Implied complexity
 
@@ -98,7 +96,7 @@ Faults, errors, and unknowns as effects of these operations are opaque in functi
 * The returned `User` may change between applications of the same `Int`.
 * The database or network may fault and the function generates an exception that must be handled.
 
-You might be thinking that these cases are a given when working with database code, and that _requires_ tacit knowledge. These cases are **effects** that dictate the circumstances under which a `User` may be produced and can be modeled accordingly as part of the typed API of `getUser`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
+You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are **effects** that dictate the circumstances under which a `User` may be produced and can be modeled accordingly as part of the typed API of `getUser`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
 
 ### Modeling complexity
 
