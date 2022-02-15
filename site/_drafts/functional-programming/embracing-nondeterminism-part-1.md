@@ -168,7 +168,7 @@ boolean runPayroll(long employeeId) {
 The code above demonstrates complexity in the dimensions of:
 
 * **Synchronous IO** as database queries and network calls are implicitly synchronous.
-* **Presence** as a `User` may not be found or their `Paycheck` not calculated.
+* **Presence** as an `Employee` may not be found or their `Paycheck` not calculated.
 * **Correctness** where the `"SUCCESS"` response from the `achClient` is the only check performed. Other responses are simply not handled.
 * **Implicit input** where the company's bank routing and account numbers are read from an external location.
 * **Implicit output** where logging occurs but swallows errors, resulting in opaque `false` return cases. Exceptions also bubble up from database and network operations.
@@ -179,8 +179,8 @@ Fortunately there are ways to model sets of these effects and contain the scope 
 ```scala
 def runPayroll(employeeId: Long): PayrollEffect[()] =
   for {
-    employee <- employeeRepo.find(employee).flip.getOr(fail(EmployeeMissing))
-    paycheck <- payCalc.calculatePaycheck(employee).flip.getOr(fail(PaycheckMissing))
+    employee <- employeeRepo.find(employee).getOrFail(EmployeeMissing)
+    paycheck <- payCalc.calculatePaycheck(employee).getOrFail(PaycheckMissing)
     companyAcctNo <- getConfig("companyAccountNo")
     companyRoutingNo <- getConfig("companyRoutingNo")
     response <- achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck)
@@ -368,7 +368,7 @@ What about implementing `extract()` for `Future[A]`? When applied to `Future[A]`
 
 You may be unsatisfied by the answer: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence? Functors solve this problem.
 
-**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure, single function called `map()`. Functors in Scala may be formally defined using the `Functor` typeclass:
+**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure: a single function called `map()`. Functors in Scala may be formally defined using the `Functor` typeclass:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -520,7 +520,7 @@ Defining a `fizzBuzz()` function that uses a functor looks like this:
 :::{.numberLines .nowrap}
 ```scala
 import Functor
-import FunctorSyntax._
+
 def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
   Functor[F].map(context) {
     case x if x % 3 == 0 && x % 5 == 0 => "fizzbuzz"
@@ -557,10 +557,10 @@ println(fizzBuzz(List()))
 
 By using functors, the `fizzBuzz()` function is free to focus on its specific program logic:
 
-* Return "fizz" when `x` is divisible by `3`
-* Return "buzz" when `x` is divisible by `5`
-* Return "fizzbuzz" when `x` is divisible by both `3` and `5`
-* Return `x` as a `String` otherwise
+* Produce "fizz" when `x` is divisible by `3`
+* Produce "buzz" when `x` is divisible by `5`
+* Produce "fizzbuzz" when `x` is divisible by both `3` and `5`
+* Produce `x` as a `String` otherwise
 
 At no point is `fizzBuzz()` burdened by the effects of the context it executes against.
 
@@ -572,7 +572,7 @@ Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, 
 
 ### Functor laws
 
-The universality of functors has a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). In fact, this definition can be applied to any structure that has the shape of a functor to assert that they are well-behaved when used as functors.
+That so many functors appear in the wild is no coincidence. Functors as a universal construction have a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). In fact, this definition can be applied to any structures that have the shape of a functor to assert that they behave as functors.
 
 In order to be a functor, a context defining a `map()` function must satisfy two laws:
 
@@ -611,9 +611,11 @@ preservesFunctionComposition(nil)
 ```
 :::
 
-Functors need only to obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be universally regarded as the _context of effects_.
+Functors need only obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be universally regarded as the _context of effects_.
 
-This means, ideally, that `map()` is the same regardless of context.
+Because of this verifiable definition, functors as a design pattern represent a truly transferrable concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written in the same language.
+
+What this means, ideally, is that `map()` is the same regardless of context.
 
 ## Building upon functors
 
