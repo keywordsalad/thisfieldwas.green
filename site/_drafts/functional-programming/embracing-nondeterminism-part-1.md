@@ -28,7 +28,7 @@ In this post I will:
 
 ## Conventions
 
-I will provide Scala code for concrete examples and note where different. Abstract examples will borrow notation that looks like "math".
+I will provide Scala code for concrete examples and note where different. Abstract examples will employ notation that looks like Scala-inspired "math".
 
 Terminology will leverage common functional programming vocabulary.
 
@@ -44,13 +44,13 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
   * For example, in the declaration:
 
-      ```scala
+      ```{.scala .numberLines .nowrap}
       def map[A, B](fa: F[A])(f: A => B): F[B]
       ```
 
       The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
       
-**Contexts** are like containers in that they hold some stuff. They are noted using `F[_]` with an underscore where the type of stuff is unknown, and `F[A]` where the stuff is known to be of type `A`. They are more concretely defined in following sections.
+**Contexts** are like containers. They are noted using `F[_]` with an underscore where the type of the contents are unspecified, and `F[A]` where the contents are known to be of type `A`. They are more concretely defined in following sections.
 
 **Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _lift is A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_.
 
@@ -78,11 +78,11 @@ Nondeterminism as _dimensions of unknown quantities_ arise in functions returnin
 
 > A simple example is a function `toBits: Int => [Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
 
-The dimension of unknown **implicit outputs** includes **faults** such as the _divide by zero error_, panics, and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Panics and exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
+The dimension of **implicit outputs** includes **faults** such as the _divide by zero error_, panics, and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Panics and exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
 
 > In contrast with most faults, a _divide by zero error_ only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
 
-_Nondeterminism creates complex code because it imposes special cases that must be managed._ Side effects are what make our programs useful in the real world, which requires that we _embrace_ nondeterminism.
+_Nondeterminism creates complex code because it imposes special cases that must be managed._ Side effects however are what make our programs useful in the real world, which requires that we _embrace_ nondeterminism.
 
 _How might complexity in programs be reduced if they must also be nondeterministic?_
 
@@ -90,7 +90,7 @@ _How might complexity in programs be reduced if they must also be nondeterminist
 
 Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h := g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, together in concert building the necessary mappings to generate the desired program output.
 
-Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** that dictate how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. These effects determine how and whether payday is successfully produced.
+Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
 
 Faults, errors, and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may dictate how an `Employee` is produced from it. For example:
 
@@ -98,7 +98,7 @@ Faults, errors, and unknowns as effects of these operations are opaque in functi
 * The returned `Employee` may change between applications of the same `Int` employee ID.
 * The database or network may fault and the function generates an exception that must be handled.
 
-You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are **effects** that dictate the circumstances under which an `Employee` may be produced and can be modeled accordingly as part of the typed API of `getEmployee`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
+You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are **effects** which describe the circumstances under which an `Employee` may be produced and can be modeled accordingly as part of the typed API of `getEmployee`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
 
 ### Modeling complexity
 
@@ -122,7 +122,8 @@ How might supporting these capabilities cause complexity to appear in code?
 * External input and API responses are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring meticulous validation logic and recovery from malformed responses.
 * Logging libraries are used to report errors and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
 * Metrics libraries may be used and require network access, possibly also async IO.
-* Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails. A/B testing requires deterministically persisting identities' sessions within their assigned variants.
+* Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails. 
+* A/B testing requires deterministically persisting identities' sessions within their assigned variants.
 * Retries using exponential back-off must retain their previous retry interval and apply a random jitter in order to calculate their next one.
 
 _These complexities can be characterized in terms of **effects**._ Each of the following effects center on some dimension of nondeterminism:
@@ -206,7 +207,7 @@ Previously I described programs as a case of function composition: `h := g ∘ f
 
 Let me start with an abstract concept: **Context**. What is a context? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`.
 
-> Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` when the type of the term is unknown, and `F[A]` when the term is known to be of type `A`. Other letters work nicely of course, as do proper names, as in `Option[Int]`.
+> Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` with an underscore when the type of the term is unspecified, and `F[A]` when the term is known to be of type `A`. Other letters work nicely of course, as do proper names, as in `Option[Int]`.
 
 Each kind of context models a set of **effects**. Contexts thus represent a concrete, typed API describing how their terms may be produced. Names of contexts can hint at the effects they model, and with some intuition you may be able to figure out what each context’s effects may be.
 
@@ -216,7 +217,7 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 
 * `Option[A]`: Presence, absence, or _optionality_ of some instance of term `A`. Getting the term `A` when there is no instance causes a fault.
 * `Either[X, A]`: Conventionally treated as _either_ term `A` if valid _or_ term `X` if invalid. Getting the wrong term causes a fault.
-* `List[A]`: _Unknown_ sort, cardinality, and length of term `A`. Getting an `A` from an empty list or from beyond the end of it causes a fault.
+* `List[A]`: _Unknown length_, sort, and cardinality of term `A`. Getting an `A` from an empty list or from beyond the end of it causes a fault.
 
 **Contexts representing side-effects:**
 
@@ -241,8 +242,9 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
     * Logging usually leverages this effect by abstracting how such output leaves the program.
 * `StateT[F, A]`: Modifying implicit inputs and outputs in the context of `F[_]`.
     * Models state changing over time in an otherwise-immutable context.
+* _These contexts are higher-order in the term of `F`. They are listed here for illustration but won't be explored in this post._
 
-Each of these contexts have two shared qualities in that they _produce_ some term `A` and that their effects dictate _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term `A` be consumed in a manner unburdened of complexity?
+Each of these contexts have two shared qualities in that they _produce_ some term `A` and that their effects determine _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term `A` be consumed in a manner unburdened of complexity?
 
 In order to generalize contexts, the key differentiator between them must be abstracted: **effects**. By shedding effects as an _implementation detail_, the production of term `A` remains a shared characteristic that can be accessed by a general interface. By what interface would term `A` be consumed?
 
@@ -262,9 +264,9 @@ f(fa)
 ```
 :::
 
-Recall from the previous section, contexts share two qualities: that they produce a term, and that they have effects dictating how the term is produced. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for `Option[A]`, `Either[X, A]`, and `List[A]`:
+Recall from the previous section, contexts share two qualities: that they produce a term, and that they have effects which determine how the term is produced. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for `Option[A]`, `Either[X, A]`, and `List[A]`:
 
-**`Option[A]`** models the presence, absence, or _optionality_ of an instance of term `A`. It is the effect of _zero or one_ of term `A`:
+**`Option[A]`** is the effect of presence, absence, or _optionality_ of an instance of term `A`:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -277,7 +279,7 @@ case object None extends Option[Nothing]
 ```
 :::
 
-**`Either[X, A]`** by convention models failure with term `X` and success with term `A`. It is the effect of being _either_ `Right`'s term `A` when successful _or_ `Left`'s term `X` when failed:
+**`Either[X, A]`** by convention is the effect of _either_ success with term `A` _or_ failure with term `X`:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -294,7 +296,7 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 ```
 :::
 
-**`List[A]`** models _zero to many_ instances of term `A`. It is the effect of an _unknown_ number, sort, and cardinality of instances:
+**`List[A]`** is the effect of _unknown length_, sort, and cardinality of instances of term `A`:
 
 :::{.numberLines .nowrap}
 ```scala
@@ -358,9 +360,7 @@ sealed trait List[A] extends Extractable[A] {
 ```
 :::
 
-_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]`. Whether an empty `Seq[A]` can be interpreted as absence is ambiguous. This requires client code to decide at the call site what absence means. This interface also imposes the effects of `List[A]`, such as length, upon all client code using it. You would probably be very unhappy using this interface in your own code.
-
-> Alternatively, absence can be preserved in `List[A]` by modifying `extract()` to return a `NonEmptyList[A]`. This has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though.
+_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]`. Absence can be preserved in `List[A]` by modifying `extract()` to return a `NonEmptyList[A]` instead as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though. _You would probably be very unhappy using this interface in your code._
 
 What about implementing `extract()` for `Future[A]`? When applied to `Future[A]`, the `extract()` function is by its own signature a blocking call. You want your dependency on `A` to be properly asynchronous.
 
@@ -393,7 +393,7 @@ What this enables is your function `f: A => B` to be used with any functor regar
 
 ### Why does the `map()` function return `F[B]`?
 
-Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting the term mean if you’re using a context like `Option[A]`? What about `Future[A]`? Would their effects change how extraction of the term would work?
+Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting the term mean if you’re using a context like `Option[A]`? What about `Future[A]`? _Would their effects change how extraction of the term would work?_
 
 Extracting _the_ term from `List[A]` flatly doesn't make sense as it has the effect of an unknown number of instances.
 
@@ -433,7 +433,7 @@ Compare with iteration using a `for` loop:
 
 Iteration as a form of lowering _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
 
-This isn't to say that functional programming is only about iteration and loops versus `map()`. Can you think of other operations that might destroy structure? For example, if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure and potentially harm the performance of your program.
+This isn't to say that functional programming is only about iteration and loops versus `map()`. Can you think of other operations that might destroy structure? For example, _if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure_ and potentially harm the performance of your program.
 
 > Where the type of your context is known, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default instance otherwise.
 
@@ -441,13 +441,13 @@ This isn't to say that functional programming is only about iteration and loops 
 
 Recall my statement from above: _"For any context `F[_]`, it produces some term `A`."_ If a context were guaranteed to have an instance of a term `A` then you should be able to consume it with your function `f: A => B`, right?
 
-But what if there’s nothing there, as in there are _zero_ instances of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map()` function above doesn’t do anything because there isn’t anything to do. If you try to `map()` a void `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". It does this without having used `f: A => B` to get there.
+But what if there’s nothing there, as in there are _zero_ instances of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map()` function above doesn’t do anything because there isn’t anything to do. If you try to `map()` a void `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". _It does this without having used `f: A => B` to get there._
 
 This behavior is referred to as _short-circuiting_ and it is a key feature of functors, applicatives, and monads that encode some notion of void. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on in later parts.
 
 > `Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in functors. An `Option[A]` will only `map()` an instance of its term `A` if it is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
 >
-> In contrast, the `Id[A]` context has the effect of the _identity_ of term `A`. To put it plainly, `Id[A]` is _the instance_ of term `A`. As the instance is always present, this context never short-circuits.
+> In contrast, the `Id[A]` context has the effect of the _identity_ of term `A`. To put it plainly, `Id[A]` _is_ the instance of term `A`. As the instance is always present, this context never short-circuits.
 
 ## Implementing a functor in Scala
 
@@ -473,13 +473,13 @@ object FunctorInstances {
     def map[A, B](fa: Option[A])(f: A => B): Option[B] =
       fa match {
         case Some(x) => Some(f(x)) // apply map
-        case None => None // void
+        case None    => None // void
       }
   }
   implicit def eitherFunctor[X] = new Functor[Either[X, *]] {
     def map[A, B](fa: Either[X, A])(f: A => B): Either[X, B] =
       fa match {
-        case Left(x) => Left(x) // void
+        case Left(x)  => Left(x) // void
         case Right(a) => Right(f(a)) // apply map
       }
   }
@@ -487,24 +487,24 @@ object FunctorInstances {
     def map[A, B](fa: List[A])(f: A => B): List[B] =
       fa match {
         case a :: at => f(a) :: map(at)(f) // apply map, recurse
-        case Nil => Nil // void
+        case Nil     => Nil // void
       }
   }
 }
 ```
 :::
 
-These three instances for `Option[_]`, `Either[X, _]`, and `List[_]` show remarkable similarities, and this isn’t uncommon across functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Implementations of `Functor` are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. What is key is that the complexities imposed by each of these contexts are completely abstracted, allowing function `f: A => B` to operate unburdened by effects with a focus on specific program logic.
+These three instances for `Option[_]`, `Either[X, _]`, and `List[_]` show remarkable similarities, and this isn’t uncommon across functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Implementations of `Functor` are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. _What is key is that the complexities imposed by each of these contexts are completely abstracted_, allowing function `f: A => B` to operate unburdened by effects with a focus on specific program logic.
 
-Can you see how functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry some error state in its term `X`. This satisfies the _either_ effect between `Left[X, A]` for failure and `Right[X, A]` for success.
+Can you see how functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left[X, _]` may be used to carry some error state in its term `X`. This satisfies the effect of _either_ `A` for success _or_ `X` for failure.
 
 > You can think of `Right`'s term as being "the right instance you want" because it's "correct". _Right?_ This pun is why `Either` is conventionally leveraged for the effect of correct vs. incorrect or success vs. failure.
 
-Contrasting with void-effects, here's what the `Functor` instance for `Id[_]` looks like:
+Contrasting with effects that encode some notion of void, here's what the `Functor` instance for `Id[_]` looks like:
 
 :::{.numberLines .nowrap}
 ```scala
-type Id[A] = A // see how sneaky the context definition is?
+type Id[A] = A
 
 object FunctorInstances {
   implicit val idFunctor: Functor[Id] = new Functor[Id] {
@@ -568,7 +568,7 @@ At no point is `fizzBuzz()` burdened by the effects of the context it executes a
 
 ## Functors are universal
 
-You might be thinking that lists and arrays in the wild already have a `map()` operation available. `Promise`s in JavaScript also have their own `map()`. You've probably been using functors for a while and never realized!
+You might be thinking that lists and arrays in the wild already have a `map()` operation available. `Promise`s in JavaScript also have their own `map()`. You've been using functors for a while and never realized!
 
 Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, find their strongest use in cases where the concrete type of the context is unimportant. However, you might observe that the _shape_ of functors appears in many places without being _called_ a functor. Using `map()` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map()` operations may be functors because _functors arise from settings where stuff exists under some circumstances_.
 
@@ -615,7 +615,7 @@ preservesFunctionComposition(nil)
 
 Functors need only obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be abstractly regarded as the _context of effects_.
 
-Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written in the same language.
+Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written even in the same language.
 
 What this means, ideally, is that `map()` is the same regardless of context.
 
