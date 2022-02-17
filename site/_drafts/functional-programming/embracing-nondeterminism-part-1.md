@@ -365,7 +365,9 @@ sealed trait List[A] extends Extractable[A] {
 ```
 :::
 
-_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]`. Absence can be preserved in `List[A]` by modifying `extract()` to return a `NonEmptyList[A]` instead as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though. _You would probably be very unhappy using this interface in your code._
+_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]`. Absence can be preserved in `List[A]` by modifying `extract()` to return a `NonEmptyList[A]` instead, as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though. 
+
+This interface essentially transforms these contexts into `NonEmptyList[A]` and imposes its specific complexity on all of your code. You would probably be very unhappy using it.
 
 What about implementing `extract()` for `Future[A]`? When applied to `Future[A]`, the `extract()` function is by its own signature a blocking call. You want your dependency on `A` to be properly asynchronous.
 
