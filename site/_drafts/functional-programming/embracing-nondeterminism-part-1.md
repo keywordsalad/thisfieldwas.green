@@ -68,7 +68,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 ## Complexity in programming
 
-Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any unknown quantity along some dimension requires specific handling in code, which creates complexity and draws focus away from business logic.
+Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any unknown quantity along some dimension requires specific handling in code, which creates complexity and draws engineering focus away from business logic.
 
 Nondeterminism as a _dependence on factors other than initial state and input_ arises when a function `f: A => B` maps to a different member of `B` for any number of times the same member of `A` has been applied. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
 
@@ -92,7 +92,7 @@ Given a function `f: A => B` and another `g: B => C`: a third function `h: A => 
 
 Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
 
-Faults, errors, and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may dictate how an `Employee` is produced from it. For example:
+Faults, errors, and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may determine how an `Employee` is produced from it. For example:
 
 * An associated `Employee` may not be found.
 * The returned `Employee` may change between applications of the same `Int` employee ID.
@@ -116,9 +116,10 @@ Can you think of some program capabilities that necessitate complexity?
 How might supporting these capabilities cause complexity to appear in code?
 
 * When a program starts, it may read configuration from the environment, a database, or files. Configuration may also be a continuous process at runtime, which may affect the entire architecture of the program.
-* Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors. Rows returned by queries will have an unknown length, sort, and cardinality.
+* Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors. 
+* Rows returned by database queries will have an unknown length, sort, and cardinality, which imposes special handling when you want just one row returned.
 * API calls to external systems require async IO in order for programs to be performant. Async IO "infects" entire codebases requiring its capability.
-* External API calls can fail for any reason. Different types of failures may dictate aborting the associated operation or retrying it. As in database queries, exception handling may be deferred to the minefield.
+* External API calls can fail for any reason. Different types of failures may dictate aborting the associated operation or retrying it. As in database queries, exception handling may not be encouraged and leave open the possibility of unexpected errors at runtime.
 * External input and API responses are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring meticulous validation logic and recovery from malformed responses.
 * Logging libraries are used to report errors and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
 * Metrics libraries may be used and require network access, possibly also async IO.
@@ -128,7 +129,7 @@ How might supporting these capabilities cause complexity to appear in code?
 
 _These complexities can be characterized in terms of **effects**._ Each of the following effects center on some dimension of nondeterminism:
 
-* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files.
+* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Long-running operations may be asynchronous without requiring IO.
 * **IO** as in synchronous operations against disk access and network boundaries.
 * **Presence** as some functions may not produce anything for some inputs.
 * **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input.
@@ -195,7 +196,7 @@ def runPayroll(employeeId: Long): PayrollEffect[()] =
 ```
 :::
 
-This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, async IO, and implicit input and output. This code is thus unburdened of most complexity.
+This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, async IO, and implicit input and output. This code is thus unburdened of most complexity, and makes the rest of it easier to work with.
 
 You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occur and the main operation short-circuits itself should any inner operation fail.
 
@@ -207,7 +208,7 @@ Previously I described programs as a case of function composition: `h := g ∘ f
 
 Let me start with an abstract concept: **Context**. What is a context? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`.
 
-> Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` with an underscore when the type of the term is unspecified, and `F[A]` when the term is known to be of type `A`. Other letters work nicely of course, as do proper names, as in `Option[Int]`.
+> Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` with an underscore when the type of the term is unspecified, and `F[A]` when the term is known to be of type `A`. Other letters work nicely of course, as do concrete names, as in `Option[Int]`.
 
 Each kind of context models a set of **effects**. Contexts thus represent a concrete, typed API describing how their terms may be produced. Names of contexts can hint at the effects they model, and with some intuition you may be able to figure out what each context’s effects may be.
 
@@ -218,6 +219,10 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 * `Option[A]`: Presence, absence, or _optionality_ of some instance of term `A`. Getting the term `A` when there is no instance causes a fault.
 * `Either[X, A]`: Conventionally treated as _either_ term `A` if valid _or_ term `X` if invalid. Getting the wrong term causes a fault.
 * `List[A]`: _Unknown length_, sort, and cardinality of term `A`. Getting an `A` from an empty list or from beyond the end of it causes a fault.
+* `NonEmptyList[A]` or `Nel[A]`: _At least one_ of term `A` with an unkown sort and cardinality. The first `A` is guaranteed to be present.
+* `Id[A]`: The identity of `A`. This _is_ `A` and is guaranteed to be present.
+* `Set[A]`: A set of _distinct instances_ of `A` whose size is unknown.
+* _Many data structures are used to model different forms of presence._
 
 **Contexts representing side-effects:**
 
