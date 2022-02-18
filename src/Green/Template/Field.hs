@@ -3,8 +3,8 @@
 module Green.Template.Field where
 
 import Control.Monad.Except
-import qualified Data.HashMap.Strict as HashMap
-import qualified Data.Text as T
+import qualified Data.Aeson.Key as Key
+import qualified Data.Aeson.KeyMap as KeyMap
 import Green.Common
 import Green.Template.Ast
 import Green.Template.Compiler
@@ -130,7 +130,7 @@ getMetadataField key item = do
   maybe
     (noResult $ "tried metadata key " ++ show key)
     (return . intoValue)
-    (HashMap.lookup (T.pack key) m)
+    (KeyMap.lookup (Key.fromString key) m)
 
 bodyField :: String -> Context String
 bodyField key = field key $ return . itemBody

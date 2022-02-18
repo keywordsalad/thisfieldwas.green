@@ -3,6 +3,8 @@ module Green.Template.Context where
 import Control.Monad.Except
 import Control.Monad.State.Strict
 import Data.Aeson
+import qualified Data.Aeson.Key as Key
+import qualified Data.Aeson.KeyMap as KeyMap
 import Data.Bifunctor
 import Data.Either
 import Data.HashMap.Strict (HashMap)
@@ -255,7 +257,7 @@ instance (IntoValue v a) => IntoContext [(String, v)] a where
   intoContext = intoContext . HashMap.fromList
 
 instance IntoContext Object a where
-  intoContext = ic . fmap (bimap T.unpack intoValue) . HashMap.toList
+  intoContext = ic . fmap (bimap Key.toString intoValue) . KeyMap.toList
     where
       ic :: [(String, ContextValue a)] -> Context a
       ic = intoContext
