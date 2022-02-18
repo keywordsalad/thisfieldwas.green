@@ -7,10 +7,10 @@ date: 2022-01-24T17:14:03-0800
 tags: functional programming, programming, scala, design patterns
 layout: post
 twitter:
-  image: /images/tags/functional-programming/function-input-output-512x512.png
+  image: /images/tags/functional-programming/functional-grass-512x512.png
 og:
   image:
-    url: /images/tags/functional-programming/function-input-output-512x512.png
+    url: /images/tags/functional-programming/functional-grass-512x512.png
     alt: Embracing nondeterminism in functional programming by way of modeling complexity as effects within execution contexts.
 ---
 
@@ -49,7 +49,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
       ```
 
       The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
-      
+
 **Contexts** are like containers. They are noted using `F[_]` with an underscore where the type of the contents are unspecified, and `F[A]` where the contents are known to be of type `A`. They are more concretely defined in following sections.
 
 **Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _lift is A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_.
@@ -116,14 +116,14 @@ Can you think of some program capabilities that necessitate complexity?
 How might supporting these capabilities cause complexity to appear in code?
 
 * When a program starts, it may read configuration from the environment, a database, or files. Configuration may also be a continuous process at runtime, which may affect the entire architecture of the program.
-* Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors. 
+* Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors.
 * Rows returned by database queries will have an unknown length, sort, and cardinality, which imposes special handling when you want just one row returned.
 * API calls to external systems require async IO in order for programs to be performant. Async IO "infects" entire codebases requiring its capability.
 * External API calls can fail for any reason. Different types of failures may dictate aborting the associated operation or retrying it. As in database queries, exception handling may not be encouraged and leave open the possibility of unexpected errors at runtime.
 * External input and API responses are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring meticulous validation logic and recovery from malformed responses.
 * Logging libraries are used to report errors and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
 * Metrics libraries may be used and require network access, possibly also async IO.
-* Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails. 
+* Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails.
 * A/B testing requires deterministically persisting identities' sessions within their assigned variants.
 * Retries using exponential back-off must retain their previous retry interval and apply a random jitter in order to calculate their next one.
 
@@ -365,7 +365,7 @@ sealed trait List[A] extends Extractable[A] {
 ```
 :::
 
-_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]`. Absence can be preserved in `List[A]` by modifying `extract()` to return a `NonEmptyList[A]` instead, as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though. 
+_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]`. Absence can be preserved in `List[A]` by modifying `extract()` to return a `NonEmptyList[A]` instead, as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though.
 
 This interface essentially transforms these contexts into `NonEmptyList[A]` and imposes its specific complexity on all of your code. You would probably be very unhappy using it.
 
