@@ -28,7 +28,7 @@ In this post I will:
 
 ## Conventions
 
-I will provide Scala code for concrete examples and note where different. Abstract examples will employ notation that looks like Scala-inspired "math".
+I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like Scala-inspired "math".
 
 Terminology will leverage common functional programming vocabulary.
 
