@@ -14,14 +14,18 @@ og:
     alt: Embracing nondeterminism in functional programming by way of modeling complexity as effects within execution contexts.
 ---
 
-What’s a functor? An applicative? Or a monad? The internet is teeming with articles that answer some facet of their character, but few provide a concrete motivation for why these structures exist or appear in the forms that they do.
+Have you ever received an unexpected `null` reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?
 
 <!--more-->
 
+Handling unknowns and nondeterminism in programs is a hard problem. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against such errors you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
+
+_Defensive programming_ as a practice tries to protect against errors by preempting how they might occur. However anticipation of errors rests entirely on _tacit knowledge_ and imposes complex code to handle and recover from errors, _drawing focus from writing the business logic that drives the value of programs_.
+
 In this post I will:
 
-* Demonstrate nondeterminism and complexity as the motivators for the use of functors, applicatives, and monads as **design patterns** in functional programming.
-* Provide **effects** as a model for characterizing nondeterminism and complexity in programs.
+* Provide **effects** as a model for characterizing nondeterminism and complexity in programs and elevate them to first-class concepts within programs.
+* Introduce the use of functors, applicatives, and monads as **design patterns** in functional programming to model effects.
 * Demonstrate the use of functors as an elementary design pattern for abstracting complexity.
 
 > The code that accompanies this post may be found [here]().
@@ -133,7 +137,7 @@ _These complexities can be characterized in terms of **effects**._ Each of the f
 * **IO** as in synchronous operations against disk access and network boundaries.
 * **Presence** as some functions may not produce anything for some inputs.
 * **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input.
-* **Correctness** requires sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls.
+* **Validation** requires sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls.
 * **Implicit input** in the form of configuration, feature flags and ramps, A/B test assignment, or other inputs that aren't themselves explicitly provided as part of an API boundary or client interaction.
 * **Implicit output** in the form of logging and metrics, as well as exceptions and other faults.
 * **State** representing change over time and how it propagates across a program's architecture. Implicit inputs and outputs together constitute a form of state.
