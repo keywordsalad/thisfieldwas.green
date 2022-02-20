@@ -123,7 +123,7 @@ How might supporting these capabilities cause complexity to appear in code?
 * Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors.
 * Rows returned by database queries will have an unknown length, sort, and cardinality, which imposes special handling when you want just one row returned.
 * API calls to external systems require async IO in order for programs to be performant. Async IO "infects" entire codebases requiring its capability.
-* External API calls can fail for any reason. Different types of failures may dictate aborting the associated operation or retrying it. As in database queries, exception handling may not be encouraged and leave open the possibility of unexpected errors at runtime.
+* External API calls can fail for any reason. Different types of failures may indicate aborting the associated operation or retrying it. As in database queries, exception handling may not be encouraged and leave open the possibility of unexpected errors at runtime.
 * External input and API responses are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring meticulous validation logic and recovery from malformed responses.
 * Logging libraries are used to report errors and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
 * Metrics libraries may be used and require network access, possibly also async IO.
@@ -377,7 +377,7 @@ What about implementing `extract()` for `Future[A]`? When applied to `Future[A]`
 
 ## Motivating functors as a design pattern
 
-`Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` all have different effects that dictate how term `A` is produced. You must follow an axiom from object oriented programming: _abstract what changes_. Therefore you have to shed effects as an implementation detail. How might that impact lowering the term `A`?
+`Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` all have different effects that determine how term `A` is produced. You must follow an axiom from object oriented programming: _abstract what changes_. Therefore you have to shed effects as an implementation detail. How might that impact lowering the term `A`?
 
 You may be unsatisfied by the answer: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence? Functors solve this problem.
 
