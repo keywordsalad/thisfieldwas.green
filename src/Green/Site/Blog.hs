@@ -9,22 +9,21 @@ import Green.Template.Custom
 import qualified Hakyll as H
 import System.FilePath
 
-buildBlogCategories :: (H.MonadMetadata m) => Bool -> m Tags
-buildBlogCategories preview = buildCategories (postsPattern preview) makeCategoryId
+buildBlogCategories :: (H.MonadMetadata m) => m Tags
+buildBlogCategories = buildCategories postsPattern makeCategoryId
 
-buildBlogTags :: (H.MonadMetadata m) => Bool -> m Tags
-buildBlogTags preview = buildTags (postsPattern preview) makeTagId
+buildBlogTags :: (H.MonadMetadata m) => m Tags
+buildBlogTags = buildTags postsPattern makeTagId
 
 blog :: SiteConfig -> Context String -> Rules ()
 blog config context = do
-  let preview = config ^. sitePreview
-  categories <- buildBlogCategories preview
-  tags <- buildBlogTags preview
+  categories <- buildBlogCategories
+  tags <- buildBlogTags
 
-  blogHome preview tags categories context
+  blogHome tags categories context
   posts context
   previews config context
-  archives preview context
+  archives context
 
   tagsPages tags context
   categoriesPages categories context
@@ -32,14 +31,14 @@ blog config context = do
   draftsIndex context
   drafts context
 
-blogHome :: Bool -> Tags -> Tags -> Context String -> Rules ()
-blogHome preview tags categories context =
+blogHome :: Tags -> Tags -> Context String -> Rules ()
+blogHome tags categories context =
   match "blog.html" do
     route indexRoute
     compile do
       categoryCloud <- renderTagCloud categories
       tagCloud <- renderTagCloud tags
-      recentPosts <- recentPostsContext preview
+      recentPosts <- recentPostsContext
       getResourceBody >>= applyTemplates do
         applyContext $
           constField "tagCloud" tagCloud
@@ -50,12 +49,12 @@ blogHome preview tags categories context =
         applyContent
         applyLayout
 
-archives :: Bool -> Context String -> Rules ()
-archives preview context = do
+archives :: Context String -> Rules ()
+archives context = do
   match "archives.html" do
     route indexRoute
     compile do
-      publishedPosts <- H.recentFirst =<< loadPublishedPosts preview
+      publishedPosts <- H.recentFirst =<< loadPublishedPosts
       getResourceBody >>= applyTemplates do
         applyContext $
           itemsField "posts" postContext publishedPosts
@@ -191,9 +190,9 @@ postContext =
     <> constField "article" True
     <> namedMetadataField "title"
 
-recentPostsContext :: Bool -> Compiler (Context String)
-recentPostsContext preview = do
-  recentPosts <- fmap (take 5) . H.recentFirst =<< loadPublishedPosts preview
+recentPostsContext :: Compiler (Context String)
+recentPostsContext = do
+  recentPosts <- fmap (take 5) . H.recentFirst =<< loadPublishedPosts
   let latestPost = take 1 recentPosts
       previousPosts = drop 1 recentPosts
   return $
@@ -203,13 +202,11 @@ recentPostsContext preview = do
 teaserContext :: Context String
 teaserContext = teaserField "teaser" "content"
 
-loadPublishedPosts :: Bool -> Compiler [Item String]
-loadPublishedPosts preview = loadExistingSnapshots (postsPattern preview) "content"
+loadPublishedPosts :: Compiler [Item String]
+loadPublishedPosts = loadExistingSnapshots postsPattern "content"
 
-postsPattern :: Bool -> Pattern
-postsPattern = \case
-  True -> "_posts/**" .||. "_drafts/**"
-  False -> "_posts/**"
+postsPattern :: Pattern
+postsPattern = "_posts/**" .||. ("_drafts/**" .&&. hasVersion "preview")
 
 loadDraftPosts :: Compiler [Item String]
 loadDraftPosts = loadExistingSnapshots ("_drafts/**" .&&. hasNoVersion) "content"

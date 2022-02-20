@@ -26,11 +26,11 @@ site config = do
   templatesDependency <- templates
   rulesExtraDependencies [templatesDependency] do
     let context = customContext config
-    homePage config context
+    homePage context
     pages context
     blog config context
     code
     static
     feed config context
-    sitemap config context
+    sitemap context
     robotsTxt config context

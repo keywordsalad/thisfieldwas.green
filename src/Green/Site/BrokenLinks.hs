@@ -1,6 +1,7 @@
 module Green.Site.BrokenLinks where
 
 import Green.Common
+import Green.Util
 import Hakyll (preprocess)
 
 brokenLinks :: Rules ()
@@ -20,4 +21,4 @@ createRedirect (brokenLink, target) =
     route idRoute
     compile do
       r <- fromMaybe target <$> getRoute (fromFilePath target)
-      makeItem $ Redirect (toUrl r)
+      makeItem $ Redirect (dropIndex $ toUrl r)
