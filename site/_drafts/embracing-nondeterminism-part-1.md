@@ -177,7 +177,7 @@ The code above demonstrates complexity in the dimensions of:
 
 * **Synchronous IO** as database queries and network calls are implicitly synchronous.
 * **Presence** as an `Employee` may not be found or their `Paycheck` not calculated.
-* **Correctness** where the `"SUCCESS"` response from the `achClient` is the only check performed. Other responses are simply not handled.
+* **Validation** where the `"SUCCESS"` response from the `achClient` is the only check performed. Other responses are simply not handled.
 * **Implicit input** where the company's bank routing and account numbers are read from an external location.
 * **Implicit output** where logging occurs but swallows errors, resulting in opaque `false` return cases. Exceptions also bubble up from database and network operations.
 
