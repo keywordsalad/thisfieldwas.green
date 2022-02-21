@@ -27,21 +27,20 @@ default: &default
     preview: true
     inflate-css: true
 
-no-debug: &no-debug
+prod:
+  <<: *default
   debug-settings:
     preview: false
     inflate-css: false
-
-prod:
-  <<: *default
-  <<: *no-debug
   site-info:
     <<: *default-site-info
     root: https://thisfieldwas.green
 
 review:
   <<: *default
-  <<: *no-debug
+  debug-settings:
+    preview: false
+    inflate-css: false
   site-info:
     <<: *default-site-info
     root: https://review.thisfieldwas.green
