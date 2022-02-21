@@ -32,9 +32,6 @@ changefreq: weekly
       <link>{{absUrl | escapeHtml}}</link>
       <guid>{{absUrl | escapeHtml}}</guid>
       <pubDate>{{published | dateAs rfc822}}</pubDate>
-      {{#for categoryList-}}
-      <category>{{item | escapeHtml}}</category>
-      {{#end-}}
       {{#for tagList-}}
       <category>{{item | escapeHtml}}</category>
       {{#end-}}

@@ -1,7 +1,7 @@
 module Green.Site.Sitemap where
 
 import Green.Common
-import Green.Site.Blog (buildBlogCategories, buildBlogTags, loadPublishedPosts)
+import Green.Site.Blog (buildBlogTags, loadPublishedPosts)
 import Green.Template
 import Green.Template.Custom
 import qualified Hakyll as H
@@ -18,7 +18,6 @@ sitemap siteContext =
 
 sitemapContext :: Context String -> Compiler (Context String)
 sitemapContext siteContext = do
-  categoriesPages <- H.loadAll . tagsPattern =<< buildBlogCategories :: Compiler [Item String]
   tagsPages <- H.loadAll . tagsPattern =<< buildBlogTags :: Compiler [Item String]
   blogPage <- H.load "blog.html" :: Compiler (Item String)
   posts <- H.recentFirst =<< loadPublishedPosts
@@ -28,7 +27,6 @@ sitemapContext siteContext = do
         pages
           <> [blogPage]
           <> feeds
-          <> categoriesPages
           <> tagsPages
           <> posts
       context =

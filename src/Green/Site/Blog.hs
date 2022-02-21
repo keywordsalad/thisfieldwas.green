@@ -9,40 +9,30 @@ import Green.Template.Custom
 import qualified Hakyll as H
 import System.FilePath
 
-buildBlogCategories :: (H.MonadMetadata m) => m Tags
-buildBlogCategories = buildCategories postsPattern makeCategoryId
-
 buildBlogTags :: (H.MonadMetadata m) => m Tags
 buildBlogTags = buildTags postsPattern makeTagId
 
 blog :: SiteConfig -> Context String -> Rules ()
 blog config context = do
-  categories <- buildBlogCategories
   tags <- buildBlogTags
-
-  blogHome tags categories context
+  blogHome tags context
   posts context
   previews config context
   archives context
-
   tagsPages tags context
-  categoriesPages categories context
-
   draftsIndex context
   drafts context
 
-blogHome :: Tags -> Tags -> Context String -> Rules ()
-blogHome tags categories context =
+blogHome :: Tags -> Context String -> Rules ()
+blogHome tags context =
   match "blog.html" do
     route indexRoute
     compile do
-      categoryCloud <- renderTagCloud categories
       tagCloud <- renderTagCloud tags
       recentPosts <- recentPostsContext
       getResourceBody >>= applyTemplates do
         applyContext $
           constField "tagCloud" tagCloud
-            <> constField "categoryCloud" categoryCloud
             <> recentPosts
             <> postContext
             <> context
@@ -147,23 +137,6 @@ draftsRoute =
     `composeRoutes` setExtension "html"
     `composeRoutes` indexRoute
 
-categoriesPages :: Tags -> Context String -> Rules ()
-categoriesPages categories context =
-  H.tagsRules categories \category pat -> do
-    route indexRoute
-    compile do
-      categoryPosts <- H.recentFirst =<< H.loadAll pat
-      makeItem "" >>= applyTemplates do
-        applyContext $
-          constField "category" category
-            <> constField "title" ("Posts under \"" ++ category ++ "\"")
-            <> itemsField "posts" postContext categoryPosts
-            <> constField "layout" ("page" :: String)
-            <> context
-        applyTemplate "_templates/posts-under-category.html"
-        applyCompiler pandocCompiler
-        applyLayout
-
 tagsPages :: Tags -> Context String -> Rules ()
 tagsPages tags context =
   H.tagsRules tags \tag pat -> do
@@ -183,10 +156,8 @@ tagsPages tags context =
 
 postContext :: Context String
 postContext =
-  categoryLinksField "categoryLinks"
-    <> tagLinksField "tagLinks"
+  tagLinksField "tagLinks"
     <> tagListField "tagList"
-    <> categoryListField "categoryList"
     <> constField "article" True
     <> namedMetadataField "title"
 
@@ -218,6 +189,3 @@ dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))
 
 tagListField :: String -> Context String
 tagListField key = field key $ lift . getTags . itemIdentifier
-
-categoryListField :: String -> Context String
-categoryListField key = field key $ lift . getCategory . itemIdentifier

@@ -10,7 +10,7 @@ import Data.Char (toLower)
 import Green.Common
 import Green.Template.Context
 import Green.Util
-import Hakyll (MonadMetadata, Tags, buildTags, getTags, renderTagCloudWith)
+import Hakyll (Tags, buildTags, getTags, renderTagCloudWith)
 import qualified Hakyll
 
 normalizeTag :: String -> String
@@ -39,28 +39,6 @@ tagLinksFieldWith key f = field key f'
 
 tagLinksField :: String -> Context a
 tagLinksField key = tagLinksFieldWith key getTags
-
-categoryLinksField :: String -> Context a
-categoryLinksField key = tagLinksFieldWith key getCategory
-
-normalizeCategory :: String -> String
-normalizeCategory = normalizeTag
-{-# INLINE normalizeCategory #-}
-
-makeCategoryId :: String -> Identifier
-makeCategoryId = Hakyll.fromCapture "categories/*.html" . normalizeCategory
-
-categoriesField :: String -> Context a
-categoriesField key = field key $ lift . getCategory . itemIdentifier
-
-getCategory :: (MonadMetadata m) => Identifier -> m [String]
-getCategory = (filter isCategory <$>) . Hakyll.getCategory
-  where
-    isCategory = not . (`elem` sourceDirs)
-    sourceDirs = ["_posts", "_drafts"]
-
-buildCategories :: (MonadMetadata m) => Pattern -> (String -> Identifier) -> m Tags
-buildCategories = Hakyll.buildTagsWith getCategory
 
 renderTagCloud :: Tags -> Compiler String
 renderTagCloud = renderTagCloudWith makeLink unwords minSize maxSize

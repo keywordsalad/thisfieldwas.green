@@ -2,12 +2,10 @@
   margin-bottom: 0.25rem;
 
   a {
-    color: inherit;
-    text-decoration: none;
+    // text-decoration: none;
 
     &:hover {
       text-decoration: underline;
-      color: $text-color-hyperlink;
     }
   }
 }
@@ -96,4 +94,11 @@
     counter-increment: heading_l6;
     user-select: none;
   }
+}
+
+.read-more {
+  border-bottom: $border-thin;
+  border-color: green;
+  padding-bottom: 1em;
+  max-width: 20em;
 }
