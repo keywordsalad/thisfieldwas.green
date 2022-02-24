@@ -1,6 +1,6 @@
 ---
 title: "Embracing Nondeterminism Part I: Contexts and Effects"
-description: Embracing nondeterminism in functional programming by way of modeling complexity as effects within execution contexts.
+description: Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.
 author: Logan McGrath
 comments: false
 date: 2022-01-24T17:14:03-0800
@@ -11,7 +11,7 @@ twitter:
 og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
-    alt: Embracing nondeterminism in functional programming by way of modeling complexity as effects within execution contexts.
+    alt: Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.
 ---
 
 Have you ever received an unexpected `null` reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?
