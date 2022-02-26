@@ -11,19 +11,21 @@ changefreq: weekly
   <p class="latest-post-label">Latest Post!</p>
   {{partial "post-meta"}}
   {{-teaser}}
-  <p class="read-more"><a href="{{url}}">Read more...</a></p>
+  <p class="read-more no-border"><a href="{{url}}">Read more...</a></p>
 {{-#end}}
 
+{{#if tagCloud-}}
+<h2 class="tags hard-section">Tag Cloud</h2>
+<p class="tag-cloud" data-show-count>{{tagCloud}}</p>
+{{#end-}}
+
+<h2>Previous posts</h2>
+
 {{#for previousPosts-}}
-  <h2 class="post-title"><a href="{{url}}">{{title}}</a></h3>
+  <h3 class="post-title"><a href="{{url}}">{{title}}</a></h3>
   {{partial "post-meta"}}
   {{-teaser}}
   <p class="read-more"><a href="{{url}}">Read more...</a></p>
 {{#end-}}
 
 <p class="view-all-posts"><a href="{{getUrl 'archives.html'}}">View all posts</a></p>
-
-{{#if tagCloud-}}
-<h2 class="hard-section">Tags</h2>
-<p class="tag-cloud" data-show-count>{{tagCloud}}</p>
-{{#end-}}

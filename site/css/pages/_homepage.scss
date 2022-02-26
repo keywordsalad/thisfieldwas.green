@@ -9,32 +9,64 @@
 
   .professional-offering {
     clear: both;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 
-    h2 {
-      text-align: center;
-    }
-  }
+    .pane {
+      ul {
+        padding: 0;
+        font-size: 0;
+        margin-left: 1.2em;
+        margin-right: 1.2em;
+      }
 
-  .skills {
-    text-align: center;
-
-    ul {
-      padding: 0;
-      font-size: 0;
-    }
-
-    li {
-      font-size: 1rem;
-      list-style: none;
-      display: inline-block;
-      margin: 0;
-      padding: 0;
-
-      &::before, &:last-child::after {
-        content: "∗";
-        color: $signature-green;
+      li {
+        font-size: 1rem;
+        list-style: none;
+        list-style-position: initial;
         display: inline-block;
-        margin: 0 0.2rem;
+        padding: 0;
+
+        &::before, &:last-child::after {
+          content: "∗";
+          color: $signature-green;
+          display: inline-block;
+          margin: 0 0.2rem;
+        }
+      }
+    }
+
+    @include media('>=tablet') {
+      .pane {
+        flex-basis: 25%;
+
+        p {
+          margin-left: 1.2em;
+          margin-right: 1.2em;
+        }
+      }
+
+      .foundations-and-practices {
+        flex-basis: 100%;
+      }
+
+      .to-work, .hard-work {
+        flex-basis: 50%;
+      }
+
+      .employment {
+        flex-basis: 100%;
+      }
+    }
+
+    @include media('<tablet') {
+      .pane {
+        flex-basis: 50%;
+      }
+
+      .foundations-and-practices, .to-work, .hard-work, .employment {
+        flex-basis: 100%;
       }
     }
   }

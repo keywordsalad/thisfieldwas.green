@@ -1,12 +1,32 @@
 .view-all-posts {
   font-size: 150%;
   font-variant: small-caps;
+  font-weight: bold;
+  font-style: italic;
+  font-family: $font-family-serif;
 }
 
-.read-more {
-  padding-left: 1.6em;
+.read-more:not(.no-border) {
+  border-bottom: $border-thin;
+  border-color: green;
+  padding-bottom: 1em;
+  margin-right: 20%;
+}
+
+.read-more, .view-all-posts {
   background-image: url("/images/grass.svg");
   background-size: 1.2em 1.2em;
-  background-position: 0 0;
+  background-position: 0 0.2em;
   background-repeat: no-repeat;
+  padding-left: 1.6em;
+}
+
+@include media('>=tablet') {
+  h2.tags {
+    text-align: center;
+  }
+  .tag-cloud {
+    width: 60%;
+    margin: 0 auto;
+  }
 }

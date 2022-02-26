@@ -1,6 +1,12 @@
 .tag-cloud {
-  --min-size: 0.7;
+  --min-size: 0.6;
   --max-size: 1.6;
+
+  @include media('>=tablet') {
+    --min-size: 0.8;
+    --max-size: 2.0;
+  }
+
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -25,6 +31,6 @@
   }
 
   &[data-show-count] .tag::after {
-    content: " (" attr(data-count) ")";
+    content: "×" attr(data-count);
   }
 }
