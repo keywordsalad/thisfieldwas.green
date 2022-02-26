@@ -48,7 +48,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
   * For example, in the declaration:
 
-      ```{.scala .numberLines .nowrap}
+      ```{.scala .numberLines}
       def map[A, B](fa: F[A])(f: A => B): F[B]
       ```
 
@@ -148,7 +148,7 @@ The actual list of effects is innumerable, but these ones are common.
 
 Take for example this Java code from a hypothetical payroll system:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```java
 EmployeeRepo employeeRepo;
 BankAchClient achClient;
@@ -183,7 +183,7 @@ The code above demonstrates complexity in the dimensions of:
 
 Fortunately there are ways to model sets of these effects and contain the scope of their impact so that code is less complex. Rewriting the above code using an effect model may look like this:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 def runPayroll(employeeId: Long): PayrollEffect[()] =
   for {
@@ -261,7 +261,7 @@ In order to generalize contexts, the key differentiator between them must be abs
 
 **For any context `F[_]`, it produces some term `A`.** If you have a function `f: A => B`, how would you apply it to the term produced by the context `F[A]`? That would require _lowering_ the term. Specifically, you can’t apply the following function directly to the context:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 // given a context producing term A
 val fa: F[A]
@@ -277,7 +277,7 @@ Recall from the previous section, contexts share two qualities: that they produc
 
 **`Option[A]`** is the effect of presence, absence, or _optionality_ of an instance of term `A`:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 sealed trait Option[+A] {
   def get: A = throw new Exception()
@@ -290,7 +290,7 @@ case object None extends Option[Nothing]
 
 **`Either[X, A]`** by convention is the effect of _either_ success with term `A` _or_ failure with term `X`:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 sealed trait Either[+X, +A] {
   def left: X = throw new Exception()
@@ -307,7 +307,7 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 
 **`List[A]`** is the effect of _unknown length_, sort, and cardinality of instances of term `A`:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 sealed trait List[+A] {
   def head: A = throw new Exception()
@@ -332,7 +332,7 @@ object List {
 
 Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, a _lowering_ operation `extract(): F[A] => A` is possible as it means the same thing between both of them: `extract()` either gets the existing instance of the term `A` or it faults. In object oriented programming, `Option[A]` and `Either[X, A]` might expose such an interface:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 trait Extractable[A] {
   def extract(): A
@@ -352,7 +352,7 @@ How do you `extract()` the term `A` from a `List[A]` such that it means the same
 
 As in `Option[A]` and `Either[X, A]` there is a notion of the presence or absence of an instance of the term `A`, but presence in `List[A]` implies _one to many_ instances. A solution inspired by object oriented programming might change the interface thusly:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 trait Extractable[A] {
   def extract(): Seq[A]
@@ -383,7 +383,7 @@ You may be unsatisfied by the answer: _extraction cannot be generalized_. All yo
 
 **Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure: a single function called `map()`. Functors in Scala may be formally defined using the `Functor` typeclass:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 trait Functor[F[_]] {
   def map[A, B](fa: F[A])(f: A => B): F[B]
@@ -464,7 +464,7 @@ This behavior is referred to as _short-circuiting_ and it is a key feature of fu
 
 Each context of course must provide its own implementation of `map()` in order for it to be used as a functor. Functor implementations in Scala are provided via typeclasses, and any type that has the shape `F[_]` may become a functor by implementing the `Functor` typeclass from above:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 trait Functor[F[_]] {
   def map[A, B](fa: F[A])(f: A => B): F[B]
@@ -477,7 +477,7 @@ object Functor {
 
 Instances of the `Functor` typeclass simply implement this trait and make themselves available implicitly:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 object FunctorInstances {
   implicit val optionFunctor = new Functor[Option] {
@@ -513,7 +513,7 @@ Can you see how functors enable control flow and short-circuiting? The void case
 
 Contrasting with effects that encode some notion of void, here's what the `Functor` instance for `Id[_]` looks like:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 type Id[A] = A
 
@@ -530,7 +530,7 @@ object FunctorInstances {
 
 Defining a `fizzBuzz()` function that uses a functor looks like this:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 import Functor
 
@@ -546,7 +546,7 @@ def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
 
 And then `fizzBuzz()` may be used for all contexts implementing the `Functor` typeclass:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 // import the Functor instance implicits
 import FunctorInstances._
@@ -591,19 +591,19 @@ In order to be a functor, a context defining a `map()` function must satisfy two
 
 1. Preservation of identity functions:
 
-    ```{.scala .numberLines .nowrap}
+    ```{.scala .numberLines}
     context.map(id) == id(context)
     ```
 
 2. Preservation of function composition:
 
-    ```{.scala .numberLines .nowrap}
+    ```{.scala .numberLines}
     context.map(g ∘ f) == context.map(f).map(g)
     ```
 
 Here are the two laws applied against Scala's builtin `List` type, which defines its own `map()` operation:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 def preservesIdentityFunctions(list: List[Int]): Unit =
   assert(list.map(identity(_)) == identity(list))
@@ -634,7 +634,7 @@ What this means, ideally, is that `map()` is the same regardless of context.
 
 In this post I introduced functors as an elementary abstraction which permit you to consume term `A` within some context `F[A]` via `map()`:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 def map[A, B](fa: F[A])(f: A => B): F[B]
 ```
@@ -644,7 +644,7 @@ This simple abstraction is enabling on its own, as it frees the logic in functio
 
 Take for example these two instances of the context `F[_]` and the function signature for `combine()`:
 
-:::{.numberLines .nowrap}
+:::{.numberLines}
 ```scala
 val fa: F[A]
 val fb: F[B]

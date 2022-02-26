@@ -5,58 +5,40 @@ code {
   word-wrap: break-word;
 
   &:not(.sourceCode) {
-    color: teal;
+    color: $code-color;
     font-family: inherit;
     text-decoration: underline;
   }
 
-  // keyword
-  .kw, .cf {
-    color: seagreen;
-    font-weight: bold;
-  }
-
-  .op {
-    color: indianred;
-  }
-
-  .ot {
-    color: slateblue;
-  }
-
-  .dt {
-    color: blue;
-  }
-
-  // function
-  .fu {
-    color: seagreen;
-  }
-
-  .st {
-    color: lightseagreen;
-  }
-
-  // character
-  .ch {
-    color: yellowgreen;
-  }
-
-  .cn {
-    color: blueviolet;
-  }
-
-  .at {
-    color: darkblue;
-  }
-
-  .va {
-    color: cornflowerblue;
-  }
-
-  .co {
-    color: gray;
-  }
+  .al { color: red; } /* Alert */
+  .an { color: saddlebrown; font-weight: bold; font-style: italic; } /* Annotation */
+  .at { color: darkblue; } /* Attribute */
+  .bn { color: blue; } /* BaseN */
+  .bu { color: steelblue; } /* Builtin */
+  .cf { color: seagreen; font-weight: bold; } /* ControlFlow */
+  .ch { color: yellowgreen; } /* Char */
+  .cn { color: blueviolet; } /* Constant */
+  .co { color: gray; font-style: italic; } /* Comment */
+  .cv { color: darkgoldenrod; font-weight: bold; font-style: italic; } /* CommentVar */
+  .do { color: darkgoldenrod; font-weight: bold; font-style: italic; } /* Documentation */
+  .dt { color: blue; font-weight: bold; } /* DataType */
+  .dv { color: darkred; } /* DecVal */
+  .er { color: red; font-weight: bold; } /* Error */
+  .ex {color: mediumseagreen } /* Extension */
+  .fl { color: darkred; } /* Float */
+  .fu { color: seagreen; } /* Function */
+  .im { } /* Import */
+  .in { color: steelblue; font-weight: bold; font-style: italic; } /* Information */
+  .kw { color: seagreen; font-weight: bold; } /* Keyword */
+  .op { color: indianred; font-weight: bold; } /* Operator */
+  .ot { color: slateblue; } /* Other */
+  .pp { color: saddlebrown; font-style: italic; } /* Preprocessor */
+  .sc { color: seagreen; } /* SpecialChar */
+  .ss { color: mediumspringgreen; } /* SpecialString */
+  .st { color: lightseagreen; } /* String */
+  .va { color: cornflowerblue; } /* Variable */
+  .vs { color: green; } /* VerbatimString */
+  .wa { color: orange; font-weight: bold; font-style: italic; } /* Warning */
 }
 
 div.sourceCode {
@@ -67,8 +49,10 @@ div.sourceCode {
 pre.sourceCode {
   margin: 1em 0;
   padding: 0;
+  overflow-x: scroll;
 
   code.sourceCode {
+    color: $source-code-color;
     display: block;
     margin: 0;
     padding: 0;
@@ -76,6 +60,8 @@ pre.sourceCode {
     flex-direction: column;
     font-family: $code-font-family;
     font-size: $code-font-size;
+    white-space: pre;
+    word-wrap: normal;
 
     .numberLines & {
       counter-reset: line-number;
