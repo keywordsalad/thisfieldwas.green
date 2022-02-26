@@ -115,7 +115,7 @@ Just with the `pure()` and `ap()` functions, you get `map()` for free and an eas
 
 > The `map2()` function can also be defined by _currying_ `f`:
 >
-> ```scala
+> ```{.scala .numberLines .nowrap}
 > def map2[A, B, C](fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
 >   ap(map(fa)(f.curried), fb)
 > ```
