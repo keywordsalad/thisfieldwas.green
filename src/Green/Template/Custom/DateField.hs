@@ -1,5 +1,7 @@
 module Green.Template.Custom.DateField where
 
+import qualified Data.Aeson.Key as Key
+import qualified Data.Aeson.KeyMap as KeyMap
 import Data.List (tails)
 import Data.String.Utils
 import Green.Common
@@ -13,6 +15,7 @@ dateFields config =
     [ dateField "date" timeLocale currentTime,
       publishedField "published" timeLocale,
       updatedField "updated" timeLocale,
+      isPublishedField "isPublished",
       constField "longDate" (displayFormat ^. displayDateLongFormat),
       constField "shortDate" (displayFormat ^. displayDateShortFormat),
       constField "timeOnly" (displayFormat ^. displayTimeFormat),
@@ -128,3 +131,10 @@ metadataDateFormats =
     "%b %e, %Y",
     "%b %d, %Y"
   ]
+
+isPublishedField :: String -> Context a
+isPublishedField key = field key f
+  where
+    f item = lift do
+      getMetadata (itemIdentifier item)
+        <&> isJust . KeyMap.lookup (Key.fromString "published")
