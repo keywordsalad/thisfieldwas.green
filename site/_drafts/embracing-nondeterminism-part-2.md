@@ -66,8 +66,8 @@ How do you apply a function to these two contexts? You use a _special case_ of t
 
 Like the functor, an applicative is a simple structure. It provides a `map()` function, as it is a special case of functor, and defines two more:
 
-1. `pure()` is a constructor which _lifts_ an instance into the context as `A => F[A]`. The name _pure_ may feel alien, but you can remember it because it gives you back a _valid_, _present_, or _**pure**_ context.
-2. `ap()`, read as _apply_, which takes a lifted function and applies a lifted argument to it as `F[A => B] => F[A] => F[B]`.
+1. `pure()` is a constructor which _lifts_ an instance into the context as `pure(): A => F[A]`. The name _pure_ may feel alien, but you can remember it because it gives you back a _valid_, _present_, or _**pure**_ context.
+2. `ap()`, read as _apply_, which takes a lifted function and applies a lifted argument to it as `ap(): F[A => B] => F[A] => F[B]`.
 
 Applicatives in Scala may be defined using the following typeclass:
 
