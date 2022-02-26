@@ -72,7 +72,7 @@ Like the functor, an applicative is a simple structure. It provides a `map()` fu
 Applicatives in Scala may be defined using the following typeclass:
 
 :::{.numberLines .nowrap}
-```
+```scala
 trait Applicative[F[_]] extends Functor[F] {
   def pure(a: A): F[A]
   def ap(ff: F[A => B])(fa: F[A]): F[B]
