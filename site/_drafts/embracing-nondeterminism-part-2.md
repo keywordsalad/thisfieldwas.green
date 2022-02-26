@@ -114,9 +114,9 @@ def map2[A, B, C](fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
 Just with the `pure()` and `ap()` functions, you get `map()` for free and an easy `map2()` function to boot!
 
 > The `map2()` function can also be defined by _currying_ `f`:
-  
-  ```scala
-  def map2[A, B, C](fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
-    ap(map(fa)(f.curried), fb)
-  ```
+>
+> ```scala
+> def map2[A, B, C](fa: F[A])(fb: F[B])(f: (A, B) => C): F[C] =
+>   ap(map(fa)(f.curried), fb)
+> ```
  
