@@ -148,10 +148,7 @@ stringify = \case
     _ -> stringify =<< applyBlock block
   ItemValue item -> return $ itemBody item
   ThunkValue fx -> stringify =<< force =<< fx
-  PairValue (x, y) -> do
-    x' <- stringify x `catchError` \_ -> return (show x)
-    y' <- stringify y `catchError` \_ -> return (show y)
-    return $ "(" ++ x' ++ ", " ++ y' ++ ")"
+  PairValue (_, x) -> stringify x
 
 isTruthy :: ContextValue a -> TemplateRunner a Bool
 isTruthy = \case
@@ -167,7 +164,7 @@ isTruthy = \case
   BlockValue {} -> return True
   ItemValue _ -> return True
   ThunkValue fx -> isTruthy =<< force =<< fx
-  PairValue (x, y) -> (&&) <$> isTruthy x <*> isTruthy y
+  PairValue (_, x) -> isTruthy x
 
 force :: ContextValue a -> TemplateRunner a (ContextValue a)
 force = \case
