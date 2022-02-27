@@ -51,7 +51,7 @@ applyBlocks :: [Block] -> TemplateRunner String [ContextValue String]
 applyBlocks = mapM applyBlock
 
 applyBlock :: Block -> TemplateRunner String (ContextValue String)
-applyBlock = \case
+applyBlock = tplWithPos getBlockPos \case
   TextBlock t _ -> return $ intoValue t
   ExpressionBlock e _ -> eval e
   CommentBlock {} -> return EmptyValue
@@ -83,7 +83,7 @@ applyAltBlock guard' bs alts mdef =
             Nothing -> return []
 
 eval :: Expression -> TemplateRunner a (ContextValue a)
-eval = \case
+eval = tplWithPos getExpressionPos \case
   NameExpression name pos -> do
     (context, item, trace) <-
       liftA3 (,,) tplContext tplItem tplTrace `catchError` \e -> do
@@ -133,7 +133,7 @@ eval = \case
 stringify :: ContextValue String -> TemplateRunner String String
 stringify = \case
   EmptyValue -> return ""
-  UndefinedValue name item trace errors -> tplFail $ "can't stringify undefined value " ++ show name ++ " in item context for " ++ itemFilePath item ++ ", trace=[" ++ intercalate ", " trace ++ "], suppressed=[" ++ intercalate ", " errors ++ "]"
+  UndefinedValue name item trace errors -> tplFail $ "can't stringify undefined value " ++ show name ++ "\nin item context for " ++ itemFilePath item ++ "\ntrace=[\n\t" ++ intercalate ",\n\t" trace ++ "\n],\nsuppressed=[\n\t" ++ intercalate ",\n\t" errors ++ "\n]\n"
   ContextValue {} -> tplFail "can't stringify context"
   ListValue xs -> mconcat <$> mapM stringify xs
   BoolValue b -> return $ show b
@@ -146,8 +146,12 @@ stringify = \case
     CommentBlock {} -> return ""
     ExpressionBlock e _ -> stringify =<< eval e
     _ -> stringify =<< applyBlock block
-  ItemValue _ items -> return $ mconcat $ itemBody <$> items
+  ItemValue item -> return $ itemBody item
   ThunkValue fx -> stringify =<< force =<< fx
+  PairValue (x, y) -> do
+    x' <- stringify x `catchError` \_ -> return (show x)
+    y' <- stringify y `catchError` \_ -> return (show y)
+    return $ "(" ++ x' ++ ", " ++ y' ++ ")"
 
 isTruthy :: ContextValue a -> TemplateRunner a Bool
 isTruthy = \case
@@ -161,11 +165,11 @@ isTruthy = \case
   IntValue x -> return $ x /= 0
   FunctionValue {} -> return True
   BlockValue {} -> return True
-  ItemValue _ xs -> return $ not (null xs)
+  ItemValue _ -> return True
   ThunkValue fx -> isTruthy =<< force =<< fx
+  PairValue (x, y) -> (&&) <$> isTruthy x <*> isTruthy y
 
 force :: ContextValue a -> TemplateRunner a (ContextValue a)
 force = \case
-  ThunkValue fx -> do
-    force =<< fx
+  ThunkValue fx -> force =<< fx
   x -> return x

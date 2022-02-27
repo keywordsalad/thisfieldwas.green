@@ -71,28 +71,44 @@ ifField :: forall a. Context a
 ifField = functionField "if" isTruthy
 
 forField :: Context String
-forField = functionField2 "for" f
+forField = functionField2 "for" applyForLoop
+
+applyForLoop :: ContextValue String -> [Block] -> TemplateRunner String (Maybe String)
+applyForLoop items blocks =
+  getAsItems items
+    `catchError` (\_ -> getAsStrings items)
+    `catchError` (\_ -> return (mempty, []))
+    >>= uncurry go
   where
-    f (items :: ContextValue String) (blocks :: [Block]) = do
-      getAsItems items
-        `catchError` (\_ -> getAsStrings items)
-        `catchError` (\_ -> return (mempty, []))
-        >>= uncurry (applyForLoop blocks)
-    --
-    getAsItems (x :: ContextValue String) = do
-      fromValue x :: TemplateRunner String (Context String, [Item String])
-    --
-    getAsStrings (x :: ContextValue String) = do
-      bodies <- fromValue x :: TemplateRunner String [String]
-      items <- forM bodies \body -> itemSetBody body <$> tplItem
-      return (bodyField "item", items)
-    --
-    applyForLoop blocks context items
-      | null items = return Nothing
+    go context items'
+      | null items' = return Nothing
       | otherwise = tplWithContext context do
-        Just . mconcat <$> forM items \item ->
+        Just . mconcat <$> forM items' \item ->
           tplWithItem item do
             reduceBlocks blocks
+
+getAsItems :: ContextValue String -> TemplateRunner String (Context String, [Item String])
+getAsItems = fromValue
+
+getAsStrings :: ContextValue String -> TemplateRunner String (Context String, [Item String])
+getAsStrings x = do
+  bodies <- fromValue x :: TemplateRunner String [String]
+  items <- forM bodies \body -> itemSetBody body <$> tplItem
+  return (bodyField "item", items)
+
+forEachField :: Context String
+forEachField = functionField3 "forEach" f
+  where
+    f (forEachKey :: ContextValue String) (forEachItems :: ContextValue String) (blocks :: [Block]) = do
+      keyId <- getKey forEachKey
+      keyItemPairs <- fromValue forEachItems :: TemplateRunner String [(ContextValue String, ContextValue String)]
+      keyItemPairs `forM` \(key, items) ->
+        tplWithContext (constField keyId key) do
+          applyForLoop items blocks
+    getKey block = case block of
+      UndefinedValue k _ _ _ -> return k -- allow identifier as key
+      StringValue k -> return k
+      _ -> tplFail "forEach: key must be a string or identifier"
 
 defaultField :: forall a. Context a
 defaultField = functionField2 "default" f

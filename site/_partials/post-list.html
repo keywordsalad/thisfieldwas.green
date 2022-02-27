@@ -1,7 +1,10 @@
-<ul>
+<ul class="post-list">
   {{#for posts}}
   <li>
-    <a href="{{url}}">{{title}}</a> - {{date | dateAs shortDate}}
-  </li>
+    <p class="post-title">
+      <strong><a href="{{url}}">{{title}}</a></strong>
+    </p>
+    {{partial "post-meta"}}
   {{#end}}
+  </li>
 </ul>

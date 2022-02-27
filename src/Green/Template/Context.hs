@@ -16,6 +16,7 @@ import qualified Data.Text as T
 import qualified Data.Vector as Vector
 import Green.Common
 import Green.Template.Ast
+import Text.Parsec (SourcePos)
 import Prelude hiding (lookup)
 
 newtype Context a = Context {unContext :: ContextFunction a}
@@ -136,6 +137,9 @@ tplWithCall call f = do
   modify' \s -> s {tplCallStack = stack}
   return x
 
+tplWithPos :: (x -> SourcePos) -> (x -> TemplateRunner a b) -> x -> TemplateRunner a b
+tplWithPos getPos f x = tplWithCall (show $ getPos x) $ f x
+
 -- | Perform an action within the scope of a field call.
 tplWithField :: String -> TemplateRunner a b -> TemplateRunner a b
 tplWithField field' f = do
@@ -158,7 +162,7 @@ tplTrace = gets tplCallStack
 tplTraced :: String -> TemplateRunner a String
 tplTraced message = do
   trace <- tplTrace
-  return $ message ++ ", trace from most recent: [" ++ intercalate ", " trace ++ "]"
+  return $ message ++ ", trace from most recent:\n" ++ intercalate "\n\t" trace ++ "\n"
 
 -- | Apply @f@ to an item if @key@ is requested.
 field :: (IntoValue v a) => String -> (Item a -> TemplateRunner a v) -> Context a
@@ -188,7 +192,7 @@ constField key val = field key f
 
 -- | Creates a field containing a list of items.
 itemsField :: String -> Context a -> [Item a] -> Context a
-itemsField key context items = constField key $ itemListValue context items
+itemsField key context items = constField key (context, items)
 
 -- | Mapping of function @g@ after context @f@.
 mapField :: (FromValue v a, IntoValue w a) => (v -> w) -> Context a -> Context a
@@ -274,8 +278,9 @@ data ContextValue a
   | IntValue Int
   | FunctionValue (ContextValue a -> TemplateRunner a (ContextValue a))
   | BlockValue Block
-  | ItemValue (Context a) [Item a]
+  | ItemValue (Item a)
   | ThunkValue (TemplateRunner a (ContextValue a))
+  | PairValue (ContextValue a, ContextValue a)
 
 type FunctionValue v w a = v -> TemplateRunner a w
 
@@ -288,7 +293,7 @@ type FunctionValue4 v x y z w a = v -> FunctionValue3 x y z w a
 instance Show (ContextValue a) where
   show = \case
     EmptyValue -> "EmptyValue"
-    UndefinedValue name item trace errors -> "UndefinedValue " ++ show name ++ " in item context for " ++ itemFilePath item ++ ", trace=[" ++ intercalate ", " trace ++ "], suppressed=[" ++ intercalate ", " errors ++ "]"
+    UndefinedValue name _ _ _ -> "UndefinedValue " ++ show name
     ContextValue {} -> "ContextValue"
     ListValue values -> "ListValue " ++ show values
     BoolValue value -> "BoolValue " ++ show value
@@ -297,14 +302,12 @@ instance Show (ContextValue a) where
     IntValue value -> "IntValue " ++ show value
     FunctionValue {} -> "FunctionValue"
     BlockValue {} -> "BlockValue"
-    ItemValue _ items -> "ItemValue " ++ show (itemFilePath <$> items)
+    ItemValue item -> "ItemValue " ++ show (itemFilePath item)
     ThunkValue {} -> "ThunkValue"
+    PairValue (x, y) -> "PairValue (" ++ show x ++ ", " ++ show y ++ ")"
 
 itemValue :: Context a -> Item a -> ContextValue a
 itemValue context item = intoValue (context, [item])
-
-itemListValue :: Context a -> [Item a] -> ContextValue a
-itemListValue context items = intoValue (context, items)
 
 class IntoValue' (flag :: Bool) v a where
   intoValue' :: Proxy flag -> v -> ContextValue a
@@ -359,9 +362,6 @@ instance IntoValue Double a where
 instance IntoValue Int a where
   intoValue = IntValue
 
-instance IntoValue (Context a, [Item a]) a where
-  intoValue = uncurry ItemValue
-
 instance (IntoValue v a) => IntoValue (Maybe v) a where
   intoValue (Just v) = intoValue v
   intoValue Nothing = EmptyValue
@@ -393,6 +393,12 @@ instance (FromValue v a, FromValue x a, FromValue y a, FromValue z a, IntoValue 
 
 instance IntoValue (TemplateRunner a (ContextValue a)) a where
   intoValue = ThunkValue
+
+instance (IntoValue v a, IntoValue x a) => IntoValue (v, x) a where
+  intoValue (v, x) = PairValue (intoValue v, intoValue x)
+
+instance IntoValue (Item a) a where
+  intoValue = ItemValue
 
 -- | Extract a concrete value of type @v@ from a @ContextValue a@.
 class FromValue v a where
@@ -444,9 +450,9 @@ instance FromValue Int a where
     ThunkValue fx -> fromValue =<< fx
     x -> tplFail $ "Tried to get " ++ show x ++ " as Int"
 
-instance FromValue (Context a, [Item a]) a where
+instance FromValue (Item a) a where
   fromValue = \case
-    ItemValue context items -> return (context, items)
+    ItemValue item -> return item
     ThunkValue fx -> fromValue =<< fx
     x -> tplFail $ "Tried to get " ++ show x ++ " as Item"
 
@@ -496,3 +502,9 @@ instance (IntoValue v a, IntoValue x a, IntoValue y a, IntoValue z a, FromValue 
           i z
     ThunkValue fx -> fromValue =<< fx
     x -> tplFail $ "Tried to get " ++ show x ++ " as Function4"
+
+instance (FromValue v a, FromValue x a) => FromValue (v, x) a where
+  fromValue = \case
+    PairValue (a, b) -> (,) <$> fromValue a <*> fromValue b
+    ThunkValue fx -> fromValue =<< fx
+    x -> tplFail $ "Tried to get " ++ show x ++ " as Pair"
