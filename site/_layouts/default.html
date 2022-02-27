@@ -11,7 +11,10 @@
 
 <main class="page-content">
   <div class="content-bound">
-    {{body}}
+    <div class="{{contentClass | default ''}}">
+      {{body}}
+    </div>
+    {{partial "page-comments"}}
   </div>
 </main>
 

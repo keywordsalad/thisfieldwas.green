@@ -6,7 +6,7 @@ published: 2021-12-05T08:08:32-0800
 comments: false
 tags: hakyll, Haskell, yak shave
 layout: post
-bodyClass: redoing-my-website
+contentClass: redoing-my-website
 changefreq: daily
 ---
 

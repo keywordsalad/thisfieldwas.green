@@ -3,7 +3,7 @@ title: App-Config-App in Action
 author: Logan McGrath
 date: 2012-11-20T17:00:00-0600
 published: 2012-11-20T17:00:00-0600
-comments: false
+comments: true
 tags: AngularJS, Perforce, Sinatra, configuration management
 layout: post
 ---

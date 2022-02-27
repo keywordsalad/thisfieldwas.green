@@ -5,6 +5,7 @@ date: 2012-11-07T13:54:00-0600
 published: 2012-11-07T13:54:00-0600
 tags: Perforce, configuration management
 layout: post
+commensts: true
 ---
 
 Following Paul Hammant's post [App-config workflow using SCM][] and subsequent

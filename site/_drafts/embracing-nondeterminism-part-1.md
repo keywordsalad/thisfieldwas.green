@@ -2,7 +2,7 @@
 title: "Embracing Nondeterminism Part I: Contexts and Effects"
 description: Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.
 author: Logan McGrath
-comments: false
+comments: true
 date: 2022-01-24T17:14:03-0800
 tags: functional programming, programming, scala, design patterns
 layout: post
@@ -414,8 +414,7 @@ Most importantly, by keeping all operations against terms within their context, 
 
 Functors thus _preserve structure_ by keeping operations within the context. For example, applying `map()` on a `List[A]` or `BinaryTree[A]`:
 
-:::{.nowrap .numberLines}
-```markdown
+```{.nowrap .numberLines}
 [1, 2, 3, 4] -> map (*2) -> [1, 4, 6, 8]
 
       4                           8
@@ -424,14 +423,12 @@ Functors thus _preserve structure_ by keeping operations within the context. For
   / \   / \                  / \     /  \
  1   3 5   7                1   6  10    14
 ```
-:::
 
 The application of `map()` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as they have been mapped-over by a function, and `BinaryTree[B]` specifically may re-balance itself. What matters here is that the structures are coherent and identifiable.
 
 Compare with iteration using a `for` loop:
 
-:::{.nowrap .numberLines}
-```markdown
+```{.nowrap .numberLines}
 [1, 2, 3, 4] -> for(x) -> x={1, 2, 3, 4}
 
       4
@@ -440,7 +437,6 @@ Compare with iteration using a `for` loop:
   / \   / \
  1   3 5   7
 ```
-:::
 
 Iteration as a form of lowering _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
 

@@ -1,7 +1,7 @@
 ---
 title: GitHub Copilot as a hot butter knife
 author: Logan McGrath
-comments: false
+comments: true
 date: 2021-12-13T14:49:08-0800
 tags: copilot, programming
 layout: post

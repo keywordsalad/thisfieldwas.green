@@ -2,7 +2,7 @@
 title: "Embracing Nondeterminism Part II: Products of Contexts"
 description: Abstracting nondeterminism and complexity in contexts in order to consume products of two or more in parallel.
 author: Logan McGrath
-comments: false
+comments: true
 date: 2022-02-23T20:58:26-0800
 tags: functional programming, programming, scala, design patterns
 layout: post
