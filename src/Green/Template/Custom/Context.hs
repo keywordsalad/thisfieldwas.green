@@ -43,6 +43,7 @@ customContext config = self
           constField "siteTitle" (info ^. siteTitle),
           constField "siteDescription" (info ^. siteDescription),
           constField "siteRoot" (info ^. siteRoot),
+          constField "siteCommentsId" (info ^. siteCommentsId),
           constField "authorEmail" (info ^. siteAuthorEmail),
           constField "authorName" (info ^. siteAuthorName),
           constField "author" (info ^. siteAuthorName), -- default to authorName
@@ -52,7 +53,8 @@ customContext config = self
           constField "githubProfile" (info ^. siteGitHubProfile),
           constField "giteaProfile" (info ^. siteGiteaProfile),
           constField "useSocial" True,
-          constField "article" False
+          constField "article" False,
+          constField "commentsSiteId" (info ^. siteCommentsId)
         ]
     currentTime =
       formatTime

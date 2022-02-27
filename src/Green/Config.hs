@@ -41,6 +41,7 @@ data SiteInfo = SiteInfo
   { _siteRoot :: String,
     _siteTitle :: String,
     _siteDescription :: String,
+    _siteCommentsId :: String,
     _siteAuthorName :: String,
     _siteAuthorEmail :: String,
     _siteLinkedInProfile :: String,
@@ -63,6 +64,7 @@ instance FromJSON SiteInfo where
       <$> info .: "root"
       <*> info .: "title"
       <*> info .:? "description" .!= ""
+      <*> info .: "comments-site"
       <*> info .: "author-name"
       <*> info .: "author-email"
       <*> info .: "linkedin-profile"
@@ -77,6 +79,7 @@ instance ToJSON SiteInfo where
       [ "root" .= _siteRoot,
         "title" .= _siteTitle,
         "description" .= _siteDescription,
+        "comments-site" .= _siteCommentsId,
         "author-name" .= _siteAuthorName,
         "author-email" .= _siteAuthorEmail,
         "linkedin-profile" .= _siteLinkedInProfile,

@@ -3,6 +3,7 @@ default: &default
     title: This Field Was Green
     description: I keep my field green by writing about tech and sometimes life.
     root: http://localhost:8000
+    comments-site: localhost
     author-name: Logan McGrath
     author-email: logan.mcgrath@thisfieldwas.green
     linkedin-profile: https://www.linkedin.com/in/loganmcgrath
@@ -35,6 +36,7 @@ prod:
   site-info:
     <<: *default-site-info
     root: https://thisfieldwas.green
+    comments-site: thisfieldwas.green
 
 review:
   <<: *default
@@ -44,9 +46,11 @@ review:
   site-info:
     <<: *default-site-info
     root: https://review.thisfieldwas.green
+    comments-site: review.thisfieldwas.green
 
 preview:
   <<: *default
   site-info:
     <<: *default-site-info
     root: https://preview.thisfieldwas.green
+    comments-site: preview.thisfieldwas.green
