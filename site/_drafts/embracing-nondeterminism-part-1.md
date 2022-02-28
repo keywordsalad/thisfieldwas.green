@@ -34,20 +34,33 @@ Terminology will leverage common functional programming vocabulary.
 
 Where there is conceptual overlap with object oriented programming, I will leverage those terms to drive the intent behind abstractions.
 
-### How to read _"math"_
+### How to read "math"
 
-* **`A`** read as _"A"_
-* **`()`** pair of parentheses, read as _"unit"_ and means _"nothing"_ or _"void"_
-* **`=>`** an equals and greater than, or right arrow, read as _"to"_
-* **`A => B`** read as _"A to B"_
-* **`F[_]`** read as _"(context) F of underscore"_ or _"context F"_
-* **`F[A]`** read as _"(context) F of A"_
-* **`f`** read as _"f"_
-* **`:`** a colon, read as _"is"_ but means _"has type"_
-* **`f: A => B`** read as _"f is A to B"_
-* **`:=`** a colon and equals, read as _"is"_ but means _"has definition"_
-* **`∘`** a ring, read as _"after"_
-* **`h := g ∘ f`** read as _"h is g after f"_
+**A** reads as _"A"_ and means _"type of A"_. **B** reads as _"B"_ and means _"type of B"_. Capital letters and words starting with capital letters are a kind of _type_.
+
+**()** a pair of parentheses, reads as _"unit"_ and means _"nothing"_ or _"void"_. It is technically a value, but the value isn't anything.
+
+**=>** an equals and greater than sign, or right arrow, reads as _"to"_ or _"mapped to"_ and indicates _change_ or _transformation_.
+
+**A => B** which read as _"A to B"_ and means _"function type of A mapped to B"_. Functions are a special kind of _type_ which represent any type _mapped to_ another type using a right arrow. Functions can map any type or function, as functions themselves are types.
+
+**F[_]** reads as _"(context) F of underscore"_ or _"context F"_. Contexts are like constructors for types in that they take types as an argument: when given a type for their argument, _the underscore_, they are instantiated as a type.
+
+**F[A]** reads as _"(context) F of A"_ and is an instantiation of `F[_]`.
+
+**f** reads as _"f"_ and means _"function f"_ or _"variable f"_. Lower-case letters and words starting with a lower-case letter are functions or variables.
+
+**:** a colon, reads as _"is"_ but means _"has type of"_.
+
+**f: A => B** reads as _"f is A to B"_ or _"function f has type of A mapped to B"_.
+
+**fa: F[A]** reads as _"fa is F of A"_ or _"variable fa has type of context F of A"_.
+
+**:=** a colon and equals sign, reads as _"is"_ but means _"is defined as"_
+
+**∘** a ring, reads as _"after"_ and represents the operation of _function composition_, which is defined in [Terminology](#terminology).
+
+**h := g ∘ f** reads as _"h is g after f"_ or _"h is defined as function g after function f"_. This is described in [Terminology](#terminology).
 
 ### Terminology
 
