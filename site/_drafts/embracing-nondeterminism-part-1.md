@@ -67,7 +67,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
       The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
 
-**Contexts** are like containers. They are noted using `F[_]` with an underscore where the type of the contents are unspecified, and `F[A]` where the contents are known to be of type `A`. They are more concretely defined in following sections.
+**Contexts** are like containers. They are noted using `F[_]`, read as _context F_ when their contents are unspecified, and `F[A]` or _F of A_ when their contents are known to be of type `A`. They are more concretely defined in later sections.
 
 **Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _lift is A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_.
 
