@@ -37,7 +37,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 ### How to read "math"
 
 * **`A`** read as _"A"_
-* **()** read as _"unit"_ and means _"nothing"_ or _"void"_
+* **`()`** pair of parentheses, read as _"unit"_ and means _"nothing"_ or _"void"_
 * **`=>`** an equals and greater than, or right arrow, read as _"to"_
 * **`A => B`** read as _"A to B"_
 * **`F[_]`** read as _"(context) F of underscore"_ or _"context F"_
