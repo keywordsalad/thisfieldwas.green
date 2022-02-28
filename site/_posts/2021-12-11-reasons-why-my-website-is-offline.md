@@ -4,7 +4,7 @@ description: >-
   My website comes out of the closet. This is from where I host several of my
   services, but the uptime is terrible!
 author: Logan McGrath
-comments:
+comments: true
 published: 2021-12-11T14:43:25-0800
 tags: self host, configuration management, tinfoil hat, duct tape, yak shave
 layout: post

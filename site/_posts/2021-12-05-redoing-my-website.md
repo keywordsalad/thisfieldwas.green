@@ -3,7 +3,7 @@ title: Redoing my website with Haskell and Hakyll
 author: Logan McGrath
 date: 2021-12-05T08:08:32-0800
 published: 2021-12-05T08:08:32-0800
-comments: false
+comments: true
 tags: hakyll, Haskell, yak shave
 layout: post
 contentClass: redoing-my-website
