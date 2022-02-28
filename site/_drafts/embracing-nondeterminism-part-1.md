@@ -340,7 +340,7 @@ object List {
 
 ### Extracting the instance of the term `A`
 
-Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, a _lowering_ operation `extract(): F[A] => A` is possible as it means the same thing between both of them: `extract()` either gets the existing instance of the term `A` or it faults. In object oriented programming, `Option[A]` and `Either[X, A]` might expose such an interface:
+Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, a _lowering_ operation `extract: F[A] => A` is possible as it means the same thing between both of them: `extract` either gets the existing instance of the term `A` or it faults. In object oriented programming, `Option[A]` and `Either[X, A]` might expose such an interface:
 
 :::{.numberLines}
 ```scala
@@ -358,7 +358,7 @@ sealed trait Either[X, A] extends Extractable[A] {
 
 ### Extracting an unknown length of `A`
 
-How do you `extract()` the term `A` from a `List[A]` such that it means the same thing as in `Option[A]` and `Either[X, A]`?
+How do you `extract` the term `A` from a `List[A]` such that it means the same thing as in `Option[A]` and `Either[X, A]`?
 
 As in `Option[A]` and `Either[X, A]` there is a notion of the presence or absence of an instance of the term `A`, but presence in `List[A]` implies _one to many_ instances. A solution inspired by object oriented programming might change the interface thusly:
 
@@ -379,11 +379,11 @@ sealed trait List[A] extends Extractable[A] {
 ```
 :::
 
-_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract()` could return an empty `Seq[A]`. Absence can be preserved in `List[A]` by modifying `extract()` to return a `NonEmptyList[A]` instead, as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though.
+_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract` could return an empty `Seq[A]`. Absence can be preserved in `List[A]` by modifying `extract` to return a `NonEmptyList[A]` instead, as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though.
 
 This interface essentially transforms these contexts into `NonEmptyList[A]` and imposes its specific complexity on all of your code. You would probably be very unhappy using it.
 
-What about implementing `extract()` for `Future[A]`? When applied to `Future[A]`, the `extract()` function is by its own signature a blocking call. You want your dependency on `A` to be properly asynchronous.
+What about implementing `extract` for `Future[A]`? When applied to `Future[A]`, the `extract` function is by its own signature a blocking call. You want your dependency on `A` to be properly asynchronous.
 
 ## Motivating functors as a design pattern
 
@@ -391,7 +391,7 @@ What about implementing `extract()` for `Future[A]`? When applied to `Future[A]`
 
 You may be unsatisfied by the answer: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence? Functors solve this problem.
 
-**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure: a single function called `map()`. Functors in Scala may be formally defined using the `Functor` typeclass:
+**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure: a single function `map: F[A] => (A => B) => F[B]`. Functors in Scala may be formally defined using the `Functor` typeclass:
 
 :::{.numberLines}
 ```scala
@@ -404,15 +404,15 @@ object Functor {
 ```
 :::
 
-What `map()` does is _lift_ the function `f: A => B` into the context so that it behaves as `F[A] => F[B]`, giving back `F[B]`.
+What `map` does is _lift_ the function `f: A => B` into the context so that it behaves as `F[A] => F[B]`, giving back `F[B]`.
 
-This _lifting_ of functions that `map()` performs is _coherent across contexts_. With `map()` you can apply `f: A => B` to any `List[A]` just as you can any `IO[A]`. The results of both operations are predictable: your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
+This _lifting_ of functions that `map` performs is _coherent across contexts_. With `map` you can apply `f: A => B` to any `List[A]` just as you can any `IO[A]`. The results of both operations are predictable: your `List[A]` maps to `List[B]` and your `IO[A]` maps to `IO[B]`.
 
 How would you consume the term produced by `Future[A]` or `Option[A]`? You would also use a functor.
 
 What this enables is your function `f: A => B` to be used with any functor regardless of its specific effects. Your function `f: A => B` is immediately reusable across all contexts and can be unit tested in isolation  of effects.
 
-### Why does the `map()` function return `F[B]`?
+### Why does the `map` function return `F[B]`?
 
 Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting the term mean if you’re using a context like `Option[A]`? What about `Future[A]`? _Would their effects change how extraction of the term would work?_
 
@@ -422,24 +422,26 @@ Because there is no way to generalize extracting a term from a context, functors
 
 Most importantly, by keeping all operations against terms within their context, the context’s specific effects remain abstracted. Asynchronous operations with `Future[A]` remain asynchronous, the length of `List[A]` remains unknown, and `Option[A]` may or may not be present.
 
-Functors thus _preserve structure_ by keeping operations within the context. For example, applying `map()` on a `List[A]` or `BinaryTree[A]`:
+Functors thus _preserve structure_ by keeping operations within the context. For example, applying `map` on a `List[A]` or `BinaryTree[A]`:
 
 ```{.nowrap .numberLines}
-[1, 2, 3, 4] -> map (*2) -> [1, 4, 6, 8]
+def f(n) = n * 2
 
-      4                           8
-    /   \                       /   \
-   2     6   -> map (*2) ->   4       12
-  / \   / \                  / \     /  \
- 1   3 5   7                1   6  10    14
+[1, 2, 3, 4] -> map f -> [1, 4, 6, 8]
+
+      4                        8
+    /   \                    /   \
+   2     6   -> map f ->   4       12
+  / \   / \               / \     /  \
+ 1   3 5   7             1   6  10    14
 ```
 
-The application of `map()` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as they have been mapped-over by a function, and `BinaryTree[B]` specifically may re-balance itself. What matters here is that the structures are coherent and identifiable.
+The application of `map` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as they have been mapped-over by a function, and `BinaryTree[B]` specifically may re-balance itself. What matters here is that the structures are coherent and identifiable.
 
 Compare with iteration using a `for` loop:
 
 ```{.nowrap .numberLines}
-[1, 2, 3, 4] -> for(x) -> x={1, 2, 3, 4}
+[1, 2, 3, 4] -> for(x) -> x={1, 2, 3, 4, 5, 6, 7}
 
       4
     /   \
@@ -450,7 +452,7 @@ Compare with iteration using a `for` loop:
 
 Iteration as a form of lowering _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
 
-This isn't to say that functional programming is only about iteration and loops versus `map()`. Can you think of other operations that might destroy structure? For example, _if you use an `await()` operation on a `Future[A]` you will destroy its asynchronous structure_ and potentially harm the performance of your program.
+This isn't to say that functional programming is only about iteration and loops versus `map`. Can you think of other operations that might destroy structure? For example, _if you use an `await` operation on a `Future[A]` you will destroy its asynchronous structure_ and potentially harm the performance of your program.
 
 > Where the type of your context is known, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default instance otherwise.
 
@@ -458,17 +460,17 @@ This isn't to say that functional programming is only about iteration and loops 
 
 Recall my statement from above: _"For any context `F[_]`, it produces some term `A`."_ If a context were guaranteed to have an instance of a term `A` then you should be able to consume it with your function `f: A => B`, right?
 
-But what if there’s nothing there, as in there are _zero_ instances of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map()` function above doesn’t do anything because there isn’t anything to do. If you try to `map()` a void `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". _It does this without having used `f: A => B` to get there._
+But what if there’s nothing there, as in there are _zero_ instances of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map` function above doesn’t do anything because there isn’t anything to do. If you try to `map` a void `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". _It does this without having used `f: A => B` to get there._
 
 This behavior is referred to as _short-circuiting_ and it is a key feature of functors, applicatives, and monads that encode some notion of void. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on in later parts.
 
-> `Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in functors. An `Option[A]` will only `map()` an instance of its term `A` if it is present, and an `Either[X, A]` will only `map()` if an instance of the desired term `A` is present.
+> `Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in functors. An `Option[A]` will only `map` an instance of its term `A` if it is present, and an `Either[X, A]` will only `map` if an instance of the desired term `A` is present.
 >
 > In contrast, the `Id[A]` context has the effect of the _identity_ of term `A`. To put it plainly, `Id[A]` _is_ the instance of term `A`. As the instance is always present, this context never short-circuits.
 
 ## Implementing a functor in Scala
 
-Each context of course must provide its own implementation of `map()` in order for it to be used as a functor. Functor implementations in Scala are provided via typeclasses, and any type that has the shape `F[_]` may become a functor by implementing the `Functor` typeclass from above:
+Each context of course must provide its own implementation of `map` in order for it to be used as a functor. Functor implementations in Scala are provided via typeclasses, and any type that has the shape `F[_]` may become a functor by implementing the `Functor` typeclass from above:
 
 :::{.numberLines}
 ```scala
@@ -534,7 +536,7 @@ object FunctorInstances {
 
 ### Using functors as a general abstraction
 
-Defining a `fizzBuzz()` function that uses a functor looks like this:
+Defining a `fizzBuzz` function that uses a functor looks like this:
 
 :::{.numberLines}
 ```scala
@@ -550,7 +552,7 @@ def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
 ```
 :::
 
-And then `fizzBuzz()` may be used for all contexts implementing the `Functor` typeclass:
+And then `fizzBuzz` may be used for all contexts implementing the `Functor` typeclass:
 
 :::{.numberLines}
 ```scala
@@ -574,26 +576,26 @@ println(fizzBuzz(List()))
 ```
 :::
 
-By using functors, the `fizzBuzz()` function is free to focus on its specific program logic:
+By using functors, the `fizzBuzz` function is free to focus on its specific program logic:
 
 * Produce "fizz" when `x` is divisible by `3`
 * Produce "buzz" when `x` is divisible by `5`
 * Produce "fizzbuzz" when `x` is divisible by both `3` and `5`
 * Produce `x` as a `String` otherwise
 
-At no point is `fizzBuzz()` burdened by the effects of the context it executes against.
+At no point is `fizzBuzz` burdened by the effects of the context it executes against.
 
 ## Functors are universal
 
-You might be thinking that lists and arrays in the wild already have a `map()` operation available. `Promise`s in JavaScript also have their own `map()`. You've been using functors for a while and never realized!
+You might be thinking that lists and arrays in the wild already have a `map` operation available. `Promise`s in JavaScript also have their own `map`. You've been using functors for a while and never realized!
 
-Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, find their strongest use in cases where the concrete type of the context is unimportant. However, you might observe that the _shape_ of functors appears in many places without being _called_ a functor. Using `map()` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map()` operations may be functors because _functors arise from settings where stuff exists under some circumstances_.
+Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, find their strongest use in cases where the concrete type of the context is unimportant. However, you might observe that the _shape_ of functors appears in many places without being _called_ a functor. Using `map` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map` operations may be functors because _functors arise from settings where stuff exists under some circumstances_.
 
 ### Functor laws
 
 That so many functors appear in the wild is no coincidence. Functors even have a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). This definition can be applied to any structures that have the shape of a functor to assert that they behave as functors.
 
-In order to be a functor, a context defining a `map()` function must satisfy two laws:
+In order to be a functor, a context defining a `map` function must satisfy two laws:
 
 1. Preservation of identity functions:
 
@@ -607,7 +609,7 @@ In order to be a functor, a context defining a `map()` function must satisfy two
     context.map(g ∘ f) == context.map(f).map(g)
     ```
 
-Here are the two laws applied against Scala's builtin `List` type, which defines its own `map()` operation:
+Here are the two laws applied against Scala's builtin `List` type, which defines its own `map` operation:
 
 :::{.numberLines}
 ```scala
@@ -634,11 +636,11 @@ Functors need only obey these two laws. These laws assert that functors compose 
 
 Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written even in the same language.
 
-What this means, ideally, is that `map()` is the same regardless of context.
+What this means, ideally, is that `map` is the same regardless of context.
 
 ## Building upon functors
 
-In this post I introduced functors as an elementary abstraction which permit you to consume term `A` within some context `F[A]` via `map()`:
+In this post I introduced functors as an elementary abstraction which permit you to consume term `A` within some context `F[A]` via `map`:
 
 :::{.numberLines}
 ```scala
@@ -648,7 +650,7 @@ def map[A, B](fa: F[A])(f: A => B): F[B]
 
 This simple abstraction is enabling on its own, as it frees the logic in function `f` from the burden of complexity present in the context of `F[_]`. However this is only an _elementary_ abstraction. Consider for a moment: with a functor you are able to work against the term produced by a single context. But what happens if you require terms produced from two or more contexts?
 
-Take for example these two instances of the context `F[_]` and the function signature for `combine()`:
+Take for example these two instances of the context `F[_]` and the function signature for `combine`:
 
 :::{.numberLines}
 ```scala
@@ -659,6 +661,6 @@ def combine(x: A, y: B): C
 ```
 :::
 
-How do you apply `combine()` to the terms `A` and `B` produced by the contexts?
+How do you apply `combine` to the terms `A` and `B` produced by the contexts?
 
 In my next post, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability.
