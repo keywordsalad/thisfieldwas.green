@@ -28,13 +28,13 @@ In this post I will provide **effects** as a model for characterizing nondetermi
 
 ## Conventions
 
-I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like "math".
+_This post assumes familiarity with Scala code_. I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like _"math"_.
 
 Terminology will leverage common functional programming vocabulary.
 
 Where there is conceptual overlap with object oriented programming, I will leverage those terms to drive the intent behind abstractions.
 
-### How to read "math"
+### How to read _"math"_
 
 * **`A`** read as _"A"_
 * **`()`** pair of parentheses, read as _"unit"_ and means _"nothing"_ or _"void"_
@@ -214,9 +214,9 @@ This code looks similar, doesn't it? What hides between the lines here is a cust
 
 You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occur and the main operation short-circuits itself should any inner operation fail.
 
-This abstraction of effects allows for safer code that better focuses on the business logic at-hand. But how are abstractions over effects created?
+This abstraction of effects allows for safer code that better focuses on the business logic at-hand. _But how are abstractions over effects created?_
 
-Previously I described programs as a case of function composition: `h := g ∘ f`. Functors, applicatives, and monads address a special case of function composition, the **composition of functional effects**. In the following section I will demonstrate abstracting the elementary effects of presence.
+Previously I described programs as a case of function composition: `h := g ∘ f`. Functors, applicatives, and monads address a _special case_ of function composition, the **composition of functional effects**. In the following section I will demonstrate abstracting the elementary effects of presence.
 
 ## Contexts and effects
 
