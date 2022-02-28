@@ -222,7 +222,7 @@ Previously I described programs as a case of function composition: `h := g ∘ f
 
 Let me start with an abstract concept: **Context**. What is a context? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`.
 
-> Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` with an underscore when the type of the term is unspecified, and `F[A]` when the term is known to be of type `A`. Other letters work nicely of course, as do concrete names, as in `Option[Int]`.
+> Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` read as _context F_ with an underscore when the type of the term is unspecified, and `F[A]` read as _F of A_ when the term is known to be of type `A`. Other letters work nicely of course, as do concrete names, as in `Option[Int]` or _Option of Int_.
 
 Each kind of context models a set of **effects**. Contexts thus represent a concrete, typed API describing how their terms may be produced. Names of contexts can hint at the effects they model, and with some intuition you may be able to figure out what each context’s effects may be.
 
@@ -230,22 +230,22 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 
 **Elementary contexts representing dimensions of presence:**
 
-* `Option[A]`: Presence, absence, or _optionality_ of some instance of term `A`. Getting the term `A` when there is no instance causes a fault.
-* `Either[X, A]`: Conventionally treated as _either_ term `A` if valid _or_ term `X` if invalid. Getting the wrong term causes a fault.
-* `List[A]`: _Unknown length_, sort, and cardinality of term `A`. Getting an `A` from an empty list or from beyond the end of it causes a fault.
-* `NonEmptyList[A]` or `Nel[A]`: _At least one_ of term `A` with an unkown sort and cardinality. The first `A` is guaranteed to be present.
-* `Id[A]`: The identity of `A`. This _is_ `A` and is guaranteed to be present.
-* `Set[A]`: A set of _distinct instances_ of `A` whose size is unknown.
+* `Option[A]` or _Option of A_: Presence, absence, or _optionality_ of some instance of term `A`. Getting the term `A` when there is no instance causes a fault.
+* `Either[X, A]` or _Either of X and A_: Conventionally treated as _either_ term `A` if valid _or_ term `X` if invalid. Getting the wrong term causes a fault.
+* `List[A]` or _List of A_: _Unknown length_, sort, and cardinality of term `A`. Getting an `A` from an empty list or from beyond the end of it causes a fault.
+* `NonEmptyList[A]` or _NonEmptyList of A_: _At least one_ of term `A` with an unkown sort and cardinality. The first `A` is guaranteed to be present.
+* `Id[A]` or _Identity of A_: This _is_ `A` and is guaranteed to be present.
+* `Set[A]` or _Set of A_: A set of _distinct instances_ of `A` whose size is unknown.
 * _Many data structures are used to model different forms of presence._
 
 **Contexts representing side-effects:**
 
-* `IO[A]`: Externally-acquired term `A`.
+* `IO[A]` or _IO of A_: Externally-acquired term `A`.
     * The instance may be here already, eventually, or never. Execution awaits the instance until it arrives or a fault occurs.
     * The instance is acquired externally from the program via processes that rely on and are influenced by side effects.
     * Faults may interrupt the acquisition of the instance.
     * Getting the instance causes a fault if acquisition has failed.
-* `Future[A]`: Eventually-acquired term `A`.
+* `Future[A]` or _Future of A_: Eventually-acquired term `A`.
     * The instance may be here already, eventually, or never.
     * The instance may be acquired externally from the program via processes that rely on and are influenced by side effects.
     * The instance may be produced via long-running processes.
@@ -255,11 +255,11 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 
 **Contexts representing implicit input and output:**
 
-* `ReaderT[F, A]`: Reading of implicit inputs in the context of `F[_]`.
+* `ReaderT[F, A]` or _Reader Transformer of context F and A_: Reading of implicit inputs in the context of `F[_]`.
     * Propagation of configuration usually leverages this effect by abstracting how instances of configuration values are acquired.
-* `WriterT[F, A]`: Writing of implicit outputs in the context of `F[_]`.
+* `WriterT[F, A]` or _Writer Transformer of context F and A_: Writing of implicit outputs in the context of `F[_]`.
     * Logging usually leverages this effect by abstracting how such output leaves the program.
-* `StateT[F, A]`: Modifying implicit inputs and outputs in the context of `F[_]`.
+* `StateT[F, A]` or _State Transformer of context F and A_: Modifying implicit inputs and outputs in the context of `F[_]`.
     * Models state changing over time in an otherwise-immutable context.
 * _These contexts are higher-order in the term of `F`. They are listed here for illustration but won't be explored in this post._
 
