@@ -22,23 +22,35 @@ Handling unknowns and nondeterminism in programs is a hard problem. Have you eve
 
 _Defensive programming_ as a practice tries to protect against errors by preempting how they might occur. However anticipation of errors rests entirely on _tacit knowledge_ and imposes complex code to handle and recover from errors, _drawing focus from writing the business logic that drives the value of programs_.
 
-In this post I will:
-
-* Provide **effects** as a model for characterizing nondeterminism and complexity in programs and elevate them to first-class concepts within programs.
-* Introduce the use of functors, applicatives, and monads as **design patterns** in functional programming to model effects.
-* Demonstrate the use of functors as an elementary design pattern for abstracting complexity.
+In this post I will provide **effects** as a model for characterizing nondeterminism and complexity in programs. I will introduce a **design pattern** to abstract complexity using this model.
 
 > The code that accompanies this post may be found [here]().
 
 ## Conventions
 
-I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like Scala-inspired "math".
+I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like "math".
 
 Terminology will leverage common functional programming vocabulary.
 
 Where there is conceptual overlap with object oriented programming, I will leverage those terms to drive the intent behind abstractions.
 
+### How to read "math"
+
+* **`A`** read as _"A"_
+* **`=>`** an equals and greater than, or right arrow, read as _"to"_
+* **`A => B`** read as _"A to B"_
+* **`F[_]`** read as _"(context) F of underscore"_ or _"context F"_
+* **`F[A]`** read as _"(context) F of A"_
+* **`f`** read as _"f"_
+* **`:`** a colon, read as _"is"_ but means _"has type"_
+* **`f: A => B`** read as _"f is A to B"_
+* **`:=`** a colon and equals, read as _"is"_ but means _"has definition"_
+* **`∘`** a ring, read as _"after"_
+* **`h := g ∘ f`** read as _"h is g after f"_
+
 ### Terminology
+
+**Functors** are a programming pattern explored in this post. Its relatives, **applicatives** and **monads**, receive honorable mentions and are addressed in later posts.
 
 **Expressions** are values that are described by some type `A`.
 
@@ -81,6 +93,8 @@ Nondeterminism as a _dependence on factors other than initial state and input_ a
 Nondeterminism as _dimensions of unknown quantities_ arise in functions returning types such as lists or potentially `null` values. These outputs have unknown length and presence respectively, and require special handling. _This means that nondeterminism is not defined by disk IO and external state alone._
 
 > A simple example is a function `toBits: Int => List[Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
+>
+> You may find hashmap lookups more familiar: unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether you will receive anything.
 
 The dimension of **implicit outputs** includes **faults** such as the _divide by zero error_, panics, and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Panics and exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
 
@@ -104,35 +118,29 @@ Faults, errors, and unknowns as effects of these operations are opaque in functi
 
 You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are **effects** which describe the circumstances under which an `Employee` may be produced and can be modeled accordingly as part of the typed API of `getEmployee`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
 
-### Modeling complexity
+### Complex program capabilities
 
-Can you think of some program capabilities that necessitate complexity?
+Can you think of some program capabilities that necessitate complexity? How might this complexity appear in code?
 
-* Configuration
-* Database queries
-* External system integration
-* Validating provided input and API responses
-* Error handling
-* Performance monitoring
-* Feature flags, ramps, and A/B testing
-* Retries and back-off strategies
+:::{.wide-list-items}
+* When a program starts, it may **read configuration** from the environment, a database, or files. Configuration may also be a continuous process at runtime, which affects the entire architecture of the program.
+* **Database queries** are surrounded by code that **handles exceptions and recovers from errors**. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors.
+* Rows returned by database queries will have an **unknown length**, sort, and cardinality, which imposes special handling when you want _just one_ row returned.
+* **External API calls require async IO** in order for programs to be performant. Async IO _infects_ entire codebases requiring its capability.
+* **External API calls can fail for any reason.** Different types of failures may indicate aborting the associated operation or retrying it. As in database queries, exception handling may not be encouraged and leave open the possibility of unexpected errors at runtime.
+* **External input and API responses** are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring **meticulous validation logic** and **recovery** from malformed responses.
+* **Error handling** typically leverages exceptions. Each case where they occur may remain unknown until they're thrown at runtime.
+* Logging libraries are used to **report errors** and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
+* **Metrics** are gathered with libraries that require network access, possibly also async IO.
+* **Feature flags and ramps** need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails.
+* **A/B testing** requires deterministically persisting identities' sessions within their assigned variants.
+* **Retries** using exponential back-off must retain their previous retry interval and apply a random jitter in order to calculate their next one.
+:::
+### A model for characterizing complexity
 
-How might supporting these capabilities cause complexity to appear in code?
+Complexities can be characterized in terms of **effects**. Each of the following effects center on some dimension of nondeterminism:
 
-* When a program starts, it may read configuration from the environment, a database, or files. Configuration may also be a continuous process at runtime, which may affect the entire architecture of the program.
-* Database queries are surrounded by code that handles exceptions and recovers from errors. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors.
-* Rows returned by database queries will have an unknown length, sort, and cardinality, which imposes special handling when you want just one row returned.
-* API calls to external systems require async IO in order for programs to be performant. Async IO "infects" entire codebases requiring its capability.
-* External API calls can fail for any reason. Different types of failures may indicate aborting the associated operation or retrying it. As in database queries, exception handling may not be encouraged and leave open the possibility of unexpected errors at runtime.
-* External input and API responses are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring meticulous validation logic and recovery from malformed responses.
-* Logging libraries are used to report errors and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
-* Metrics libraries may be used and require network access, possibly also async IO.
-* Feature flags and ramps need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails.
-* A/B testing requires deterministically persisting identities' sessions within their assigned variants.
-* Retries using exponential back-off must retain their previous retry interval and apply a random jitter in order to calculate their next one.
-
-_These complexities can be characterized in terms of **effects**._ Each of the following effects center on some dimension of nondeterminism:
-
+:::{.wide-list-items}
 * **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Long-running operations may be asynchronous without requiring IO.
 * **IO** as in synchronous operations against disk access and network boundaries.
 * **Presence** as some functions may not produce anything for some inputs.
@@ -141,6 +149,7 @@ _These complexities can be characterized in terms of **effects**._ Each of the f
 * **Implicit input** in the form of configuration, feature flags and ramps, A/B test assignment, or other inputs that aren't themselves explicitly provided as part of an API boundary or client interaction.
 * **Implicit output** in the form of logging and metrics, as well as exceptions and other faults.
 * **State** representing change over time and how it propagates across a program's architecture. Implicit inputs and outputs together constitute a form of state.
+:::
 
 The actual list of effects is innumerable, but these ones are common.
 

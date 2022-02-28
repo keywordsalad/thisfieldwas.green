@@ -46,6 +46,10 @@ li > ul {
   margin: 0.5rem 0;
 }
 
+.wide-list-items li {
+  @include block;
+}
+
 dl {
   @include block;
 }
