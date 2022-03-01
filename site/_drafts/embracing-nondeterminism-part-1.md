@@ -484,7 +484,7 @@ Recall my statement from above: _"For any context `F[_]`, it produces some term 
 
 But what if there’s nothing there, as in there are _zero_ instances of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map` function above doesn’t do anything because there isn’t anything to do. If you try to `map` a void `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". _It does this without having used `f: A => B` to get there._
 
-This behavior is referred to as _short-circuiting_ and it is a key feature of functors, applicatives, and monads that encode some notion of void. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on in later parts.
+This behavior is referred to as _short-circuiting_ and it is a key feature of contexts that encode some notion of void. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on in later parts.
 
 > `Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in functors. An `Option[A]` will only `map` an instance of its term `A` if it is present, and an `Either[X, A]` will only `map` if an instance of the desired term `A` is present.
 >
@@ -541,7 +541,7 @@ Can you see how functors enable control flow and short-circuiting? The void case
 
 > You can think of `Right`'s term as being "the right instance you want" because it's "correct". _Right?_ This pun is why `Either` is conventionally leveraged for the effect of correct vs. incorrect or success vs. failure.
 
-Contrasting with effects that encode some notion of void, here's what the `Functor` instance for `Id[_]` looks like:
+Contrasting with contexts that encode some notion of void, here's what the `Functor` instance for `Id[_]` looks like:
 
 :::{.numberLines}
 ```scala
