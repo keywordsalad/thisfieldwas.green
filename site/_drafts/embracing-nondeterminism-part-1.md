@@ -654,11 +654,11 @@ preservesFunctionComposition(nil)
 ```
 :::
 
-Functors need only obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors _compose functional effects_ because composition is preserved within their contexts. Functors may be treated as an abstract _context of effects_ because of this property.
+These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ because function composition is preserved within their contexts.
 
 Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written even in the same language.
 
-What this means, ideally, is that `map` is the same regardless of context.
+Functors may be universally regarded as a _context of effects_. What this means, ideally, is that `map` is the same regardless of context.
 
 ## Building upon functors
 
