@@ -18,11 +18,11 @@ Have you ever received an unexpected `null` reference? Have you ever written a f
 
 <!--more-->
 
-Significant portions of program logic exist to address special cases imposed by unknowns and nondeterminism. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against such errors you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
+Significant portions of program logic exist to address special cases imposed by unknowns and nondeterminism. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
 
-_[Defensive programming][]_ as a practice tries to protect against errors by preempting how they might occur. However anticipation of errors rests entirely on _tacit knowledge_ and imposes complex code to handle and recover from errors. _This complex code draws focus from writing the business logic that drives the value of programs_.
+_[Defensive programming][]_ as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on _tacit knowledge_ and imposes complex code to handle and recover from such cases. _This complex code draws focus from writing the business logic that drives the value of programs_.
 
-In this post I will provide **effects** as a model for characterizing nondeterminism and complexity in programs. I will introduce a **design pattern** to abstract complexity using this model.
+In this post I will provide **effects** as a model for characterizing nondeterminism and unknowns in programs. I will introduce a **design pattern** to abstract complexity using this model.
 
 > The code that accompanies this post may be found [here]().
 
@@ -36,19 +36,17 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 ### How to read "math"
 
-**A** reads as _"A"_ and means _"type of A"_. **B** reads as _"B"_ and means _"type of B"_. Capital letters and words starting with capital letters are a kind of _type_.
-
-**()** a pair of parentheses, reads as _"unit"_ and means _"nothing"_ or _"void"_. It is technically a value, but the value isn't anything.
+**A** reads as _"A"_ and means _"type of A"_; **B** reads as _"B"_ and means _"type of B"_. Uppercase letters and words starting with uppercase letters are names of _types_.
 
 **=>** an equals and greater than sign, or right arrow, reads as _"to"_ or _"mapped to"_ and indicates _change_ or _transformation_.
 
-**A => B** which read as _"A to B"_ and means _"function type of A mapped to B"_. Functions are a special kind of _type_ which represent any type _mapped to_ another type using a right arrow. Functions can map any type or function, as functions themselves are types.
+**A => B** which read as _"A to B"_ and means _"function type of type A mapped to type B"_. Functions types are a special kind of _type_ which represent any type _mapped to_ another type using a right arrow. Functions types can map any kind of type to any other kind of type, including function types.
 
-**F[_]** reads as _"(context) F of underscore"_ or _"context F"_. Contexts are like constructors for types in that they take types as an argument: when given a type for their argument, _the underscore_, they are instantiated as a type.
+**F[_]** reads as _"(context) F of underscore"_ or _"context F"_. Contexts are a type constructor that take types as an argument and produce another type. They become instantiated when their _underscore_ is replaced by another type, as in **F[A]** or _"(context) F of A"_.
 
-**F[A]** reads as _"(context) F of A"_ and is an instantiation of `F[_]`.
+**()** a pair of parentheses, reads as _"unit"_ and means _"nothing"_ or _"void"_. It is both a type and a solitary value.
 
-**f** reads as _"f"_ and means _"function f"_ or _"variable f"_. Lower-case letters and words starting with a lower-case letter are functions or variables.
+**f** reads as _"f"_ and means _"function f"_ or _"variable f"_. Lowercase letters and words starting with a lowercase letter are functions or variables.
 
 **:** a colon, reads as _"is"_ but means _"has type of"_.
 
@@ -82,7 +80,9 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Contexts** are like containers. They are noted using `F[_]`, read as _context F_ when their contents are unspecified, and `F[A]` or _F of A_ when their contents are known to be of type `A`. They are more concretely defined in later sections.
 
-**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _lift is A to F of A_. A **lifted** term or expression already has the form `F[A]`, or _F of A_.
+**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _lift is A to F of A_. 
+
+A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
 
 **Lowering** describes extracting a term `A` from a context `F[A]` such that `lower: F[A] => A`, read as _lower is F of A to A_.
 
@@ -90,7 +90,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 * This alternative notation in Scala concretely defines `h` as an application of the function `g` _after_ `f` is applied to argument `x`.
 
-    ```scala
+    ```{.scala .numberLines}
     def f(a: A): B
     def g(b: B): C
     def h(x: A): C = g(f(x))
@@ -98,19 +98,27 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 ## Complexity in programming
 
-Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any unknown quantity along some dimension requires specific handling in code, which creates complexity and draws engineering focus away from business logic.
+Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any unknown quantity along some dimension requires specific handling in code. Specific handling in code _creates complexity and draws engineering focus away from business logic_.
 
 Nondeterminism as a _dependence on factors other than initial state and input_ arises when a function `f: A => B` maps to a different member of `B` for any number of times the same member of `A` has been applied. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
 
 > An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external_ to the function's signature.
+>
+> ```{.scala .numberLines}
+> println(rng()) // => 2847
+> println(rng()) // => 928576932
+> println(rng()) // => -462859302846
+> println(rng()) // => 1337
+> println(rng()) // => 42
+> ```
 
 Nondeterminism as _dimensions of unknown quantities_ arise in functions returning types such as lists or potentially `null` values. These outputs have unknown length and presence respectively, and require special handling. _This means that nondeterminism is not defined by disk IO and external state alone._
 
 > A simple example is a function `toBits: Int => List[Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
 >
-> You may find hashmap lookups more familiar: unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether you will receive anything.
+> You may find hashmap lookups more familiar: Unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether an associated value exists.
 
-The dimension of **implicit outputs** includes **faults** such as the _divide by zero error_, panics, and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Panics and exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
+The dimension of **implicit outputs** includes **faults** such as the _divide by zero error_ and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
 
 > In contrast with most faults, a _divide by zero error_ only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
 
@@ -124,7 +132,7 @@ Given a function `f: A => B` and another `g: B => C`: a third function `h: A => 
 
 Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
 
-Faults, errors, and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may determine how an `Employee` is produced from it. For example:
+Errors and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may determine how an `Employee` is produced from it. For example:
 
 * An associated `Employee` may not be found.
 * The returned `Employee` may change between applications of the same `Int` employee ID.
@@ -150,9 +158,10 @@ Can you think of some program capabilities that necessitate complexity? How migh
 * **A/B testing** requires deterministically persisting identities' sessions within their assigned variants.
 * **Retries** using exponential back-off must retain their previous retry interval and apply a random jitter in order to calculate their next one.
 :::
+
 ### A model for characterizing complexity
 
-Complexities can be characterized in terms of **effects**. Each of the following effects center on some dimension of nondeterminism:
+Complexities can be characterized in terms of **effects**. Each of the following effects center on some dimension of nondeterminism that imposes complexity:
 
 :::{.wide-list-items}
 * **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Long-running operations may be asynchronous without requiring IO.
@@ -229,7 +238,7 @@ You may notice that there are no return statements for error cases: the flow of 
 
 This abstraction of effects allows for safer code that better focuses on the business logic at-hand. _But how are abstractions over effects created?_
 
-Previously I described programs as a case of function composition: `h := g ∘ f`. Functors, applicatives, and monads address a _special case_ of function composition, the **composition of functional effects**. In the following section I will demonstrate abstracting the elementary effects of presence.
+Previously I described programs as a case of function composition: `h := g ∘ f`. Functors, applicatives, and monads address a _special case_ of function composition, the **composition of functional effects**. In the following sections I will describe how effects are abstracted in order to demonstrate how they compose later.
 
 ## Contexts and effects
 
@@ -604,7 +613,7 @@ You might be thinking that lists and arrays in the wild already have a `map` ope
 
 Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, find their strongest use in cases where the concrete type of the context is unimportant. However, you might observe that the _shape_ of functors appears in many places without being _called_ a functor. Using `map` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map` operations may be functors because _functors arise from settings where stuff exists under some circumstances_.
 
-### Functor laws
+### Composition of functional effects
 
 That so many functors appear in the wild is no coincidence. Functors even have a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). This definition can be applied to any structures that have the shape of a functor to assert that they behave as functors.
 
@@ -645,7 +654,7 @@ preservesFunctionComposition(nil)
 ```
 :::
 
-Functors need only obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ and may be abstractly regarded as the _context of effects_.
+Functors need only obey these two laws. These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors _compose functional effects_ because composition is preserved within their contexts. Functors may be treated as an abstract _context of effects_ because of this property.
 
 Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written even in the same language.
 
