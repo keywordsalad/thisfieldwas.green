@@ -122,7 +122,7 @@ The dimension of **implicit outputs** includes **faults** such as the _divide by
 
 > In contrast with most faults, a _divide by zero error_ only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
 
-_Nondeterminism creates complex code because it imposes special cases that must be managed._ Side effects however are what make our programs useful in the real world, which requires that we _embrace_ nondeterminism.
+_Nondeterminism creates complex code because it imposes special cases that must be managed._ However programs in the real world realize their value through nondeterministic processes, therefore we must _embrace nondeterminism_.
 
 _How might complexity in programs be reduced if they must also be nondeterministic?_
 
