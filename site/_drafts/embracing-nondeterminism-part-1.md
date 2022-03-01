@@ -40,7 +40,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **=>** an equals and greater than sign, or right arrow, reads as _"to"_ or _"mapped to"_ and indicates _change_ or _transformation_.
 
-**A => B** which read as _"A to B"_ and means _"function type of type A mapped to type B"_. Functions types are a special kind of _type_ which represent any type _mapped to_ another type using a right arrow. Functions types can map any kind of type to any other kind of type, including function types.
+**A => B** which read as _"A to B"_ and means _"function type of type A mapped to type B"_. Function types are a special kind of _type_ which represent any type _mapped to_ another type using a right arrow. Functions types can map any kind of type to any other kind of type, including function types.
 
 **F[_]** reads as _"(context) F of underscore"_ or _"context F"_. Contexts are a type constructor that take types as an argument and produce another type. They become instantiated when their _underscore_ is replaced by another type, as in **F[A]** or _"(context) F of A"_.
 
