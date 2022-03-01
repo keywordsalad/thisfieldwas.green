@@ -62,7 +62,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 ### Terminology
 
-**Functors** are a programming pattern explored in this post. Its relatives, **applicatives** and **monads**, receive honorable mentions and are addressed in later posts.
+**Functors** are a programming pattern explored in this post. Think of them as an analog of a **design pattern** found in object-oriented programming.
 
 **Expressions** are values that are described by some type `A`.
 
@@ -238,7 +238,7 @@ You may notice that there are no return statements for error cases: the flow of 
 
 This abstraction of effects allows for safer code that better focuses on the business logic at-hand. _But how are abstractions over effects created?_
 
-Previously I described programs as a case of function composition: `h := g ∘ f`. Functors, applicatives, and monads address a _special case_ of function composition, the **composition of functional effects**. In the following sections I will describe how effects are abstracted in order to demonstrate how they compose later.
+Previously I described programs as a case of function composition: `h := g ∘ f`. Functors address a _special case_ of function composition, the **composition of functional effects**. In the following sections I will describe how effects are abstracted in order to demonstrate how they compose later.
 
 ## Contexts and effects
 
