@@ -558,7 +558,7 @@ object FunctorInstances {
 
 ### Using functors as a general abstraction
 
-Defining a `fizzBuzz` function that uses a functor looks like this:
+Defining a `fizzBuzz: F[Int] => F[String]` function that uses a functor looks like this:
 
 :::{.numberLines}
 ```scala
@@ -609,7 +609,7 @@ At no point is `fizzBuzz` burdened by the effects of the context it executes aga
 
 ## Functors are universal
 
-You might be thinking that lists and arrays in the wild already have a `map` operation available. `Promise`s in JavaScript also have their own `map`. You've been using functors for a while and never realized!
+You might be thinking that lists and arrays in the wild already have a `map` operation available. `Promise`s in JavaScript also have their own `map` operation named [`then`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#chained_promises). You've been using functors for a while and never realized!
 
 Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, find their strongest use in cases where the concrete type of the context is unimportant. However, you might observe that the _shape_ of functors appears in many places without being _called_ a functor. Using `map` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map` operations may be functors because _functors arise from settings where stuff exists under some circumstances_.
 
