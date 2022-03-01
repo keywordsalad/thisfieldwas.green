@@ -565,11 +565,15 @@ Defining a `fizzBuzz: F[Int] => F[String]` function that uses a functor looks li
 import Functor
 
 def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
-  Functor[F].map(context) {
-    case x if x % 3 == 0 && x % 5 == 0 => "fizzbuzz"
-    case x if x % 3 == 0 => "fizz"
-    case x if x % 3 == 0 => "buzz"
-    case x => x.toString
+  Functor[F].map(context) { x =>
+    val isFizz = x % 3 == 0
+    val isBuzz = x % 5 == 0 
+    (isFizz, isBuzz) match {
+      case (true, true) => "fizzbuzz"
+      case (true, _) => "fizz"
+      case (_, true) => "buzz"
+      case _ => x.toString
+    } 
   }
 ```
 :::
