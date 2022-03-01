@@ -20,7 +20,7 @@ Have you ever received an unexpected `null` reference? Have you ever written a f
 
 Significant portions of program logic exist to address special cases imposed by unknowns and nondeterminism. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
 
-_[Defensive programming][]_ as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on _tacit knowledge_ and imposes complex code to handle and recover from such cases. _This complex code draws focus from writing the business logic that drives the value of programs_.
+_[Defensive programming][]_ as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on _[tacit knowledge][]_ and imposes complex code to handle and recover from such cases. _This complex code draws focus from writing the business logic that drives the value of programs_.
 
 In this post I will provide **effects** as a model for characterizing nondeterminism and unknowns in programs. I will introduce a **design pattern** to abstract complexity using this model.
 
@@ -80,7 +80,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Contexts** are like containers. They are noted using `F[_]`, read as _context F_ when their contents are unspecified, and `F[A]` or _F of A_ when their contents are known to be of type `A`. They are more concretely defined in later sections.
 
-**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _lift is A to F of A_. 
+**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift: A => F[A]`, read as _lift is A to F of A_.
 
 A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
 
@@ -567,13 +567,13 @@ import Functor
 def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
   Functor[F].map(context) { x =>
     val isFizz = x % 3 == 0
-    val isBuzz = x % 5 == 0 
+    val isBuzz = x % 5 == 0
     (isFizz, isBuzz) match {
       case (true, true) => "fizzbuzz"
       case (true, _) => "fizz"
       case (_, true) => "buzz"
       case _ => x.toString
-    } 
+    }
   }
 ```
 :::
@@ -692,3 +692,4 @@ How do you apply `combine` to the terms `A` and `B` produced by the contexts?
 In my next post, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability.
 
 [Defensive programming]: https://en.wikipedia.org/wiki/Defensive_programming
+[tacit knowledge]: https://en.wikipedia.org/wiki/Tacit_knowledge
