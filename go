@@ -84,7 +84,7 @@ _verify-prerequisites () {
   tag="$(date +'publish_%Y.%m.%d_%H.%M.%S')_$sha"
 
   rm -rf _site
-  git clone --branch _site "$(git config --get remote.origin.url)" --single-branch _site
+  git clone --depth 1 --branch _site "$(git config --get remote.origin.url)" --single-branch _site
 
   SITE_ENV=prod ⚡rebuild
 
