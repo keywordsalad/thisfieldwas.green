@@ -54,19 +54,19 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **fa: F[A]** reads as _"fa is F of A"_ or _"variable fa has type of context F of A"_.
 
-**:=** a colon and equals sign, reads as _"is"_ but means _"is defined as"_
+**=** an equals sign, reads as _"is"_ but means _"is defined as"_.
 
 **∘** a ring, reads as _"after"_ and represents the operation of _function composition_, which is defined in [Terminology](#terminology).
 
-**h := g ∘ f** reads as _"h is g after f"_ or _"h is defined as function g after function f"_. This is described in [Terminology](#terminology).
+**h = g ∘ f** reads as _"h is g after f"_ or _"h is defined as function g after function f"_. This is described in [Terminology](#terminology).
 
 ### Terminology
-
-**Functors** are a programming pattern explored in this post. Think of them as an analog of a **design pattern** found in object-oriented programming.
 
 **Expressions** are values that are described by some type `A`.
 
 **Functions** are a _special case_ of expressions that map some type `A` to some type `B`. They are described by `f: A => B`, read as _f is A to B_.
+
+**Functors** are a programming pattern explored in this post. Think of them as an analog of a **design pattern** found in object-oriented programming.
 
 **Terms** are identifiers naming unitary or indivisible variables and types.
 
@@ -95,12 +95,23 @@ A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
     def g(b: B): C
     def h(x: A): C = g(f(x))
     ```
+    
+## Foundations of complexity
+
+Programming broadly consists of two categories of functions:
+
+  1. **Pure functions** having the property of producing the same result for the same argument, for all arguments. They are **deterministic**.
+  2. **Impure functions** having the property of producing different results for the same argument, for any arguments. They are **nondeterministic**.
+
+**Nondeterminism** arises from outputs dependent on factors other than initial state and input to a function. These factors are referred to as **side effects**. In addition, functions may produce secondary outputs as **side effects**.
+
+Both categories of functions may produce their results in an **unknown quantity** along some dimension, such as presence, length, or validity of the result. These quantities require specific knowledge of a given input in order to be known with certainty in the result. Unknown quantities are particularly influenced by side effects in impure functions.
 
 ## Complexity in programming
 
-Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any unknown quantity along some dimension requires specific handling in code. Specific handling in code _creates complexity and draws engineering focus away from business logic_.
+Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any _unknown quantity_ along some dimension requires specific handling in code. Specific handling in code _creates complexity_ and draws engineering focus _away from business logic_.
 
-Nondeterminism as a _dependence on factors other than initial state and input_ arises when a function `f: A => B` maps to a different member of `B` for any number of times the same member of `A` has been applied. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
+Nondeterminism as a dependence on factors other than initial state and input arises when a function `f: A => B` maps to a different member of `B` for any number of times function `f` has been applied to the same member of `A`. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
 
 > An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external_ to the function's signature.
 >
@@ -112,27 +123,29 @@ Nondeterminism as a _dependence on factors other than initial state and input_ a
 > println(rng()) // => 42
 > ```
 
-Nondeterminism as _dimensions of unknown quantities_ arise in functions returning types such as lists or potentially `null` values. These outputs have unknown length and presence respectively, and require special handling. _This means that nondeterminism is not defined by disk IO and external state alone._
+_Unknown quantities_ along measurable dimensions arise in functions returning types such as lists, potentially `null` values, or validation results. These outputs have unknown length, presence, and validity respectively, and require specific handling for undesirable cases. Even pure functions produce results having unknown quantities.
 
 > A simple example is a function `toBits: Int => List[Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
 >
 > You may find hashmap lookups more familiar: Unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether an associated value exists.
+>
+> Both of these operations are pure functions and are deterministic, but their results are contextualized by length and presence and must be handled.
 
-The dimension of **implicit outputs** includes **faults** such as the _divide by zero error_ and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** may influence the outcome.
+**Implicit outputs** as side effects include **faults** such as the _divide by zero error_ and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** as a side effect may influence the outcome.
 
 > In contrast with most faults, a _divide by zero error_ only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
 
-_Nondeterminism creates complex code because it imposes special cases that must be managed._ However programs in the real world realize their value through nondeterministic processes, therefore we must _embrace nondeterminism_.
+_Nondeterminism and unknown quantities create complex code because they impose specific cases that must be handled._ Yet side effects drive the business value of programs in the real world, which requires that we _embrace_ nondeterminism and unknown quantities.
 
-_How might complexity in programs be reduced if they must also be nondeterministic?_
+_How might complexity in programs be reduced if they must also be driven by side effects?_
 
 ### Implied complexity
 
-Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h := g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, together in concert building the necessary mappings to generate the desired program output.
+Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h = g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, together in concert building the necessary mappings to generate the desired program output.
 
 Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
 
-Errors and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _tacit knowledge_ in order for you to be aware of what effects may determine how an `Employee` is produced from it. For example:
+Errors and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _[tacit knowledge][]_ in order for you to be aware of what effects may determine how an `Employee` is produced from it. For example:
 
 * An associated `Employee` may not be found.
 * The returned `Employee` may change between applications of the same `Int` employee ID.
@@ -155,7 +168,7 @@ Can you think of some program capabilities that necessitate complexity? How migh
 * Logging libraries are used to **report errors** and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
 * **Metrics** are gathered with libraries that require network access, possibly also async IO.
 * **Feature flags and ramps** need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails.
-* **A/B testing** requires deterministically persisting identities' sessions within their assigned variants.
+* **A/B testing** requires reliably persisting identities' sessions within their assigned variants.
 * **Retries** using exponential back-off must retain their previous retry interval and apply a random jitter in order to calculate their next one.
 :::
 
@@ -164,7 +177,7 @@ Can you think of some program capabilities that necessitate complexity? How migh
 Complexities can be characterized in terms of **effects**. Each of the following effects center on some dimension of nondeterminism that imposes complexity:
 
 :::{.wide-list-items}
-* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Long-running operations may be asynchronous without requiring IO.
+* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Multithreading and concurrency imply asynchronous operations. Long-running operations may be asynchronous without requiring IO.
 * **IO** as in synchronous operations against disk access and network boundaries.
 * **Presence** as some functions may not produce anything for some inputs.
 * **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input.
