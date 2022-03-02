@@ -18,9 +18,9 @@ Have you ever received an unexpected `null` reference? Have you ever written a f
 
 <!--more-->
 
-Significant portions of program logic exist to address special cases imposed by unknowns and nondeterminism. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
+Significant portions of program logic exist to address special cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
 
-_[Defensive programming][]_ as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on _[tacit knowledge][]_ and imposes complex code to handle and recover from such cases. _This complex code draws focus from writing the business logic that drives the value of programs_.
+_[Defensive programming][]_ as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on _[tacit knowledge][]_ and imposes complex code to handle and recover from them. _This complex code draws focus from writing the business logic that drives the value of programs_.
 
 In this post I will provide **effects** as a model for characterizing nondeterminism and unknowns in programs. I will introduce a **design pattern** to abstract complexity using this model.
 
@@ -28,7 +28,7 @@ In this post I will provide **effects** as a model for characterizing nondetermi
 
 ## Conventions
 
-_This post assumes familiarity with Scala code_. I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like _"math"_.
+**This post assumes familiarity with Scala code**. I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like **"math"**.
 
 Terminology will leverage common functional programming vocabulary.
 
@@ -56,9 +56,9 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **=** an equals sign, reads as _"is"_ but means _"is defined as"_.
 
-**∘** a ring, reads as _"after"_ and represents the operation of _function composition_, which is defined in [Terminology](#terminology).
+**∘** a ring, reads as _"(applied) after"_ and represents the operation of _function composition_, which is defined in [Terminology](#terminology).
 
-**h = g ∘ f** reads as _"h is g after f"_ or _"h is defined as function g after function f"_. This is described in [Terminology](#terminology).
+**h = g ∘ f** reads as _"h is g after f"_ or _"h is defined as function g applied after function f"_. This is described in [Terminology](#terminology).
 
 ### Terminology
 
@@ -86,7 +86,7 @@ A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
 
 **Lowering** describes extracting a term `A` from a context `F[A]` such that `lower: F[A] => A`, read as _lower is F of A to A_.
 
-**Composition** describes chaining the output of a function `f: A => B` to the input of a function `g: B => C` such that a new function `h: A => C` may defined as `h := g ∘ f`, read as _h is g after f_.
+**Composition** describes chaining the output of a function `f: A => B` to the input of a function `g: B => C` such that a new function `h: A => C` may defined as `h = g ∘ f`, read as _h is g after f_.
 
 * This alternative notation in Scala concretely defines `h` as an application of the function `g` _after_ `f` is applied to argument `x`.
 
@@ -101,19 +101,19 @@ A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
 Programming broadly consists of two categories of functions:
 
   1. **Pure functions** having the property of producing the same result for the same argument, for all arguments. They are **deterministic**.
-  2. **Impure functions** having the property of producing different results for the same argument, for any arguments. They are **nondeterministic**.
+  2. **Impure functions** having the property of producing different results for the same argument, for any argument. They are **nondeterministic**.
 
 **Nondeterminism** arises from outputs dependent on factors other than initial state and input to a function. These factors are referred to as **side effects**. In addition, functions may produce secondary outputs as **side effects**.
 
-Both categories of functions may produce their results in an **unknown quantity** along some dimension, such as presence, length, or validity of the result. These quantities require specific knowledge of a given input in order to be known with certainty in the result. Unknown quantities are particularly influenced by side effects in impure functions.
+Both categories of functions may produce their results in an **unknown quantity** along some measurable dimension, such as presence, length, or validity of the result. These quantities require specific knowledge of a given input in order to be known with certainty in the result. Quantities may be nondeterministic in impure functions as they are particularly influenced by side effects.
 
 ## Complexity in programming
 
-Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any _unknown quantity_ along some dimension requires specific handling in code. Specific handling in code _creates complexity_ and draws engineering focus _away from business logic_.
+Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any _unknown quantity_ along some measurable dimension requires specific handling in code. This specific handling _creates complexity and draws engineering focus away from business logic_.
 
-Nondeterminism as a dependence on factors other than initial state and input arises when a function `f: A => B` maps to a different member of `B` for any number of times function `f` has been applied to the same member of `A`. This means that `f: A => B` is driven by **side effects** that occur independent of the signature of the function.
+_Nondeterminism_ as a dependence on factors other than initial state and input arises when a function `f: A => B` maps to a different member of `B` for any number of times `f` has been applied to the same member of `A`. This means that `f` is influenced by **side effects** that occur independent of its signature.
 
-> An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect _external_ to the function's signature.
+> An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect or _implicit input_ which is external to the function's signature of `() => Int`:
 >
 > ```{.scala .numberLines}
 > println(rng()) // => 2847
@@ -129,11 +129,15 @@ _Unknown quantities_ along measurable dimensions arise in functions returning ty
 >
 > You may find hashmap lookups more familiar: Unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether an associated value exists.
 >
-> Both of these operations are pure functions and are deterministic, but their results are contextualized by length and presence and must be handled.
+> Both of these operations are pure functions and are deterministic, but their results are contextualized by length and presence and must be handled specifically.
 
-**Implicit outputs** as side effects include **faults** such as the _divide by zero error_ and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** as a side effect may influence the outcome.
+Side effects as **implicit outputs** include **faults** such as the _divide by zero error_ and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** as a side effect may influence the outcome.
 
 > In contrast with most faults, a _divide by zero error_ only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
+>
+> Running out of memory will throw an exception even in pure functions. Exceptions are truly nondeterministic and you must choose when and how to handle their cases.
+
+Exceptions in particular carry a dual meaning. As secondary outputs they are side effects, but their presence or absense is _measurable as success or failure_ and unknown ahead of time.
 
 _Nondeterminism and unknown quantities create complex code because they impose specific cases that must be handled._ Yet side effects drive the business value of programs in the real world, which requires that we _embrace_ nondeterminism and unknown quantities.
 
@@ -251,7 +255,7 @@ You may notice that there are no return statements for error cases: the flow of 
 
 This abstraction of effects allows for safer code that better focuses on the business logic at-hand. _But how are abstractions over effects created?_
 
-Previously I described programs as a case of function composition: `h := g ∘ f`. Functors address a _special case_ of function composition, the **composition of functional effects**. In the following sections I will describe how effects are abstracted in order to demonstrate how they compose later.
+Previously I described programs as a case of function composition: `h = g ∘ f`. Functors address a _special case_ of function composition, the **composition of functional effects**. In the following sections I will describe how effects are abstracted in order to demonstrate how they compose later.
 
 ## Contexts and effects
 
@@ -300,7 +304,7 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 
 Each of these contexts have two shared qualities in that they _produce_ some term `A` and that their effects determine _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term `A` be consumed in a manner unburdened of complexity?
 
-In order to generalize contexts, the key differentiator between them must be abstracted: **effects**. By shedding effects as an _implementation detail_, the production of term `A` remains a shared characteristic that can be accessed by a general interface. By what interface would term `A` be consumed?
+In order to generalize contexts, the key differentiator between them must be abstracted: **effects**. By shedding effects as an _implementation detail_, the production of term `A` remains a shared characteristic. This allows a **seam** to be created between an impure function _producing_ the context and a pure function _consuming_ instances of the term `A`.
 
 ## Consuming terms produced by contexts
 
@@ -426,7 +430,7 @@ What about implementing `extract` for `Future[A]`? When applied to `Future[A]`, 
 
 You may be unsatisfied by the answer: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence? Functors solve this problem.
 
-**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure: a single function `map: F[A] => (A => B) => F[B]`. Functors in Scala may be formally defined using the `Functor` typeclass:
+**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure: a single function `map: F[A] => (A => B) => F[B]`. Functors in Scala may be formally declared using the `Functor` typeclass:
 
 :::{.numberLines}
 ```scala
@@ -671,7 +675,7 @@ preservesFunctionComposition(nil)
 ```
 :::
 
-These laws assert that functors compose in the same manner as functions `f` and `g` do in `h := g ∘ f`. Functors thus _compose functional effects_ because function composition is preserved within their contexts.
+These laws assert that functors compose in the same manner as functions `f` and `g` do in `h = g ∘ f`. Functors thus _compose functional effects_ because function composition is preserved within their contexts.
 
 Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written even in the same language.
 
@@ -687,9 +691,9 @@ def map[A, B](fa: F[A])(f: A => B): F[B]
 ```
 :::
 
-This simple abstraction is enabling on its own, as it frees the logic in function `f` from the burden of complexity present in the context of `F[_]`. However this is only an _elementary_ abstraction. Consider for a moment: with a functor you are able to work against the term produced by a single context. But what happens if you require terms produced from two or more contexts?
+This simple abstraction is enabling on its own, as it frees the logic in function `f` from the burden of complexity present in the context of `F[_]`. However this is only an _elementary_ abstraction as it simply provides a mechanism for _composing functions_ in serial within the context of effects. 
 
-Take for example these two instances of the context `F[_]` and the function signature for `combine`:
+Consider for a moment: with a functor you are able to work against the term produced by a single context. But what happens if you require terms produced from two or more contexts? Take for example these two instances of the context `F[_]` and the function signature for `combine`:
 
 :::{.numberLines}
 ```scala
