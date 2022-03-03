@@ -173,7 +173,7 @@ Given a function `f: A => B` and another `g: B => C`: a third function `h: A => 
 
 Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `program: Input => Output`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
 
-Errors and unknown quantities as **effects** of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _[tacit knowledge][]_ in order for you to be aware of what effects may determine how an `Employee` is produced from it. For example:
+Errors and unknown quantities as **effects** of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _[tacit knowledge][]_ of what effects may determine how an `Employee` is produced from it. For example:
 
 * An associated `Employee` may not be found.
 * The returned `Employee` may change between applications of the same `Int` employee ID.
