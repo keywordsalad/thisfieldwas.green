@@ -25,7 +25,7 @@ default: &default
     destination-directory: _site
 
   debug-settings:
-    preview: true
+    preview: false
     inflate-css: true
 
 prod:

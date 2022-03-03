@@ -18,7 +18,7 @@ Have you ever received an unexpected `null` reference? Have you ever written a f
 
 <!--more-->
 
-Significant portions of program logic exist to address special cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
+Significant portions of program logic exist to address specific cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
 
 _[Defensive programming][]_ as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on _[tacit knowledge][]_ and imposes complex code to handle and recover from them. _This complex code draws focus from writing the business logic that drives the value of programs_.
 
@@ -40,9 +40,9 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **=>** an equals and greater than sign, or right arrow, reads as _"to"_ or _"mapped to"_ and indicates _change_ or _transformation_.
 
-**A => B** which read as _"A to B"_ and means _"function type of type A mapped to type B"_. Function types are a special kind of _type_ which represent any type _mapped to_ another type using a right arrow. Functions types can map any kind of type to any other kind of type, including function types.
+**A => B** reads as _"A to B"_ and means _"function type of type A mapped to type B"_. Function types are a special kind of _type_ which represent any type _mapped to_ another type using a right arrow. Functions types can map any kind of type to any other kind of type, including function types.
 
-**F[_]** reads as _"(context) F of underscore"_ or _"context F"_. Contexts are a type constructor that take types as an argument and produce another type. They become instantiated when their _underscore_ is replaced by another type, as in **F[A]** or _"(context) F of A"_.
+**F[_]** reads as _"(context) F of underscore"_ or _"context F"_. Contexts are a type constructor[^hkt] that take types as an argument and produce another type. They become instantiated when their _underscore_ is replaced by another type, as in **F[A]** or _"(context) F of A"_.
 
 **()** a pair of parentheses, reads as _"unit"_ and means _"nothing"_ or _"void"_. It is both a type and a solitary value.
 
@@ -56,9 +56,9 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **=** an equals sign, reads as _"is"_ but means _"is defined as"_.
 
-**∘** a ring, reads as _"(applied) after"_ and represents the operation of _function composition_, which is defined in [Terminology](#terminology).
+**∘** a ring, reads as _"after"_ and represents the operation of _function composition_. Composition is described in [Terminology](#terminology).
 
-**h = g ∘ f** reads as _"h is g after f"_ or _"h is defined as function g applied after function f"_. This is described in [Terminology](#terminology).
+**h = g ∘ f** reads as _"h is g after f"_ or _"h is defined as the composition of function g after function f"_.
 
 ### Terminology
 
@@ -88,68 +88,92 @@ A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
 
 **Composition** describes chaining the output of a function `f: A => B` to the input of a function `g: B => C` such that a new function `h: A => C` may defined as `h = g ∘ f`, read as _h is g after f_.
 
-* This alternative notation in Scala concretely defines `h` as an application of the function `g` _after_ `f` is applied to argument `x`.
+* This algebraic notation demonstrates how function `g` is applied _after_ function `f` is applied to argument `x` of function `h`:
+
+  ```
+  h(x) = g(f(x))
+  ```
+
+* Compare with this definition in Scala which declares the types of the functions:
 
     ```{.scala .numberLines}
-    def f(a: A): B
-    def g(b: B): C
-    def h(x: A): C = g(f(x))
+    val f: A => B = _
+    val g: B => C = _
+    val h: A => C = a => g(f(a))
     ```
-    
-## Foundations of complexity
-
-Programming broadly consists of two categories of functions:
-
-  1. **Pure functions** having the property of producing the same result for the same argument, for all arguments. They are **deterministic**.
-  2. **Impure functions** having the property of producing different results for the same argument, for any argument. They are **nondeterministic**.
-
-**Nondeterminism** arises from outputs dependent on factors other than initial state and input to a function. These factors are referred to as **side effects**. In addition, functions may produce secondary outputs as **side effects**.
-
-Both categories of functions may produce their results in an **unknown quantity** along some measurable dimension, such as presence, length, or validity of the result. These quantities require specific knowledge of a given input in order to be known with certainty in the result. Quantities may be nondeterministic in impure functions as they are particularly influenced by side effects.
 
 ## Complexity in programming
 
-Complexity is imposed by the _nondeterministic nature_ of programs in the real world. Any _unknown quantity_ along some measurable dimension requires specific handling in code. This specific handling _creates complexity and draws engineering focus away from business logic_.
+### Pure and impure functions
 
-_Nondeterminism_ as a dependence on factors other than initial state and input arises when a function `f: A => B` maps to a different member of `B` for any number of times `f` has been applied to the same member of `A`. This means that `f` is influenced by **side effects** that occur independent of its signature.
+Programming broadly consists of two categories of functions:
 
-> An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect or _implicit input_ which is external to the function's signature of `() => Int`:
+  1. **Pure functions** which produce the same result for the same argument, for all arguments. They are _deterministic_.
+  2. **Impure functions** which produce different results for the same argument, for any argument. They are _nondeterministic_.
+
+**Nondeterminism** arises from outputs dependent on factors other than input to a function. These factors are referred to as **side effects** as **implicit input**. In addition, functions may produce **side effects** as **implicit output**.
+
+Both categories of functions may produce their results in **unknown quantities** along any measurable dimension, such as presence, length, or validity of their result. These quantities require specific knowledge of a given input in order to be known with certainty in the result. Unknown quantities are nondeterministic in impure functions as they are particularly influenced by side effects.
+
+### Manifesting complexity
+
+#### Nondeterminism
+
+Nondeterminism as a dependence on factors other than initial state and input arises when a function `f: A => B` maps to a different member of `B` for any number of times `f` has been applied to the same member of `A`. This means that `f` is influenced by **side effects** that occur independent of its signature.
+
+An extreme example of a nondeterministic function is the random number generator `rng: () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect or _implicit input_ which is external to the function's signature of `() => Int`:
+
+```{.scala .numberLines}
+println(rng())
+// 1729
+println(rng())
+// 87539319
+println(rng())
+// -2147483648
+println(rng())
+// 1337
+println(rng())
+// 42
+```
+
+Nondeterminism is significant in that operations may be unpredictable, and that no operation in particular may be reproducible.
+
+#### Unknown quantities
+
+Unknown quantities along measurable dimensions arise in functions returning types such as lists, potentially `null` references, or validation results. These outputs have unknown length, presence, and validity respectively, and require specific handling for undesirable cases. _Even pure functions produce results having unknown quantities._
+
+* A simple example is a function `toBits: Int => List[Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
+* You may find hashmap lookups more familiar: Unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether an associated value exists.
+
+Both of these operations are pure functions and are deterministic, but their results are contextualized by length and presence. Any unknown quantity along some measurable dimension requires specific handling in code. This means that in addition to writing code that handles the desired result of an operation, code must be specifically written for each dimension that exhibits unknown quantities.
+
+#### Relating nondeterminism and unknown quantities
+
+Unknown quantities are affected particularly by nondeterminism. Undesired results along dimensions such as length, presence, and validity require specific handling in addition to the code to handle the desired output of operations. This specific handling _creates complexity and draws engineering focus away from business logic_.
+
+**Side effects manifest as nondeterminism and form unknown quantities.**
+
+Side effects as **implicit outputs** include **faults** such as the _divide by zero_ error and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some side effect as an **implicit input** may influence the outcome.
+
+> In contrast with most faults, a _divide by zero_ error only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
 >
-> ```{.scala .numberLines}
-> println(rng()) // => 2847
-> println(rng()) // => 928576932
-> println(rng()) // => -462859302846
-> println(rng()) // => 1337
-> println(rng()) // => 42
-> ```
+> Running out of memory will throw an exception even in pure functions. Exceptions are truly nondeterministic and you must choose when and how to handle their cases. Hopefully you know ahead of time where you will need to do so.
 
-_Unknown quantities_ along measurable dimensions arise in functions returning types such as lists, potentially `null` values, or validation results. These outputs have unknown length, presence, and validity respectively, and require specific handling for undesirable cases. Even pure functions produce results having unknown quantities.
+Side effects form unknown quantities especially in the case of exceptions. Considered as implicit outputs they are side effects, but their presence or absence is measurable as a _dimension of success or failure_ and unknown ahead of time.
 
-> A simple example is a function `toBits: Int => List[Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
->
-> You may find hashmap lookups more familiar: Unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether an associated value exists.
->
-> Both of these operations are pure functions and are deterministic, but their results are contextualized by length and presence and must be handled specifically.
+Concurrency and asynchronous operations are driven entirely by side effects. Asynchronous operations have an unknown temporal quantity that imposes costly specific handling.
 
-Side effects as **implicit outputs** include **faults** such as the _divide by zero error_ and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some **implicit input** as a side effect may influence the outcome.
-
-> In contrast with most faults, a _divide by zero error_ only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
->
-> Running out of memory will throw an exception even in pure functions. Exceptions are truly nondeterministic and you must choose when and how to handle their cases.
-
-Exceptions in particular carry a dual meaning. As secondary outputs they are side effects, but their presence or absense is _measurable as success or failure_ and unknown ahead of time.
-
-_Nondeterminism and unknown quantities create complex code because they impose specific cases that must be handled._ Yet side effects drive the business value of programs in the real world, which requires that we _embrace_ nondeterminism and unknown quantities.
+Unknown quantities are affected by implicit inputs to operations. These operations themselves may produce implicit outputs that affect later operations. The effects of these unknown quantities increase nondeterminism and vice versa, which increases the number of undesired cases in code. _Nondeterminism and unknown quantities create complex code because they impose cases that must be handled specifically._ Yet side effects drive the business value of programs in the real world, which requires that we _embrace_ nondeterminism and unknown quantities.
 
 _How might complexity in programs be reduced if they must also be driven by side effects?_
 
 ### Implied complexity
 
-Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h = g ∘ f` or _h is g after f_. Programs may be modeled as a function `prog: A => B`, where `prog` is composed of innumerable smaller functions, together in concert building the necessary mappings to generate the desired program output.
+Given a function `f: A => B` and another `g: B => C`: a third function `h: A => C` may be composed of `h = g ∘ f` or _h is g after f_. Programs may be modeled as a function `program: Input => Output`, where `program` is composed of innumerable smaller functions, together in concert building the necessary mappings to generate the desired program output.
 
-Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `prog: A => B`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
+Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `program: Input => Output`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
 
-Errors and unknowns as effects of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _[tacit knowledge][]_ in order for you to be aware of what effects may determine how an `Employee` is produced from it. For example:
+Errors and unknown quantities as **effects** of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _[tacit knowledge][]_ in order for you to be aware of what effects may determine how an `Employee` is produced from it. For example:
 
 * An associated `Employee` may not be found.
 * The returned `Employee` may change between applications of the same `Int` employee ID.
@@ -164,8 +188,9 @@ Can you think of some program capabilities that necessitate complexity? How migh
 :::{.wide-list-items}
 * When a program starts, it may **read configuration** from the environment, a database, or files. Configuration may also be a continuous process at runtime, which affects the entire architecture of the program.
 * **Database queries** are surrounded by code that **handles exceptions and recovers from errors**. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors.
-* Rows returned by database queries will have an **unknown length**, sort, and cardinality, which imposes special handling when you want _just one_ row returned.
+* Rows returned by database queries will have an **unknown length**, sort, and cardinality, which imposes specific handling when you want _just one_ row returned.
 * **External API calls require async IO** in order for programs to be performant. Async IO _infects_ entire codebases requiring its capability.
+* **Concurrency requires async IO and task management** in order to share the limited resources of a machine across a distributed set of tasks. Task management requires interruptions, queues, and thread pools, and all operations against these resources may fail.
 * **External API calls can fail for any reason.** Different types of failures may indicate aborting the associated operation or retrying it. As in database queries, exception handling may not be encouraged and leave open the possibility of unexpected errors at runtime.
 * **External input and API responses** are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring **meticulous validation logic** and **recovery** from malformed responses.
 * **Error handling** typically leverages exceptions. Each case where they occur may remain unknown until they're thrown at runtime.
@@ -173,7 +198,7 @@ Can you think of some program capabilities that necessitate complexity? How migh
 * **Metrics** are gathered with libraries that require network access, possibly also async IO.
 * **Feature flags and ramps** need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails.
 * **A/B testing** requires reliably persisting identities' sessions within their assigned variants.
-* **Retries** using exponential back-off must retain their previous retry interval and apply a random jitter in order to calculate their next one.
+* **Retries** using an [exponential back-off][] strategy must retain their previous retry interval and apply a random jitter in order to calculate their next interval.
 :::
 
 ### A model for characterizing complexity
@@ -199,25 +224,32 @@ Take for example this Java code from a hypothetical payroll system:
 
 :::{.numberLines}
 ```java
-EmployeeRepo employeeRepo;
-BankAchClient achClient;
-PayCalculator payCalc;
+class PayrollRunner {
 
-boolean runPayroll(long employeeId) {
-    Employee employee = employeeRepo.find(employeeId)
-    if (employee == null) {
-        Logger.error("Missing employee " + employeeId.toString());
-        return false;
+    EmployeeRepo employeeRepo;
+    BankAchClient achClient;
+    PayCalculator payCalc;
+
+    boolean runPayroll(long employeeId) {
+        try {
+            Employee employee = employeeRepo.find(employeeId)
+            if (employee == null) {
+                Logger.error("Missing employee " + employeeId);
+                return false;
+            }
+            Paycheck paycheck = payCalc.calculatePaycheck(employee);
+            if (paycheck == null) {
+                Logger.error("No paycheck for " + employeeId);
+                return false;
+            }
+            String companyAcctNo = PayrollConfig.get("companyAcctNo");
+            String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
+            String response = achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck);
+            return response.equals("SUCCESS");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
-    Paycheck paycheck = payCalc.calculatePaycheck(employee);
-    if (paycheck == null) {
-        Logger.error("No paycheck for " + employeeId.toString());
-        return false;
-    }
-    String companyAcctNo = PayrollConfig.get("companyAcctNo");
-    String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
-    String response = achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck);
-    return response.equals("SUCCESS");
 }
 ```
 :::
@@ -230,26 +262,78 @@ The code above demonstrates complexity in the dimensions of:
 * **Implicit input** where the company's bank routing and account numbers are read from an external location.
 * **Implicit output** where logging occurs but swallows errors, resulting in opaque `false` return cases. Exceptions also bubble up from database and network operations.
 
-Fortunately there are ways to model sets of these effects and contain the scope of their impact so that code is less complex. Rewriting the above code using an effect model may look like this:
+_These complexities are not obvious from the code above_. I have rewritten it to handle all undesirable cases to highlight where complexity exists:
+
+:::{.numberLines}
+```java
+class PayrollRunner {
+
+    EmployeeRepo employeeRepo;
+    BankAchClient achClient;
+    PayCalculator payCalc;
+
+    void runPayroll(long employeeId) throws PayrollException, MissingConfigException {
+        Employee employee;
+        try {
+            employee = employeeRepo.find(employeeId);
+            if (employee == null) {
+                Logger.error("Missing employee " + employeeId);
+                throw new MissingEmployeeException(employeeId);
+            }
+        } catch (SQLException exception) {
+            throw new PayrollException("Error looking up employee " + employeeId, exception);
+        }
+        Paycheck paycheck = payCalc.calculatePaycheck(employee);
+        if (paycheck == null) {
+            Logger.error("No paycheck for " + employeeId);
+            throw new PayrollMissingException(employeeId);
+        }
+        String companyAcctNo = PayrollConfig.get("companyAcctNo");
+        if (companyAcctNo == null) {
+            throw new MissingConfigException("companyAcctNo");
+        }
+        String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
+        if (companyRoutingNo == null) {
+          throw new MissingConfigException("companyRoutingNo");
+        }
+        String response;
+        try {
+            response = = achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck);
+        } catch (AchException exception) {
+            throw new PayrollException("Failed to deposit paycheck for employee " + employee, exception);
+        }
+        if (!response.equals("SUCCESS")) {
+          throw new DepositPaycheckException("Received error response when depositing paycheck for employee " + employeeId + ": " + response);
+        }
+    }
+}
+```
+:::
+
+There's a large amount of complexity in this code. In order to make clear all effects, checked exceptions are leveraged and all exceptions that are known to be thrown by other functions must be translated into exceptions representing the domain of this function. As all false cases effectively communicated no information, they have been removed and replaced with exceptions typed according to the reason for failure, and the function now returns void as it is side-effecting and any return for success would be superfluous.
+
+There are a number of checks along the dimension of presence. There's several along the dimension of success and failure. Each operation is dependent upon the success of the operation preceding it, and verification of success is performed following _procedural_ steps.
+
+There's a lot of effects just in this code. Fortunately there are ways to model sets of these effects and contain the scope of their impact so that code is less complex. Rewriting the above code using an effect model may look like this:
 
 :::{.numberLines}
 ```scala
 def runPayroll(employeeId: Long): PayrollEffect[()] =
   for {
-    employee <- employeeRepo.find(employee).getOrFail(EmployeeMissing)
-    paycheck <- payCalc.calculatePaycheck(employee).getOrFail(PaycheckMissing)
+    employee <- employeeRepo.find(employee).getOrFail(EmployeeMissing(employeeId))
+    paycheck <- payCalc.calculatePaycheck(employee).getOrFail(PaycheckMissing(employeeId))
     companyAcctNo <- getConfig("companyAccountNo")
     companyRoutingNo <- getConfig("companyRoutingNo")
     response <- achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck)
       .flatMap {
         case "SUCCESS" => pure(())
-        case msg       => fail(DirectDepositError(msg))
+        case msg       => fail(DirectDepositError(employeeId, msg))
       }
   } yield response
 ```
 :::
 
-This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, async IO, and implicit input and output. This code is thus unburdened of most complexity, and makes the rest of it easier to work with.
+This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, async IO, success and failure, and implicit input and output. This code is thus unburdened of most complexity, and makes the rest of it easier to work with.
 
 You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occur and the main operation short-circuits itself should any inner operation fail.
 
@@ -259,7 +343,7 @@ Previously I described programs as a case of function composition: `h = g ∘ f`
 
 ## Contexts and effects
 
-Let me start with an abstract concept: **Context**. What is a context? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`.
+What is a **context**? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`.
 
 > Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` read as _context F_ with an underscore when the type of the term is unspecified, and `F[A]` read as _F of A_ when the term is known to be of type `A`. Other letters work nicely of course, as do concrete names, as in `Option[Int]` or _Option of Int_.
 
@@ -272,7 +356,7 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 * `Option[A]` or _Option of A_: Presence, absence, or _optionality_ of some instance of term `A`. Getting the term `A` when there is no instance causes a fault.
 * `Either[X, A]` or _Either of X and A_: Conventionally treated as _either_ term `A` if valid _or_ term `X` if invalid. Getting the wrong term causes a fault.
 * `List[A]` or _List of A_: _Unknown length_, sort, and cardinality of term `A`. Getting an `A` from an empty list or from beyond the end of it causes a fault.
-* `NonEmptyList[A]` or _NonEmptyList of A_: _At least one_ of term `A` with an unkown sort and cardinality. The first `A` is guaranteed to be present.
+* `NonEmptyList[A]` or _NonEmptyList of A_: _At least one_ of term `A` with an unknown sort and cardinality. The first `A` is guaranteed to be present.
 * `Id[A]` or _Identity of A_: This _is_ `A` and is guaranteed to be present.
 * `Set[A]` or _Set of A_: A set of _distinct instances_ of `A` whose size is unknown.
 * _Many data structures are used to model different forms of presence._
@@ -302,9 +386,11 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
     * Models state changing over time in an otherwise-immutable context.
 * _These contexts are higher-order in the term of `F`. They are listed here for illustration but won't be explored in this post._
 
-Each of these contexts have two shared qualities in that they _produce_ some term `A` and that their effects determine _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term `A` be consumed in a manner unburdened of complexity?
+Each of these contexts have two shared characteristics in that they _produce_ some term `A` and that their effects determine _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term `A` be consumed in a manner unburdened of complexity?
 
-In order to generalize contexts, the key differentiator between them must be abstracted: **effects**. By shedding effects as an _implementation detail_, the production of term `A` remains a shared characteristic. This allows a **seam** to be created between an impure function _producing_ the context and a pure function _consuming_ instances of the term `A`.
+In order to generalize contexts, the key differentiator between them must be abstracted: **effects**. By shedding effects as an _implementation detail_, the production of term `A` remains a shared characteristic. This opens an opportunity to create a **seam** between an impure function _producing_ the context itself and a pure function _consuming_ instances of the term `A` contained within.
+
+_How do you create this seam?_
 
 ## Consuming terms produced by contexts
 
@@ -322,7 +408,7 @@ f(fa)
 ```
 :::
 
-Recall from the previous section, contexts share two qualities: that they produce a term, and that they have effects which determine how the term is produced. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for `Option[A]`, `Either[X, A]`, and `List[A]`:
+Recall from the previous section, contexts share two characteristics: that they produce a term, and that they have effects which determine how the term is produced. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for `Option[A]`, `Either[X, A]`, and `List[A]`:
 
 **`Option[A]`** is the effect of presence, absence, or _optionality_ of an instance of term `A`:
 
@@ -330,7 +416,6 @@ Recall from the previous section, contexts share two qualities: that they produc
 ```scala
 sealed trait Option[+A] {
   def get: A = throw new Exception()
-  def isSome: Boolean = this != None
 }
 case class Some[+A](override val get: A) extends Option[A]
 case object None extends Option[Nothing]
@@ -344,10 +429,6 @@ case object None extends Option[Nothing]
 sealed trait Either[+X, +A] {
   def left: X = throw new Exception()
   def right: A = throw new Exception()
-  def isRight: Boolean = this match {
-    case _: Right => true
-    case _ => false
-  }
 }
 case class Left[+X, +A](override val left: X) extends Either[X, A]
 case class Right[+X, +A](override val right: A) extends Either[X, A]
@@ -361,12 +442,6 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 sealed trait List[+A] {
   def head: A = throw new Exception()
   def tail: List[A] = throw new Exception()
-  def isNil: Boolean = this == Nil
-  def ::[B >: A](newHead: B): List[B] = newHead :: this
-  def ++[B >: A](newTail: B): List[B] = this match {
-    case h :: t => h :: (t ++ newTail)
-    case Nil => newTail
-  }
 }
 case class ::[A](override val head: A, override val tail: List[A]) extends List[A]
 case object Nil extends List[Nothing]
@@ -501,7 +576,7 @@ Recall my statement from above: _"For any context `F[_]`, it produces some term 
 
 But what if there’s nothing there, as in there are _zero_ instances of term `A`? Can you do anything? When a context has this kind of effect, a sort of "nothing here" or _void_ effect, then the `map` function above doesn’t do anything because there isn’t anything to do. If you try to `map` a void `F[A]` with `f: A => B` then it returns a void `F[B]` as there’s "nothing here". _It does this without having used `f: A => B` to get there._
 
-This behavior is referred to as _short-circuiting_ and it is a key feature of contexts that encode some notion of void. It is exploited in particular to enable _control flow_ and _error handling_, which I will expand on in later parts.
+This behavior is referred to as _short-circuiting_ and it is a key feature of contexts that encode some notion of void. It is exploited in particular to enable two key features of _imperative programming_, control flow and error handling, which I will expand on in later parts.
 
 > `Option[A]` and `Either[X, A]` are two prime examples of short-circuiting in functors. An `Option[A]` will only `map` an instance of its term `A` if it is present, and an `Either[X, A]` will only `map` if an instance of the desired term `A` is present.
 >
@@ -579,8 +654,6 @@ Defining a `fizzBuzz: F[Int] => F[String]` function that uses a functor looks li
 
 :::{.numberLines}
 ```scala
-import Functor
-
 def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
   Functor[F].map(context) { x =>
     val isFizz = x % 3 == 0
@@ -626,7 +699,7 @@ By using functors, the `fizzBuzz` function is free to focus on its specific prog
 * Produce "fizzbuzz" when `x` is divisible by both `3` and `5`
 * Produce `x` as a `String` otherwise
 
-At no point is `fizzBuzz` burdened by the effects of the context it executes against.
+At no point is `fizzBuzz` burdened by the effects of the context it executes against. Given a `Functor` instance for them, it's usable against `IO[Int]` and `Future[Int]` as well!
 
 ## Functors are universal
 
@@ -675,15 +748,15 @@ preservesFunctionComposition(nil)
 ```
 :::
 
-These laws assert that functors compose in the same manner as functions `f` and `g` do in `h = g ∘ f`. Functors thus _compose functional effects_ because function composition is preserved within their contexts.
+These laws assert that functors preserve the behavior of functions `f` and `g` as if they were applied in sequence and also if they were composed independent of `map`. Functors thus _compose functional effects_ because this property of composition is retained within the context of their effects.
 
 Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written even in the same language.
 
-Functors may be universally regarded as a _context of effects_. What this means, ideally, is that `map` is the same regardless of context.
+Functors may be universally regarded as a _context of effects_. What this means is that ideally and _provably_ `map` is the same regardless of specific context.
 
 ## Building upon functors
 
-In this post I introduced functors as an elementary abstraction which permit you to consume term `A` within some context `F[A]` via `map`:
+In this post I introduced functors as an elementary abstraction which permit you to separate business logic in function `f` from complex operations producing instances of term `A` in context `F[A]`:
 
 :::{.numberLines}
 ```scala
@@ -691,22 +764,44 @@ def map[A, B](fa: F[A])(f: A => B): F[B]
 ```
 :::
 
-This simple abstraction is enabling on its own, as it frees the logic in function `f` from the burden of complexity present in the context of `F[_]`. However this is only an _elementary_ abstraction as it simply provides a mechanism for _composing functions_ in serial within the context of effects. 
+This abstraction is enabling on its own, as it frees the logic in function `f` from the burden of complexity present in the context of `F[_]`. However this is only an _elementary_ abstraction as it simply provides a mechanism for _composing functions_ in serial within the context of effects. Our goal eventually is to abstract effects in _imperative_ code as in the custom effect model from the above `runPayroll` function:
 
-Consider for a moment: with a functor you are able to work against the term produced by a single context. But what happens if you require terms produced from two or more contexts? Take for example these two instances of the context `F[_]` and the function signature for `combine`:
+:::{.numberLines}
+```scala
+def runPayroll(employeeId: Long): PayrollEffect[()] =
+  for {
+    employee <- employeeRepo.find(employee).getOrFail(EmployeeMissing(employeeId))
+    paycheck <- payCalc.calculatePaycheck(employee).getOrFail(PaycheckMissing(employeeId))
+    companyAcctNo <- getConfig("companyAccountNo")
+    companyRoutingNo <- getConfig("companyRoutingNo")
+    response <- achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck)
+      .flatMap {
+        case "SUCCESS" => pure(())
+        case msg       => fail(DirectDepositError(employeeId, msg))
+      }
+  } yield response
+```
+:::
+
+Consider for a moment: with a functor you are able to work against the _desired_ case of a result. You can chain any number of `map` operations against a functor, or `map` any number of composed functions against it. At the end, you still have a functor that is in the _desired_ case. In order to write _imperative_ code, you have to be able to force an _undesirable_ case so that subsequent operations are skipped.
+
+Working against _two or more contexts at once_ opens opportunities to introduce _undesirable_ cases. Take for example these two instances of the context `F[_]` and the function signature for `combine`:
 
 :::{.numberLines}
 ```scala
 val fa: F[A]
 val fb: F[B]
 
-def combine(x: A, y: B): C
+def combine(a: A, b: B): C
 ```
 :::
 
-How do you apply `combine` to the terms `A` and `B` produced by the contexts?
+How do you apply `combine` to the terms `A` and `B` produced by the contexts? What happens if one of the contexts is in an undesirable case? At first blush it appears that `map` might work, but `combine` takes two arguments. You need a specialized functor in order to apply `combine`!
 
-In my next post, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability.
+In my next post, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs.
 
 [Defensive programming]: https://en.wikipedia.org/wiki/Defensive_programming
 [tacit knowledge]: https://en.wikipedia.org/wiki/Tacit_knowledge
+[exponential back-off]: https://en.wikipedia.org/wiki/Exponential_backoff
+
+[^hkt]: `F[_]` specifically is a [higher-kinded type](https://danso.ca/blog/higher-kinded-types/).

@@ -58,7 +58,7 @@
     user-select: none;
   }
   h2 {
-    text-decoration: underline;
+    border-bottom: $border-thin;
     counter-reset: heading_l3;
   }
 

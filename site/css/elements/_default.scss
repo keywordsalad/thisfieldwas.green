@@ -29,11 +29,6 @@ strong, em, b, i {
   color: $text-color-emphasize;
 }
 
-section {
-  margin: 0;
-  padding: 0;
-}
-
 p {
   @include block;
 }
