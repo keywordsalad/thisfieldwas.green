@@ -443,12 +443,8 @@ sealed trait List[+A] {
   def head: A = throw new Exception()
   def tail: List[A] = throw new Exception()
 }
-case class ::[A](override val head: A, override val tail: List[A]) extends List[A]
+case class ::[+A](override val head: A, override val tail: List[A]) extends List[A]
 case object Nil extends List[Nothing]
-
-object List {
-  def apply[+A](values: A*): List[A] = values.foldRight(Nil)(_ :: _)
-}
 ```
 :::
 
