@@ -50,6 +50,9 @@ review:
 
 preview:
   <<: *default
+  debug-settings:
+    preview: true
+    inflate-css: false
   site-info:
     <<: *default-site-info
     root: https://preview.thisfieldwas.green
