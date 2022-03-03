@@ -20,8 +20,8 @@ aside, figure {
   font-style: italic;
   margin: 1rem 0;
   padding: 0 0.5rem;
-  border-top: $border-regular;
-  border-bottom: $border-thin;
+  border-top: $border-style $border-color-regular $border-width-regular;
+  border-bottom: $border-style $border-color-regular $border-width-thin;
   text-align: center;
 
   &.video {

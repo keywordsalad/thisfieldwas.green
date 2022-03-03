@@ -11,7 +11,7 @@
 #headers-without-numbers-aside, #headers-with-numbers-aside {
   @include aside(right);
   a {
-    border: $border-thick;
+    border: $border-style $border-color-regular $border-width-thick;
   }
 
   @include media('>=tablet') {

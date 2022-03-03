@@ -5,7 +5,8 @@ $signature-green: darkgreen;
 $font-family-sans-serif: "Noto Sans", sans-serif;
 $font-family-serif: "Noto Serif", serif;
 
-$root-background: aliceblue;
+// $root-background: aliceblue; // #f0f8ff
+$root-background: #fdfffe; // original: aliceblue / #f0f8ff
 $root-font-family: $font-family-sans-serif;
 $root-font-size: 1rem;
 $root-line-height: 1.6;
@@ -39,14 +40,19 @@ $code-color-highlight: gold;
 $code-color-highlight-hover: yellow;
 $code-color-hyperlink: $text-color-hyperlink;
 
-$aside-background: color.adjust(honeydew, $hue: -10%, $saturation: -50%, $lightness: -3%);
+// $aside-background: color.adjust(honeydew, $hue: -10%, $saturation: -50%, $lightness: -3%);
+$aside-background: #f0fff0; // original: honeydew / #f0fff0
 $aside-font-family: $font-family-serif;
 $aside-font-size: 1.1em;
 
-$border-color: darken($signature-green, 4%);
-$border-style: solid $border-color;
-$border-ginormous: 0.5rem $border-style;
-$border-very-thick: 0.4rem $border-style;
-$border-thick: 0.3rem $border-style;
-$border-regular: 0.2rem $border-style;
-$border-thin: 0.1rem $border-style;
+$border-color-dark: darken($signature-green, 4%);
+$border-color-regular: $signature-green;
+$border-style: solid;
+$border-width-ginormous: 0.5rem;
+$border-width-very-thick: 0.4rem;
+$border-width-thick: 0.3rem;
+$border-width-regular: 0.2rem;
+$border-width-thin: 0.1rem;
+
+$border-header: $border-style $border-color-regular $border-width-thin;
+$border-separator: $border-style $border-color-regular $border-width-thin;

@@ -7,26 +7,24 @@
 }
 
 .read-more:not(.no-border) {
-  border-bottom: $border-thin;
-  border-color: green;
+  border-bottom: $border-separator;
   padding-bottom: 1em;
   margin-right: 20%;
 }
 
 .read-more, .view-all-posts {
-  background-image: url("/images/grass.svg");
-  background-size: 1.2em 1.2em;
-  background-position: 0 0.2em;
-  background-repeat: no-repeat;
-  padding-left: 1.6em;
+  @include grass-icon-bullet;
 }
 
 @include media('>=tablet') {
-  h2.tags {
-    text-align: center;
-  }
   .tag-cloud {
     width: 60%;
     margin: 0 auto;
+  }
+}
+
+.page-content .blog {
+  h2.post-title {
+    border-bottom: none;
   }
 }

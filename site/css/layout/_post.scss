@@ -42,7 +42,7 @@
 
 .teaser-list {
   .teaser-item {
-    border-top: $border-thin;
+    border-top: $border-separator;
   }
   header + * {
     margin-top: 0.5rem;
@@ -58,7 +58,6 @@
     user-select: none;
   }
   h2 {
-    border-bottom: $border-thin;
     counter-reset: heading_l3;
   }
 

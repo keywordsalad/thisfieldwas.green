@@ -67,8 +67,8 @@ blockquote {
   background-color: $aside-background;
   margin: 1.5rem 1rem;
   padding: 0.5rem 1rem;
-  border-left: $border-regular;
-  border-right: $border-thin;
+  border-left: $border-style $border-color-regular $border-width-regular;
+  border-right: $border-style $border-color-regular $border-width-thin;
   font-style: italic;
   & > *:first-child {
     margin-top: 0;
@@ -108,7 +108,7 @@ a em {
 .footnotes {
   font-size: 0.9rem;
   color: $text-color-light;
-  border-top: $border-thin;
+  border-top: $border-separator;
 
   hr {
     display: none;
@@ -117,4 +117,12 @@ a em {
   code {
     font-size: inherit;
   }
+}
+
+@mixin grass-icon-bullet {
+  background-image: url("/images/grass.svg");
+  background-size: 1.3em 1.3em;
+  background-position: 0 0.1em;
+  background-repeat: no-repeat;
+  padding-left: 1.6em;
 }

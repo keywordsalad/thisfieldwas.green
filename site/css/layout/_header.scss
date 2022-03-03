@@ -3,8 +3,8 @@
 
 .page-header {
   $logo-icon-width: 3rem;
-  border-top: $border-ginormous;
-  border-bottom: $border-regular;
+  border-top: $border-style $border-color-dark $border-width-ginormous;
+  border-bottom: $border-style $border-color-dark $border-width-regular;
 
   @include layout-section {
     display: grid;

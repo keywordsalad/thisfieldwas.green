@@ -4,12 +4,16 @@
   @include layout-section;
   padding-bottom: 1.2em;
 
-  h1 {
-    border-bottom: $border-thin;
+  h1:not(.no-border) {
+    border-bottom: $border-header;
+  }
+
+  h2:not(.no-border) {
+    border-bottom: $border-header;
   }
 }
 
 .page-comments {
   margin-top: 2.4em;
-  border-top: $border-regular;
+  border-top: $border-separator
 }

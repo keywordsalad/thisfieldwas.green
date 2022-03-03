@@ -4,8 +4,8 @@
   @include layout-section;
   padding-top: 0.3rem;
   padding-bottom: 0.5rem;
-  border-top: $border-regular;
-  border-bottom: $border-ginormous;
+  border-top: $border-style $border-color-dark $border-width-regular;
+  border-bottom: $border-style $border-color-dark $border-width-ginormous;
   font-size: $text-font-size-tiny;
   $margin: 0.3rem 0;
 
@@ -31,11 +31,7 @@
     list-style: none;
 
     li {
-      padding-left: 1.2em;
-      background-image: url("/images/grass.svg");
-      background-size: 1em 1em;
-      background-repeat: no-repeat;
-      background-position: 0 0.3em;
+      @include grass-icon-bullet;
     }
 
     @include media('>=tablet') {

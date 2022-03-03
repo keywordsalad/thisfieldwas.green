@@ -94,7 +94,7 @@ pre.sourceCode {
       width: 2em;
       padding: 0 0.5em 0 0;
       margin: 0 0.5em 0 0;
-      border-right: $border-thin;
+      border-right: $border-style $border-color-regular $border-width-thin;
       text-align: right;
       user-select: none;
       &::before {
