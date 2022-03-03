@@ -392,7 +392,7 @@ In order to generalize contexts, the key differentiator between them must be abs
 
 _How do you create this seam?_
 
-## Consuming terms produced by contexts
+## A design pattern for contexts
 
 **For any context `F[_]`, it produces some term `A`.** If you have a function `f: A => B`, how would you apply it to the term produced by the context `F[A]`? That would require _lowering_ the term. Specifically, you can’t apply the following function directly to the context:
 
@@ -448,7 +448,7 @@ case object Nil extends List[Nothing]
 ```
 :::
 
-### Extracting the instance of the term `A`
+### An object-oriented approach to contexts
 
 Both `Option[A]` and `Either[X, A]` have roughly the same shape in that there either is or isn’t an instance of the desired term `A`. Because of this, a _lowering_ operation `extract: F[A] => A` is possible as it means the same thing between both of them: `extract` either gets the existing instance of the term `A` or it faults. In object oriented programming, `Option[A]` and `Either[X, A]` might expose such an interface:
 
@@ -458,15 +458,18 @@ trait Extractable[A] {
   def extract(): A
 }
 sealed trait Option[A] extends Extractable[A] {
+  def get: A = throw new Exception()
   override def extract(): A = get
 }
 sealed trait Either[X, A] extends Extractable[A] {
+  def left: X = throw new Exception()
+  def right: A = throw new Exception()
   override def extract(): A = right
 }
 ```
 :::
 
-### Extracting an unknown length of `A`
+#### Generalizing for an unknown length of term `A`
 
 How do you `extract` the term `A` from a `List[A]` such that it means the same thing as in `Option[A]` and `Either[X, A]`?
 
@@ -478,24 +481,31 @@ trait Extractable[A] {
   def extract(): Seq[A]
 }
 sealed trait Option[A] extends Extractable[A] {
+  def get: A = throw new Exception()
   override def extract(): Seq[A] = Seq(get)
 }
 sealed trait Either[X, A] extends Extractable[A] {
+  def left: X = throw new Exception()
+  def right: A = throw new Exception()
   override def extract(): Seq[A] = Seq(right)
 }
 sealed trait List[A] extends Extractable[A] {
-  override def extract(): Seq[A] = this.toSeq
+  def head: A = throw new Exception()
+  def tail: List[A] = throw new Exception()
+  override def extract(): Seq[A] = ???
 }
 ```
 :::
 
-_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but in `List[A]` however `extract` could return an empty `Seq[A]`. Absence can be preserved in `List[A]` by modifying `extract` to return a `NonEmptyList[A]` instead, as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though.
+_This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but `Seq[A]` is allowed to be empty per its definition. Allowing `List[A]` to be empty implies that it should be allowed to return an empty `Seq[A]` from `extract`. In order to preserve faulting on absence, `extract` must return a `NonEmptyList[A]` instead, as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though.
 
 This interface essentially transforms these contexts into `NonEmptyList[A]` and imposes its specific complexity on all of your code. You would probably be very unhappy using it.
 
 What about implementing `extract` for `Future[A]`? When applied to `Future[A]`, the `extract` function is by its own signature a blocking call. You want your dependency on `A` to be properly asynchronous.
 
-## Motivating functors as a design pattern
+_This interface does not generalize for more than the contexts of `Option` and `Either`._
+
+### Motivating functors as a design pattern
 
 `Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` all have different effects that determine how term `A` is produced. You must follow an axiom from object oriented programming: _abstract what changes_. Therefore you have to shed effects as an implementation detail. How might that impact lowering the term `A`?
 
@@ -522,7 +532,7 @@ How would you consume the term produced by `Future[A]` or `Option[A]`? You would
 
 What this enables is your function `f: A => B` to be used with any functor regardless of its specific effects. Your function `f: A => B` is immediately reusable across all contexts and can be unit tested in isolation  of effects.
 
-### Why does the `map` function return `F[B]`?
+#### Why does the `map` function return `F[B]`?
 
 Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting the term mean if you’re using a context like `Option[A]`? What about `Future[A]`? _Would their effects change how extraction of the term would work?_
 
@@ -578,7 +588,7 @@ This behavior is referred to as _short-circuiting_ and it is a key feature of co
 >
 > In contrast, the `Id[A]` context has the effect of the _identity_ of term `A`. To put it plainly, `Id[A]` _is_ the instance of term `A`. As the instance is always present, this context never short-circuits.
 
-## Implementing a functor in Scala
+### Implementing functors in Scala
 
 Each context of course must provide its own implementation of `map` in order for it to be used as a functor. Functor implementations in Scala are provided via typeclasses, and any type that has the shape `F[_]` may become a functor by implementing the `Functor` typeclass from above:
 
@@ -644,7 +654,7 @@ object FunctorInstances {
 ```
 :::
 
-### Using functors as a general abstraction
+#### Using Scala functors as a general abstraction
 
 Defining a `fizzBuzz: F[Int] => F[String]` function that uses a functor looks like this:
 
@@ -697,13 +707,13 @@ By using functors, the `fizzBuzz` function is free to focus on its specific prog
 
 At no point is `fizzBuzz` burdened by the effects of the context it executes against. Given a `Functor` instance for them, it's usable against `IO[Int]` and `Future[Int]` as well!
 
-## Functors are universal
+### Functors are universal
 
 You might be thinking that lists and arrays in the wild already have a `map` operation available. `Promise`s in JavaScript also have their own `map` operation named [`then`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#chained_promises). You've been using functors for a while and never realized!
 
 Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, find their strongest use in cases where the concrete type of the context is unimportant. However, you might observe that the _shape_ of functors appears in many places without being _called_ a functor. Using `map` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map` operations may be functors because _functors arise from settings where stuff exists under some circumstances_.
 
-### Composition of functional effects
+#### Composition of functional effects
 
 That so many functors appear in the wild is no coincidence. Functors even have a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). This definition can be applied to any structures that have the shape of a functor to assert that they behave as functors.
 
