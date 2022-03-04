@@ -203,7 +203,7 @@ Can you think of some program capabilities that necessitate complexity? How migh
 
 ### A model for characterizing complexity
 
-Complexities can be characterized in terms of **effects**. Each of the following effects center on some dimension of nondeterminism that imposes complexity:
+Complexities can be characterized in terms of **effects**. Each of the following effects center on some measurable dimension influenced by nondeterminism:
 
 :::{.wide-list-items}
 * **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Multithreading and concurrency imply asynchronous operations. Long-running operations may be asynchronous without requiring IO.
