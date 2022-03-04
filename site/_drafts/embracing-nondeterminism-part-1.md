@@ -145,13 +145,7 @@ Unknown quantities along measurable dimensions arise in functions returning type
 * A simple example is a function `toBits: Int => List[Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
 * You may find hashmap lookups more familiar: Unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether an associated value exists.
 
-Both of these operations are pure functions and are deterministic, but their results are contextualized by length and presence. Any unknown quantity along some measurable dimension requires specific handling in code. This means that in addition to writing code that handles the desired result of an operation, code must be specifically written for each dimension that exhibits unknown quantities.
-
-#### Relating nondeterminism and unknown quantities
-
-Unknown quantities are affected particularly by nondeterminism. Undesired results along dimensions such as length, presence, and validity require specific handling in addition to the code to handle the desired output of operations. This specific handling _creates complexity and draws engineering focus away from business logic_.
-
-**Side effects manifest as nondeterminism and form unknown quantities.**
+Both of these operations are pure functions and are deterministic, but their results are contextualized by length and presence. Any unknown quantity along some measurable dimension requires specific handling in code. This means that in addition to writing code that handles the desired case of an operation, code must be specifically written for each dimension that exhibits unknown quantities.
 
 Side effects as **implicit outputs** include **faults** such as the _divide by zero_ error and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some side effect as an **implicit input** may influence the outcome.
 
@@ -159,11 +153,17 @@ Side effects as **implicit outputs** include **faults** such as the _divide by z
 >
 > Running out of memory will throw an exception even in pure functions. Exceptions are truly nondeterministic and you must choose when and how to handle their cases. Hopefully you know ahead of time where you will need to do so.
 
-Side effects form unknown quantities especially in the case of exceptions. Considered as implicit outputs they are side effects, but their presence or absence is measurable as a _dimension of success or failure_ and unknown ahead of time.
+Side effects form unknown quantities especially in the case of faults. Considered as implicit outputs they are side effects, but their presence or absence is measurable as a _dimension of success or failure_ and unknown ahead of time.
 
 Concurrency and asynchronous operations are driven entirely by side effects. Asynchronous operations have an unknown temporal quantity that imposes costly specific handling.
 
-Unknown quantities are affected by implicit inputs to operations. These operations themselves may produce implicit outputs that affect later operations. The effects of these unknown quantities increase nondeterminism and vice versa, which increases the number of undesired cases in code. _Nondeterminism and unknown quantities create complex code because they impose cases that must be handled specifically._ Yet side effects drive the business value of programs in the real world, which requires that we _embrace_ nondeterminism and unknown quantities.
+#### Relating nondeterminism and unknown quantities
+
+Unknown quantities are affected particularly by nondeterminism. Undesired cases along dimensions such as length, presence, validity, success, and time require specific handling in addition to the code to handle the desired output case of operations. _This specific handling creates complexity and draws engineering focus away from business logic_.
+
+**Side effects manifest as nondeterminism and form unknown quantities.**
+
+These features form a vicious cycle. Unknown quantities are affected by implicit inputs to operations. These operations themselves may produce implicit outputs that affect later operations. The effects of these unknown quantities increase nondeterminism and vice versa, which increases the number of undesired cases in code. Nondeterminism and unknown quantities create complex code because they impose cases that must be handled specifically. Yet side effects drive the business value of programs in the real world, which requires that we embrace nondeterminism and unknown quantities.
 
 _How might complexity in programs be reduced if they must also be driven by side effects?_
 
