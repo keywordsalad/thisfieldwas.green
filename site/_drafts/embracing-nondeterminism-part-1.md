@@ -547,19 +547,19 @@ Functors thus _preserve structure_ by keeping operations within the context. For
 ```{.nowrap .numberLines}
 def f(n) = n * 2
 
-map([  1,    2,    3,    4])(f)
+map([  1,    2,    3,    4 ])(f)
        |     |     |     |
        v     v     v     v
-    [f(1), f(2), f(3), f(4)] 
+    [f(1), f(2), f(3), f(4)]
        |     |     |     |
        v     v     v     v
-    [  1,    4,    6,    8]
+    [  1,    4,    6,    8 ]
 
- map(     4   
-        /   \    
-       2     6  
-      / \   / \   
-     1   3 5   7)(f)
+          4
+        /   \
+ map(  2     6  )(f)
+      / \   / \
+     1   3 5   7
      |    |    |
      v    v    v
          f(4)
@@ -567,13 +567,13 @@ map([  1,    2,    3,    4])(f)
     f(2)      f(6)
    /    \    /    \
  f(1)  f(3) f(5)  f(7)
-          |
-          v
-          8   
-        /   \    
-       4     12  
-      / \   /  \   
-     1   6 10   14    
+     |    |    |
+     v    v    v
+          8
+        /   \
+       4     12
+      / \   /  \
+     1   6 10   14
 ```
 
 The application of `map` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as they have been mapped-over by a function, and `BinaryTree[B]` specifically may re-balance itself. What matters here is that the structures are coherent and identifiable.
