@@ -42,7 +42,8 @@ defaultSiteConfigWith hakyllConfig =
             _siteTwitterProfile = "https://twitter.com/thisold.blog",
             _siteGitHubProfile = "https://github.com/thisold.blog",
             _siteGiteaProfile = "https://bitsof.thisold.blog/blogger",
-            _siteGiteaWebUrl = "https://bitsof.thisold.blog/blogger/blog"
+            _siteGiteaWebUrl = "https://bitsof.thisold.blog/blogger/blog",
+            _siteCommentsId = "blog"
           },
       _siteCurrentTime = fromJust defaultTestTime,
       _siteTimeLocale = defaultTimeLocale,

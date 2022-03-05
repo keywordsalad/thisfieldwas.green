@@ -76,7 +76,6 @@ tests:
       - green
       - hakyll
       - hspec
-      - hspec-core
       - parsec
       - time
 
