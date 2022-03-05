@@ -604,7 +604,7 @@ This isn't to say that functional programming is only about iteration and loops 
 
 > Where the type of your context is known, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default instance otherwise.
 
-### Context `F[A]` must produce some term `A`
+#### Context `F[A]` must produce some term `A`
 
 Recall my statement from above: _"For any context `F[_]`, it produces some term `A`."_ If a context were guaranteed to have an instance of a term `A` then you should be able to consume it with your function `f: A => B`, right?
 
