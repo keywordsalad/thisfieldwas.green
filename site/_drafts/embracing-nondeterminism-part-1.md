@@ -206,8 +206,8 @@ Can you think of some program capabilities that necessitate complexity? How migh
 Complexities can be characterized in terms of **effects**. Each of the following effects center on some measurable dimension influenced by nondeterminism:
 
 :::{.wide-list-items}
-* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Multithreading and concurrency imply asynchronous operations. Long-running operations may be asynchronous without requiring IO.
-* **IO** as in synchronous operations against disk access and network boundaries.
+* **IO** as in synchronous operations against disk access, network boundaries, and concurrency primitives.
+* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Multithreading and concurrency imply asynchronous operations and task management.
 * **Presence** as some functions may not produce anything for some inputs.
 * **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input.
 * **Validation** requires sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls.
