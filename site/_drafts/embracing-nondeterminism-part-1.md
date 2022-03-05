@@ -50,9 +50,9 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **:** a colon, reads as _"is"_ but means _"has type of"_.
 
-**f: A => B** reads as _"f is A to B"_ or _"function f has type of A mapped to B"_.
+**f : A => B** reads as _"f is A to B"_ or _"function f has type of A mapped to B"_.
 
-**fa: F[A]** reads as _"fa is F of A"_ or _"variable fa has type of context F of A"_.
+**fa : F[A]** reads as _"fa is F of A"_ or _"variable fa has type of context F of A"_.
 
 **=** an equals sign, reads as _"is"_ but means _"is defined as"_.
 
