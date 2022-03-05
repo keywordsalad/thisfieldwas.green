@@ -82,9 +82,6 @@ pre.sourceCode {
 
   > span {
     counter-increment: line-number;
-    &:hover {
-      background-color: $code-color-highlight-hover;
-    }
     &:target {
       background-color: $code-color-highlight;
     }
