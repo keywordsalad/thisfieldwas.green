@@ -1,9 +1,7 @@
 code {
   color: $code-color;
-  text-decoration: none;
   white-space: pre;
   word-wrap: normal;
-
   font-family: inherit;
   text-decoration: underline;
 
@@ -47,6 +45,7 @@ pre.sourceCode {
   margin: 1em 0;
   padding: 0;
   overflow-x: scroll;
+  @include overflow-shadows-x;
 
   code.sourceCode {
     color: $source-code-color;

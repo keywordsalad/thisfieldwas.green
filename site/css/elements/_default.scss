@@ -1,3 +1,4 @@
+@use "sass:color";
 @import "variables";
 @import "containers";
 
@@ -125,4 +126,15 @@ a em {
   background-position: 0 0.1em;
   background-repeat: no-repeat;
   padding-left: 1.6em;
+}
+
+@mixin overflow-shadows-x($background-color: $root-background, $shadow-color: #cccccc) {
+  background:
+    linear-gradient(90deg, $background-color 10%, rgb(253, 255, 254, 0) 100%),
+    linear-gradient(270deg, $background-color 10%, rgba(253, 255, 254, 0) 100%) 100% 0,
+    radial-gradient(farthest-side at 0% 40%, color.adjust($shadow-color, $alpha: 0.6), rgba(0, 0, 0, 0)),
+    radial-gradient(farthest-side at 100% 40%, color.adjust($shadow-color, $alpha: 0.6), rgba(0, 0, 0, 0)) 100% 0;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
+  background-size: 10em 100%, 10em 100%, 2.5em 120%, 2.5em 120%;
 }
