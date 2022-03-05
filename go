@@ -102,7 +102,7 @@ _verify-prerequisites () {
 
 ⚡preview () {
   _help-line "Build the site and publish a preview build"
-  ⚡rebuild_all
+  SITE_ENV=preview ⚡rebuild
   rsync -ahp _site/* closet.thisfieldwas.green:/usr/share/nginx/preview.thisfieldwas.green/_site/
 }
 
