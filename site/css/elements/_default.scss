@@ -132,9 +132,9 @@ a em {
   background:
     linear-gradient(90deg, $background-color 10%, color.adjust($background-color, $alpha: 0) 100%),
     linear-gradient(270deg, $background-color 10%, color.adjust($background-color, $alpha: 0) 100%) 100% 0,
-    radial-gradient(farthest-side at 0% 40%, color.adjust($shadow-color, $alpha: 0.6), rgba(0, 0, 0, 0)),
-    radial-gradient(farthest-side at 100% 40%, color.adjust($shadow-color, $alpha: 0.6), rgba(0, 0, 0, 0)) 100% 0;
+    radial-gradient(farthest-side at 0% 45%, color.adjust($shadow-color, $alpha: 0.6), rgba(0, 0, 0, 0)),
+    radial-gradient(farthest-side at 100% 45%, color.adjust($shadow-color, $alpha: 0.6), rgba(0, 0, 0, 0)) 100% 0;
   background-repeat: no-repeat;
   background-attachment: local, local, scroll, scroll;
-  background-size: 10em 100%, 10em 100%, 2.5em 120%, 2.5em 120%;
+  background-size: 3em 100%, 3em 100%, 1em 110%, 1em 110%;
 }

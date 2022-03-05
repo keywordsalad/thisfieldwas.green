@@ -100,6 +100,12 @@ _verify-prerequisites () {
   popd
 }
 
+⚡preview () {
+  _help-line "Build the site and publish a preview build"
+  ⚡rebuild_all
+  rsync -ahp _site/* closet.thisfieldwas.green:/usr/share/nginx/preview.thisfieldwas.green/_site/
+}
+
 ⚡test_sync () {
   _help-line "Verify that the current or specified local branch is up to date with the remote branch"
 
