@@ -294,7 +294,7 @@ class PayrollRunner {
         }
         String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
         if (companyRoutingNo == null) {
-          throw new MissingConfigException("companyRoutingNo");
+            throw new MissingConfigException("companyRoutingNo");
         }
         String response;
         try {
@@ -303,7 +303,7 @@ class PayrollRunner {
             throw new PayrollException("Failed to deposit paycheck for employee " + employee, exception);
         }
         if (!response.equals("SUCCESS")) {
-          throw new DepositPaycheckException("Received error response when depositing paycheck for employee " + employeeId + ": " + response);
+            throw new DepositPaycheckException("Received error response when depositing paycheck for employee " + employeeId + ": " + response);
         }
     }
 }
