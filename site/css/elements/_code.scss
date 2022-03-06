@@ -37,15 +37,38 @@ code {
 }
 
 div.sourceCode {
+  position: relative;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+
+  .shadow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.7em;
+  }
+
+  .shadow-left {
+    left: 0;
+    background: radial-gradient(farthest-side at 0 45%, rgba(0, 0, 0, 0.35), transparent);
+    background-size: 0.7em 110%;
+    background-repeat: no-repeat;
+    opacity: 0;
+  }
+
+  .shadow-right {
+    right: 0;
+    background: radial-gradient(farthest-side at 100% 45%, rgba(0, 0, 0, 0.35), transparent);
+    background-size: 0.7em 110%;
+    background-repeat: no-repeat;
+  }
 }
 
 pre.sourceCode {
   margin: 1em 0;
   padding: 0;
   overflow-x: scroll;
-  @include overflow-shadows-x;
 
   code.sourceCode {
     color: $source-code-color;
