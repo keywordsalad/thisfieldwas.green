@@ -83,8 +83,13 @@ _verify-prerequisites () {
   sha="$(git log -1 HEAD --pretty=format:%h)"
   tag="$(date +'publish_%Y.%m.%d_%H.%M.%S')_$sha"
 
-  rm -rf _site
-  git clone --depth 1 --branch _site "$(git config --get remote.origin.url)" --single-branch _site
+  git fetch _site _site
+  mkdir -p _site
+  rm -rf _site/* _site/.git
+  cp -r .git/ ./_site/.git/
+  pushd ./_site
+  git switch _site
+  popd
 
   SITE_ENV=prod ⚡rebuild
 
