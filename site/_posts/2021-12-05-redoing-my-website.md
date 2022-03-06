@@ -149,7 +149,7 @@ That particular instance above is due to a [footgun](http://dev.stephendiehl.com
 
 ### Using `css` is still like the Family Guy meme
 
-{{img id: "family-guy-css",
+{{imageFigure id: "family-guy-css",
       title: "<code>css</code>: it's still like this, but it got prettier",
       src: "/images/redoing-my-website/family-guy-css.gif"}}
 

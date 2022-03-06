@@ -8,6 +8,7 @@ comments: true
 published: 2021-12-11T14:43:25-0800
 tags: self host, configuration management, tinfoil hat, duct tape, yak shave
 layout: post
+thumbnail: /images/reasons-my-website-is-offline/coming-out-of-the-closet-128x128.png
 twitter:
   image: /images/reasons-my-website-is-offline/coming-out-of-the-closet-512x512.png
 og:
@@ -153,7 +154,7 @@ I have a lot of problems hosting my website and source code from my _closet comp
 
 Hosting my website and source code myself feels very empowering. I feel as if I reclaimed a little piece of the internet. For that alone I want to see what more I can self host. The internet today clusters around a centralizing oligopoly of services, and I pine for the days when every odd person had their own small, weird website, and frequented a handful of small, niche forums, each with just enough users to be interesting. Now there's Facebook. GitHub. Google... If I name a _thing_: there's likely a single site that I would go to for that _thing_. That _thing_ has likely regressed in quality towards the mean and mediocre. And when I go to that site for that _thing_, I can't tell whether I've found the _thing_ or an ad for a subscription service that gives me access to the _thing_ at a markup.
 
-{{img id: "closet-computer-in-context",
+{{imageFigure id: "closet-computer-in-context",
       title: "Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.",
       src: "/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png"}}
 

@@ -6,6 +6,7 @@ comments: true
 date: 2022-01-24T17:14:03-0800
 tags: functional programming, programming, scala, design patterns
 layout: post
+thumbnail: /images/tags/functional-programming/functional-grass-128x128.png
 twitter:
   image: /images/tags/functional-programming/functional-grass-512x512.png
 og:

@@ -26,11 +26,11 @@ _In this post I will demonstrate in Copilot:_
 
 <div id="numbered-headers">
 
-{{img id: "headers-without-numbers",
+{{imageFigure id: "headers-without-numbers",
       src: "/images/copilot-as-a-hot-butter-knife/headers/01-headers-without-numbers.png",
       title: "My minimalist design where h2 and h3 headers are nearly the same size"}}
 
-{{img id: "headers-with-numbers",
+{{imageFigure id: "headers-with-numbers",
       src: "/images/copilot-as-a-hot-butter-knife/headers/02-headers-with-numbers.png",
       title: "By adding header numbering, I maintain the minimalism, and make the subheading relationship explicit"}}
 

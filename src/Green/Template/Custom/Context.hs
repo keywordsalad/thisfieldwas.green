@@ -35,7 +35,7 @@ customContext config = self
           gitCommits config,
           escapeHtmlField,
           escapeHtmlUriField,
-          imgField,
+          imageFigureField,
           youtubeField,
           codeField,
           defaultFields,

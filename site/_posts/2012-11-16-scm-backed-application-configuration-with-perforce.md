@@ -41,21 +41,21 @@ All installation and example setup details may be found in
 
 When you login, you should see this screen:
 
-{{img id: "img-app-start", src: "/images/app-config2/start.png"}}
+{{imageFigure id: "img-app-start", src: "/images/app-config2/start.png"}}
 
 You'll notice I made the extra effort to add colors and drop shadows :D The
 application works from the project root in Perforce, so the files in each branch
 are viewable here. Clicking on "Dev" > "aardvark_configuration.html" will bring
 up a form for editing `aardvark_configuration.json` as in the previous version:
 
-{{img id: "img-app-config", src: "/images/app-config2/aardvark_configuration.png"}}
+{{imageFigure id: "img-app-config", src: "/images/app-config2/aardvark_configuration.png"}}
 
 Changes to the form data are automatically saved. After making a view edits, you
 can click "View Diff" to get the diffs or "Revert" your changes. Go ahead and
 change the email address and fiddle around with the banned nicks, then go click
 "Pending Changes":
 
-{{img id: "img-app-changes", src: "/images/app-config2/changes.png"}}
+{{imageFigure id: "img-app-changes", src: "/images/app-config2/changes.png"}}
 
 This screen shows all files that were changed and their diffs as well. You can
 "Revert" each file individually, and if you want to commit all changes, then
@@ -63,7 +63,7 @@ enter a commit message and click "Commit Changes". If you commit the changes and
 go back to "Dev" > "aardvark_configuration.html", you'll see the new values in
 the form:
 
-{{img id: "image-app-commit", src: "/images/app-config2/aardvark_configuration-changed.png"}}
+{{imageFigure id: "image-app-commit", src: "/images/app-config2/aardvark_configuration-changed.png"}}
 
 ## Security and Permissions
 

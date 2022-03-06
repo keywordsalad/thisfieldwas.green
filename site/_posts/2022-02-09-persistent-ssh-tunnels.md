@@ -7,6 +7,7 @@ date: 2022-02-08T14:27:57-0800
 published: 2022-02-09T16:02:28-0800
 tags: self host, duct tape, yak shave
 layout: post
+thumbnail: /images/tags/duct-tape/duct-tape-128x128.png
 twitter:
   image: /images/tags/duct-tape/duct-tape-512x512.png
 og:

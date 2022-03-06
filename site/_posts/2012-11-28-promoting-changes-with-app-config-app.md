@@ -40,7 +40,7 @@ staging-prod   staging   prod
 If you login to App-Config-App and go to "Promote Changes," you get an interface
 showing these relationships:
 
-{{img id: "img-promote-changes", src: "/images/app-config3/promote_changes.png"}}
+{{imageFigure id: "img-promote-changes", src: "/images/app-config3/promote_changes.png"}}
 
 Changes between environments can be promoted in either direction along a mapping
 configuration. The receiving environment accepts all changes (developers would
@@ -49,11 +49,11 @@ the changes by clicking on the "Pending Changes" link.
 
 For example, I've promoted changes from "qa" to "dev":
 
-{{img id: "img-promote-result", src: "/images/app-config3/promote_result.png"}}
+{{imageFigure id: "img-promote-result", src: "/images/app-config3/promote_result.png"}}
 
 I can then review the changes by clicking on "Pending Changes":
 
-{{img id: "img-pending-changes", src: "/images/app-config3/pending_changes.png"}}
+{{imageFigure id: "img-pending-changes", src: "/images/app-config3/pending_changes.png"}}
 
 Changes may be edited or reverted before committing them.
 
@@ -66,7 +66,7 @@ changes get promoted, but it requires a little more work.
 I've connected P4V to my App-Config-App user workspace to perform the same
 promotion from "qa" to "dev":
 
-{{img id: "img-config-promotion", src: "/images/app-config3/p4v.png"}}
+{{imageFigure id: "img-config-promotion", src: "/images/app-config3/p4v.png"}}
 
 Select the "qa" folder, then from the menu bar go to "Actions" >
 "Merge/Integrate". This will bring up a wizard for performing the integration.
@@ -82,12 +82,12 @@ Resolve option: "Accept source"
 
 And ensure the direction of integration is "Target" < "Source":
 
-{{img id: "img-config-integrate", src: "/images/app-config3/p4v_integrate.png"}}
+{{imageFigure id: "img-config-integrate", src: "/images/app-config3/p4v_integrate.png"}}
 
 Finally, click "Merge". If you expand the "dev" folder, you can see the where
 the changes are:
 
-{{img id: "img-config-results", src: "/images/app-config3/p4v_integrate_result.png"}}
+{{imageFigure id: "img-config-results", src: "/images/app-config3/p4v_integrate_result.png"}}
 
 You are now free to modify the files further before finally committing the
 changes.

@@ -29,13 +29,13 @@ codeField = functionField "code" f
             . dropWhile null
             . lines
 
-imgField :: Context String
-imgField = functionField "img" f
+imageFigureField :: Context String
+imageFigureField = functionField "imageFigure" f
   where
     defaults = defaultKeys ["id", "src", "title", "alt"]
-    f (imgFields :: Context String) =
-      tplWithContext (imgFields <> defaults) do
-        applyTemplate "_templates/image.html"
+    f (imageFigureFields :: Context String) =
+      tplWithContext (imageFigureFields <> defaults) do
+        applyTemplate "_templates/image-figure.html"
         tplPopBody
 
 youtubeField :: Context String

@@ -168,27 +168,27 @@ stack_configuration.json and post changes back.
 From `http://localhost/appconfig/index.html`, the data from
 stack_configuration.json is loaded into the form:
 
-{{img id: "img-config-form", src: "/images/app-config/start.png"}}
+{{imageFigure id: "img-config-form", src: "/images/app-config/start.png"}}
 
 Edits to stack_configuration.json can be made using the form, and the diffs
 viewed by clicking on "View Diffs":
 
-{{img id: "img-config-diffs", src: "/images/app-config/diffs.png"}}
+{{imageFigure id: "img-config-diffs", src: "/images/app-config/diffs.png"}}
 
 The changes can be saved by entering a commit message and clicking "Commit
 Changes". After which, clicking "View Diffs" will show no changes:
 
-{{img id: "img-config-commit", src: "/images/app-config/diffs-after-commit.png"}}
+{{imageFigure id: "img-config-commit", src: "/images/app-config/diffs-after-commit.png"}}
 
 To show that edits have in fact been made to stack_configuration.json, go
 to `http://localhost/stack_configuration.json`, select "History" and click on "
 History List":
 
-{{img id: "img-config-history", src: "/images/app-config/history.png"}}
+{{imageFigure id: "img-config-history", src: "/images/app-config/history.png"}}
 
 Chronicle also provides an interface for viewing diffs between revisions:
 
-{{img id: "img-config-revisions", src: "/images/app-config/history-diffs.png"}}
+{{imageFigure id: "img-config-revisions", src: "/images/app-config/history-diffs.png"}}
 
 ## Disk Usage
 

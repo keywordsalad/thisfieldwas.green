@@ -10,6 +10,7 @@ changefreq: weekly
   <h2 class="post-title"><a href="{{url}}">{{title}}</a></h2>
   <p class="latest-post-label">Latest Post!</p>
   {{partial "post-meta"}}
+  {{partial "post-thumbnail"}}
   {{-teaser}}
   <p class="read-more no-border"><a href="{{url}}">Read more...</a></p>
 {{-#end}}
@@ -24,6 +25,7 @@ changefreq: weekly
 {{#for previousPosts-}}
   <h3 class="post-title"><a href="{{url}}">{{title}}</a></h3>
   {{partial "post-meta"}}
+  {{partial "post-thumbnail"}}
   {{-teaser}}
   <p class="read-more"><a href="{{url}}">Read more...</a></p>
 {{#end-}}
