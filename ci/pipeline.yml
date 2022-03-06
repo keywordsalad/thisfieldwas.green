@@ -111,6 +111,8 @@ resources:
   source:
     repository: registry.thisfieldwas.green/tfwg/prebaked-site
     tag: latest
+    username: ((registry.username))
+    password: ((registry.password))
 - name: prebaked-site-dockerfiles
   type: git
   icon: git
@@ -129,6 +131,8 @@ resources:
   source:
     repository: registry.thisfieldwas.green/tfwg/base-site
     tag: latest
+    username: ((registry.username))
+    password: ((registry.password))
 - name: base-site-dockerfiles
   type: git
   icon: git

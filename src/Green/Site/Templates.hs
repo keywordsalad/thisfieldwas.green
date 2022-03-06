@@ -6,7 +6,10 @@ import Green.Template
 templates :: Rules Dependency
 templates = do
   match templatePattern do
-    compile getResourceTemplate
+    compile $
+      getResourceBody
+        >>= compileTemplateItem
+        >>= makeItem
   makePatternDependency templatePattern
   where
     templatePattern =

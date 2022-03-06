@@ -10,13 +10,6 @@ import Green.Template.Context hiding (field)
 import Green.Template.Source.Parser (parse)
 import Hakyll.Core.Compiler.Internal
 
--- | Compiles an item as a template.
-getResourceTemplate :: Compiler (Item Template)
-getResourceTemplate =
-  getResourceBody
-    >>= compileTemplateItem
-    >>= makeItem
-
 -- | Takes an item and compiles a template from it.
 compileTemplateItem :: Item String -> Compiler Template
 compileTemplateItem item = do
@@ -61,8 +54,8 @@ applyBlock = tplWithPos getBlockPos \case
       eval e >>= \case
         FunctionValue f -> f (intoValue bs')
         x -> tplFail $ "invalid chrome function " ++ show x ++ " near " ++ show pos
-  AltBlock (ApplyBlock e bs _ :| alts) mdef _ ->
-    intoValue <$> applyAltBlock e bs alts mdef
+  AltBlock (ApplyBlock e bs _ :| alts) maybeDefault _ ->
+    intoValue <$> applyAltBlock e bs alts maybeDefault
 
 applyAltBlock ::
   Expression ->
@@ -70,15 +63,15 @@ applyAltBlock ::
   [ApplyBlock] ->
   Maybe DefaultBlock ->
   TemplateRunner String [ContextValue String]
-applyAltBlock guard' bs alts mdef =
+applyAltBlock guard' bs alts maybeDefault =
   eval guard' >>= \case
     FunctionValue f -> pure <$> f (intoValue bs)
     x ->
       isTruthy x >>= \case
         True -> applyBlocks bs
         False -> case alts of
-          ApplyBlock guard'' bs' _ : alts' -> applyAltBlock guard'' bs' alts' mdef
-          [] -> case mdef of
+          ApplyBlock guard'' bs' _ : alts' -> applyAltBlock guard'' bs' alts' maybeDefault
+          [] -> case maybeDefault of
             Just (DefaultBlock bs' _) -> applyBlocks bs'
             Nothing -> return []
 
@@ -92,8 +85,11 @@ eval = tplWithPos getExpressionPos \case
     (x, s') <-
       lift $
         runStateT (unContext context name) s `compilerCatch` \case
-          CompilationFailure ne -> compilerThrow (NonEmpty.toList ne)
-          CompilationNoResult ss -> return (UndefinedValue name item (show pos : trace) ss, s) -- TODO figure out how to get state changes to persist if value comes back empty
+          CompilationFailure ne ->
+            compilerThrow (NonEmpty.toList ne)
+          CompilationNoResult ss ->
+            -- TODO figure out how to get state changes to persist if value comes back empty
+            return (UndefinedValue name item (show pos : trace) ss, s)
     put s'
     return x
   StringExpression s _ -> return $ intoValue s
@@ -112,8 +108,11 @@ eval = tplWithPos getExpressionPos \case
         (x, s') <-
           lift $
             runStateT (unContext target' name) s `compilerCatch` \case
-              CompilationFailure errors -> compilerThrow (NonEmpty.toList errors)
-              CompilationNoResult _ -> return (EmptyValue, s) -- TODO figure out how to get state changes to persist if value comes back empty
+              CompilationFailure errors ->
+                compilerThrow (NonEmpty.toList errors)
+              CompilationNoResult _ ->
+                -- TODO figure out how to get state changes to persist if value comes back empty
+                return (EmptyValue, s)
         put s'
         return x
       EmptyValue -> return EmptyValue
@@ -133,7 +132,16 @@ eval = tplWithPos getExpressionPos \case
 stringify :: ContextValue String -> TemplateRunner String String
 stringify = \case
   EmptyValue -> return ""
-  UndefinedValue name item trace errors -> tplFail $ "can't stringify undefined value " ++ show name ++ "\nin item context for " ++ itemFilePath item ++ "\ntrace=[\n\t" ++ intercalate ",\n\t" trace ++ "\n],\nsuppressed=[\n\t" ++ intercalate ",\n\t" errors ++ "\n]\n"
+  UndefinedValue name item trace errors ->
+    tplFail $
+      "can't stringify undefined value " ++ show name
+        ++ "\nin item context for "
+        ++ itemFilePath item
+        ++ "\ntrace=[\n\t"
+        ++ intercalate ",\n\t" trace
+        ++ "\n],\nsuppressed=[\n\t"
+        ++ intercalate ",\n\t" errors
+        ++ "\n]\n"
   ContextValue {} -> tplFail "can't stringify context"
   ListValue xs -> mconcat <$> mapM stringify xs
   BoolValue b -> return $ show b

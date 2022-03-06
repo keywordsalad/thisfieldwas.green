@@ -152,7 +152,7 @@ _verify-prerequisites () {
   for x in ${sizes[@]}; do
     out_file="$out_dir/grass-${x}x${x}.png"
     out_files+=("$out_file")
-    inkscape -w $x -h $x -b "aliceblue" -o "$out_file" "$src_file"
+    inkscape -w $x -h $x -o "$out_file" "$src_file"
     identify "$out_file"
   done
 
