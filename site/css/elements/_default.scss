@@ -127,14 +127,3 @@ a em {
   background-repeat: no-repeat;
   padding-left: 1.6em;
 }
-
-@mixin overflow-shadows-x($background-color: $root-background, $shadow-color: #aabbaa) {
-  background:
-    linear-gradient(90deg, $background-color 10%, color.adjust($background-color, $alpha: 0) 100%),
-    linear-gradient(270deg, $background-color 10%, color.adjust($background-color, $alpha: 0) 100%) 100% 0,
-    radial-gradient(farthest-side at 0% 50%, color.adjust($shadow-color, $alpha: 0.6), rgba(0, 0, 0, 0)),
-    radial-gradient(farthest-side at 100% 50%, color.adjust($shadow-color, $alpha: 0.6), rgba(0, 0, 0, 0)) 100% 0;
-  background-repeat: no-repeat;
-  background-attachment: local, local, scroll, scroll;
-  background-size: 3em 100%, 3em 100%, 1em 100%, 1em 100%;
-}

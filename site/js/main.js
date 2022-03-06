@@ -14,6 +14,12 @@ function writeCopyrightYear() {
 
 function addCodeScrolling() {
     document.querySelectorAll("div.sourceCode").forEach(wrapper => {
+        let content = wrapper.querySelector("pre.sourceCode")
+        let contentScrollWidth = content.scrollWidth - wrapper.offsetWidth
+        if (contentScrollWidth <= 0) {
+            return;
+        }
+
         let leftShadow = document.createElement("div")
         leftShadow.classList.add("shadow", "shadow-left")
         wrapper.appendChild(leftShadow)
@@ -22,8 +28,6 @@ function addCodeScrolling() {
         rightShadow.classList.add("shadow", "shadow-right")
         wrapper.appendChild(rightShadow)
 
-        let content = wrapper.querySelector("pre.sourceCode")
-        let contentScrollWidth = content.scrollWidth - wrapper.offsetWidth
         function setScroll() {
             let currentScroll = content.scrollLeft / contentScrollWidth
             leftShadow.style.opacity = currentScroll

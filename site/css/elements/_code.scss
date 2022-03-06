@@ -46,21 +46,21 @@ div.sourceCode {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 0.7em;
+    width: 0.5em;
   }
 
   .shadow-left {
     left: 0;
-    background: radial-gradient(farthest-side at 0 45%, rgba(0, 0, 0, 0.35), transparent);
-    background-size: 0.7em 110%;
+    background: radial-gradient(farthest-side at 0 50%, rgba(34, 51, 34, 0.35), transparent);
+    background-size: 0.5em 100%;
     background-repeat: no-repeat;
     opacity: 0;
   }
 
   .shadow-right {
     right: 0;
-    background: radial-gradient(farthest-side at 100% 45%, rgba(0, 0, 0, 0.35), transparent);
-    background-size: 0.7em 110%;
+    background: radial-gradient(farthest-side at 100% 50%, rgba(34, 51, 34, 0.35), transparent);
+    background-size: 0.5em 100%;
     background-repeat: no-repeat;
   }
 }
