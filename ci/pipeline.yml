@@ -8,39 +8,39 @@ jobs:
   public: true
   interruptible: true
   plan:
-  - get: site-prebaked-image
+  - get: prebaked-site-image
     trigger: true
-  - get: site-repo
+  - get: site-source
     trigger: true
   - task: build-and-test
-    image: site-prebaked-image
+    image: prebaked-site-image
     config:
       platform: linux
       inputs:
-      - name: site-repo
+      - name: site-source
       outputs:
-      - name: site-build
+      - name: site-dist
       run:
         path: sh
         args:
         - -cx
         - |
           set -eux
-          cd site-repo
+          cd site-source
           ./go build
           ./go test
 
 # Create the docker image with the library dependencies pre-built
-- name: site-prebaked-image-job
+- name: build-prebaked-site-image
   max_in_flight: 1
   public: true
   interruptible: true
   plan:
-  - get: site-prebaked-image-repo
+  - get: prebaked-site-dockerfiles
     trigger: true
-  - get: site-base-image
+  - get: base-site-image
     trigger: true
-  - get: site-repo
+  - get: site-source
   - get: oci-build-task
   - task: build-image
     image: oci-build-task
@@ -48,26 +48,26 @@ jobs:
     config:
       platform: linux
       inputs:
-      - name: site-prebaked-image-repo
-      - name: site-repo
+      - name: prebaked-site-dockerfiles
+      - name: site-source
       outputs:
       - name: image
       params:
-        DOCKERFILE: site-prebaked-image-repo/ci/prebaked-site/Dockerfile
+        DOCKERFILE: prebaked-site-dockerfiles/ci/prebaked-site/Dockerfile
         UNPACK_ROOTFS: true
       run:
         path: build
-  - put: site-prebaked-image
+  - put: prebaked-site-image
     params:
       image: image/image.tar
 
 # Create the base docker image
-- name: site-base-image-job
+- name: build-base-site-image
   max_in_flight: 1
   public: true
   interruptible: true
   plan:
-  - get: site-base-image-repo
+  - get: base-site-dockerfiles
     trigger: true
   - get: oci-build-task
   - task: build-image
@@ -76,15 +76,15 @@ jobs:
     config:
       platform: linux
       inputs:
-      - name: site-base-image-repo
+      - name: base-site-dockerfiles
       outputs:
       - name: image
       params:
-        DOCKERFILE: site-base-image-repo/ci/base-site/Dockerfile
+        DOCKERFILE: base-site-dockerfiles/ci/base-site/Dockerfile
         UNPACK_ROOTFS: true
       run:
         path: build
-  - put: site-base-image
+  - put: base-site-image
     params:
       image: image/image.tar
 
@@ -93,7 +93,7 @@ resources:
 ###############################################################################
 
 # Site source code
-- name: site-repo
+- name: site-source
   type: git
   icon: git
   source:
@@ -105,13 +105,13 @@ resources:
     - stack.yaml
 
 # Docker image with site library dependencies pre-built
-- name: site-prebaked-image
+- name: prebaked-site-image
   type: registry-image
   icon: docker
   source:
-    repository: registry:5000/tfwg/prebaked-site
+    repository: registry.thisfieldwas.green/tfwg/prebaked-site
     tag: latest
-- name: site-prebaked-image-repo
+- name: prebaked-site-dockerfiles
   type: git
   icon: git
   source:
@@ -123,13 +123,13 @@ resources:
     - stack.yaml
 
 # Docker image with software dependencies installed
-- name: site-base-image
+- name: base-site-image
   type: registry-image
   icon: docker
   source:
-    repository: registry:5000/tfwg/base-site
+    repository: registry.thisfieldwas.green/tfwg/base-site
     tag: latest
-- name: site-base-image-repo
+- name: base-site-dockerfiles
   type: git
   icon: git
   source:
