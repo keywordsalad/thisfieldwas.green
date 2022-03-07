@@ -37,7 +37,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 ### How to read "math"
 
-**A** reads as _"A"_ and means _"type of A"_; **B** reads as _"B"_ and means _"type of B"_. Uppercase letters and words starting with uppercase letters are names of _types_.
+**Uppercase letters** and words starting with uppercase letters are names of _types_. For example **A** reads as _"A"_ and means _"type of A"_.
 
 **=>** an equals and greater than sign, or right arrow, reads as _"to"_ or _"mapped to"_ and indicates _change_ or _transformation_.
 
@@ -47,7 +47,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **()** a pair of parentheses, reads as _"unit"_ and means _"nothing"_ or _"void"_. It is both a type and a solitary value.
 
-**f** reads as _"f"_ and means _"function f"_ or _"variable f"_. Lowercase letters and words starting with a lowercase letter are functions or variables.
+**Lowercase letters** and words starting with a lowercase letter are functions or variables. **f** reads as _"f"_ and means _"function f"_ or _"variable f"_.
 
 **:** a colon, reads as _"is"_ but means _"has type of"_.
 
