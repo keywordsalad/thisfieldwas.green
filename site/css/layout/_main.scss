@@ -5,10 +5,12 @@
   padding-bottom: 1.2em;
 
   h1:not(.no-border) {
+    padding-bottom: 0.2em;
     border-bottom: $border-header;
   }
 
   h2:not(.no-border) {
+    padding-bottom: 0.2em;
     border-bottom: $border-header;
   }
 }
