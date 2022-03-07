@@ -44,15 +44,15 @@ div.sourceCode {
 
   .shadow {
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 1em;
+    bottom: 1em;
     width: 0.7em;
   }
 
   .shadow-left {
     left: 0;
     background: radial-gradient(farthest-side at 0 50%, rgba(34, 51, 34, 0.45), transparent);
-    background-size: 0.5em 100%;
+    background-size: 0.7em 100%;
     background-repeat: no-repeat;
     opacity: 0;
     border-left: $border-very-thin;
@@ -61,7 +61,7 @@ div.sourceCode {
   .shadow-right {
     right: 0;
     background: radial-gradient(farthest-side at 100% 50%, rgba(34, 51, 34, 0.45), transparent);
-    background-size: 0.5em 100%;
+    background-size: 0.7em 100%;
     background-repeat: no-repeat;
     border-right: $border-very-thin;
   }
