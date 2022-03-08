@@ -26,9 +26,10 @@ jobs:
         - -cx
         - |
           set -eux
-          cd site-source
+          cd /site-source
           ./go build
           ./go test
+          mv /site-source/_site /site-dist
 
 # Create the docker image with the library dependencies pre-built
 - name: build-prebaked-site-image
