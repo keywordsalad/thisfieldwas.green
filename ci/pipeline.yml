@@ -26,6 +26,7 @@ jobs:
         - -cx
         - |
           set -eux
+          ln -s /.stack-work /site-source/.stack-work
           cd /site-source
           ./go build
           ./go test
