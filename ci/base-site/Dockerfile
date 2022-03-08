@@ -2,6 +2,7 @@ FROM archlinux:base
 
 ENV PATH="/root/.local/bin:$PATH"
 
+RUN pacman -Sy
 RUN pacman -S sh curl
 RUN pacman -S dart-sass
 RUN pacman -S imagemagick
