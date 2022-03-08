@@ -1,12 +1,11 @@
-FROM registry.thisfieldwas.green/tfwg/base-site-image:latest
+FROM registry.thisfieldwas.green/tfwg/base-site:latest
 
 COPY site-source /site-source
 
 RUN set -eux; \
-  cd /site-source; \
+  pushd /site-source; \
   ./go prebake; \
-  cd ..; \
-  rm /site-source/*; \
-  rm /site-source/.*;
+  popd ..; \
+  rm -rf /site-source/*;
 
 CMD ["stack"]

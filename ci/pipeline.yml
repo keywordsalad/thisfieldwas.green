@@ -36,7 +36,7 @@ jobs:
   public: true
   interruptible: true
   plan:
-  - get: prebaked-site-dockerfiles
+  - get: prebaked-site-source
     trigger: true
   - get: base-site-image
     trigger: true
@@ -48,12 +48,12 @@ jobs:
     config:
       platform: linux
       inputs:
-      - name: prebaked-site-dockerfiles
+      - name: prebaked-site-source
       - name: site-source
       outputs:
       - name: image
       params:
-        DOCKERFILE: prebaked-site-dockerfiles/ci/prebaked-site/Dockerfile
+        DOCKERFILE: prebaked-site-source/ci/prebaked-site/Dockerfile
         UNPACK_ROOTFS: true
       run:
         path: build
@@ -67,7 +67,7 @@ jobs:
   public: true
   interruptible: true
   plan:
-  - get: base-site-dockerfiles
+  - get: base-site-source
     trigger: true
   - get: oci-build-task
   - task: build-image
@@ -76,11 +76,11 @@ jobs:
     config:
       platform: linux
       inputs:
-      - name: base-site-dockerfiles
+      - name: base-site-source
       outputs:
       - name: image
       params:
-        DOCKERFILE: base-site-dockerfiles/ci/base-site/Dockerfile
+        DOCKERFILE: base-site-source/ci/base-site/Dockerfile
         UNPACK_ROOTFS: true
       run:
         path: build
@@ -113,7 +113,7 @@ resources:
     tag: latest
     username: ((registry.username))
     password: ((registry.password))
-- name: prebaked-site-dockerfiles
+- name: prebaked-site-source
   type: git
   icon: git
   source:
@@ -133,7 +133,7 @@ resources:
     tag: latest
     username: ((registry.username))
     password: ((registry.password))
-- name: base-site-dockerfiles
+- name: base-site-source
   type: git
   icon: git
   source:
