@@ -1,17 +1,20 @@
 FROM ubuntu:latest
 
-RUN set -eux; \
-  apt-get update; \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata;
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends locales
 
-RUN apt-get install -y curl
+RUN set -eux; \
+  locale-gen en_US.UTF-8; \
+  update-locale LANG=en_US.UTF-8;
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl
 
 ENV PATH "/root/.local/bin:$PATH"
 RUN set -eux; \
   curl -sSL https://get.haskellstack.org/ | sh
 
-RUN apt-get install -y sass
-RUN apt-get install -y imagemagick
-RUN apt-get install -y inkscape
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends sass
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends imagemagick
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends inkscape
 
 CMD ["stack"]
