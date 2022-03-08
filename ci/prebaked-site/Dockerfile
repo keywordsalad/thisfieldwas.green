@@ -6,6 +6,6 @@ RUN set -eux; \
   cd /site-source; \
   ./go prebake; \
   cd ..; \
-  rm -rf /site-source/*;
+  rm -rf /site-source;
 
 CMD ["stack"]
