@@ -54,6 +54,12 @@ _verify-prerequisites () {
   ⚡build "$@"
 }
 
+⚡prebake() {
+  _help-line "Compile only the site generator's and tests' dependencies"
+  stack build --only-dependencies
+  stack test --only-dependencies
+}
+
 ⚡watch () {
   _help-line "Build the site generator, generate the site, and then run the preview server"
   ⚡build

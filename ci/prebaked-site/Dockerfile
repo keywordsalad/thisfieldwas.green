@@ -1,13 +1,12 @@
-FROM registry.thisfieldwas.green/tfwg/site-base-image:latest
+FROM registry.thisfieldwas.green/tfwg/base-site-image:latest
 
-COPY site-repo /site-repo
+COPY site-source /site-source
 
 RUN set -eux; \
-  cd /site-repo; \
-  stack build --only-dependencies; \
-  stack test --only-dependencies; \
+  cd /site-source; \
+  ./go prebake; \
   cd ..; \
-  rm /site-repo/*; \
-  rm /site-repo/.*;
+  rm /site-source/*; \
+  rm /site-source/.*;
 
 CMD ["stack"]
