@@ -1,9 +1,9 @@
 module Green.Config where
 
-import qualified Data.Aeson.Key as Key
 import Data.Aeson.Types
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as Char8
+import qualified Data.Text as T
 import Data.Yaml
 import Green.Common
 import Green.Lens
@@ -194,7 +194,7 @@ toHakyllConfigurationJSON H.Configuration {..} =
 
 parseSiteConfigJSON :: [(String, String)] -> TimeLocale -> ZonedTime -> Value -> Parser SiteConfig
 parseSiteConfigJSON env timeLocale time = withObject "SiteConfig" \allConfig -> do
-  config <- allConfig .: Key.fromString envKey
+  config <- allConfig .: T.pack envKey
   SiteConfig env
     <$> config .: "site-info"
     <*> (overrideDebugSettings <$> config .:? "debug-settings" .!= defaultSiteDebug)

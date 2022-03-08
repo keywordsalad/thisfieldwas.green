@@ -1,9 +1,9 @@
 module Green.Template.Custom.DateField where
 
-import qualified Data.Aeson.Key as Key
-import qualified Data.Aeson.KeyMap as KeyMap
+import qualified Data.HashMap.Strict as HashMap
 import Data.List (tails)
 import Data.String.Utils
+import qualified Data.Text as T
 import Green.Common
 import Green.Config
 import Green.Template.Context
@@ -137,4 +137,4 @@ isPublishedField key = field key f
   where
     f item = lift do
       getMetadata (itemIdentifier item)
-        <&> isJust . KeyMap.lookup (Key.fromString "published")
+        <&> isJust . HashMap.lookup (T.pack "published")
