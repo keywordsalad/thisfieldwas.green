@@ -1,4 +1,4 @@
-FROM registry.thisfieldwas.green/tfwg/base-site-image:latest
+FROM registry.thisfieldwas.green/tfwg/base-site:latest
 
 COPY site-source /site-source
 
