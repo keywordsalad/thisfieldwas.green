@@ -1,17 +1,11 @@
-FROM ubuntu:latest
-
-RUN set -eux; \
-  apt-get update; \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata;
-
-RUN apt-get install -y curl
+FROM archlinux:base
 
 ENV PATH="/root/.local/bin:$PATH"
-RUN set -eux; \
-  curl -sSL https://get.haskellstack.org/ | sh
 
-RUN apt-get install -y sass
-RUN apt-get install -y imagemagick
-RUN apt-get install -y inkscape
+RUN pacman -S sh curl
+RUN pacman -S dart-sass
+RUN pacman -S imagemagick
+RUN pacman -S inkscape
+RUN pacman -S stack
 
 CMD ["stack"]
