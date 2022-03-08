@@ -6,12 +6,12 @@ RUN set -eux; \
 
 RUN apt-get install -y curl
 
-ENV PATH="/root/.local/bin:$PATH"
+ENV PATH "/root/.local/bin:$PATH"
 RUN set -eux; \
   curl -sSL https://get.haskellstack.org/ | sh
 
-RUN apt-get install sass
-RUN apt-get install imagemagick
-RUN apt-get install inkscape
+RUN apt-get install -y sass
+RUN apt-get install -y imagemagick
+RUN apt-get install -y inkscape
 
 CMD ["stack"]
