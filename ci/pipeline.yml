@@ -103,8 +103,7 @@ resources:
   type: git
   icon: git
   source:
-    uri: git@bitsof.thisfieldwas.green:keywordsalad/thisfieldwas.green.git
-    private_key: ((git.id_ed25519))
+    uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
     ignore_paths:
     - ci/*
@@ -124,8 +123,7 @@ resources:
   type: git
   icon: git
   source:
-    uri: git@bitsof.thisfieldwas.green:keywordsalad/thisfieldwas.green.git
-    private_key: ((git.id_ed25519))
+    uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
     paths:
     - ci/prebaked-site/*
@@ -145,8 +143,7 @@ resources:
   type: git
   icon: git
   source:
-    uri: git@bitsof.thisfieldwas.green:keywordsalad/thisfieldwas.green.git
-    private_key: ((git.id_ed25519))
+    uri: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green.git
     branch: main
     paths:
     - ci/base-site/*
