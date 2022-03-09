@@ -32,6 +32,9 @@ jobs:
           cd /site-source
           ./go build
           ./go test
+          echo "((git.id_rsa))" > /root/.ssh/id_rsa
+          ./go preview
+          ./go publish
 
 # Create the docker image with the library dependencies pre-built
 - name: build-prebaked-site-image
