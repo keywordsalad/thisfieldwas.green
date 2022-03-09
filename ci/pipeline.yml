@@ -18,8 +18,10 @@ jobs:
       platform: linux
       inputs:
       - name: site-source
+        path: /site-source
       outputs:
       - name: site-dist
+        path: /site-source/_site
       run:
         path: sh
         args:
@@ -30,7 +32,6 @@ jobs:
           cd /site-source
           ./go build
           ./go test
-          mv /site-source/_site /site-dist
 
 # Create the docker image with the library dependencies pre-built
 - name: build-prebaked-site-image
