@@ -26,7 +26,7 @@ jobs:
         - -cx
         - |
           set -eux
-          cp -r /.stack-work /site-source/.stack-work
+          ln -s /.stack-work /site-source/.stack-work
           cd /site-source
           ./go build
           ./go test
