@@ -32,9 +32,6 @@ jobs:
           cd /site-source
           ./go build
           ./go test
-          echo "((git.id_ed25519))" > /root/.ssh/id_ed25519
-          ./go preview
-          ./go publish
 
 # Create the docker image with the library dependencies pre-built
 - name: build-prebaked-site-image
