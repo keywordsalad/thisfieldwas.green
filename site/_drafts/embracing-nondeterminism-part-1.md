@@ -182,39 +182,52 @@ Errors and unknown quantities as **effects** of these operations are opaque in f
 
 You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are **effects** which describe the circumstances under which an `Employee` may be produced and can be modeled accordingly as part of the typed API of `getEmployee`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
 
-### Complex program capabilities
+### Operations producing undesired cases
 
-Can you think of some program capabilities that necessitate complexity? How might this complexity appear in code?
+Can you think of some program operations that produce undesired cases in addition to their desired output? How might these cases cause code to become complex?
 
 :::{.wide-list-items}
-* When a program starts, it may **read configuration** from the environment, a database, or files. Configuration may also be a continuous process at runtime, which affects the entire architecture of the program.
-* **Database queries** are surrounded by code that **handles exceptions and recovers from errors**. Some languages encourage a hands-off approach to exception handling, leaving a minefield of potential errors.
-* Rows returned by database queries will have an **unknown length**, sort, and cardinality, which imposes specific handling when you want _just one_ row returned.
-* **External API calls require async IO** in order for programs to be performant. Async IO _infects_ entire codebases requiring its capability.
-* **Concurrency requires async IO and task management** in order to share the limited resources of a machine across a distributed set of tasks. Task management requires interruptions, queues, and thread pools, and all operations against these resources may fail.
-* **External API calls can fail for any reason.** Different types of failures may indicate aborting the associated operation or retrying it. As in database queries, exception handling may not be encouraged and leave open the possibility of unexpected errors at runtime.
-* **External input and API responses** are validated and transformed into domain objects. Sometimes the responses returned are in an unexpected format, requiring **meticulous validation logic** and **recovery** from malformed responses.
-* **Error handling** typically leverages exceptions. Each case where they occur may remain unknown until they're thrown at runtime.
-* Logging libraries are used to **report errors** and might require file system or network access. Logging may necessitate async IO itself so that the program remains performant.
-* **Metrics** are gathered with libraries that require network access, possibly also async IO.
-* **Feature flags and ramps** need to be queried in real-time. Error handling modes must be provided in the event that a behavior-modifying query fails.
-* **A/B testing** requires reliably persisting identities' sessions within their assigned variants.
+* When a program starts, it may **read configuration** from the environment, a database, or files. Reading configuration values may be blocking or asynchronous, and some configuration keys may not have associated values. 
+* **Database queries** produce an unknown length of rows, and may fail due to incorrect syntax, a database error, or network fault. Receiving an unknown length of rows imposes specific handling if all you want is _just one row_ and any guarantees that you're retrieving the correct one must be manually enforced.
+* **API calls** may be blocking or require async IO, they may fail for any reason, and the data they return may or may not conform to an expected structure.
+* **Task management** of long-running operations requires async IO and managing limited computing resources. Tasks may fail for any reason or they may never complete. You have to wait for the result to be available in order to use it.
+* **Error handling** when an operation fails may require aborting the operation and returning a default case, or retrying it. Exceptions are easy to rethrow or bubble-up the stack causing unexpected errors at runtime.
 * **Retries** using an [exponential back-off][] strategy must retain their previous retry interval and apply a random jitter in order to calculate their next interval.
+* **User-provided input**, **server requests**, and **API responses** must be validated to assert that they conform to an expected structure and then validated for semantic content. Invalid data must be handled.
+* Some operations **produce logs and metrics** as a secondary output. All components requiring logs and metrics carry an extra dependency in order to support them, and their associated operations may be blocking or require async IO.
+* **Feature flags and ramps** need to be queried in real-time. These queries may be blocking or asynchronous, and they may fail for any reason. Presentation of default variants in the case of failure must be reliably persisted to the current session, yet this operation may fail as well.
+* **A/B testing** requires reliably determining eligibility of users' sessions per variant and persisting the associated assignments. Either of these operations may fail and presenting a default variant itself requires persistence. Retrieving assigned variants must also be reliable.
 :::
 
 ### A model for characterizing complexity
 
-Complexities can be characterized in terms of **effects**. Each of the following effects center on some measurable dimension influenced by nondeterminism:
+Complexities can be characterized in terms of **effects**. The operations listed above impose complexity because they feature the effects of:
 
 :::{.wide-list-items}
-* **IO** as in synchronous operations against disk access, network boundaries, and concurrency primitives.
-* **Time and Async** as in asynchronous operations against disk access and network boundaries, such as API calls, database queries, or streaming from files. Multithreading and concurrency imply asynchronous operations and task management.
-* **Presence** as some functions may not produce anything for some inputs.
-* **Length** as database queries return zero or many rows, streaming data over the network implies infinitely many of "something", and long-running programs act as consumers of an infinite input.
-* **Validation** requires sanitizing and validating program inputs or permissively-structured outputs from applied functions or network calls.
-* **Implicit input** in the form of configuration, feature flags and ramps, A/B test assignment, or other inputs that aren't themselves explicitly provided as part of an API boundary or client interaction.
-* **Implicit output** in the form of logging and metrics, as well as exceptions and other faults.
-* **State** representing change over time and how it propagates across a program's architecture. Implicit inputs and outputs together constitute a form of state.
+* **Presence**
+  * Some configuration keys may not have an associated value.
+  * Some database queries expect one row to be returned, but instead no rows may be found.
+* **Length**
+  * Database queries may return zero or many rows.
+  * Collections don't have a totally guaranteed or fixed size.
+* **Validity**
+  * User-provided input, server requests, and API responses all require validation before they may be used.
+* **Success**
+  * Some operations fail with an exception, which can hide potential error cases.
+  * Some operations may be aborted.
+* **IO**
+  * Operations are dependent on external systems' state as **implicit input**
+  * Operations can affect external systems' state as **implicit output**.
+  * Operations may be concurrent, paused, or interrupted.
+  * Operations may block execution of the calling operation.
+  * Interacting with concurrency primitives may block execution and produce nondeterministic outputs.
+* **Time**
+  * Task management makes no guarantees how long any particular task will take to run.
+  * API calls require an indeterminate amount of time.
+  * Database queries take time to run and return rows as they are found.
+  * Operations dependent on async output must await the result.
+* **State**
+  * Retry strategies must track previous state in order to calculate their next retry periods.
 :::
 
 The actual list of effects is innumerable, but these ones are common.
