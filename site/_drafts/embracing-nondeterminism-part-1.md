@@ -203,7 +203,6 @@ Can you think of some program operations that produce undesired cases in additio
 
 Complexities can be characterized in terms of **effects**. The operations listed above impose complexity because they feature the effects of:
 
-:::{.wide-list-items}
 * **Presence**
   * Some configuration keys may not have an associated value.
   * Some database queries expect one row to be returned, but instead no rows may be found.
@@ -228,7 +227,6 @@ Complexities can be characterized in terms of **effects**. The operations listed
   * Operations dependent on async output must await the result.
 * **State**
   * Retry strategies must track previous state in order to calculate their next retry periods.
-:::
 
 The actual list of effects is innumerable, but these ones are common.
 
