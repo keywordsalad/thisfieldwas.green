@@ -204,21 +204,26 @@ Can you think of some program operations that produce undesired cases in additio
 Complexities can be characterized in terms of **effects**. The operations listed above impose complexity because they feature the effects of:
 
 **Presence**
+
 * Some configuration keys may not have an associated value.
 * Some database queries expect one row to be returned, but instead no rows may be found.
  
 **Length**
+
 * Database queries may return zero or many rows.
 * Collections don't have a totally guaranteed or fixed size.
 
 **Validity**
+
 * User-provided input, server requests, and API responses all require validation before they may be used.
  
 **Success**
+
 * Some operations fail with an exception, which can hide potential error cases.
 * Some operations may be aborted.
 
 **IO**
+
 * Operations are dependent on external systems' state as **implicit input**
 * Operations can affect external systems' state as **implicit output**.
 * Operations may be concurrent, paused, or interrupted.
@@ -226,12 +231,14 @@ Complexities can be characterized in terms of **effects**. The operations listed
 * Interacting with concurrency primitives may block execution and produce nondeterministic outputs.
  
 **Time**
+
 * Task management makes no guarantees how long any particular task will take to run.
 * API calls require an indeterminate amount of time.
 * Database queries take time to run and return rows as they are found.
 * Operations dependent on async output must await the result.
 
 **State**
+
 * Retry strategies must track previous state in order to calculate their next retry periods.
 
 The actual list of effects is innumerable, but these ones are common.
