@@ -279,15 +279,14 @@ class PayrollRunner {
 ```
 :::
 
-The code above demonstrates complexity in the dimensions of:
+The code above demonstrates effects in the dimensions of:
 
-* **Synchronous IO** as database queries and network calls are implicitly synchronous.
-* **Presence** as an `Employee` may not be found or their `Paycheck` not calculated.
-* **Validation** where the `"SUCCESS"` response from the `achClient` is the only check performed. Other responses are simply not handled.
-* **Implicit input** where the company's bank routing and account numbers are read from an external location.
-* **Implicit output** where logging occurs but swallows errors, resulting in opaque `false` return cases. Exceptions also bubble up from database and network operations.
+* **IO** as database queries and network calls are implicitly synchronous. Configuration acts as an implicit input.
+* **Presence** as an `Employee` may not be found or their `Paycheck` not calculated. Configured banking information may not have associated values.
+* **Validity** where the `"SUCCESS"` response from the `achClient` is the only check performed. Other responses are simply not handled.
+* **Success** where logging occurs but swallows errors, resulting in opaque `false` return cases. Exceptions also bubble up from database and network operations.
 
-_These complexities are not obvious from the code above_. I have rewritten it to handle all undesirable cases to highlight where complexity exists:
+_These effects are not obvious from the code above_. I have rewritten it to handle all undesirable cases to highlight where complexity exists:
 
 :::{.numberLines}
 ```java
@@ -335,9 +334,9 @@ class PayrollRunner {
 ```
 :::
 
-There's a large amount of complexity in this code. In order to make clear all effects, checked exceptions are leveraged and all exceptions that are known to be thrown by other functions must be translated into exceptions representing the domain of this function. As all false cases effectively communicated no information, they have been removed and replaced with exceptions typed according to the reason for failure, and the function now returns void as it is side-effecting and any return for success would be superfluous.
+There's a large amount of complexity in this code due to effects. In order to make clear all effects and where they occur, I have leveraged checked exceptions and all exceptions that are known to be thrown by other functions are translated into exceptions representing the domain of this operation. As all false cases effectively communicated no information so they have been removed and replaced with exceptions typed according to the reason for failure. The operation now returns void as it is side-effecting and any return for success would be superfluous.
 
-There are a number of checks along the dimension of presence. There's several along the dimension of success and failure. Each operation is dependent upon the success of the operation preceding it, and verification of success is performed following _procedural_ steps.
+There are a number of checks along the dimension of presence. There's several along the dimension of success. Each operation is dependent upon the success of the operation preceding it, following a _procedurally validated_ imperative flow.
 
 There's a lot of effects just in this code. Fortunately there are ways to model sets of these effects and contain the scope of their impact so that code is less complex. Rewriting the above code using an effect model may look like this:
 
@@ -358,11 +357,11 @@ def runPayroll(employeeId: Long): PayrollEffect[()] =
 ```
 :::
 
-This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, async IO, success and failure, and implicit input and output. This code is thus unburdened of most complexity, and makes the rest of it easier to work with.
+This code looks similar, doesn't it? What hides between the lines here is a custom effect model `PayrollEffect` that abstracts away the effects of presence, async IO, success, and implicit input and output. This code is thus unburdened of most complexity, and makes the rest of it easier to work with.
 
 You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occur and the main operation short-circuits itself should any inner operation fail.
 
-This abstraction of effects allows for safer code that better focuses on the business logic at-hand. _But how are abstractions over effects created?_
+_This abstraction of effects allows for safer code that better focuses on the business logic at-hand._
 
 Previously I described programs as a case of function composition: `h = g ∘ f`. Functors address a _special case_ of function composition, the **composition of functional effects**. In the following sections I will describe how effects are abstracted in order to demonstrate how they compose later.
 
