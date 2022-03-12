@@ -160,7 +160,7 @@ _How might complexity in programs be reduced if they must also be driven by side
 
 ### Implied complexity
 
-Given a function `f : A => B` and another `g : B => C`: a third function `h : A => C` may be composed of `h = g ∘ f` or _h is g after f_. Programs may be modeled as a function `program : Input => Output`, where `program` is composed of innumerable smaller functions, together in concert building the necessary mappings to generate the desired program output.
+Given a function `f : A => B` and another `g : B => C`: a third function `h : A => C` may be composed of `h = g ∘ f` or _h is g after f_. Programs may be modeled as a function `program : Input => Output`, where `program` is composed of innumerable smaller functions, together in concert building the necessary mappings to generate the desired program output. However composition is not so simple in programs as the results of some operations may not produce the desired input for subsequent operations.
 
 Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `program : Input => Output`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of unknown length and an error might occur when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
 
