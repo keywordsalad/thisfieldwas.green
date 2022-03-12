@@ -39,15 +39,13 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Uppercase letters** and words starting with uppercase letters are names of _types_. For example **A** reads as _"A"_ and means _"type of A"_.
 
-**=>** an equals and greater than sign, or right arrow, reads as _"to"_ or _"mapped to"_ and indicates _change_ or _transformation_.
+**Lowercase letters** and words starting with a lowercase letter are functions or variables. **f** reads as _"f"_ and means _"function f"_ or _"variable f"_.
 
-**A => B** reads as _"A to B"_ and means _"function type of type A mapped to type B"_. Function types are a special kind of _type_ which represent any type _mapped to_ another type using a right arrow. Functions types can map any kind of type to any other kind of type, including function types.
+**A => B** reads as _"A to B"_ and means _"function type of type A mapped to type B"_. Functions types can map any kind of type to any other kind of type, including function types.
 
-**F[_]** reads as _"(context) F of underscore"_ or _"context F"_. Contexts are a type constructor[^hkt] that take types as an argument and produce another type. They become instantiated when their _underscore_ is replaced by another type, as in **F[A]** or _"(context) F of A"_.
+**F[_]** reads as _"context F of underscore"_ or _"context F"_. Contexts are a type constructor[^hkt] that take types as an argument and produce another type. They become proper types when their _underscore_ is replaced by another type, as in **F[A]** or _"context F of A"_.
 
 **()** a pair of parentheses, reads as _"unit"_ and means _"nothing"_ or _"void"_. It is both a type and a solitary value.
-
-**Lowercase letters** and words starting with a lowercase letter are functions or variables. **f** reads as _"f"_ and means _"function f"_ or _"variable f"_.
 
 **:** a colon, reads as _"is"_ but means _"has type of"_.
 
@@ -65,7 +63,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Expressions** are values that are described by some type `A`.
 
-**Functions** are a _special case_ of expressions that map some type `A` to some type `B`. They are described by `f : A => B`, read as _f is A to B_.
+**Functions** are a _special case_ of expressions that map some type `A` to some type `B`. They are described by `A => B`, read as _A to B_.
 
 **Functors** are a programming pattern explored in this post. Think of them as an analog of a **design pattern** found in object-oriented programming.
 
@@ -89,7 +87,7 @@ A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
 
 **Composition** describes chaining the output of a function `f : A => B` to the input of a function `g : B => C` such that a new function `h : A => C` may defined as `h = g ∘ f`, read as _h is g after f_.
 
-* This algebraic notation demonstrates how function `g` is applied _after_ function `f` is applied to argument `x` of function `h`:
+* This algebraic notation demonstrates how function `g` is applied _after_ function `f` is applied to the argument `x`:
 
   ```
   h(x) = g(f(x))
@@ -100,7 +98,7 @@ A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
   ```scala
   val f: A => B = _
   val g: B => C = _
-  val h: A => C = a => g(f(a))
+  val h: A => C = x => g(f(x))
   ```
 
 ## Complexity in programming
@@ -124,7 +122,8 @@ Nondeterminism as a dependence on factors other than initial state and input ari
 
 An extreme example of a nondeterministic function is the random number generator `rng : () => Int` as it maps the solitary unit value `()` to all members of type `Int`. This mapping is influenced by some side effect or _implicit input_ which is external to the function's signature of `() => Int`:
 
-```{.scala .numberLines}
+:::{.numberLines}
+```scala
 println(rng())
 // 1729
 println(rng())
@@ -136,6 +135,7 @@ println(rng())
 println(rng())
 // 42
 ```
+:::
 
 Nondeterminism is significant in that operations may be unpredictable, and that no operation in particular may be reproducible.
 
@@ -144,27 +144,23 @@ Nondeterminism is significant in that operations may be unpredictable, and that 
 Unknown quantities along measurable dimensions arise in functions returning types such as lists, potentially `null` references, or validation results. These outputs have unknown length, presence, and validity respectively, and require specific handling for undesirable cases. _Even pure functions produce results having unknown quantities._
 
 * A simple example is a function `toBits : Int => List[Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
-* You may find hashmap lookups more familiar: Unless you have specific knowledge of the key used to lookup a value from a hashmap, you don't have any guarantee whether an associated value exists.
+* Hashmap lookups may or may not return a value associated to a given key. Unless you have specific knowledge of the key used to lookup a value, you don't have any guarantee whether the value actually exists.
 
 Both of these operations are pure functions and are deterministic, but their results are contextualized by length and presence. Any unknown quantity along some measurable dimension requires specific handling in code. This means that in addition to writing code that handles the desired case of an operation, code must be specifically written for each dimension that exhibits unknown quantities.
 
-Side effects as **implicit outputs** include **faults** such as the _divide by zero_ error and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some side effect as an **implicit input** may influence the outcome.
+Side effects as **implicit output** include **faults** such as the _divide by zero_ error and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some side effect as an **implicit input** may influence the outcome.
 
 > In contrast with most faults, a _divide by zero_ error only occurs if the input divisor is `0`. The additional check for `0` that division sometimes requires is not considered complexity in practice.
 >
 > Running out of memory will throw an exception even in pure functions. Exceptions are truly nondeterministic and you must choose when and how to handle their cases. Hopefully you know ahead of time where you will need to do so.
 
-Side effects form unknown quantities especially in the case of faults. Considered as implicit outputs they are side effects, but their presence or absence is measurable as a _dimension of success or failure_ and unknown ahead of time.
+In addition to being side effects, exceptions may be reasoned about as a _dimension of success or failure_ in an operation. This quantity is unknowable ahead of time and highly dependent upon implicit input.
 
-Concurrency and asynchronous operations are driven entirely by side effects. Asynchronous operations have an unknown temporal quantity that imposes costly specific handling.
+Concurrency and asynchronous operations are driven entirely by side effects. Asynchronous operations have an unknown temporal quantity that imposes costly specific handling, as execution must wait for operations to complete. Support for asynchronous operations requires runtimes to manage limited computing resources and scheduling of tasks, forming an entire system within a program.
 
 #### Relating nondeterminism and unknown quantities
 
-Unknown quantities are affected particularly by nondeterminism. Undesired cases along dimensions such as length, presence, validity, success, and time require specific handling in addition to the code to handle the desired output case of operations. _This specific handling creates complexity and draws engineering focus away from business logic_.
-
-**Side effects manifest as nondeterminism and form unknown quantities.**
-
-These features form a vicious cycle. Unknown quantities are affected by implicit inputs to operations. These operations themselves may produce implicit outputs that affect later operations. The effects of these unknown quantities increase nondeterminism and vice versa, which increases the number of undesired cases in code. Nondeterminism and unknown quantities create complex code because they impose cases that must be handled specifically. Yet side effects drive the business value of programs in the real world, which requires that we embrace nondeterminism and unknown quantities.
+Side effects enable nondeterminism which influences unknown quantities in the results of operations. Undesired cases along dimensions such as length, presence, validity, success, and time require specific handling in addition to the code to handle the desired output case of operations. This specific handling creates complexity and draws engineering focus away from business logic. Yet side effects drive the business value of programs in the real world, which requires that we embrace nondeterminism and unknown quantities.
 
 _How might complexity in programs be reduced if they must also be driven by side effects?_
 
