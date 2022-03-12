@@ -41,31 +41,25 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Lowercase letters** and words starting with a lowercase letter are functions or variables. **f** reads as _"f"_ and means _"function f"_ or _"variable f"_.
 
-**A => B** reads as _"A to B"_ and means _"function type of type A mapped to type B"_. Functions types can map any kind of type to any other kind of type, including function types.
+**A => B** reads as _"A to B"_ and means _"function type of input type A mapped to output type B"_. Functions types can map any kind of input type to any other kind of output type, including function types.
 
 **F[_]** reads as _"context F of underscore"_ or _"context F"_. Contexts are a type constructor[^hkt] that take types as an argument and produce another type. They become proper types when their _underscore_ is replaced by another type, as in **F[A]** or _"context F of A"_.
 
 **()** a pair of parentheses, reads as _"unit"_ and means _"nothing"_ or _"void"_. It is both a type and a solitary value.
 
-**:** a colon, reads as _"is"_ but means _"has type of"_.
-
 **f : A => B** reads as _"f is A to B"_ or _"function f has type of A mapped to B"_.
 
 **fa : F[A]** reads as _"fa is F of A"_ or _"variable fa has type of context F of A"_.
 
-**=** an equals sign, reads as _"is"_ but means _"is defined as"_.
-
-**∘** a ring, reads as _"after"_ and represents the operation of _function composition_. Composition is described in [Terminology](#terminology).
-
-**h = g ∘ f** reads as _"h is g after f"_ or _"h is defined as the composition of function g after function f"_.
+**h = g ∘ f** reads as _"h is g after f"_ or _"h is defined as function g composed after function f"_. Composition is described in [Terminology](#terminology).
 
 ### Terminology
 
+**Functors** are a programming pattern explored in this post. Think of them as an analog of a **design pattern** found in object-oriented programming.
+
 **Expressions** are values that are described by some type `A`.
 
-**Functions** are a _special case_ of expressions that map some type `A` to some type `B`. They are described by `A => B`, read as _A to B_.
-
-**Functors** are a programming pattern explored in this post. Think of them as an analog of a **design pattern** found in object-oriented programming.
+**Functions** are a _special case_ of expressions that map some type `A` to some type `B`. They are described by `A => B`.
 
 **Terms** are identifiers naming unitary or indivisible variables and types. 
 
@@ -77,15 +71,15 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
     The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
 
-**Contexts** are like containers. They are noted using `F[_]`, read as _context F_ when their contents are unspecified, and `F[A]` or _F of A_ when their contents are known to be of type `A`. They are more concretely defined in later sections.
+**Contexts** describe circumstances within which their contents are found. They are noted using `F[_]` when their contents are unspecified, and `F[A]` when their contents are known to be of type `A`. They are more concretely defined in later sections.
 
-**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift : A => F[A]`, read as _lift is A to F of A_.
+**Lifting** describes injecting a term `A` into a context `F[_]` such that `lift : A => F[A]`.
 
-A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
+A **Lifted** term or expression already has the form `F[A]`.
 
-**Lowering** describes extracting a term `A` from a context `F[A]` such that `lower : F[A] => A`, read as _lower is F of A to A_.
+**Lowering** describes extracting a term `A` from a context `F[A]` such that `lower : F[A] => A`.
 
-**Composition** describes chaining the output of a function `f : A => B` to the input of a function `g : B => C` such that a new function `h : A => C` may defined as `h = g ∘ f`, read as _h is g after f_.
+**Composition** describes chaining the output of a function `f : A => B` to the input of a function `g : B => C` such that a new function `h : A => C` may defined as `h = g ∘ f`.
 
 * This algebraic notation demonstrates how function `g` is applied _after_ function `f` is applied to the argument `x`:
 
@@ -334,7 +328,7 @@ class PayrollRunner {
 ```
 :::
 
-There's a large amount of complexity in this code due to various effects. In order to make clear all effects and where they occur, I have leveraged checked exceptions and all exceptions that are known to be thrown by other functions are translated into exceptions representing the domain of this operation. As all false cases effectively communicated no information so they have been removed and replaced with exceptions typed according to the reason for failure. The operation now returns void as it is side-effecting and any return for success would be superfluous.
+There's a large amount of complexity in this code due to various effects. In order to make clear all effects and where they occur, I leveraged checked exceptions and all exceptions that are known to be thrown by other functions are translated into exceptions representing the domain of this operation. As all false cases effectively communicated no information I replaced them with exceptions typed according to the reason for failure. The operation now returns void as it is side-effecting and a specific return for success would be superfluous.
 
 There are a number of checks along the dimension of presence. There's several along the dimension of success. Each operation is dependent upon the success of the operation preceding it, following a _procedurally validated_ imperative flow.
 
@@ -367,7 +361,7 @@ Previously I described programs as a case of function composition: `h = g ∘ f`
 
 ## Contexts and effects
 
-What is a **context**? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`.
+What is a **context**? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`. 
 
 > Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` read as _context F_ with an underscore when the type of the term is unspecified, and `F[A]` read as _F of A_ when the term is known to be of type `A`. Other letters work nicely of course, as do concrete names, as in `Option[Int]` or _Option of Int_.
 
@@ -383,7 +377,8 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
 * `NonEmptyList[A]` or _NonEmptyList of A_: _At least one_ of term `A` with an unknown sort and cardinality. The first `A` is guaranteed to be present.
 * `Id[A]` or _Identity of A_: This _is_ `A` and is guaranteed to be present.
 * `Set[A]` or _Set of A_: A set of _distinct instances_ of `A` whose size is unknown.
-* _Many data structures are used to model different forms of presence._
+
+> Many data structures are used to model different forms of presence.
 
 **Contexts representing side-effects:**
 
@@ -408,7 +403,8 @@ Each kind of context models a set of **effects**. Contexts thus represent a conc
     * Logging usually leverages this effect by abstracting how such output leaves the program.
 * `StateT[F, A]` or _State Transformer of context F and A_: Modifying implicit inputs and outputs in the context of `F[_]`.
     * Models state changing over time in an otherwise-immutable context.
-* _These contexts are higher-order in the term of `F`. They are listed here for illustration but won't be explored in this post._
+
+> These contexts are higher-order in the term of `F`. They are listed here for illustration but won't be explored in this post.
 
 Each of these contexts have two shared characteristics in that they _produce_ some term `A` and that their effects determine _how_ term `A` is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term `A` be consumed in a manner unburdened of complexity?
 
@@ -527,15 +523,15 @@ This interface essentially transforms these contexts into `NonEmptyList[A]` and 
 
 What about implementing `extract` for `Future[A]`? When applied to `Future[A]`, the `extract` function is by its own signature a blocking call. You want your dependency on `A` to be properly asynchronous.
 
-_This interface does not generalize for more than the contexts of `Option` and `Either`._
+This interface does not generalize for more than the contexts of `Option` and `Either`. A better interface exists.
 
 ### Motivating functors as a design pattern
 
-`Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` all have different effects that determine how term `A` is produced. You must follow an axiom from object oriented programming: _abstract what changes_. Therefore you have to shed effects as an implementation detail. How might that impact lowering the term `A`?
+`Option[A]`, `Either[A]`, `List[A]`, `Future[A]`, and `IO[A]` each have different effects that determine how term `A` is produced. You must follow an axiom from object oriented programming: _abstract what changes_. Therefore you have to shed effects as an implementation detail. How might that impact lowering the term `A`?
 
 You may be unsatisfied by the answer: _extraction cannot be generalized_. All you know is that there is term `A`. You don't know whether an instance is present, how many of it there are, whether it's here already, or if it's arriving later. How do you consume term `A` when you know nothing about its instances' nature of existence? Functors solve this problem.
 
-**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. A functor is a simple structure: a single function `map : F[A] => (A => B) => F[B]`. Functors in Scala may be formally declared using the `Functor` typeclass:
+**Functors** are abstractions that allow you to consume term `A` within the context of `F[A]`. Functors are a class of types for which they have defined a single function `map : F[A] => (A => B) => F[B]`. Functors in Scala may be formally declared using the `Functor` typeclass:
 
 :::{.numberLines}
 ```scala
@@ -586,7 +582,7 @@ map([  1,    2,    3,    4 ])(f)
      1   3 5   7     -->  f(1)  f(3) f(5)  f(7)  -->  1    6  10    14
 ```
 
-The application of `map` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as they have been mapped-over by a function, and `BinaryTree[B]` specifically may re-balance itself. What matters here is that the structures are coherent and identifiable.
+The application of `map` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as a function has been applied to them, and `BinaryTree[B]` specifically may re-balance itself. What matters here is that the structures are coherent and identifiable.
 
 Compare with iteration using a `for` loop:
 
@@ -609,7 +605,7 @@ for (x in nums) {
 
 Iteration as a form of lowering _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
 
-This isn't to say that functional programming is only about iteration and loops versus `map`. Can you think of other operations that might destroy structure? For example, _if you use an `await` operation on a `Future[A]` you will destroy its asynchronous structure_ and potentially harm the performance of your program.
+This isn't to say that functional programming is only about iteration and loops versus `map`. Can you think of other operations that might destroy structure? For example, if you use an `await` operation on a `Future[A]` you will destroy its _asynchronous structure_ and potentially harm the performance of your program.
 
 > Where the type of your context is known, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default instance otherwise.
 
@@ -676,7 +672,7 @@ Can you see how functors enable control flow and short-circuiting? The void case
 
 > You can think of `Right`'s term as being "the right instance you want" because it's "correct". _Right?_ This pun is why `Either` is conventionally leveraged for the effect of correct vs. incorrect or success vs. failure.
 
-Contrasting with contexts that encode some notion of void, here's what the `Functor` instance for `Id[_]` looks like:
+Contrasting with contexts that encode some notion of void, the `Functor` instance for `Id[_]` will always apply the function in `map`:
 
 :::{.numberLines}
 ```scala
@@ -746,13 +742,13 @@ At no point is `fizzBuzz` burdened by the effects of the context it executes aga
 
 ### Functors are universal
 
-You might be thinking that lists and arrays in the wild already have a `map` operation available. `Promise`s in JavaScript also have their own `map` operation named [`then`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#chained_promises). You've been using functors for a while and never realized!
+You might be thinking that lists and arrays in the wild already have a `map` operation available. `Promise`s in JavaScript also have their own `map` operation named [`then`][]. You've been using functors for a while and never realized!
 
 Functors as a formal abstraction API, such as in the Scala `Functor` typeclass, find their strongest use in cases where the concrete type of the context is unimportant. However, you might observe that the _shape_ of functors appears in many places without being _called_ a functor. Using `map` on a list conceptually performs the same operation as on both arrays and `Promise`s. Other structures defining `map` operations may be functors because _functors arise from settings where stuff exists under some circumstances_.
 
 #### Composition of functional effects
 
-That so many functors appear in the wild is no coincidence. Functors even have a [formal definition](https://en.m.wikipedia.org/wiki/Functor) within the higher math of [category theory](https://en.m.wikipedia.org/wiki/Category_theory). This definition can be applied to any structures that have the shape of a functor to assert that they behave as functors.
+That so many functors appear in the wild is no coincidence. Functors even have a [formal definition][] within the higher math of [category theory][]. This definition can be applied to any structures that have the shape of a functor to assert that they behave as functors.
 
 In order to be a functor, a context defining a `map` function must satisfy two laws:
 
@@ -793,9 +789,9 @@ preservesFunctionComposition(nil)
 
 These laws assert that functors preserve the behavior of functions `f` and `g` as if they were applied in sequence and also if they were composed independent of `map`. Functors thus _compose functional effects_ because this property of composition is retained within the context of their effects.
 
-Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming are mere idioms to be relearned between codebases written even in the same language.
+Because of this rigorous definition, functors as a design pattern represent a concept that _transcends_ codebases and languages. In contrast, design patterns as they are realized in object-oriented programming form idioms that must be relearned between codebases written even in the same language.
 
-Functors may be universally regarded as a _context of effects_. What this means is that ideally and _provably_ `map` is the same regardless of specific context.
+Functors may be universally regarded as a _context of effects_. What this means is that ideally, and _provably_, `map` is the same regardless of specific context.
 
 ## Building upon functors
 
@@ -846,5 +842,8 @@ In my next post, we will explore how **applicatives** enable working within two 
 [Defensive programming]: https://en.wikipedia.org/wiki/Defensive_programming
 [tacit knowledge]: https://en.wikipedia.org/wiki/Tacit_knowledge
 [exponential back-off]: https://en.wikipedia.org/wiki/Exponential_backoff
+[formal definition]: https://en.m.wikipedia.org/wiki/Functor
+[category theory]: https://en.m.wikipedia.org/wiki/Category_theory
+[`then`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#chained_promises
 
 [^hkt]: `F[_]` specifically is a [higher-kinded type](https://danso.ca/blog/higher-kinded-types/).
