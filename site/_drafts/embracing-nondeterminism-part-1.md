@@ -69,15 +69,15 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Functors** are a programming pattern explored in this post. Think of them as an analog of a **design pattern** found in object-oriented programming.
 
-**Terms** are identifiers naming unitary or indivisible variables and types.
+**Terms** are identifiers naming unitary or indivisible variables and types. 
 
-  * For example, in the declaration:
+* For example, in the declaration:
 
-      ```{.scala .numberLines}
-      def map[A, B](fa: F[A])(f: A => B): F[B]
-      ```
+    ```.scala
+    def map[A, B](fa: F[A])(f: A => B): F[B]
+    ```
 
-      The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
+    The variable terms are `fa` and `f`, and the type terms are `A` and `B`.
 
 **Contexts** are like containers. They are noted using `F[_]`, read as _context F_ when their contents are unspecified, and `F[A]` or _F of A_ when their contents are known to be of type `A`. They are more concretely defined in later sections.
 
@@ -97,11 +97,11 @@ A **Lifted** term or expression already has the form `F[A]`, or _F of A_.
 
 * Compare with this definition in Scala which declares the types of the functions:
 
-    ```{.scala .numberLines}
-    val f: A => B = _
-    val g: B => C = _
-    val h: A => C = a => g(f(a))
-    ```
+  ```scala
+  val f: A => B = _
+  val g: B => C = _
+  val h: A => C = a => g(f(a))
+  ```
 
 ## Complexity in programming
 
@@ -251,30 +251,30 @@ Take for example this Java code from a hypothetical payroll system:
 ```java
 class PayrollRunner {
 
-    EmployeeRepo employeeRepo;
-    BankAchClient achClient;
-    PayCalculator payCalc;
+  EmployeeRepo employeeRepo;
+  BankAchClient achClient;
+  PayCalculator payCalc;
 
-    boolean runPayroll(long employeeId) {
-        try {
-            Employee employee = employeeRepo.find(employeeId)
-            if (employee == null) {
-                Logger.error("Missing employee " + employeeId);
-                return false;
-            }
-            Paycheck paycheck = payCalc.calculatePaycheck(employee);
-            if (paycheck == null) {
-                Logger.error("No paycheck for " + employeeId);
-                return false;
-            }
-            String companyAcctNo = PayrollConfig.get("companyAcctNo");
-            String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
-            String response = achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck);
-            return response.equals("SUCCESS");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+  boolean runPayroll(long employeeId) {
+    try {
+      Employee employee = employeeRepo.find(employeeId)
+      if (employee == null) {
+        Logger.error("Missing employee " + employeeId);
+        return false;
+      }
+      Paycheck paycheck = payCalc.calculatePaycheck(employee);
+      if (paycheck == null) {
+        Logger.error("No paycheck for " + employeeId);
+        return false;
+      }
+      String companyAcctNo = PayrollConfig.get("companyAcctNo");
+      String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
+      String response = achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck);
+      return response.equals("SUCCESS");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+  }
 }
 ```
 :::
@@ -292,49 +292,53 @@ _These effects are not obvious from the code above_. I have rewritten it to hand
 ```java
 class PayrollRunner {
 
-    EmployeeRepo employeeRepo;
-    BankAchClient achClient;
-    PayCalculator payCalc;
+  EmployeeRepo employeeRepo;
+  BankAchClient achClient;
+  PayCalculator payCalc;
 
-    void runPayroll(long employeeId) throws PayrollException, MissingConfigException {
-        Employee employee;
-        try {
-            employee = employeeRepo.find(employeeId);
-            if (employee == null) {
-                Logger.error("Missing employee " + employeeId);
-                throw new MissingEmployeeException(employeeId);
-            }
-        } catch (SQLException exception) {
-            throw new PayrollException("Error looking up employee " + employeeId, exception);
-        }
-        Paycheck paycheck = payCalc.calculatePaycheck(employee);
-        if (paycheck == null) {
-            Logger.error("No paycheck for " + employeeId);
-            throw new PayrollMissingException(employeeId);
-        }
-        String companyAcctNo = PayrollConfig.get("companyAcctNo");
-        if (companyAcctNo == null) {
-            throw new MissingConfigException("companyAcctNo");
-        }
-        String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
-        if (companyRoutingNo == null) {
-            throw new MissingConfigException("companyRoutingNo");
-        }
-        String response;
-        try {
-            response = = achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck);
-        } catch (AchException exception) {
-            throw new PayrollException("Failed to deposit paycheck for employee " + employee, exception);
-        }
-        if (!response.equals("SUCCESS")) {
-            throw new DepositPaycheckException("Received error response when depositing paycheck for employee " + employeeId + ": " + response);
-        }
+  void runPayroll(long employeeId) throws PayrollException, MissingConfigException {
+    Employee employee;
+    try {
+      employee = employeeRepo.find(employeeId);
+      if (employee == null) {
+        Logger.error("Missing employee " + employeeId);
+        throw new MissingEmployeeException(employeeId);
+      }
+    } catch (SQLException exception) {
+      throw new PayrollException("Error looking up employee " + employeeId, exception);
     }
+ 
+    Paycheck paycheck = payCalc.calculatePaycheck(employee);
+    if (paycheck == null) {
+      Logger.error("No paycheck for " + employeeId);
+      throw new PayrollMissingException(employeeId);
+    }
+
+    String companyAcctNo = PayrollConfig.get("companyAcctNo");
+    if (companyAcctNo == null) {
+      throw new MissingConfigException("companyAcctNo");
+    }
+
+    String companyRoutingNo = PayrollConfig.get("companyRoutingNo");
+    if (companyRoutingNo == null) {
+      throw new MissingConfigException("companyRoutingNo");
+    }
+
+    String response;
+    try {
+      response = achClient.depositPaycheck(companyAcctNo, companyRoutingNo, paycheck);
+    } catch (AchException exception) {
+      throw new PayrollException("Failed to deposit paycheck for employee " + employee, exception);
+    }
+    if (!response.equals("SUCCESS")) {
+      throw new DepositPaycheckException("Received error response when depositing paycheck for employee " + employeeId + ": " + response);
+    }
+  }
 }
 ```
 :::
 
-There's a large amount of complexity in this code due to effects. In order to make clear all effects and where they occur, I have leveraged checked exceptions and all exceptions that are known to be thrown by other functions are translated into exceptions representing the domain of this operation. As all false cases effectively communicated no information so they have been removed and replaced with exceptions typed according to the reason for failure. The operation now returns void as it is side-effecting and any return for success would be superfluous.
+There's a large amount of complexity in this code due to various effects. In order to make clear all effects and where they occur, I have leveraged checked exceptions and all exceptions that are known to be thrown by other functions are translated into exceptions representing the domain of this operation. As all false cases effectively communicated no information so they have been removed and replaced with exceptions typed according to the reason for failure. The operation now returns void as it is side-effecting and any return for success would be superfluous.
 
 There are a number of checks along the dimension of presence. There's several along the dimension of success. Each operation is dependent upon the success of the operation preceding it, following a _procedurally validated_ imperative flow.
 
