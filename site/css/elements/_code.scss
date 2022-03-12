@@ -51,19 +51,21 @@ div.sourceCode {
 
   .shadow-left {
     left: 0;
-    background: radial-gradient(farthest-side at 0 50%, rgba(34, 51, 34, 0.45), transparent);
-    background-size: 0.7em 100%;
+    background: radial-gradient(farthest-side at 0 47.5%, rgba(34, 51, 34, 0.35), transparent);
+    background-size: 0.7em 105%;
     background-repeat: no-repeat;
     opacity: 0;
     border-left: $border-very-thin;
+    border-radius: 0.2em 0 0 0.2em;
   }
 
   .shadow-right {
     right: 0;
-    background: radial-gradient(farthest-side at 100% 50%, rgba(34, 51, 34, 0.45), transparent);
-    background-size: 0.7em 100%;
+    background: radial-gradient(farthest-side at 100% 47.5%, rgba(34, 51, 34, 0.35), transparent);
+    background-size: 0.7em 105%;
     background-repeat: no-repeat;
     border-right: $border-very-thin;
+    border-radius: 0 0.2em 0.2em 0;
   }
 }
 
