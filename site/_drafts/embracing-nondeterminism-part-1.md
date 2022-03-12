@@ -67,7 +67,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Functors** are a programming pattern explored in this post. Think of them as an analog of a **design pattern** found in object-oriented programming.
 
-**Terms** are identifiers naming unitary or indivisible variables and types.
+**Terms** are identifiers naming unitary or indivisible variables and types. 
 
 * For example, in the declaration:
 
@@ -183,7 +183,7 @@ You might be thinking that these cases are a given when working with database co
 Can you think of some program operations that produce undesired cases in addition to their desired output? How might these cases cause code to become complex?
 
 :::{.wide-list-items}
-* When a program starts, it may **read configuration** from the environment, a database, or files. Reading configuration values may be blocking or asynchronous, and some configuration keys may not have associated values.
+* When a program starts, it may **read configuration** from the environment, a database, or files. Reading configuration values may be blocking or asynchronous, and some configuration keys may not have associated values. 
 * **Database queries** produce an unknown length of rows, and may fail due to incorrect syntax, a database error, or network fault. Receiving an unknown length of rows imposes specific handling if all you want is _just one row_ and any guarantees that you're retrieving the correct one must be manually enforced.
 * **API calls** may be blocking or require async IO, they may fail for any reason, and the data they return may or may not conform to an expected structure.
 * **Task management** of long-running operations requires async IO and managing limited computing resources. Tasks may fail for any reason or they may never complete. You have to wait for the result to be available in order to use it.
@@ -203,7 +203,7 @@ Complexities can be characterized in terms of **effects**. The operations listed
 
 * Some configuration keys may not have an associated value.
 * Some database queries expect one row to be returned, but instead no rows may be found.
-
+ 
 **Length**
 
 * Database queries may return zero or many rows.
@@ -212,7 +212,7 @@ Complexities can be characterized in terms of **effects**. The operations listed
 **Validity**
 
 * User-provided input, server requests, and API responses all require validation before they may be used.
-
+ 
 **Success**
 
 * Some operations fail with an exception, which can hide potential error cases.
@@ -225,7 +225,7 @@ Complexities can be characterized in terms of **effects**. The operations listed
 * Operations may be concurrent, paused, or interrupted.
 * Operations may block execution of the calling operation.
 * Interacting with concurrency primitives may block execution and produce nondeterministic outputs.
-
+ 
 **Time**
 
 * Task management makes no guarantees how long any particular task will take to run.
@@ -303,7 +303,7 @@ class PayrollRunner {
     } catch (SQLException exception) {
       throw new PayrollException("Error looking up employee " + employeeId, exception);
     }
-
+ 
     Paycheck paycheck = payCalc.calculatePaycheck(employee);
     if (paycheck == null) {
       Logger.error("No paycheck for " + employeeId);
@@ -758,13 +758,13 @@ In order to be a functor, a context defining a `map` function must satisfy two l
 
 1. Preservation of identity functions:
 
-    ```{.scala .numberLines}
+    ```scala
     context.map(id) == id(context)
     ```
 
 2. Preservation of function composition:
 
-    ```{.scala .numberLines}
+    ```scala
     context.map(g ∘ f) == context.map(f).map(g)
     ```
 
@@ -773,7 +773,7 @@ Here are the two laws applied against Scala's builtin `List` type, which defines
 :::{.numberLines}
 ```scala
 def preservesIdentityFunctions(list: List[Int]): Unit =
-  assert(list.map(identity(_)) == identity(list))
+  assert(list.map(identity) == identity(list))
 
 def preservesFunctionComposition(list: List[Int]): Unit = {
   val f: Int => Int = _ + 3
