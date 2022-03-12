@@ -13,8 +13,8 @@ function writeCopyrightYear() {
 }
 
 function addCodeScrolling() {
-    document.querySelectorAll("div.sourceCode").forEach(wrapper => {
-        let content = wrapper.querySelector("pre.sourceCode")
+    document.querySelectorAll("pre.sourceCode").forEach(wrapper => {
+        let content = wrapper.querySelector("code.sourceCode")
         let contentScrollWidth = content.scrollWidth - wrapper.offsetWidth
         if (contentScrollWidth <= 0) {
             return;

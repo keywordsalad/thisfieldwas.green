@@ -36,43 +36,9 @@ code {
   .wa { color: orange; font-weight: bold; font-style: italic; } /* Warning */
 }
 
-div.sourceCode {
-  position: relative;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-
-  .shadow {
-    position: absolute;
-    top: 0.5em;
-    bottom: 0.5em;
-    width: 0.7em;
-  }
-
-  .shadow-left {
-    left: 0;
-    background: radial-gradient(farthest-side at 0 47.5%, rgba(34, 51, 34, 0.35), transparent);
-    background-size: 0.7em 105%;
-    background-repeat: no-repeat;
-    opacity: 0;
-    border-left: $border-very-thin;
-    border-radius: 0.2em 0 0 0.2em;
-  }
-
-  .shadow-right {
-    right: 0;
-    background: radial-gradient(farthest-side at 100% 47.5%, rgba(34, 51, 34, 0.35), transparent);
-    background-size: 0.7em 105%;
-    background-repeat: no-repeat;
-    border-right: $border-very-thin;
-    border-radius: 0 0.2em 0.2em 0;
-  }
-}
-
 pre.sourceCode {
   margin: 1em 0;
-  padding: 0;
-  overflow-x: scroll;
+  @include shadow-scroll-x;
 
   code.sourceCode {
     color: $source-code-color;
@@ -86,6 +52,7 @@ pre.sourceCode {
     font-size: $code-font-size;
     white-space: pre;
     word-wrap: normal;
+    overflow-x: scroll;
 
     > span {
       display: block;
@@ -123,6 +90,14 @@ pre.sourceCode {
       &::before {
         content: counter(line-number);
       }
+    }
+
+    &:first-child a:first-child {
+      padding-top: 0.3em;
+    }
+
+    &:last-child a:first-child {
+      padding-bottom: 0.3em;
     }
   }
 }
