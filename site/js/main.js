@@ -19,7 +19,7 @@ function writeCopyrightYear() {
 }
 
 function updateScrollShadowsSelector(selector) {
-    document.querySelectorAll(selector).forEach(wrapper => updateScrollShadows(wrapper))
+    document.querySelectorAll(selector).forEach(updateScrollShadows)
 }
 
 function updateScrollShadows(wrapper) {
