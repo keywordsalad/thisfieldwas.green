@@ -54,7 +54,15 @@ aside, figure {
     }
   }
 
-  figcaption {
-    @include block;
+  .aside-content {
+    padding: 1em 0.5em;
+
+    & > *:first-child {
+      margin-top: 0;
+    }
+
+    & > *:last-child {
+      margin-bottom: 0;
+    }
   }
 }
