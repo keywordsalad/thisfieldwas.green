@@ -1,0 +1,84 @@
+$shadow-default-color: rgba(34, 51, 34, 0.35);
+$shadow-length: 105%;
+$shadow-width: 0.7em;
+$shadow-center: 47.5%;
+$shadow-border: $border-very-thin;
+$shadow-border-radius: 0.2em;
+
+@mixin shadow-scroll-base {
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+@mixin shadow-scroll-x-base($shadow-color: $shadow-default-color) {
+  .shadow-x {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: $shadow-width;
+  }
+
+  .shadow-left {
+    left: 0;
+    background: radial-gradient(farthest-side at 0 $shadow-center, $shadow-color, transparent);
+    background-size: $shadow-width $shadow-length;
+    background-repeat: no-repeat;
+    opacity: 0;
+    border-left: $shadow-border;
+    border-radius: $shadow-border-radius 0 0 $shadow-border-radius;
+  }
+
+  .shadow-right {
+    right: 0;
+    background: radial-gradient(farthest-side at 100% $shadow-center, $shadow-color, transparent);
+    background-size: $shadow-width $shadow-length;
+    background-repeat: no-repeat;
+    border-right: $shadow-border;
+    border-radius: 0 $shadow-border-radius $shadow-border-radius 0;
+  }
+}
+
+@mixin shadow-scroll-y-base($shadow-color: $shadow-default-color) {
+  .shadow-y {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: $shadow-width;
+  }
+
+  .shadow-top {
+    top: 0;
+    background: radial-gradient(farthest-side at $shadow-center 0%, $shadow-color, transparent);
+    background-size: $shadow-length $shadow-width;
+    background-repeat: no-repeat;
+    opacity: 0;
+    border-top: $shadow-border;
+    border-radius: $shadow-border-radius $shadow-border-radius 0 0;
+  }
+
+  .shadow-bottom {
+    bottom: 0;
+    background: radial-gradient(farthest-side at $shadow-center 100%, $shadow-color, transparent);
+    background-size: $shadow-length $shadow-width;
+    background-repeat: no-repeat;
+    border-bottom: $shadow-border;
+    border-radius: 0 0 $shadow-border-radius $shadow-border-radius;
+  }
+}
+
+@mixin shadow-scroll($shadow-color: $shadow-default-color) {
+  @include shadow-scroll-base;
+  @include shadow-scroll-x-base($shadow-color);
+  @include shadow-scroll-y-base($shadow-color);
+}
+
+@mixin shadow-scroll-x($shadow-color: $shadow-default-color) {
+  @include shadow-scroll-base;
+  @include shadow-scroll-x-base($shadow-color);
+}
+
+@mixin shadow-scroll-y($shadow-color: $shadow-default-color) {
+  @include shadow-scroll-base;
+  @include shadow-scroll-y-base($shadow-color);
+}

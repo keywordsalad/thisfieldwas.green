@@ -1,0 +1,31 @@
+@import "theme";
+
+#functor-diagrams {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+#img-list-functor, #img-tree-functor {
+  @include media('<=tablet') {
+    width: 100%;
+  }
+
+  .content {
+    @include shadow-scroll-x;
+    overflow: hidden;
+
+    a {
+      overflow-x: scroll;
+    }
+  }
+}
+
+#img-list-functor img {
+  width: 256px;
+}
+
+#img-tree-functor img {
+  width: 512px;
+}

@@ -1,6 +1,4 @@
 @use "sass:color";
-@import "variables";
-@import "containers";
 
 html {
   width: 100%;
@@ -34,8 +32,9 @@ p {
   @include block;
 }
 
-ul {
-  @include block;
+ul, ol {
+  margin: 1em 0;
+  padding: 0;
 }
 
 li > ul {
@@ -43,25 +42,31 @@ li > ul {
 }
 
 .wide-list-items li {
-  @include block;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 dl {
   @include block;
 }
 
-dt {
-  color: $header-color;
-  font-family: $header-font-family;
-  font-style: italic;
-  font-weight: bold;
-  font-size: $header-font-size-ratio * 1em;
-  text-decoration: underline;
+dd + dt {
+  margin-top: 1em;
 }
 
-dd {
-  @include block;
+dt {
+  color: $text-color-emphasize;
+  font-weight: bold;
+}
+
+dd, li {
+  display: list-item;
+  list-style-type: disc;
   margin-left: 1.5em;
+}
+
+ol > li {
+  list-style-type: decimal;
 }
 
 blockquote {
@@ -117,45 +122,5 @@ a em {
 
   code {
     font-size: inherit;
-  }
-}
-
-@mixin grass-icon-bullet {
-  background-image: url("/images/grass.svg");
-  background-size: 1.3em 1.3em;
-  background-position: 0 0.1em;
-  background-repeat: no-repeat;
-  padding-left: 1.6em;
-}
-
-@mixin shadow-scroll-x {
-  padding: 0;
-  overflow: hidden;
-  position: relative;
-
-  .shadow {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 0.7em;
-  }
-
-  .shadow-left {
-    left: 0;
-    background: radial-gradient(farthest-side at 0 47.5%, rgba(34, 51, 34, 0.35), transparent);
-    background-size: 0.7em 105%;
-    background-repeat: no-repeat;
-    opacity: 0;
-    border-left: $border-very-thin;
-    border-radius: 0.2em 0 0 0.2em;
-  }
-
-  .shadow-right {
-    right: 0;
-    background: radial-gradient(farthest-side at 100% 47.5%, rgba(34, 51, 34, 0.35), transparent);
-    background-size: 0.7em 105%;
-    background-repeat: no-repeat;
-    border-right: $border-very-thin;
-    border-radius: 0 0.2em 0.2em 0;
   }
 }

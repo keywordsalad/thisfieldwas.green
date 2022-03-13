@@ -1,0 +1,8 @@
+@import "theme";
+
+#closet-computer-in-context {
+  @include aside(right);
+  img {
+    width: 30rem;
+  }
+}

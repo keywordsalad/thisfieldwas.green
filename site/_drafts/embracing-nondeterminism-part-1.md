@@ -13,11 +13,15 @@ og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
     alt: Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.
+stylesheets:
+  - css/posts/embracing-nondeterminism-part-1.scss
 ---
 
 Have you ever received an unexpected `null` reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?
 
 <!--more-->
+
+{{add "scrollShadowsXSelectors" "#img-tree-functor .content"}}
 
 Significant portions of program logic exist to address specific cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
 
@@ -61,7 +65,7 @@ Where there is conceptual overlap with object oriented programming, I will lever
 
 **Functions** are a _special case_ of expressions that map some type `A` to some type `B`. They are described by `A => B`.
 
-**Terms** are identifiers naming unitary or indivisible variables and types. 
+**Terms** are identifiers naming unitary or indivisible variables and types.
 
 * For example, in the declaration:
 
@@ -166,9 +170,9 @@ Functions in real world programs must internally interact with implicit inputs a
 
 Errors and unknown quantities as **effects** of these operations are opaque in functions modeled as simple input to output, as in `getEmployee : Int => Employee`. The signature of this function requires _[tacit knowledge][]_ of what effects may determine how an `Employee` is produced from it. For example:
 
-* An associated `Employee` may not be found.
-* The returned `Employee` may change between applications of the same `Int` employee ID.
-* The database or network may fault and the function generates an exception that must be handled.
+1. An associated `Employee` may not be found.
+2. The returned `Employee` may change between applications of the same `Int` employee ID.
+3. The database or network may fault and the function generates an exception that must be handled.
 
 You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are **effects** which describe the circumstances under which an `Employee` may be produced and can be modeled accordingly as part of the typed API of `getEmployee`. I will soon explain how this modeling works; first we will consider how to characterize complexity.
 
@@ -177,7 +181,7 @@ You might be thinking that these cases are a given when working with database co
 Can you think of some program operations that produce undesired cases in addition to their desired output? How might these cases cause code to become complex?
 
 :::{.wide-list-items}
-* When a program starts, it may **read configuration** from the environment, a database, or files. Reading configuration values may be blocking or asynchronous, and some configuration keys may not have associated values. 
+* When a program starts, it may **read configuration** from the environment, a database, or files. Reading configuration values may be blocking or asynchronous, and some configuration keys may not have associated values.
 * **Database queries** produce an unknown length of rows, and may fail due to incorrect syntax, a database error, or network fault. Receiving an unknown length of rows imposes specific handling if all you want is _just one row_ and any guarantees that you're retrieving the correct one must be manually enforced.
 * **API calls** may be blocking or require async IO, they may fail for any reason, and the data they return may or may not conform to an expected structure.
 * **Task management** of long-running operations requires async IO and managing limited computing resources. Tasks may fail for any reason or they may never complete. You have to wait for the result to be available in order to use it.
@@ -193,43 +197,36 @@ Can you think of some program operations that produce undesired cases in additio
 
 Complexities can be characterized in terms of **effects**. The operations listed above impose complexity because they feature the effects of:
 
-**Presence**
+Presence
+  : Some configuration keys may not have an associated value.
+  : Some database queries expect one row to be returned, but instead no rows may be found.
 
-* Some configuration keys may not have an associated value.
-* Some database queries expect one row to be returned, but instead no rows may be found.
- 
-**Length**
+Length
+  : Database queries may return zero or many rows.
+  : Collections don't have a totally guaranteed or fixed size.
 
-* Database queries may return zero or many rows.
-* Collections don't have a totally guaranteed or fixed size.
+Validity
+  : User-provided input, server requests, and API responses all require validation before they may be used.
 
-**Validity**
+Success
+  : Some operations fail with an exception, which can hide potential error cases.
+  : Some operations may be aborted.
 
-* User-provided input, server requests, and API responses all require validation before they may be used.
- 
-**Success**
+IO
+  : Operations are dependent on external systems' state as **implicit input**
+  : Operations can affect external systems' state as **implicit output**.
+  : Operations may be concurrent, paused, or interrupted.
+  : Operations may block execution of the calling operation.
+  : Interacting with concurrency primitives may block execution and produce nondeterministic outputs.
 
-* Some operations fail with an exception, which can hide potential error cases.
-* Some operations may be aborted.
+Time
+  : Task management makes no guarantees how long any particular task will take to run.
+  : API calls require an indeterminate amount of time.
+  : Database queries take time to run and return rows as they are found.
+  : Operations dependent on async output must await the result.
 
-**IO**
-
-* Operations are dependent on external systems' state as **implicit input**
-* Operations can affect external systems' state as **implicit output**.
-* Operations may be concurrent, paused, or interrupted.
-* Operations may block execution of the calling operation.
-* Interacting with concurrency primitives may block execution and produce nondeterministic outputs.
- 
-**Time**
-
-* Task management makes no guarantees how long any particular task will take to run.
-* API calls require an indeterminate amount of time.
-* Database queries take time to run and return rows as they are found.
-* Operations dependent on async output must await the result.
-
-**State**
-
-* Retry strategies must track previous state in order to calculate their next retry periods.
+State
+  : Retry strategies must track previous state in order to calculate their next retry periods.
 
 The actual list of effects is innumerable, but these ones are common.
 
@@ -297,7 +294,7 @@ class PayrollRunner {
     } catch (SQLException exception) {
       throw new PayrollException("Error looking up employee " + employeeId, exception);
     }
- 
+
     Paycheck paycheck = payCalc.calculatePaycheck(employee);
     if (paycheck == null) {
       Logger.error("No paycheck for " + employeeId);
@@ -361,7 +358,7 @@ Previously I described programs as a case of function composition: `h = g ∘ f`
 
 ## Contexts and effects
 
-What is a **context**? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`. 
+What is a **context**? _A context is a setting where stuff exists under some circumstances._ Stuff such as instances of term `A` in the _context_ of `F[A]`.
 
 > Contexts in Scala may be neatly represented by a letter and brackets such as `F[_]` read as _context F_ with an underscore when the type of the term is unspecified, and `F[A]` read as _F of A_ when the term is known to be of type `A`. Other letters work nicely of course, as do concrete names, as in `Option[Int]` or _Option of Int_.
 
@@ -562,52 +559,44 @@ Because there is no way to generalize extracting a term from a context, functors
 
 Most importantly, by keeping all operations against terms within their context, the context’s specific effects remain abstracted. Asynchronous operations with `Future[A]` remain asynchronous, the length of `List[A]` remains unknown, and `Option[A]` may or may not be present.
 
-Functors thus _preserve structure_ by keeping operations within the context. For example, applying `map` on a `List[A]` or `BinaryTree[A]`:
+Functors thus _preserve structure_ by keeping operations within the context. For example, applying `map` on a `List[A]` or `BinaryTree[A]`.
 
-```{.nowrap .numberLines}
-def f(n) = n * 2
+:::{#functor-diagrams}
+{{imageFigure id: "img-list-functor",
+              src: getUrl "images/embracing-nondeterminism/list-functor-512x512.png",
+              title: "Applying <code>map</code> to a <code>List[Int]</code>."}}
+{{imageFigure id: "img-tree-functor",
+              src: getUrl "images/embracing-nondeterminism/binary-tree-functor-1024x340.png",
+              title: "Applying <code>map</code> to a <code>BinaryTree[Int]</code>."}}
+:::
 
-map([  1,    2,    3,    4 ])(f)
-       |     |     |     |
-       v     v     v     v
-    [f(1), f(2), f(3), f(4)]
-       |     |     |     |
-       v     v     v     v
-    [  1,    4,    6,    8 ]
+The application of `map` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as a function has been applied to them, and `BinaryTree[B]` may re-balance itself accordingly. What matters here is that the structures are coherent and identifiable. Both `List[B]` and `BinaryTree[B]` are created from this operation and the originating `List[A]` and `BinaryTree[A]` still exist in their original state.
 
-          4          -->          f(4)           -->         8
-        /   \                   /      \                   /   \
- map(  2     6  )(f) -->     f(2)       f(6)     -->     4       12
-      / \   / \              /   \     /    \          /  \     /  \
-     1   3 5   7     -->  f(1)  f(3) f(5)  f(7)  -->  1    6  10    14
-```
+Compare with using iteration using a `for` loop in this JavaScript code:
 
-The application of `map` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as a function has been applied to them, and `BinaryTree[B]` specifically may re-balance itself. What matters here is that the structures are coherent and identifiable.
+:::{.numberLines}
+```javascript
+const list = [1, 2, 3, 4, 5, 6, 7]
+const square = x => x * x
 
-Compare with iteration using a `for` loop:
-
-```{.nowrap .numberLines}
-[1, 2, 3, 4] -> for(x) -> x={1, 2, 3, 4, 5, 6, 7}
-
-      4
-    /   \
-   2     6   -> for(x) -> x={1, 2, 3, 4, 5, 6, 7}
-  / \   / \
- 1   3 5   7
-
-// or more concretely...
-nums = [1, 2, 3, 4]
-numx2 = []
-for (x in nums) {
-  numx2.push(x * 2)
+for (const x in list) {
+  const x2 = square(x) // apply function to the current value
+  results.push(x2) // append to new list
 }
 ```
+:::
 
-Iteration as a form of lowering _destroys structure_. In order to get a `List[B]` back you would have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
+Iteration as a form of lowering _destroys structure_. In order to get a `List[B]` back you have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural_ steps.
 
 This isn't to say that functional programming is only about iteration and loops versus `map`. Can you think of other operations that might destroy structure? For example, if you use an `await` operation on a `Future[A]` you will destroy its _asynchronous structure_ and potentially harm the performance of your program.
 
-> Where the type of your context is known, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default instance otherwise.
+> Where the type of your context is known, it may make sense to pull the structure apart to extract the term. A common use case with `Option` is to extract the term if it is present and provide a default instance otherwise:
+>
+> :::{.numberLines}
+> ```scala
+> val myLookup = map.find("myKey").getOrElse("myDefault")
+> ```
+> :::
 
 #### Context `F[A]` must produce some term `A`
 
@@ -838,6 +827,17 @@ def combine(a: A, b: B): C
 How do you apply `combine` to the terms `A` and `B` produced by the contexts? What happens if one of the contexts is in an undesirable case? At first blush it appears that `map` might work, but `combine` takes two arguments. You need a specialized functor in order to apply `combine`!
 
 In my next post, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs.
+
+> **Acknowledgements**
+>
+> Many of my professional network, colleagues, and friends helped me develop this material and proof read my many drafts. I would like to especially thank:
+>
+> * [Angi Shen](https://www.linkedin.com/in/angishen/), my team mate at Credit Karma, for her many questions about functors and related patterns and forcing me to learn how to teach these subjects.
+> * Ivy Huang, my team mate at Credit Karma, for providing the initial impetus to write this piece, and for helping me develop this material both in this format and for use in technical training.
+> * [Rex Fenley](https://www.linkedin.com/in/rexmas/), my category theory study buddy, for helping me refine concepts and develop vocabulary to carry the subject.
+> * [Rodrigo Manubens](https://www.linkedin.com/in/rodrigo-manubens-7a862260/), my friend and colleague at Credit Karma, for highlighting the hard parts and praising the good parts.
+> * [Mindy Or](https://www.linkedin.com/in/mindy-or-2658857a/), my friend and former ThoughtWorks colleague, for providing perspectives for those new to this subject matter and forcing me to think about what points I was actually trying to make.
+> * [Aaron Erickson](https://www.linkedin.com/in/aaronerickson/), my former ThoughtWorks colleague and seasoned functional programmer, for proof reading and providing criticism.
 
 [Defensive programming]: https://en.wikipedia.org/wiki/Defensive_programming
 [tacit knowledge]: https://en.wikipedia.org/wiki/Tacit_knowledge

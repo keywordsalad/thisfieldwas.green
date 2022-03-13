@@ -1,16 +1,7 @@
 @import "vendor/include-media";
 
-@import "fonts";
-@import "elements/default";
-@import "elements/containers";
-@import "elements/headers";
-@import "elements/asides";
-@import "elements/code";
-@import "elements/tag-cloud";
-@import "elements/blog";
-
-@import "layout/header";
-@import "layout/main";
-@import "layout/main-nav";
-@import "layout/footer";
-@import "layout/post";
+@import "variables";
+@import "mixins/asides";
+@import "mixins/containers";
+@import "mixins/grass-icon-bullet";
+@import "mixins/shadow-scroll";

@@ -41,7 +41,7 @@ $code-color-hyperlink: $text-color-hyperlink;
 
 // $aside-background: color.adjust(honeydew, $hue: -10%, $saturation: -50%, $lightness: -3%);
 $aside-background: #f0fff0; // original: honeydew / #f0fff0
-$aside-font-family: $font-family-serif;
+$aside-font-family: $font-family-sans-serif;
 $aside-font-size: 1.1em;
 
 $border-color-dark: darken($signature-green, 4%);

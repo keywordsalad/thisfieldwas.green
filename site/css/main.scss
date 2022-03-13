@@ -1,5 +1,15 @@
 @import "theme";
-@import "pages/homepage";
-@import "posts/copilot-as-a-hot-butter-knife";
-@import "posts/redoing-my-website";
-@import "posts/reasons-why-my-website-is-offline"
+
+@import "fonts";
+@import "elements/default";
+@import "elements/headers";
+@import "elements/asides";
+@import "elements/code";
+@import "elements/tag-cloud";
+@import "elements/blog";
+
+@import "layout/header";
+@import "layout/main";
+@import "layout/main-nav";
+@import "layout/footer";
+@import "layout/post";

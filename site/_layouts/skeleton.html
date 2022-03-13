@@ -19,7 +19,12 @@
 {{-#end-}}
 
 <link rel="stylesheet" href="/css/main.css">
+{{#for stylesheets-}}
+<link rel="stylesheet" href="{{getUrl item}}">
+{{-#end-}}
+
 <script src="{{getUrl 'js/main.js'}}"></script>
+{{partial "scroll-shadows"}}
 
 </head>
 <body>

@@ -1,0 +1,13 @@
+<script src="{{getUrl 'js/scroll-shadows.js'}}"></script>
+<script>
+  {{add "scrollShadowsXSelectors" "pre.sourceCode"-}}
+  let scrollShadowsXSelectors = [{{#for scrollShadowsXSelectors}}"{{item}}",{{#end}}]
+  let scrollShadowsYSelectors = [{{#for scrollShadowsYSelectors}}"{{item}}",{{#end}}]
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>

@@ -22,6 +22,9 @@ defaultFields =
       getUrlField "getUrl",
       getAbsUrlField "getAbsUrl" "siteRoot" "getUrl",
       putField "put",
+      addField "add",
+      putBlockField "putBlock",
+      addBlockField "addBlock",
       linkedTitleField,
       metadataPriorityField "updated" ["updated", "published", "created"],
       metadataPriorityField "published" ["updated", "created"],
@@ -226,11 +229,25 @@ metadataPriorityField key priorityKeys = field key f
 namedMetadataField :: String -> Context String
 namedMetadataField key = field key $ lift . getMetadataField key
 
-putField :: forall a. String -> Context a
+putField :: String -> Context a
 putField key = functionField key tplPut
+
+addField :: forall a. String -> Context a
+addField key = functionField2 key f
+  where
+    f (name :: String) (value :: ContextValue a) = do
+      current <- tplGet name `catchError` \_ -> return []
+      tplPut $ constField name (value : current)
 
 putBlockField :: String -> Context a
 putBlockField key = functionField2 key f
   where
     f (name :: String) (blocks :: [Block]) = do
       tplPut $ constField name blocks
+
+addBlockField :: String -> Context a
+addBlockField key = functionField2 key f
+  where
+    f (name :: String) (blocks :: [Block]) = do
+      current <- tplGet name `catchError` \_ -> return []
+      tplPut $ constField name (current ++ blocks)

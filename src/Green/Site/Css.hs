@@ -8,7 +8,7 @@ scss :: SiteConfig -> Rules ()
 scss siteConfig = do
   scssDependency <- makePatternDependency "css/**"
   rulesExtraDependencies [scssDependency] $
-    match "css/main.scss" do
+    match ("css/main.scss" .||. "css/pages/*.scss" .||. "css/posts/*.scss") do
       route $ setExtension "css"
       compile do
         css <- withItemBody compileSass =<< getResourceString

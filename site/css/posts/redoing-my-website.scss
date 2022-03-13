@@ -1,4 +1,6 @@
-#family-guy-css-aside {
+@import "theme";
+
+#family-guy-css {
   @include aside(right);
 
   img {

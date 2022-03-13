@@ -9,18 +9,18 @@
 @mixin layout-section {
   @include contain-floats;
   margin: 0;
-  padding: 0 1rem;
+  padding: 0 1em;
   clear: both;
   .content-bound {
     max-width: $body-max-width;
-    padding: 0 0.5rem;
+    padding: 0 0.5em;
     margin: 0 auto;
     @content
   }
 }
 
 @mixin block {
-  margin: 1rem 0;
+  margin: 1em 0;
 }
 
 @mixin scrollable {
