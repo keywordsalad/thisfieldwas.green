@@ -27,6 +27,7 @@ default: &default
   debug-settings:
     preview: false
     inflate-css: true
+    inflate-js: true
 
 prod:
   <<: *default

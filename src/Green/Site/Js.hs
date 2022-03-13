@@ -1,14 +1,19 @@
 module Green.Site.Js where
 
 import qualified Data.ByteString.Lazy.Char8 as C
-import Hakyll
+import Green.Common
+import Green.Config
 import Text.Jasmine
 
-js :: Rules ()
-js =
+js :: SiteConfig -> Rules ()
+js config =
   match "js/**.js" do
     route idRoute
     compile do
-      let minifyJS = C.unpack . minify . C.pack . itemBody
       s <- getResourceString
-      return $ itemSetBody (minifyJS s) s
+      return $ itemSetBody (processJS $ itemBody s) s
+  where
+    processJS
+      | config ^. siteDebug . debugInflateJs = id
+      | otherwise = minifyJS
+    minifyJS = C.unpack . minify . C.pack

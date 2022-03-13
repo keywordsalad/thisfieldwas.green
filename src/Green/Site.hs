@@ -21,7 +21,7 @@ site :: SiteConfig -> Rules ()
 site config = do
   brokenLinks
   images
-  js
+  js config
   scss config
   templatesDependency <- templates
   rulesExtraDependencies [templatesDependency] do

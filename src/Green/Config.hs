@@ -11,7 +11,8 @@ import qualified Hakyll as H
 
 data SiteDebug = SiteDebug
   { _debugPreview :: Bool,
-    _debugInflateCss :: Bool
+    _debugInflateCss :: Bool,
+    _debugInflateJs :: Bool
   }
   deriving (Show)
 
@@ -21,7 +22,8 @@ defaultSiteDebug :: SiteDebug
 defaultSiteDebug =
   SiteDebug
     { _debugPreview = False,
-      _debugInflateCss = False
+      _debugInflateCss = False,
+      _debugInflateJs = False
     }
 
 instance FromJSON SiteDebug where
@@ -29,12 +31,14 @@ instance FromJSON SiteDebug where
     SiteDebug
       <$> debug .:? "preview" .!= (defaultSiteDebug ^. debugPreview)
       <*> debug .:? "inflate-css" .!= (defaultSiteDebug ^. debugInflateCss)
+      <*> debug .:? "inflate-js" .!= (defaultSiteDebug ^. debugInflateJs)
 
 instance ToJSON SiteDebug where
   toJSON SiteDebug {..} =
     object
       [ "preview" .= _debugPreview,
-        "inflate-css" .= _debugInflateCss
+        "inflate-css" .= _debugInflateCss,
+        "inflate-js" .= _debugInflateJs
       ]
 
 data SiteInfo = SiteInfo
@@ -206,8 +210,9 @@ parseSiteConfigJSON env timeLocale time = withObject "SiteConfig" \allConfig -> 
     envKey = fromMaybe "default" $ lookup "SITE_ENV" env
     overrideDebugSettings debug =
       debug
-        & debugInflateCss %~ (\x -> maybe x read $ lookup "SITE_INFLATE_CSS" env)
         & debugPreview %~ (\x -> maybe x read $ lookup "SITE_PREVIEW" env)
+        & debugInflateCss %~ (\x -> maybe x read $ lookup "SITE_INFLATE_CSS" env)
+        & debugInflateJs %~ (\x -> maybe x read $ lookup "SITE_INFLATE_JS" env)
 
 parseConfigYaml :: [(String, String)] -> TimeLocale -> ZonedTime -> ByteString -> Either String SiteConfig
 parseConfigYaml env timeLocale time =
