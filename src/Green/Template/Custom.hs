@@ -50,10 +50,3 @@ saveSnapshots snapshots = do
 applyContext :: Context a -> TemplateRunner a ()
 applyContext = tplPushContext
 {-# INLINE applyContext #-}
-
-evalContext :: Context String -> String -> Item String -> TemplateRunner String String
-evalContext context expression' =
-  fmap itemBody . lift . applyTemplates do
-    applyContext context
-    tplModifyItem $ return . itemSetBody expression'
-    applyContent

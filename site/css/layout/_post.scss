@@ -40,6 +40,16 @@
   }
 }
 
+.estimated-reading-time {
+  color: $text-color-light;
+  font-size: $text-font-size-small;
+  font-style: italic;
+
+  .length {
+    color: $text-color-emphasize;
+  }
+}
+
 .teaser-list {
   .teaser-item {
     border-top: $border-separator;
