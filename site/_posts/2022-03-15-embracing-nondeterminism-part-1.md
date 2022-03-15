@@ -834,7 +834,7 @@ In my next post, we will explore how **applicatives** enable working within two 
 > Many of my professional network, colleagues, and friends helped me develop this material and proof read my many drafts. I would like to especially thank:
 >
 > * [Angi Shen](https://www.linkedin.com/in/angishen/), my team mate at Credit Karma, for her many questions about functors and related patterns and forcing me to learn how to teach these subjects.
-> * Ivy Huang, my team mate at Credit Karma, for providing the initial impetus to write this piece, and for helping me develop this material both in this format and for use in technical training.
+> * [Ivy Huang](https://www.linkedin.com/in/shushu-huang-b2123324/), my team mate at Credit Karma, for providing the initial impetus to write this piece, and for helping me develop this material both in this format and for use in technical training.
 > * [Rex Fenley](https://www.linkedin.com/in/rexmas/), my category theory study buddy, for helping me refine concepts and develop vocabulary to carry the subject.
 > * [Rodrigo Manubens](https://www.linkedin.com/in/rodrigo-manubens-7a862260/), my friend and colleague at Credit Karma, for highlighting the hard parts and praising the good parts.
 > * [Mindy Or](https://www.linkedin.com/in/mindy-or-2658857a/), my friend and former ThoughtWorks colleague, for providing perspectives for those new to this subject matter and forcing me to think about what points I was actually trying to make.
