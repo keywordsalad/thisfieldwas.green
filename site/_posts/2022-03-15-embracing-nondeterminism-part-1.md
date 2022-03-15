@@ -4,6 +4,7 @@ description: Abstracting nondeterminism and complexity by modeling effects as fi
 author: Logan McGrath
 comments: true
 date: 2022-01-24T17:14:03-0800
+published: 2022-03-15T09:20:00-0700
 tags: functional programming, programming, scala, design patterns
 layout: post
 thumbnail: /images/tags/functional-programming/functional-grass-128x128.png

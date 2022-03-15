@@ -14,7 +14,7 @@ og:
     alt: Abstracting nondeterminism and complexity in contexts in order to consume products of two or more in parallel.
 ---
 
-In my last post {{ linkedTitle "_drafts/embracing-nondeterminism-part-1.md" }} we introduced **functors** as a design pattern used to abstract over the **effects** of nondeterminism and complexity inherent in programs. We modeled nondeterminism and complexity as **contexts** representing sets of effects. Using the functor's `map()` function, you are able to consume the terms produced by individual contexts. But what if you require two or more terms from as many contexts?
+In my last post {{ linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md" }} we introduced **functors** as a design pattern used to abstract over the **effects** of nondeterminism and complexity inherent in programs. We modeled nondeterminism and complexity as **contexts** representing sets of effects. Using the functor's `map()` function, you are able to consume the terms produced by individual contexts. But what if you require two or more terms from as many contexts?
 
 <!--more-->
 
