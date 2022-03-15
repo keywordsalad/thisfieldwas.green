@@ -165,7 +165,7 @@ getUri key id' = lift do
       (fail $ "no route by " ++ show key ++ " found for item " ++ show id')
       (return . ("/" ++))
       maybeRoute
-  let uri = stripSuffix "/index.html" definitelyRoute
+  let uri = stripSuffix "index.html" definitelyRoute
   return if null uri then "/" else uri
 
 absUrlField :: String -> String -> String -> Context a
