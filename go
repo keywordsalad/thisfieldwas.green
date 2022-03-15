@@ -95,6 +95,7 @@ _verify-prerequisites () {
   cp -r .git/ ./_site/.git/
   pushd ./_site
   git switch _site
+  git pull origin _site
   popd
 
   SITE_ENV=prod ⚡rebuild
@@ -102,7 +103,7 @@ _verify-prerequisites () {
   pushd ./_site
   git add .
   git commit -m "Build on $(date) generated from $sha"
-  git push origin "_site"
+  git push origin _site
 
   git tag -a "$tag" -m "Build on $(date) generated from $sha"
   git push origin "$tag"
