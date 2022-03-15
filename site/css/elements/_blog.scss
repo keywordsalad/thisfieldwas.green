@@ -6,6 +6,10 @@
   font-family: $font-family-serif;
 }
 
+.read-more {
+  clear: both;
+}
+
 .read-more:not(.no-border) {
   border-bottom: $border-separator;
   padding-bottom: 1em;
