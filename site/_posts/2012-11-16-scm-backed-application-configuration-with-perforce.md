@@ -4,7 +4,7 @@ author: Logan McGrath
 date: 2012-11-16T17:00:00-0600
 published: 2012-11-16T17:00:00-0600
 comments: true
-tags: configuration management, Perforce, Sinatra, AngularJS
+tags: configuration management, perforce, sinatra, angularjs
 layout: post
 ---
 

@@ -3,7 +3,7 @@ title: Using Perforce Chronicle for application configuration
 author: Logan McGrath
 date: 2012-11-07T13:54:00-0600
 published: 2012-11-07T13:54:00-0600
-tags: Perforce, configuration management
+tags: perforce, configuration management
 layout: post
 comments: true
 ---

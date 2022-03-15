@@ -4,7 +4,7 @@ author: Logan McGrath
 date: 2021-12-05T08:08:32-0800
 published: 2021-12-05T08:08:32-0800
 comments: true
-tags: hakyll, Haskell, yak shave
+tags: hakyll, haskell, yak shave
 layout: post
 contentClass: redoing-my-website
 changefreq: daily
