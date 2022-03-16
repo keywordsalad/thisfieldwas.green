@@ -30,8 +30,6 @@ _[Defensive programming][]_ as a practice tries to protect against errors and un
 
 In this post I will provide **effects** as a model for characterizing nondeterminism and unknowns in programs. I will introduce a **design pattern** to abstract complexity using this model.
 
-> The code that accompanies this post may be found [here]().
-
 ## Conventions
 
 **This post assumes familiarity with Scala code**. I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like **"math"**.
