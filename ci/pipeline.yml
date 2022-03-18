@@ -2,8 +2,38 @@
 jobs:
 ###############################################################################
 
-# Build and test the site
-- name: build-and-test-site
+# Build the site for preview
+- name: build-preview-site
+  max_in_flight: 1
+  public: true
+  interruptible: true
+  plan:
+  - get: prebaked-site-image
+    trigger: true
+  - get: site-source
+    trigger: true
+  - task: build-and-generate
+    image: prebaked-site-image
+    config:
+      platform: linux
+      inputs:
+      - name: site-source
+        path: /site-source
+      outputs:
+      - name: site-preview
+        path: /site-source/_site
+      run:
+        path: sh
+        args:
+        - -cx
+        - |
+          set -eux
+          ln -s /.stack-work /site-source/.stack-work
+          cd /site-source
+          SITE_ENV=preview ./go build
+
+# Build the site for test
+- name: test-site
   max_in_flight: 1
   public: true
   interruptible: true
@@ -19,9 +49,6 @@ jobs:
       inputs:
       - name: site-source
         path: /site-source
-      outputs:
-      - name: site-dist
-        path: /site-source/_site
       run:
         path: sh
         args:
@@ -30,8 +57,20 @@ jobs:
           set -eux
           ln -s /.stack-work /site-source/.stack-work
           cd /site-source
-          ./go build
-          ./go test
+          ./go test 
+
+# Deploy the site to preview
+- name: deploy-preview-site
+  max_in_flight: 1
+  public: true
+  interruptible: true
+  inputs:
+  - name: site-preview
+  plan:
+  - put: rsync-site-preview
+    params:
+      sync_dir: ((thisfieldwas_green.preview_dir))
+      rsync_opts: ["-ahp", "--del"]
 
 # Create the docker image with the library dependencies pre-built
 - name: build-prebaked-site-image
@@ -95,6 +134,15 @@ jobs:
 resources:
 ###############################################################################
 
+# Site preview deploy root
+- name: rsync-site-preview
+  type: rsync-resource
+  source:
+    server: ((thisfieldwas_green.server))
+    base_dir: /sync_directory
+    user : ((thisfieldwas_green.user))
+    private_key: ((thisfieldwas_green.ssh_private_key))
+
 # Site source code
 - name: site-source
   type: git
@@ -151,3 +199,13 @@ resources:
   icon: docker
   source:
     repository: concourse/oci-build-task
+
+###############################################################################
+resources_types:
+###############################################################################
+
+- name: rsync-resource
+  type: docker-image
+  source:
+      repository: mrsixw/concourse-rsync-resource
+      tag: latest
