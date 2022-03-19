@@ -1,6 +1,6 @@
 ---
 title: "Embracing Nondeterminism Part I: Contexts and Effects"
-description: Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.
+description: "Ever wonder what the purpose of that map() method was on so many objects? It's not just for arrays! I wrote about its use as an abstraction, and hopefully you'll find it useful."
 author: Logan McGrath
 comments: true
 date: 2022-01-24T17:14:03-0800
