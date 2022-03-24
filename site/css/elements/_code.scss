@@ -2,8 +2,7 @@ code {
   color: $code-color;
   white-space: pre;
   word-wrap: normal;
-  font-family: inherit;
-  text-decoration: underline;
+  font-family: $code-font-family;
 
   .al { color: red; } /* Alert */
   .an { color: saddlebrown; font-weight: bold; font-style: italic; } /* Annotation */
@@ -40,6 +39,10 @@ pre.sourceCode {
   margin: 1em 0;
   @include shadow-scroll-x;
 
+  blockquote & {
+    font-style: normal;
+  }
+
   code.sourceCode {
     color: $source-code-color;
     text-decoration: none;
@@ -48,7 +51,6 @@ pre.sourceCode {
     padding: 0;
     display: flex;
     flex-direction: column;
-    font-family: $code-font-family;
     font-size: $code-font-size;
     white-space: pre;
     word-wrap: normal;

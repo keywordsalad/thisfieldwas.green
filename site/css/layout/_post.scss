@@ -31,6 +31,12 @@
     color: $text-color-light;
   }
 
+  .post-updated {
+    color: $text-color-light;
+    font-size: $text-font-size-tiny;
+    font-style: italic;
+  }
+
   .post-categories {
     font-style: italic;
   }

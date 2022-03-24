@@ -99,7 +99,7 @@ a {
   text-decoration: underline;
 }
 
-a em {
+a em, a strong {
   color: $text-color-hyperlink;
 }
 

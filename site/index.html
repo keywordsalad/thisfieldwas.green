@@ -30,7 +30,7 @@ stylesheets:
 <ul>
   {{#for recentPosts}}
   <li>
-    <a href="{{url}}">{{title}}</a> - {{date | dateAs shortDate}}
+    <a href="{{url}}">{{title}}</a> - {{published | dateAs shortDate}}
   </li>
   {{#end}}
 </ul>

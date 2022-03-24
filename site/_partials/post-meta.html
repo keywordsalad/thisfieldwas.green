@@ -9,6 +9,11 @@
       by {{author}}
     {{#end-}}
   </p>
+  {{#if isUpdated-}}
+    <p class="post-updated">
+      Last updated on {{updated | dateAs shortDate}}
+    </p>
+  {{#end-}}
   {{#if tags-}}
     <p class="post-tags">
       Tags: {{tagLinks}}

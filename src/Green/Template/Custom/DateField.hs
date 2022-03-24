@@ -16,6 +16,7 @@ dateFields config =
       publishedField "published" timeLocale,
       updatedField "updated" timeLocale,
       isPublishedField "isPublished",
+      isUpdatedField "isUpdated",
       constField "longDate" (displayFormat ^. displayDateLongFormat),
       constField "shortDate" (displayFormat ^. displayDateShortFormat),
       constField "timeOnly" (displayFormat ^. displayTimeFormat),
@@ -138,3 +139,10 @@ isPublishedField key = field key f
     f item = lift do
       getMetadata (itemIdentifier item)
         <&> isJust . KeyMap.lookup (Key.fromString "published")
+
+isUpdatedField :: String -> Context a
+isUpdatedField key = field key f
+  where
+    f item = lift do
+      getMetadata (itemIdentifier item)
+        <&> isJust . KeyMap.lookup (Key.fromString "updated")

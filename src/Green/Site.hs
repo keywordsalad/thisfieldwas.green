@@ -31,6 +31,6 @@ site config = do
     blog config context
     code
     static
-    feed config context
+    feed context
     sitemap context
     robotsTxt config context
