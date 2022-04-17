@@ -17,7 +17,7 @@ og:
     alt: Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.
 stylesheets:
   - css/posts/embracing-nondeterminism-part-1.scss
-code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/tag/part1_v3
+code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/tag/part1_v4
 ---
 
 Have you ever received an unexpected `null` reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?
