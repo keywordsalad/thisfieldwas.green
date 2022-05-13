@@ -89,7 +89,7 @@ _verify-prerequisites () {
   sha="$(git log -1 HEAD --pretty=format:%h)"
   tag="$(date +'publish_%Y.%m.%d_%H.%M.%S')_$sha"
 
-  git fetch _site _site
+  git fetch origin _site
   mkdir -p _site
   rm -rf _site/* _site/.git
   cp -r .git/ ./_site/.git/
