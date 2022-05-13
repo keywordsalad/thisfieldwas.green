@@ -37,7 +37,7 @@ For any context `F[A]`, the `map()` function accepts another function `f: A => B
 
 Contexts that are functors thus allow abstraction over unknown cases. For example, a function `f: A => B` may be lifted into an `Option[A]` and applied if an instance of `A` is present. If no instance of `A` is present, then nothing happens. Specifically, by using `map()` the function `f` is unconcerned with the unknown quantity of `A`’s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities.
 
-What this means is that for any context in the desired state, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. they propagate the _undesired case_.
+What this means is that for any context in the desired case, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. they propagate the _undesired case_.
 
 Functors however only allow transformation of data from a sole instance of a context. This means that functions applicable to `map()` may only have the form `f: A => B`. Multiple inputs to a function lifted with `map()` are not possible with this abstraction. Consequently, as there is only one input, control flow is not possible as `map()` always runs `f` if the context is in its desired case, and no instance of `A` will cause `map()` to return the context in an undesired case to halt further computation against the context.
 
@@ -51,31 +51,46 @@ def map2[F[_], A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C]
 ```
 :::
 
-This two-argument analog of `map()` unlocks a key capability: controlling to proceed or halt computation against the context. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` to apply to function `f`. But if either one or both are in the undesired case, `f` does not run, and the undesired cases are propagated through `F[C]`. This means that `fa` or `fb` become levers with which to halt computations against the context `F[C]`.
+This two-argument analog of `map()` unlocks a key capability: controlling to proceed or halt computation against the context. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` with which the function `f` may be applied. But if either one or both are in the undesired case, `f` does not apply, and the undesired cases are propagated through `F[C]`. This means that `fa` or `fb` become levers with which to halt computations against the context `F[C]`.
 
-Take for example addition lifted into the context of `Option[Int]`:
+Take for example addition lifted into the context of `Option[Int]` within the example code's `sbt console`:
 
 :::{.numberLines}
 ```scala
-scala> map2(Some(2), Some(3))(_ + _)
-res0: Option[Int] = Some(5)
+scala> import green.thisfieldwas.{embracingnondeterminism=>en}
+import green.thisfieldwas.{embracingnondeterminism=>en}
 
-scala> map2(Some(2), None)(_ + _)
-res1: Option[Int] = None
+scala> import en.effects._
+import en.effects._
 
-scala> map2(None, Some(3))(_ + _)
-res2: Option[Int] = None
+scala> import en.typeclasses._
+import en.typeclasses._
 
-scala> map2(None, None)(_ + _)
-res3: Option[Int] = None
+scala> import Option.Instances._
+import Option.Instances._
+
+scala> val F = Applicative[Option]
+val F: Applicative[Option] = Option$Instances$$anon$1
+
+scala> F.map2(Option(2), Option(2))(_ + _)
+val res2: Option[Int] = Some(4)
+
+scala> F.map2(Option(2), Option[Int]())(_ + _)
+val res3: Option[Int] = None
+
+scala> F.map2(Option[Int](), Option(2))(_ + _)
+val res4: Option[Int] = None
+
+scala> F.map2(Option[Int](), Option[Int]())(_ + _)
+val res5: Option[Int] = None
 ```
 :::
 
-Only when both arguments are in the desired case does addition apply. If either or both arguments are in the undesired case, then the undesired case is propagated. This means all further operations against the context are halted. The functions that produce the two input contexts are thus capable of controlling whether computation via `f` proceeds and permits further computation against the context `F[C]`.
+Only when both arguments are in the desired case does the function of addition apply. If either or both arguments are in the undesired case, then the undesired case is propagated. This halts any further operations against the context. The functions that produce the two input contexts are thus capable of controlling whether computation via `f` proceeds and permits further computation against the context `F[C]`.
 
 ## Applicative functors
 
-The `map2()` function is implemented using a new structure, a specialization of a functor called an **applicative functor**, or simply called an _applicative_.
+The `map2()` function is implemented using a new structure, a specialization of a functor called an **applicative functor**, or simply an _applicative_.
 
 Applicative specialization arises in the type of `A` contained within functor `F[_]`. If `A` is merely an opaque type, then `F[A]` is a functor and no more. But if however `A` is specifically known to have some type `A => B`, that is to say _`A` is a function_, then `F[A => B]` is an _applicative_ functor.
 
@@ -126,7 +141,7 @@ You might be wondering why a function would be ever be lifted into a context. I 
 def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
   ap(ap(pure(f.curried))(fa))(fb)
 ```
-::: 
+:::
 
 Let’s break down the steps:
 
@@ -144,7 +159,7 @@ You might have noticed, `map2()` looks an awful lot like `map()`. In fact, `Appl
 def map[A, B](fa: F[A])(f: A => B): F[B] =
   ap(pure(f))(fa)
 ```
-::: 
+:::
 
 If your context is an applicative, then it is also a functor with no extra work. But you can always provide your own implementation of `map()` if it makes sense to.
 
@@ -269,7 +284,7 @@ implicit def validatedApplicative[E: Semigroup]: Applicative[Validated[E, *]] =
   }
 }
 ```
-::: 
+:::
 
 This means that `Validated` is usable as an `Applicative` for any case where `E` is combinable. But what does that actually mean for us?
 
@@ -419,7 +434,7 @@ Each of `validateUsername()`, `validateEmail()`, and `validatePassword()` act as
 
 ### Implications of independent levers
 
-It may not have been obvious from `validateUser()`, but each validation function evaluates independently of the other validation functions. In the `Validation` context, this means that each function executes without impacting the other functions regardless of individual success or failure. Imagine for a moment, what if the functions were evaluated within an asynchronous context? 
+It may not have been obvious from `validateUser()`, but each validation function evaluates independently of the other validation functions. In the `Validation` context, this means that each function executes without impacting the other functions regardless of individual success or failure. Imagine for a moment, what if the functions were evaluated within an asynchronous context?
 
 Let’s define a function on the `Applicative` typeclass that gathers the results of some effectful operations:
 
@@ -431,7 +446,7 @@ def sequence[A](fas: List[F[A]]): F[List[A]] =
     case Nil => pure(Nil)
   }
 ```
-::: 
+:::
 
 And then if we load three `User`s at once:
 
@@ -449,7 +464,7 @@ val loadingUsers = Applicative[Future].sequence(List(
 
 The variable `loadingUsers` now contains `Future[List[User]]`. As each `Future[User]` resolves, they are collected into a `List`. Because each `loadUser()` function executes independently, this has a profound implication in the context of a `Future`: they are executed concurrently!
 
-Should any `User` fail to load, the undesired case will propagate and the rest of the `sequence()` operation will halt. All other users are discarded.
+Should any `User` fail to load, the undesired case will propagate and the rest of the `sequence()` operation will halt. All other `User`s are discarded.
 
 The pattern offered by `Applicative` is an all-or-nothing result in its output. If all inputs are in the desired case, then the output will be in the desired case as well. But if any are in an undesired case, then the undesired case propagates and computation halts.
 
@@ -502,7 +517,7 @@ implicit val listApplicative: Applicative[List] = new Applicative[List] {
 ```
 :::
 
-`Option` and `Either`’s instances of `Applicative` are straight-forward: if a function and argument are present, they are applied and the result returned in the desired case. If either are missing, then the undesired case is propagated instead. 
+`Option` and `Either`’s instances of `Applicative` are straight-forward: if a function and argument are present, they are applied and the result returned in the desired case. If either are missing, then the undesired case is propagated instead.
 
 `List` looks very different at first glance, but conceptually performs the same way. Specifically, `List` performs a Cartesian product of its functions and arguments, applying each pair together and building a new `List` from the results. If either the function or argument `List` are empty, then an empty result `List` is returned, as an empty `List` represents the undesired case.
 
@@ -521,7 +536,7 @@ These laws are rigorous and we can write tests for these to prove that our appli
 
 ### Testing "for all" `F[_]`
 
-In order to properly test our applicative instances, we need to be able to generate a broad range of inputs to verify that the applicative properties hold with a high degree of confidence. Specifically, "for all" `List`s, for example, the property checks for `Applicative` must pass for each generated instance. Therefore we will leverage `scalacheck` for property-based testing. `scalacheck` will generate for us a set of arbitrary instances of the contexts and execute tests called _property checks_ against each to verify that each check passes. If all checks pass, then the property may be considered to hold "for all" instances of the tested context.
+In order to properly test our applicative instances, we need to be able to generate a broad range of inputs to verify that the applicative properties hold with a high degree of confidence. Specifically, "for all" `List`s, for example, the property checks for `Applicative` must pass for each generated instance. We will leverage `scalacheck` for property-based testing. `scalacheck` will generate for us a set of arbitrary instances of the contexts and execute tests called _property checks_ against each to verify that each check passes. If all checks pass, then the property may be considered to hold "for all" instances of the tested context.
 
 Generating an arbitrary context `F[_]` containing an arbitrary `A` is not supported directly by `scalacheck`, however. We can leverage this typeclass below to enable generating instances of `F[A]` from any generator for `A`:
 
@@ -530,18 +545,18 @@ Generating an arbitrary context `F[_]` containing an arbitrary `A` is not suppor
 import org.scalacheck.Gen
 
 trait LiftedGen[F[_]] {
- 
+
    def lift[A](gen: Gen[A]): Gen[F[A]]
  }
- 
+
  object LiftedGen {
- 
+
    def apply[F[_]: LiftedGen]: LiftedGen[F] = implicitly[LiftedGen[F]]
- 
+
    object Syntax {
- 
+
      implicit class LiftedGenOps[A](val gen: Gen[A]) extends AnyVal {
- 
+
        def lift[F[_]: LiftedGen]: Gen[F[A]] = LiftedGen[F].lift[A](gen)
      }
    }
@@ -602,7 +617,7 @@ trait ApplicativeLaws { this: AnyPropSpec with ScalaCheckPropertyChecks with Mat
 ```
 :::
 
-With this trait, laws specs can be written for each context. 
+With this trait, laws specs can be written for each context.
 
 :::{.numberLines}
 ```scala
@@ -615,9 +630,9 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 class OptionLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
 
   import Option.Instances._
- 
+
    implicit val optionLiftedGen: LiftedGen[Option] = new LiftedGen[Option] {
- 
+
      override def lift[A](gen: Gen[A]): Gen[Option[A]] =
        Gen.lzy(
          Gen.oneOf(
@@ -626,16 +641,16 @@ class OptionLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matc
          )
        )
    }
- 
+
    checkApplicativeLaws()
 }
 
 class EitherLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
 
   import Either.Instances._
- 
+
    implicit def eitherLiftedGen[X: Arbitrary]: LiftedGen[Either[X, *]] = new LiftedGen[Either[X, *]] {
- 
+
      override def lift[A](gen: Gen[A]): Gen[Either[X, A]] =
        Gen.lzy(
          Gen.oneOf(
@@ -644,27 +659,27 @@ class EitherLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matc
          )
        )
    }
- 
+
    checkApplicativeLaws[Either[String, *]]()
 }
 
 class ListLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
 
   import List.Instances._
- 
+
    implicit val listLiftedGen: LiftedGen[List] = new LiftedGen[List] {
- 
+
      override def lift[A](gen: Gen[A]): Gen[List[A]] = {
        def go(length: Int, acc: List[A]): Gen[List[A]] =
          if (length == 0) {
            Gen.const(acc)
          } else {
            gen.flatMap(a => go(length - 1, a :: acc))
-         } 
+         }
        Gen.choose(0, 100).flatMap(go(_, Nil))
-     } 
+     }
    }
- 
+
    checkApplicativeLaws()
 }
 ```
