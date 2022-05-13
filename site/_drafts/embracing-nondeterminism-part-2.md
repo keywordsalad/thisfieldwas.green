@@ -1,6 +1,6 @@
 ---
-title: "Embracing Nondeterminism Part II: Products of success or failure"
-description: Leveraging the effects of two or more contexts to affect outcomes of success or failure.
+title: "Embracing Nondeterminism Part II: Proceeding or halting computation"
+description: Leveraging the effects of two or more contexts to allow computations to proceed or halt.
 author: Logan McGrath
 comments: true
 date: 2022-02-23T20:58:26-0800
@@ -11,10 +11,10 @@ twitter:
 og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
-    alt: Leveraging the effects of two or more contexts to affect outcomes of success or failure.
+    alt: Leveraging the effects of two or more contexts to allow computations to proceed or halt.
 ---
 
-Remember functors? Recall from my last post, {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}, they are structures that define a single operation: `map()`. What `map()` allows you to do is lift a function into a context and apply it to its term if context is in its desired case, but performing no action if not.
+Remember functors? Recall from my last post, {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}, they are structures that define a single operation: `map()`. What `map()` allows you to do is lift a function into a context and apply it to its term if the context is in the desired case, but performing no action if not. In this post we will explore how to exploit contexts in their undesired cases to halt computations in order to express control flow.
 
 <!--more-->
 
@@ -35,9 +35,9 @@ object Functor {
 
 For any context `F[A]`, the `map()` function accepts another function `f: A => B` and applies it to the term within the context, giving back `F[B]`.
 
-Contexts that are functors thus allow you to abstract over unknown cases. For example, your function `f: A => B` may be lifted into an `Option[A]` and applied if an instance of `A` is present. If no instance of `A` is present, then nothing happens. Specifically, you as the author of the code don’t have to worry about the unknown quantity of `A`’s presence in order to use function `f`. Many contexts encode dimensions of unknown quantities, and as functors the nondeterminism of these quantities is completely abstracted by `map()`.
+Contexts that are functors thus allow abstraction over unknown cases. For example, a function `f: A => B` may be lifted into an `Option[A]` and applied if an instance of `A` is present. If no instance of `A` is present, then nothing happens. Specifically, by using `map()` the function `f` is unconcerned with the unknown quantity of `A`’s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities.
 
-What this means is that for any context in the desired state, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. the _undesired case_.
+What this means is that for any context in the desired state, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. they propagate the _undesired case_.
 
 Functors however only allow transformation of data from a sole instance of a context. This means that functions applicable to `map()` may only have the form `f: A => B`. Multiple inputs to a function lifted with `map()` are not possible with this abstraction. Consequently, as there is only one input, control flow is not possible as `map()` always runs `f` if the context is in its desired case, and no instance of `A` will cause `map()` to return the context in an undesired case to halt further computation against the context.
 
@@ -51,7 +51,7 @@ def map2[F[_], A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C]
 ```
 :::
 
-This two-argument analog of `map()` unlocks a key capability: controlling for failure. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` to apply to function `f`. But if either one is in the undesired case, `f` does not run, and the undesired cases are propagated through `F[C]`. This means that `fa` or `fb` become levers with which to halt computations against the context `F[C]`.
+This two-argument analog of `map()` unlocks a key capability: controlling to proceed or halt computation against the context. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` to apply to function `f`. But if either one or both are in the undesired case, `f` does not run, and the undesired cases are propagated through `F[C]`. This means that `fa` or `fb` become levers with which to halt computations against the context `F[C]`.
 
 Take for example addition lifted into the context of `Option[Int]`:
 
@@ -71,7 +71,7 @@ res3: Option[Int] = None
 ```
 :::
 
-Only when both arguments are in the desired case does addition apply. If either or both arguments are in the undesired case, then the undesired case is propagated. This means all further operations against the context are halted. The functions that produce the two input contexts are thus capable of indicating whether this computation proceeds or halts, and the specific complexity of the contexts’ cases are abstracted from the function consuming their contents.
+Only when both arguments are in the desired case does addition apply. If either or both arguments are in the undesired case, then the undesired case is propagated. This means all further operations against the context are halted. The functions that produce the two input contexts are thus capable of controlling whether computation via `f` proceeds and permits further computation against the context `F[C]`.
 
 ## Applicative functors
 
@@ -119,7 +119,7 @@ These operations afforded by applicatives offer two capabilities:
 * `pure()` which lifts the result of a pure computation `A` into the context such that `pure: A => F[A]`. This is essentially a constructor for a context in the desired case, such as `Some` for `Option[A]` or `Right` for `Either[X, A]`.
 * `ap()`, read as _apply_, for applying a lifted function to a lifted argument.
 
-You might be wondering why a function would be lifted into a context to begin with. First, I will demonstrate how `ap()` works by defining `map2()` within `Applicative`:
+You might be wondering why a function would be ever be lifted into a context. I will demonstrate why this is desirable in how `ap()` works by defining `map2()` within `Applicative`:
 
 :::{.numberLines}
 ```scala
@@ -130,10 +130,10 @@ def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
 
 Let’s break down the steps:
 
-* By currying the function `f: (A, B) => C`, it becomes `A => B => C`.
-* Lifting it with `pure()` gives `F[A => B => C]` in the desired case.
-* In this form, `ap()` may apply the function to context argument `fa: F[A]` which will give back `F[B => C]` in the desired case if `fa` is itself in the desired case.
-* Then `ap()` may be applied with context argument `fb: F[B]` which will give back `F[C]` in the desired case if `fb` is itself in the desired case.
+1. By currying the function `f: (A, B) => C`, it becomes `A => B => C`.
+2. Lifting it with `pure()` gives `F[A => B => C]` in the desired case.
+3. In this form, `ap()` may apply the function to context argument `fa: F[A]` which will give back `F[B => C]` in the desired case if `fa` is itself in the desired case.
+4. Then `ap()` may apply the function to the context argument `fb: F[B]` which will give back `F[C]` in the desired case if `fb` is itself in the desired case.
 
 Each step of lifted function application accounts for the case of the function and argument contexts and halts if either context is in the undesired case.
 
@@ -146,11 +146,11 @@ def map[A, B](fa: F[A])(f: A => B): F[B] =
 ```
 ::: 
 
-If your context is an applicative, it is thus also a functor with no extra work. But you can always provide your own implementation of `map()` if it makes sense to.
+If your context is an applicative, then it is also a functor with no extra work. But you can always provide your own implementation of `map()` if it makes sense to.
 
-## Validation as a use-case for applicatives
+## Validation as a use case
 
-Let's walk through my favorite usage of applicatives: validation. When we construct a `User` from data that we receive from an external source, such as a form or API, we can use `ap()` to lift `User`'s constructor into a validation context and apply it to validated arguments. If all arguments are valid, then we should receive a validation context containing a valid `User`. If any arguments are invalid, then we should receive an invalid context with all reasons for validation failure.
+Let's walk through my favorite usage of applicatives: validation. When constructing a `User` from data that we receive from an external source, such as a form or API, we can use `ap()` to lift `User`'s curried constructor into a validation context and apply it to validated arguments. If all arguments are valid, then we should receive a validation context containing a valid `User`. If any arguments are invalid, then we should receive an invalid context with all reasons for validation failure.
 
 Here is the definition for `User`:
 
@@ -170,7 +170,7 @@ case class Valid[+A](a: A) extends Validated[Nothing, A]
 ```
 :::
 
-`Validated` contains the term you want or the reason you didn’t get it. Realistically, we could fail to receive a `User` for three or more reasons related to `username`, `email`, and `password` all being invalid, which implies that term `E` represents one or more instances. Let’s define an applicative instance for `Validated` and see what arises:
+`Validated` contains the valid value you want or the invalid error reason for why you didn’t get it. Realistically, we could fail to receive a `User` for three or more reasons related to `username`, `email`, and `password` all being invalid, which implies that term `E` represents one or more instances of `E`. Let’s define an applicative instance for `Validated` and see what arises:
 
 :::{.numberLines}
 ```scala
@@ -189,11 +189,11 @@ implicit def validatedApplicative[E]: Applicative[Validated[E, *]] =
 ```
 :::
 
-We’ve hit a snag: when we have two instances of `E` we don't have a way to collect them. This means that out of the box our `Validated` instances of `Applicative` doesn’t make a very good general validation utility as it doesn’t have a way to report all errors. We don’t have any way to combine their values without concretely defining `E`, such as with `List[String]` which creates a rigid API requirement. Is there a way to keep `E` abstract but still be able to gather errors as they occur?
+We’ve hit a snag: when there are two instances of `E` we don't have a way to combine them. This means that out of the box our `Validated` instance of `Applicative` doesn’t make a very good general validation utility as it doesn’t have a way to report all errors that are encountered. We don’t have any way to combine their values without concretely defining `E` such as with `List[String]` which creates a rigid API requirement. Is there a way to keep `E` abstract but still be able to gather errors as they occur?
 
-### Modeling errors as combinable data
+### Modeling errors as a combinable structure
 
-Structures defining a `combine()` operation form a typeclass known as a **semigroup** under certain conditions. Semigroups are very common, and constraining `E` to have an instance of `Semigroup` provides great advantage in the context of validation. First, see how the typeclass is defined:
+Structures defining a `combine()` operation form a typeclass known as a **semigroup** under a specific condition. Semigroups are very common, and constraining `E` to have an instance of `Semigroup` provides great flexibility in the context of validation. First, let's see how the typeclass is defined:
 
 :::{.numberLines}
 ```scala
@@ -271,7 +271,7 @@ implicit def validatedApplicative[E: Semigroup]: Applicative[Validated[E, *]] =
 ```
 ::: 
 
-This means that `Validated` is usable for any case where `E` is combinable. But what does that actually mean for us?
+This means that `Validated` is usable as an `Applicative` for any case where `E` is combinable. But what does that actually mean for us?
 
 * Errors may exist in a non-zero amount when the context is `Invalid`
 * When there are errors, the amount is unbounded
@@ -378,26 +378,6 @@ Using this function, we can attempt to create a `User` with nothing but invalid 
 :::{.numberLines}
 ```scala
 val validatedUser = validateUser(
-  username = "buttonoperator27",
-  email = "test@email.com",
-  password = "password12345"
-)
-inside(validatedUser) {
-  case Valid(user) =>
-    user shouldBe User(
-      username = "buttonoperator27",
-      email = "test@email.com",
-      password = "password12345"
-    )
-}
-```
-:::
-
-And with valid data, receive a constructed `User`:
-
-:::{.numberLines}
-```scala
-val validatedUser = validateUser(
   username = "",
   email = "not an email",
   password = "12345"
@@ -413,7 +393,27 @@ inside(validatedUser) {
 ```
 :::
 
-Applicatives thus enable entire computations to succeed if all contextual arguments are in the desired case. If any argument is in the undesired case, then this case is propagated and the computation as a whole fails.
+And with valid data, receive a constructed `User`:
+
+:::{.numberLines}
+```scala
+val validatedUser = validateUser(
+  username = "buttonoperator27",
+  email = "test@email.com",
+  password = "password12345"
+)
+inside(validatedUser) {
+  case Valid(user) =>
+    user shouldBe User(
+      username = "buttonoperator27",
+      email = "test@email.com",
+      password = "password12345"
+    )
+}
+```
+:::
+
+Applicatives thus enable entire computations to succeed if all context arguments are in the desired case. If any argument is in the undesired case, then this case is propagated and the computation as a whole fails.
 
 Each of `validateUsername()`, `validateEmail()`, and `validatePassword()` act as levers on whether a `User` is successfully produced. Writing specific if-statements to guide whether a `User` is produced or errors returned instead is not required: the `Applicative` typeclass succinctly abstracts away the necessary plumbing to control the flow of logic required to handle undesired cases. Errors are declared where they should occur and the abstraction handles the rest.
 
@@ -428,7 +428,7 @@ Let’s define a function on the `Applicative` typeclass that gathers the result
 def sequence[A](fas: List[F[A]]): F[List[A]] =
   fas match {
     case headF :: tailF => map2(headF, sequence(tailF))(_ :: _)
-    case Nil => Nil
+    case Nil => pure(Nil)
   }
 ```
 ::: 
@@ -449,9 +449,9 @@ val loadingUsers = Applicative[Future].sequence(List(
 
 The variable `loadingUsers` now contains `Future[List[User]]`. As each `Future[User]` resolves, they are collected into a `List`. Because each `loadUser()` function executes independently, this has a profound implication in the context of a `Future`: they are executed concurrently!
 
-Should any `User` fail to load, its undesired case will propagate and the rest of the `sequence()` operation will halt. All other users are discarded.
+Should any `User` fail to load, the undesired case will propagate and the rest of the `sequence()` operation will halt. All other users are discarded.
 
-The pattern offered by `Applicative` is an all-or-nothing result in its output. If all inputs are in the desired case, then the output will be in the desired case as well. But if any are in an undesired case, then those cases propagate and computation halts.
+The pattern offered by `Applicative` is an all-or-nothing result in its output. If all inputs are in the desired case, then the output will be in the desired case as well. But if any are in an undesired case, then the undesired case propagates and computation halts.
 
 ## Becoming an Applicative
 
@@ -521,9 +521,9 @@ These laws are rigorous and we can write tests for these to prove that our appli
 
 ### Testing "for all" `F[_]`
 
-In order to properly test our applicative instances, we need to be able to generate a broad range of inputs to verify that the applicative properties hold with a high degree of confidence. Specifically, "for all" `List`s, for example, the properties of `Applicative` must hold. Therefore we will leverage `scalacheck` for property-based testing. `scalacheck` will generate for us a set of arbitrary instances of the types and execute tests called _property checks_ against each to verify that each passes. If all checks pass, then the property may be considered to hold "for all" of the tested type.
+In order to properly test our applicative instances, we need to be able to generate a broad range of inputs to verify that the applicative properties hold with a high degree of confidence. Specifically, "for all" `List`s, for example, the property checks for `Applicative` must pass for each generated instance. Therefore we will leverage `scalacheck` for property-based testing. `scalacheck` will generate for us a set of arbitrary instances of the contexts and execute tests called _property checks_ against each to verify that each check passes. If all checks pass, then the property may be considered to hold "for all" instances of the tested context.
 
-Generating an arbitrary context `F[_]` containing an arbitrary `A` is not supported directly by `scalacheck`, however. We can leverage this typeclass to enable generating instances of `F[A]` from any generator for `A`:
+Generating an arbitrary context `F[_]` containing an arbitrary `A` is not supported directly by `scalacheck`, however. We can leverage this typeclass below to enable generating instances of `F[A]` from any generator for `A`:
 
 :::{.numberLines}
 ```scala
@@ -627,7 +627,7 @@ class OptionLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matc
        )
    }
  
-   checkApplicativeLaws[Option]()
+   checkApplicativeLaws()
 }
 
 class EitherLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
@@ -665,7 +665,7 @@ class ListLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matche
      } 
    }
  
-   checkApplicativeLaws[List]()
+   checkApplicativeLaws()
 }
 ```
 :::
@@ -674,8 +674,8 @@ Try running these specs!
 
 ### Implications of the applicative laws
 
-Each of `Option`, `Either`, and `List` conform to the applicative laws and we only had to write the properties to test them once. These properties prove that functions and arguments used within these contexts maintain referential transparency in their arrangments and that the specific contexts do not change the factoring semantics of the code.
+Each of `Option`, `Either`, and `List` conform to the applicative laws and we only had to write the properties once. These properties prove that functions and arguments used within these contexts maintain referential transparency in their arrangments and that the specific contexts do not change the factoring semantics of the code.
 
 What does change, however, are these contexts' specific effects. For example, you would not have to refactor code abstracted by applicative operations if you changed the backing implementation from `Either` to `List`, but your code would produce potentially more than one result in the desired case.
 
-This is the goal, however, as these effects' dimensions of unknown quantity should not burden our code. Instead, we push the complexity to the edge of the context, where it is important that our context is an `Either` or a `List`.
+This is the goal, however, as these effects' dimensions of unknown quantity should not burden our code. Instead, we push the complexity to the edge of the context, where it is important that our context is an `Either` or a `List`, and keep our business logic focused on individual instances contained within each context.
