@@ -5,7 +5,7 @@ author: Logan McGrath
 comments: true
 date: 2022-01-24T17:14:03-0800
 published: 2022-03-15T09:20:00-0700
-updated: 2022-03-24T12:19:20-0700
+updated: 2022-05-15T14:21:23-0700
 tags: functional programming, programming, scala, design patterns
 layout: post
 thumbnail: /images/tags/functional-programming/functional-grass-128x128.png
@@ -144,12 +144,12 @@ Nondeterminism is significant in that operations may be unpredictable, and that 
 
 #### Unknown quantities
 
-Unknown quantities along measurable dimensions arise in functions returning types such as lists, potentially `null` references, or validation results. These outputs have unknown length, presence, and validity respectively, and require specific handling for undesirable cases. _Even pure functions produce results having unknown quantities._
+Unknown quantities along measurable dimensions arise in functions returning types such as lists, potentially `null` references, or validation results. These outputs have unknown length, presence, and validity respectively, and require specific handling for undesired cases. _Even pure functions produce results having unknown quantities._
 
 * A simple example is a function `toBits: Int => List[Boolean]` where the known quantity of `Boolean` bits returned requires specific knowledge of the input argument.
 * Hashmap lookups may or may not return a value associated to a given key. Unless you have specific knowledge of the key used to lookup a value, you don't have any guarantee whether the value actually exists.
 
-Both of these operations are pure functions and are deterministic, but their results are _contextualized_ by length and presence. Any unknown quantity along some measurable dimension requires specific handling in code. This means that in addition to writing code that handles a _desired output case_ of an operation, code must be specifically written for each dimension that exhibits unknown quantities.
+Both of these operations are pure functions and are deterministic, but their results are _contextualized_ by length and presence. Any unknown quantity along some measurable dimension requires specific handling in code. This means that in addition to writing code that handles a _desired case_ of an operation, code must be specifically written for each dimension that exhibits unknown quantities.
 
 Side effects as _implicit output_ include **faults** such as the _divide by zero_ error and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are fully nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some side effect as an implicit input may influence the outcome.
 
@@ -163,7 +163,7 @@ Concurrency and asynchronous operations are driven entirely by side effects. Asy
 
 #### Relating nondeterminism and unknown quantities
 
-Side effects enable nondeterminism which influences unknown quantities in the results of operations. _Undesired output cases_ along dimensions such as length, presence, validity, success, and time require specific handling in addition to the code to handle the _desired output cases_ of operations. _This specific handling creates complexity and draws engineering focus away from business logic._ Yet side effects drive the business value of programs in the real world, which requires that we embrace nondeterminism and unknown quantities.
+Side effects enable nondeterminism which influences unknown quantities in the results of operations. _Undesired cases_ along dimensions such as length, presence, validity, success, and time require specific handling in addition to the code to handle the _desired cases_ of operations. _This specific handling creates complexity and draws engineering focus away from business logic._ Yet side effects drive the business value of programs in the real world, which requires that we embrace nondeterminism and unknown quantities.
 
 _How might complexity in programs be reduced if they must also be driven by side effects?_
 
@@ -183,7 +183,7 @@ You might be thinking that these cases are a given when working with database co
 
 ### Operations producing undesired cases
 
-Can you think of some program operations that produce undesired output cases in addition to their desired output cases? How might these cases cause code to become complex?
+Can you think of some program operations that produce undesired cases in addition to their desired cases? How might these cases cause code to become complex?
 
 :::{.wide-list-items}
 * When a program starts, it may **read configuration** from the environment, a database, or files. Reading configuration values may be blocking or asynchronous, and some configuration keys may not have associated values.
@@ -278,7 +278,7 @@ The code above demonstrates effects in the dimensions of:
 * **Validity** where the `"SUCCESS"` response from the `achClient` is the only check performed. Other responses are simply not handled.
 * **Success** where logging occurs but swallows errors, resulting in opaque `false` return cases. Exceptions also bubble up from database and network operations.
 
-_These effects are not obvious from the code above_. Below I have rewritten the operation to handle all undesirable output cases to highlight where complexity exists:
+_These effects are not obvious from the code above_. Below I have rewritten the operation to handle all undesired cases to highlight where complexity exists:
 
 :::{.numberLines}
 ```java
@@ -416,7 +416,7 @@ Each of these contexts have two shared characteristics in that they _produce_ so
 
 In order to generalize contexts, the key differentiator between them must be abstracted: _effects_. By shedding effects as an _implementation detail_, the production of term `A` remains a shared characteristic. This opens an opportunity to create a **seam** between an impure function _producing_ the context itself and a pure function _consuming_ instances of the term `A` within the context.
 
-The term _seam_ comes from Michael Feathers' [Working Effectively With Legacy Code][]: _"A place where you can alter behavior in your program without editing in that place."_ A seam is where we introduce an abstraction to separate the impure output of an operation from pure consumption of the desired output case. How functions handle an unknown length of items, for example, does not change and is independent of how functions consume each item. How functions consume each item varies on a case-by-case basis, and changes frequently according to requirements within business logic. This illustrates a need for a separation of concerns that can be enabled by abstraction.
+The term _seam_ comes from Michael Feathers' [Working Effectively With Legacy Code][]: _"A place where you can alter behavior in your program without editing in that place."_ A seam is where we introduce an abstraction to separate the impure output of an operation from pure consumption of the desired case. How functions handle an unknown length of items, for example, does not change and is independent of how functions consume each item. How functions consume each item varies on a case-by-case basis, and changes frequently according to requirements within business logic. This illustrates a need for a separation of concerns that can be enabled by abstraction.
 
 Take for example the following JavaScript code:
 
@@ -466,6 +466,8 @@ case object None extends Option[Nothing]
 ```
 :::
 
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Option.scala) for the definition in the sample repository.
+
 **`Either[X, A]`** by convention is the effect of _either_ success with term `A` _or_ failure with term `X`:
 
 :::{.numberLines}
@@ -479,6 +481,8 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 ```
 :::
 
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala) for the definition in the sample repository.
+
 **`List[A]`** is the effect of _unknown length_, sort, and cardinality of instances of term `A`:
 
 :::{.numberLines}
@@ -491,6 +495,8 @@ case class ::[+A](override val head: A, override val tail: List[A]) extends List
 case object Nil extends List[Nothing]
 ```
 :::
+
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala) for the definition in the sample repository.
 
 ### An object-oriented approach to contexts
 
@@ -553,7 +559,7 @@ sealed trait List[A] extends Extractable[A] {
 
 _This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but Scala's `Seq[A]` is allowed to be empty per its definition. Allowing `List[A]` to be empty implies that it should be allowed to return an empty `Seq[A]` from `extract`. In order to preserve faulting on absence, `extract` must return a [`NonEmptyList[A]` instead]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/nel), as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though.
 
-This interface essentially transforms these contexts into `NonEmptyList[A]` and imposes its specific complexity on all of your code. You would probably be very unhappy using it.
+This interface essentially transforms these contexts into [`NonEmptyList[A]`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/NonEmptyList.scala) and imposes its specific complexity on all of your code. You would probably be very unhappy using it.
 
 What about implementing `extract` for `Future[A]`? When applied to `Future[A]`, the `extract` function by its own signature is a blocking call. You want your dependency on `A` to be properly asynchronous.
 
@@ -578,7 +584,7 @@ object Functor {
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Functor.scala) for the accompanying code.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Functor.scala) for the definition in the sample repository.
 
 What `map` does is _lift_ the function `f: A => B` into the context so that it behaves as `F[A] => F[B]`, giving back `F[B]`.
 
@@ -611,21 +617,21 @@ Functors thus _preserve structure_ by keeping operations within the context. For
 
 The application of `map` produces two new and identifiable `List[B]` and `BinaryTree[B]`s. The values internally change, as a function has been applied to them, and `BinaryTree[B]` may re-balance itself accordingly. What matters here is that the structures are coherent and identifiable. Both `List[B]` and `BinaryTree[B]` are created from this operation and the originating `List[A]` and `BinaryTree[A]` still exist in their original state.
 
-Compare with using iteration using a `for` loop in this JavaScript code:
+Compare with using iteration over an array using a `for` loop in this JavaScript code:
 
 :::{.numberLines}
 ```javascript
-const list = [1, 2, 3, 4, 5, 6, 7]
+const array = [1, 2, 3, 4, 5, 6, 7]
 const square = x => x * x
 
-for (const x in list) {
+for (const x in array) {
   const x2 = square(x) // apply function to the current value
-  results.push(x2) // append to new list
+  results.push(x2) // append to a new array
 }
 ```
 :::
 
-Iteration as a form of lowering _destroys structure_. In order to get a `List[B]` back you have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural steps_.
+Iteration as a form of lowering _destroys structure_. In order to get a `array` back you have to rebuild it yourself and any structural guarantees must be manually implemented following _procedural steps_.
 
 This isn't to say that functional programming is only about iteration and loops versus `map`. Can you think of other operations that might destroy structure? For example, if you use an `await` operation on a `Future[A]` you will destroy its _asynchronous structure_ and potentially harm the performance of your program.
 
@@ -653,9 +659,11 @@ This behavior is referred to as _short-circuiting_ and it is a key feature of co
 
 The two contexts `Option[A]` and `Either[X, A]` demonstrate simple short-circuiting. An `Option[A]` will only `map` an instance of its term `A` if it is present as the `Some[A]` case, and an `Either[X, A]` will only `map` if an instance of the desired term `A` is present as the `Right[X, A]` case. In contrast, the `Id[A]` context has the effect of the _identity_ of term `A`. To put it plainly, `Id[A]` _is_ the instance of term `A`: as the instance is always present, the `Id[A]` context never short-circuits.
 
+> Contexts that may be operated on when a function is applied via `map()` are considered to be in a _desired case_, such as the `Some` of an `Option` or the `Right` of an `Either`. Void contexts, or contexts that may not be operated on, are in the _undesired case_. These include the `None` of `Option` and the `Left` of `Either`. These cases are undesired as they don't contain any instances of the term you would want to operate against.
+
 ### Implementing functors in Scala
 
-Each context must provide its own implementation of `map` in order for it to be used as a functor. Functor implementations in Scala are provided via typeclasses, and any type that has the _structure_ of `F[_]` may become a functor by implementing the `Functor` typeclass from above:
+Each context must provide its own implementation of `map` in order for it to be used as a functor. Functor implementations in Scala are provided via typeclasses, and any type that has the _shape_ of `F[_]` may become a functor by implementing the `Functor` typeclass from above:
 
 :::{.numberLines}
 ```scala
@@ -667,6 +675,8 @@ object Functor {
 }
 ```
 :::
+
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Functor.scala) for the definition in the sample repository.
 
 Instances of the `Functor` typeclass implement this trait and make themselves available implicitly:
 
@@ -699,6 +709,13 @@ object FunctorInstances {
 :::
 
 These three instances for `Option[_]`, `Either[X, _]`, and `List[_]` show remarkable similarities, and this isn’t uncommon across functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Implementations of `Functor` are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. _What is key is that the complexities imposed by each of these contexts are completely abstracted_, allowing function `f: A => B` to operate unburdened by effects with a focus on specific program logic.
+
+> Follow these links for the instances in the sample repository for
+> [Option]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Option.scala),
+> [Either]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L122),
+> [List]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206),
+> [NonEmptyList]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/NonEmptyList.scala#L90),
+> and [Id]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/package.scala#L26).
 
 Can you see how functors enable control flow and short-circuiting? The void cases are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left` may be used to carry some error state in its term `X`. This satisfies the effect of _either_ `A` for success _or_ `X` for failure.
 
@@ -809,30 +826,39 @@ In order to be a functor, a context defining a `map` operation must satisfy the 
     context.map(g compose f) == context.map(f).map(g)
     ```
 
-Here are the two laws applied against Scala's builtin `List` type, which defines its own `map` operation:
+Here are the two laws applied against Scala's builtin `List` type using `scalacheck` properties. The `List` type defines its own `map()` operation, and these properties prove that it is also a functor:
 
 :::{.numberLines}
 ```scala
-def preservesIdentityFunctions(list: List[Int]): Unit =
-  assert(list.map(identity) == identity(list))
+class ListSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers {
 
-def preservesFunctionComposition(list: List[Int]): Unit = {
-  val f: Int => Int = _ + 3
-  val g: Int => Double = _ / 17.0
-  assert(list.map(g compose f) == list.map(f).map(g))
+  property("List.map() preserves identity functions") {
+    forAll(arbitrary[List[Int]]) { fa =>
+      fa.map(identity) mustBe identity(fa)
+    }
+  }
+
+  property("List.map() preserves function composition") {
+    forAll(for {
+      fa <- arbitrary[List[Double]]
+      f <- arbitrary[Double => String]
+      g <- arbitrary[String => Int]
+    } yield (fa, f, g)) { case (fa, f, g) =>
+      fa.map(g compose f) mustBe fa.map(f).map(g)
+    }
+  }
 }
-
-val listOf3 = List(1, 2, 3)
-preservesIdentityFunctions(listOf3)
-preservesFunctionComposition(listOf3)
-
-val nil = List()
-preservesIdentityFunctions(nil)
-preservesFunctionComposition(nil)
 ```
 :::
 
-> See the [functor laws definition]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/FunctorLaws.scala) and its implementations for the [Option]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala), [Either]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/EitherSpec.scala), and [List]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala) functors.
+> * See the functor laws applied to Scala's Standard Library
+>   types [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala),
+>   [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala),
+>   and [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala)
+> * See the [generalized functor laws]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/FunctorLaws.scala)
+>   applied to our [Option]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala),
+>   [Either]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/EitherSpec.scala),
+>   and [List]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala) types.
 
 These laws assert that functors preserve the behavior of functions `f` and `g` as if they were composed and also applied in sequence independent of `map`. Functors thus _compose functional effects_ because this property of composition is retained within the context of their effects. The seam introduced by `map` creates a hard delineation between any context's complexity of effects and the business logic of pure functions `f` and `g`.
 
@@ -867,9 +893,9 @@ def runPayroll(employeeId: Long): PayrollRunner[()] =
 ```
 :::
 
-Consider for a moment: with a functor you are able to work against a function's _desired_ output case. You can chain any number of `map` operations against a context, or `map` any number of composed functions against it. Given a context in the desired output case, after applying `map` you will still have a context that is in the desired output case. In order to write _imperative_ code, you have to be able to force an _undesirable_ output case so that subsequent operations are skipped.
+Consider for a moment: with a functor you are able to work against a function's _desired_ case. You can chain any number of `map` operations against a context, or `map` any number of composed functions against it. Given a context in the desired case, after applying `map` you will still have a context that is in the desired case. In order to write _imperative_ code, you have to be able to force an _undesired_ case so that subsequent operations are skipped.
 
-Working against _two or more contexts at once_ opens opportunities to introduce _undesirable_ output cases. Take for example these two instances of the context `F[_]` and the function signature for `combine`:
+Working against _two or more contexts at once_ opens opportunities to introduce _undesired_ cases. Take for example these two instances of the context `F[_]` and the function signature for `combine`:
 
 :::{.numberLines}
 ```scala
@@ -880,7 +906,7 @@ def combine(a: A, b: B): C
 ```
 :::
 
-How do you apply `combine` to the terms `A` and `B` produced by the contexts? What happens if one of the contexts is in an undesirable case? At first blush it appears that `map` might work, but `combine` takes two arguments. You need a specialized functor in order to apply `combine`!
+How do you apply `combine` to the terms `A` and `B` produced by the contexts? What happens if one of the contexts is in an undesired case? At first blush it appears that `map` might work, but `combine` takes two arguments. You need a specialized functor in order to apply `combine`!
 
 In my next post, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs.
 
