@@ -3,7 +3,7 @@ title: "Embracing Nondeterminism Part II: Proceeding or halting computation"
 description: Leveraging the effects of two or more contexts to allow computations to proceed or halt.
 author: Logan McGrath
 comments: true
-date: 2022-02-23T20:58:26-0800
+date: 2022-05-07T14:21:23-0700
 tags: functional programming, programming, scala, design patterns
 layout: post
 twitter:
