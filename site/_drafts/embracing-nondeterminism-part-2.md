@@ -12,11 +12,14 @@ og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
     alt: Leveraging the effects of two or more contexts to allow computations to proceed or halt.
+code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2
 ---
 
 Remember functors? Recall from my last post, {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}, they are structures that define a single operation: `map()`. What `map()` allows you to do is lift a function into a context and apply it to its term if the context is in the desired case, but performing no action if not. In this post we will explore how to exploit contexts in their undesired cases to halt computations in order to express control flow.
 
 <!--more-->
+
+> The code that accompanies this post may be found [here]({{code_repo}}).
 
 ## Motivating applicative functors as a design pattern
 
@@ -33,17 +36,19 @@ object Functor {
 ```
 :::
 
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Functor.scala) for the definition in the sample repository.
+
 For any context `F[A]`, the `map()` function accepts another function `f: A => B` and applies it to the term within the context, giving back `F[B]`.
 
-Contexts that are functors thus allow abstraction over unknown cases. For example, a function `f: A => B` may be lifted into an `Option[A]` and applied if an instance of `A` is present. If no instance of `A` is present, then nothing happens. Specifically, by using `map()` the function `f` is unconcerned with the unknown quantity of `A`’s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities.
+Contexts that are functors thus allow abstraction over unknown cases. For example, a function `f: A => B` may be lifted into an `Option[A]` and applied if an instance of `A` is present. If no instance of `A` is present, then nothing happens. Specifically, by using `map()` the function `f` is unconcerned with the unknown quantity of `A`'s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities.
 
 What this means is that for any context in the desired case, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. they propagate the _undesired case_.
 
-Functors however only allow transformation of data from a sole instance of a context. This means that functions applicable to `map()` may only have the form `f: A => B`. Multiple inputs to a function lifted with `map()` are not possible with this abstraction. Consequently, as there is only one input, control flow is not possible as `map()` always runs `f` if the context is in its desired case, and no instance of `A` will cause `map()` to return the context in an undesired case to halt further computation against the context.
+Functors however only allow transformation of data from a sole instance of a context. This means that functions applicable to `map()` may only have the form `f: A => B`. Multiple inputs to a function lifted with `map()` are not possible with this abstraction. Consequently, as there is only one input, control flow is not possible as `map()` always applies `f` if the context is in its desired case, and no instance of the term `A` will cause `map()` to return the context in an undesired case to halt further computation against the context. There is no way to control the flow of execution against contexts by using functors.
 
 ## Control flow
 
-What function might allow for control flow using contexts? There is one, `map2()`:
+What function might allow for control flow against contexts? There is one, `map2()`:
 
 :::{.numberLines}
 ```scala
@@ -51,9 +56,9 @@ def map2[F[_], A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C]
 ```
 :::
 
-This two-argument analog of `map()` unlocks a key capability: controlling to proceed or halt computation against the context. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` with which the function `f` may be applied. But if either one or both are in the undesired case, `f` does not apply, and the undesired cases are propagated through `F[C]`. This means that `fa` or `fb` become levers with which to halt computations against the context `F[C]`.
+This two-argument analog of `map()` unlocks a key capability: controlling whether proceed or halt computation against the context. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` against which the function `f` may be applied. But if either one or both are in the undesired case, `f` does not apply, and the undesired cases are propagated through `F[C]`. This means that `fa` and `fb` become levers with which to halt computations against the context `F[C]`.
 
-Take for example addition lifted into the context of `Option[Int]` within the example code's `sbt console`:
+Take for example addition lifted into the context of `Option[Int]` within the example sample repository's `sbt console`:
 
 :::{.numberLines}
 ```scala
@@ -127,6 +132,8 @@ object Applicative {
 ```
 :::
 
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Applicative.scala) for the definition in the sample repository.
+
 Note that `Applicative` extends `Functor` as it is a specialization. All applicatives are also functors.
 
 These operations afforded by applicatives offer two capabilities:
@@ -134,7 +141,7 @@ These operations afforded by applicatives offer two capabilities:
 * `pure()` which lifts the result of a pure computation `A` into the context such that `pure: A => F[A]`. This is essentially a constructor for a context in the desired case, such as `Some` for `Option[A]` or `Right` for `Either[X, A]`.
 * `ap()`, read as _apply_, for applying a lifted function to a lifted argument.
 
-You might be wondering why a function would be ever be lifted into a context. I will demonstrate why this is desirable in how `ap()` works by defining `map2()` within `Applicative`:
+You might be wondering why a function would ever be lifted into a context. I will demonstrate why this is desirable in how `ap()` works by defining `map2()` within `Applicative`:
 
 :::{.numberLines}
 ```scala
@@ -143,14 +150,14 @@ def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
 ```
 :::
 
-Let’s break down the steps:
+Lifting `f` into the context works following these steps:
 
 1. By currying the function `f: (A, B) => C`, it becomes `A => B => C`.
 2. Lifting it with `pure()` gives `F[A => B => C]` in the desired case.
 3. In this form, `ap()` may apply the function to context argument `fa: F[A]` which will give back `F[B => C]` in the desired case if `fa` is itself in the desired case.
 4. Then `ap()` may apply the function to the context argument `fb: F[B]` which will give back `F[C]` in the desired case if `fb` is itself in the desired case.
 
-Each step of lifted function application accounts for the case of the function and argument contexts and halts if either context is in the undesired case.
+Each step of lifted function application accounts for the case of the function and argument contexts and halts if either context is in the undesired case. The undesired case will propagate instead if and when it exists.
 
 You might have noticed, `map2()` looks an awful lot like `map()`. In fact, `Applicative` provides a default implementation of `map()`:
 
@@ -165,7 +172,11 @@ If your context is an applicative, then it is also a functor with no extra work.
 
 ## Validation as a use case
 
-Let's walk through my favorite usage of applicatives: validation. When constructing a `User` from data that we receive from an external source, such as a form or API, we can use `ap()` to lift `User`'s curried constructor into a validation context and apply it to validated arguments. If all arguments are valid, then we should receive a validation context containing a valid `User`. If any arguments are invalid, then we should receive an invalid context with all reasons for validation failure.
+Let's walk through a powerful capability of applicatives: _validation_.
+
+### Validating a `User` from external data
+
+When constructing a `User` from data that we receive from an external source, such as a form or API, we can use `ap()` to lift `User`'s curried constructor into a validation context and apply it to validated arguments. If all arguments are valid, then we should receive a validation context containing a valid `User`. If any arguments are invalid, then we should receive an invalid context with all reasons for validation failure.
 
 Here is the definition for `User`:
 
@@ -179,13 +190,51 @@ Each of `username`, `email`, and `password` must to be valid in order for `User`
 
 :::{.numberLines}
 ```scala
-sealed trait Validated[+E, +A]
-case class Invalid[+E](e: E) extends Validated[E, Nothing]
-case class Valid[+A](a: A) extends Validated[Nothing, A]
+sealed trait Validated[+E, +A] {
+
+  def invalid: E
+
+  def valid: A
+}
+
+case class Valid[+A](valid: A) extends Validated[Nothing, A] {
+
+  def invalid: Nothing = throw new NoSuchElementException("Valid.invalid")
+}
+
+case class Invalid[+E](invalid: E) extends Validated[E, Nothing] {
+
+  def valid: Nothing = throw new NoSuchElementException("Invalid.valid")
+}
 ```
 :::
 
-`Validated` contains the valid value you want or the invalid error reason for why you didn’t get it. Realistically, we could fail to receive a `User` for three or more reasons related to `username`, `email`, and `password` all being invalid, which implies that term `E` represents one or more instances of `E`. Let’s define an applicative instance for `Validated` and see what arises:
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Validated.scala) for the definitions in the sample repository.
+
+#### Why use a new `Validated` context instead of `Either`?
+
+The `Applicative` instance for `Either` in the context of validation has one key flaw: it short-circuits on the first `Left`.
+
+Refer to `Either`'s implementation of `ap()`:
+
+:::{.numberLines}
+```scala
+override def ap[A, B](ff: Either[X, A => B])(fa: Either[X, A]): Either[X, B] =
+  (ff, fa) match {
+    case (Right(f), Right(a)) => Right(f(a))
+    case (Left(x), _)         => Left(x)
+    case (_, Left(x))         => Left(x)
+  }
+```
+:::
+
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L145-L150) for the definition.
+
+For both cases of `Left` they are immediately returned and there is no specific handling for situations where both `ff` and `fa` may be in the `Left` case. This means that the first `Left` propagates and all subsequent `Left`s are swallowed. In the context of validation, this means that for any number of validation errors that the context might produce, we would only receive the first error. We would have to resolve the error and re-run the operation, and repeat for each subsequent error until the operation succeeded. This makes `Either` a very poor choice for modeling validation. It is strictly one thing or the other, whereas validation is specialized to propagate all reasons for failure.
+
+### Validation via `Applicative`
+
+`Validated` contains the valid value you want or the reason for invalidation. We could fail to receive a `User` for three or more reasons related to `username`, `email`, and `password` all being invalid, which implies that term `E` represents some data containing zero or more of _something_. This has a specific implication on how we define an instance of `Applicative` for `Validated`:
 
 :::{.numberLines}
 ```scala
@@ -198,50 +247,41 @@ implicit def validatedApplicative[E]: Applicative[Validated[E, *]] =
       (ff, fa) match {
         case (Valid(f), Valid(a)) => Valid(f(a))
         case (Invalid(x), Invalid(y)) => ??? /* what do we do with these two E's? */
-        // ...
+        case (Invalid(x), _) => Invalid(x)
+        case (_, Invalid(y)) => Invalid(y)
       }
   }
 ```
 :::
 
-We’ve hit a snag: when there are two instances of `E` we don't have a way to combine them. This means that out of the box our `Validated` instance of `Applicative` doesn’t make a very good general validation utility as it doesn’t have a way to report all errors that are encountered. We don’t have any way to combine their values without concretely defining `E` such as with `List[String]` which creates a rigid API requirement. Is there a way to keep `E` abstract but still be able to gather errors as they occur?
+When there are two instances of `E` we don't have a way to combine them as `E` is an opaque type. Without concretely defining `E`, such as with `List[String]` or another similar structure, we won't be able to combine their values, but this creates an inflexible API. Specifically, this inability to combine `E` leaves `Validated` in the same position that `Either` is in: the first undesired case propagates and subsequent cases are swallowed. How do we combine the undesired cases?
 
-### Modeling errors as a combinable structure
+### Modeling combinable structures
 
-Structures defining a `combine()` operation form a typeclass known as a **semigroup** under a specific condition. Semigroups are very common, and constraining `E` to have an instance of `Semigroup` provides great flexibility in the context of validation. First, let's see how the typeclass is defined:
+Structures defining a `combine()` operation form a typeclass known as a **semigroup** under a specific condition: that `combine()` is associative. Semigroups are very common, and constraining `E` to have an instance of `Semigroup` provides great API flexibility. First, let's see how the `Semigroup` typeclass is defined:
 
 :::{.numberLines}
 ```scala
 trait Semigroup[A] {
-
   def combine(left: A, right: A): A
 }
-
 object Semigroup {
-
   def apply[A: Semigroup]: Semigroup[A] = implicit[Semigroup[A]]
-
-  object Syntax {
-
-    implicit class SemigroupOps[S](val s: S) extends AnyVal {
-
-      // an infix operator for convenience
-      def |+|(other: S)(implicit S: Semigroup[S]): S = S.combine(s, other)
-
-      def combine(other: S)(implicit S: Semigroup[S]): S = S.combine(s, other)
-    }
-  }
 }
 ```
 :::
 
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Semigroup.scala) for the definition in the sample repository.
+
 A semigroup is thus an additive form of data. Here's a few familiar data types that you may have used as semigroups without realizing it:
 
-* Strings under concatenation
-* Lists under concatenation
-* Natural numbers under addition
+* [Lists under concatenation]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L28)
+* [Strings under concatenation]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L10)
+* [Integers under addition]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L13)
+* [Booleans under `&&`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/BooleanSpec.scala#L10)
+* [Sets under union]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L10)
 
-Truly to be a semigroup, however, the `combine()` operation must be associative. This can be tested with a `scalacheck` property:
+The `combine()` operation must be associative. This can be tested with a `scalacheck` property:
 
 :::{.numberLines}
 ```scala
@@ -264,6 +304,8 @@ def checkSemigroupLaws[S: Semigroup: Arbitrary](): Unit = {
 ```
 :::
 
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/SemigroupLaws.scala) for the definition in the sample repository.
+
 Given an `E` with an instance of `Semigroup`, we can define an `Applicative` instance for `Validated`:
 
 :::{.numberLines}
@@ -277,7 +319,7 @@ implicit def validatedApplicative[E: Semigroup]: Applicative[Validated[E, *]] =
     override def ap[A, B](ff: Validated[E, A => B])(fa: Validated[E, A]): Validated[E, B] =
       (ff, fa) match {
         case (Valid(f), Valid(a))     => Valid(f(a))
-        case (Invalid(x), Invalid(y)) => Invalid(x |+| y) // combine the errors!
+        case (Invalid(x), Invalid(y)) => Invalid(x |+| y) // propagate both undesired cases via Semigroup
         case (Invalid(x), _)          => Invalid(x)
         case (_, Invalid(y))          => Invalid(y)
       }
@@ -286,19 +328,21 @@ implicit def validatedApplicative[E: Semigroup]: Applicative[Validated[E, *]] =
 ```
 :::
 
-This means that `Validated` is usable as an `Applicative` for any case where `E` is combinable. But what does that actually mean for us?
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Validated.scala#L98-L104) for the definition in the sample repository.
+
+This means that `Validated` is usable as an `Applicative` for any case where `E` is combinable. What implications does this have?
 
 * Errors may exist in a non-zero amount when the context is `Invalid`
 * When there are errors, the amount is unbounded
 * Combining errors can be frequent, and should be computationally cheap
 
-Naively, a `List[String]` works for `E`. It forms a `Semigroup` under concatenation, but concatenation isn’t cheap in Scala `List`s! It can also be empty per its type, which means that as `E` you have to code for invariants where it is actually empty.
+Naively, a `List[String]` works for `E`. It forms a `Semigroup` under concatenation, but concatenation isn't cheap in Scala `List`s! It can also be empty per its type, which means that as `E` you have to code for invariants where it is actually empty.
 
 There exists a better structure, and we can whip it together pretty quick. The `NonEmptyChain`:
 
 :::{.numberLines}
 ```scala
-sealed trait NonEmptyChain[+A] {
+trait NonEmptyChain[+A] {
 
   import NonEmptyChain._
 
@@ -306,48 +350,52 @@ sealed trait NonEmptyChain[+A] {
 
   def tail: Option[NonEmptyChain[A]]
 
+  def length: Int
+
+  def cons[B >: A](newHead: B): NonEmptyChain[B] = prepend(Singleton(newHead))
+
+  def prepend[B >: A](prefix: NonEmptyChain[B]): NonEmptyChain[B] = prefix.append(this)
+
   def append[B >: A](suffix: NonEmptyChain[B]): NonEmptyChain[B] = Append(this, suffix)
 
-  def toList: List[A]
+  def toSeq: Seq[A]
 }
 
 object NonEmptyChain {
 
-  def apply[A](head: A): NonEmptyChain[A] = Singleton(head)
-
-  def apply[A](head: A, rest: A*): NonEmptyChain[A] = {
-    val reversed = (head +: rest).reverse
-    reversed.tail.foldLeft(NonEmptyChain(reversed.head))((acc, prev) => acc.cons(prev))
-  }
+  def apply[A](value: A, rest: A*): NonEmptyChain[A] =
+    rest.map[NonEmptyChain[A]](Singleton(_)).foldLeft[NonEmptyChain[A]](Singleton(value))(_ append _)
 
   private case class Singleton[+A](head: A) extends NonEmptyChain[A] {
 
     override def tail: Option[NonEmptyChain[A]] = None
 
-    override def toList: List[A] = List(head)
-
     override def length: Int = 1
+
+    override def toSeq: Seq[A] = Seq(head)
   }
 
   private case class Append[+A](prefix: NonEmptyChain[A], suffix: NonEmptyChain[A]) extends NonEmptyChain[A] {
 
     override def head: A = prefix.head
 
-    override def tail: Option[NonEmptyChain[A]] = prefix.tail.map(_.append(suffix)).orElse(Some(suffix))
-
-    override def toList: List[A] = prefix.toList.foldRight(suffix.toList)(_ :: _)
+    override def tail: Option[NonEmptyChain[A]] = prefix.tail.map(suffix.prepend).orElse(Some(suffix))
 
     override def length: Int = prefix.length + suffix.length
+
+    override def toSeq: Seq[A] = prefix.toSeq ++ suffix.toSeq
   }
 
   object Instances {
 
-    // NonEmptyChain forms a semigroup under append
-    implicit def necSemigroup[A]: Semigroup[NonEmptyChain[A]] = _ append _
+    implicit def nonEmptyChainSemigroup[A]: Semigroup[NonEmptyChain[A]] = _ append _
   }
 }
+
 ```
 :::
+
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChain.scala) for the definition in the sample repository.
 
 Using a `NonEmptyChain`, we can start writing validation functions for `User`:
 
@@ -436,7 +484,7 @@ Each of `validateUsername()`, `validateEmail()`, and `validatePassword()` act as
 
 It may not have been obvious from `validateUser()`, but each validation function evaluates independently of the other validation functions. In the `Validation` context, this means that each function executes without impacting the other functions regardless of individual success or failure. Imagine for a moment, what if the functions were evaluated within an asynchronous context?
 
-Let’s define a function on the `Applicative` typeclass that gathers the results of some effectful operations:
+Let's define a function on the `Applicative` typeclass that gathers the results of some effectful operations:
 
 :::{.numberLines}
 ```scala
@@ -470,7 +518,7 @@ The pattern offered by `Applicative` is an all-or-nothing result in its output. 
 
 ## Becoming an Applicative
 
-In order to become an `Applicative`, an effect type must implement the typeclass. Let’s implement instances for the usual suspects, `Option`, `Either`, and `List`. As `Applicative` is a specialization of `Functor`, we can simply upgrade our current `Functor` instances to become `Applicatives`:
+In order to become an `Applicative`, an effect type must implement the typeclass. Let's implement instances for the usual suspects, `Option`, `Either`, and `List`. As `Applicative` is a specialization of `Functor`, we can simply upgrade our current `Functor` instances to become `Applicatives`:
 
 :::{.numberLines}
 ```scala
@@ -481,7 +529,7 @@ implicit val optionApplicative: Applicative[Option] = new Applicative[Option] {
   def pure[A](a: A): Option[A] = Some(a)
 
   def ap[A, B](ff: Option[A => B])(fa: F[A]): F[B] =
-    (ff, fa) match (
+    (ff, fa) match {
       case (Some(f), Some(a)) => Some(f(a))
       case _ => None
     }
@@ -517,7 +565,7 @@ implicit val listApplicative: Applicative[List] = new Applicative[List] {
 ```
 :::
 
-`Option` and `Either`’s instances of `Applicative` are straight-forward: if a function and argument are present, they are applied and the result returned in the desired case. If either are missing, then the undesired case is propagated instead.
+`Option` and `Either`'s instances of `Applicative` are straight-forward: if a function and argument are present, they are applied and the result returned in the desired case. If either are missing, then the undesired case is propagated instead.
 
 `List` looks very different at first glance, but conceptually performs the same way. Specifically, `List` performs a Cartesian product of its functions and arguments, applying each pair together and building a new `List` from the results. If either the function or argument `List` are empty, then an empty result `List` is returned, as an empty `List` represents the undesired case.
 
