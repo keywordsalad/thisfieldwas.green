@@ -698,6 +698,8 @@ object FunctorInstances {
       }
   }
   implicit val listFunctor = new Functor[List] {
+    // the naive implementation is recursive, the sample repository demonstrates
+    // a more robust implementation
     def map[A, B](fa: List[A])(f: A => B): List[B] =
       fa match {
         case a :: at => f(a) :: map(at)(f) // apply map, recurse
