@@ -639,8 +639,8 @@ trait ApplicativeLaws { this: Laws with FunctorLaws =>
   /** Defined per Applicative laws taken from the Haskell wiki:
     * [[https://en.wikibooks.org/wiki/Haskell/Applicative_functors#Applicative_functor_laws]]
     *
-    * These laws extend the Functor laws, so the Functor laws don't need to be
-    * registered explicitly.
+    * These laws extend the functor laws, so `checkFunctorLaws[F]()` should be
+    * executed alongside this function.
     *
     * @param TT The type tag of the context
     * @tparam F The context type being tested
