@@ -228,7 +228,7 @@ override def ap[A, B](ff: Either[X, A => B])(fa: Either[X, A]): Either[X, B] =
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L145-L150) for the definition.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L145-L150) for `Either`'s definition of `ap()`.
 
 For both cases of `Left` they are immediately returned and there is no specific handling for situations where both `ff` and `fa` may be in the `Left` case. This means that the first `Left` propagates and all subsequent `Left`s are swallowed. In the context of validation, this means that for any number of validation errors that the context might produce, we would only receive the first error. We would have to resolve the error and re-run the operation, and repeat for each subsequent error until the operation succeeded. This makes `Either` a very poor choice for modeling validation. It is strictly one thing or the other, whereas validation is specialized to propagate all reasons for failure.
 
@@ -285,8 +285,6 @@ The `combine()` operation must be associative. This can be tested with a `scalac
 
 :::{.numberLines}
 ```scala
-import Semigroup.Syntax._
-
 def checkSemigroupLaws[S: Semigroup: Arbitrary](): Unit = {
 
   import Semigroup.Syntax._
@@ -332,11 +330,11 @@ implicit def validatedApplicative[E: Semigroup]: Applicative[Validated[E, *]] =
 
 This means that `Validated` is usable as an `Applicative` for any case where `E` is combinable. What implications does this have?
 
-* Errors may exist in a non-zero amount when the context is `Invalid`
-* When there are errors, the amount is unbounded
-* Combining errors can be frequent, and should be computationally cheap
+* Errors may exist in a non-zero amount when the context is `Invalid`.
+* When there are errors, the amount is unbounded.
+* Combining errors can be frequent, and should be computationally cheap.
 
-Naively, a `List[String]` works for `E`. It forms a `Semigroup` under concatenation, but concatenation isn't cheap in Scala `List`s! It can also be empty per its type, which means that as `E` you have to code for invariants where it is actually empty.
+Naively, a `List[String]` works for `E`. It forms a `Semigroup` under concatenation, but concatenation isn't cheap in Scala `List`s. It can also be empty per its type, which means that as `E` you have to code for invariants where it is actually empty.
 
 There exists a better structure, and we can whip it together pretty quick. The `NonEmptyChain`:
 
@@ -357,8 +355,6 @@ trait NonEmptyChain[+A] {
   def prepend[B >: A](prefix: NonEmptyChain[B]): NonEmptyChain[B] = prefix.append(this)
 
   def append[B >: A](suffix: NonEmptyChain[B]): NonEmptyChain[B] = Append(this, suffix)
-
-  def toSeq: Seq[A]
 }
 
 object NonEmptyChain {
@@ -366,28 +362,27 @@ object NonEmptyChain {
   def apply[A](value: A, rest: A*): NonEmptyChain[A] =
     rest.map[NonEmptyChain[A]](Singleton(_)).foldLeft[NonEmptyChain[A]](Singleton(value))(_ append _)
 
-  private case class Singleton[+A](head: A) extends NonEmptyChain[A] {
+  case class Singleton[+A](head: A) extends NonEmptyChain[A] {
 
     override def tail: Option[NonEmptyChain[A]] = None
 
     override def length: Int = 1
-
-    override def toSeq: Seq[A] = Seq(head)
   }
 
-  private case class Append[+A](prefix: NonEmptyChain[A], suffix: NonEmptyChain[A]) extends NonEmptyChain[A] {
+
+  case class Append[+A](prefix: NonEmptyChain[A], suffix: NonEmptyChain[A]) extends NonEmptyChain[A] {
 
     override def head: A = prefix.head
 
     override def tail: Option[NonEmptyChain[A]] = prefix.tail.map(suffix.prepend).orElse(Some(suffix))
 
     override def length: Int = prefix.length + suffix.length
-
-    override def toSeq: Seq[A] = prefix.toSeq ++ suffix.toSeq
   }
 
   object Instances {
 
+    /** `NonEmptyChain` forms a `Semigroup` under the `append()` operation.
+      */
     implicit def nonEmptyChainSemigroup[A]: Semigroup[NonEmptyChain[A]] = _ append _
   }
 }
@@ -397,7 +392,7 @@ object NonEmptyChain {
 
 > [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChain.scala) for the definition in the sample repository.
 
-Using a `NonEmptyChain`, we can start writing validation functions for `User`:
+Using a `NonEmptyChain`, we can start writing validation functions for `User` to test that they work:
 
 :::{.numberLines}
 ```scala
@@ -406,25 +401,35 @@ import NonEmptyChain.Instances._
 import Validated.Instances._
 import Validated.Syntax._
 
-def validateUsername(username: String): Validated[NonEmptyChain[String], String] =
-  if (username.nonEmpty) {
-    username.validNec
+case class User(username: String, email: String, password: String)
+
+def validateUsername(username: String): ValidatedNec[String, String] =
+  if (username.isEmpty) {
+    "Username can't be blank".invalidNec[String]
   } else {
-    "Username can't be blank".invalidNec
+    username.validNec[String]
   }
 
-def validateEmail(email: String): Validated[NonEmptyChain[String], String] =
-  if (email.contains('@')) {
-    email.validNec
+def validateEmail(email: String): ValidatedNec[String, String] =
+  if (!email.contains('@')) {
+    "Email does not appear to be valid".invalidNec[String]
   } else {
-    "Email does not appear to be valid".invalidNec
+    email.validNec[String]
   }
 
-def validatePassword(password: String): Validated[NonEmptyChain[String], String] =
-  if (password.length >= 8) {
-    password.validNec
-  } else {
-    "Password must be at least 8 characters long".invalidNec
+def validatePassword(password: String): ValidatedNec[String, String] =
+  List(
+    Option.cond(password.length < 8)("Password must have at least 8 characters"),
+    Option.cond(!password.exists(_.isLower))("Password must contain at least one lowercase character"),
+    Option.cond(!password.exists(_.isUpper))("Password must contain at least one uppercase character"),
+    Option.cond(!password.exists(_.isDigit))("Password must contain at least one digit"),
+    Option.cond(!password.exists("`~!@#$%^&*()-_=+[]{}\\|;:'\",.<>/?".contains(_)))(
+      "Password must contain at least one symbol"
+    ),
+  ).foldLeft(password.validNec[String]) { (validated, errorOption) =>
+    errorOption.fold(validated) { message =>
+      Invalid(validated.fold(_.cons(message))(_ => NonEmptyChain(message)))
+    }
   }
 
 def validateUser(username: String, email: String, password: String): Validated[NonEmptyChain[String], User] =
@@ -432,7 +437,6 @@ def validateUser(username: String, email: String, password: String): Validated[N
     .ap(validateUsername(username))
     .ap(validateEmail(email))
     .ap(validatePassword(password))
-
 ```
 :::
 
@@ -442,16 +446,21 @@ Using this function, we can attempt to create a `User` with nothing but invalid 
 ```scala
 val validatedUser = validateUser(
   username = "",
-  email = "not an email",
-  password = "12345"
+  email = "bananaphone",
+  password = "\n\t\r\r\r",
 )
-inside(validatedUser) {
-  case Invalid(errors) =>
-    errors.toList should contain theSameElementsAs Seq(
+inside(validatedUser) { case Invalid(reasons) =>
+  (reasons.toSeq should contain).theSameElementsAs(
+    Seq(
       "Username can't be blank",
       "Email does not appear to be valid",
-      "Password must be at least 8 characters long",
+      "Password must have at least 8 characters",
+      "Password must contain at least one lowercase character",
+      "Password must contain at least one uppercase character",
+      "Password must contain at least one digit",
+      "Password must contain at least one symbol",
     )
+  )
 }
 ```
 :::
@@ -461,20 +470,21 @@ And with valid data, receive a constructed `User`:
 :::{.numberLines}
 ```scala
 val validatedUser = validateUser(
-  username = "buttonoperator27",
-  email = "test@email.com",
-  password = "password12345"
+  username  = "commander.keen",
+  email = "commander.keen@vorticonexterminator.net",
+  password = "m4rti@an$Rul3",
 )
-inside(validatedUser) {
-  case Valid(user) =>
-    user shouldBe User(
-      username = "buttonoperator27",
-      email = "test@email.com",
-      password = "password12345"
-    )
+inside(validatedUser) { case Valid(user) =>
+  user shouldBe User(
+    username = "commander.keen",
+    email = "commander.keen@vorticonexterminator.net",
+    password = "m4rti@an$Rul3",
+  )
 }
 ```
 :::
+
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L50) for the specs in the sample repository.
 
 Applicatives thus enable entire computations to succeed if all context arguments are in the desired case. If any argument is in the undesired case, then this case is propagated and the computation as a whole fails.
 
@@ -488,13 +498,12 @@ Let's define a function on the `Applicative` typeclass that gathers the results 
 
 :::{.numberLines}
 ```scala
-def sequence[A](fas: List[F[A]]): F[List[A]] =
-  fas match {
-    case headF :: tailF => map2(headF, sequence(tailF))(_ :: _)
-    case Nil => pure(Nil)
-  }
+def sequence[A](listFa: List[F[A]]): F[List[A]] =
+  listFa.foldLeft(pure(List[A]()))((fListA, fa) => map2(fa, fListA)(_ :: _))
 ```
 :::
+
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Applicative.scala#L70-L71) for the definition in the sample repository.
 
 And then if we load three `User`s at once:
 
@@ -526,9 +535,9 @@ implicit val optionApplicative: Applicative[Option] = new Applicative[Option] {
 
   // removed map() and now using the default
 
-  def pure[A](a: A): Option[A] = Some(a)
+  override def pure[A](a: A): Option[A] = Some(a)
 
-  def ap[A, B](ff: Option[A => B])(fa: F[A]): F[B] =
+  override def ap[A, B](ff: Option[A => B])(fa: F[A]): F[B] =
     (ff, fa) match {
       case (Some(f), Some(a)) => Some(f(a))
       case _ => None
@@ -539,9 +548,9 @@ implicit def eitherApplicative[X]: Applicative[Either[X, *]] = new Applicative[E
 
   // removed map() and now using the default
 
-  def pure[A](a: A): Either[X, A] = Right(x)
+  override def pure[A](a: A): Either[X, A] = Right(x)
 
-  def ap[A, B](ff: Either[X, A => B])(fa: F[A]): F[B] =
+  override def ap[A, B](ff: Either[X, A => B])(fa: F[A]): F[B] =
     (ff, fa) match {
       case (Right(f), Right(a)) => Right(f(a))
       case (Left(x), _) => Left(x)
@@ -553,17 +562,22 @@ implicit val listApplicative: Applicative[List] = new Applicative[List] {
 
   // removed map() and now using the default
 
-  def pure[A](a: A): List[A] = List(a)
+  override def pure[A](a: A): List[A] = List(a)
 
-  def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] =
-    ff.foldRight(List[B]()) { (acc1, f) =>
-      fa.foldRight(acc1) { (acc2, a) =>
-        f(a) :: acc2
+  override def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] =
+    ff.foldLeft(List[B]()) { (outerResult, f) =>
+      fa.foldLeft(outerResult) { (innerResult, a) =>
+        f(a) :: innerResult
       }
-    }
+    }.reverse
 }
 ```
 :::
+
+> See the instances of `Applicative` for
+> [`Option`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Option.scala#L127-L155),
+> [`Either`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L122-L151),
+> and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206-L235) in the sample repository.
 
 `Option` and `Either`'s instances of `Applicative` are straight-forward: if a function and argument are present, they are applied and the result returned in the desired case. If either are missing, then the undesired case is propagated instead.
 
@@ -612,51 +626,70 @@ trait LiftedGen[F[_]] {
 ```
 :::
 
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/util/LiftedGen.scala) for the definition in the sample repository.
+
 ### Defining the applicative laws as properties
 
 Now we will walk through defining the properties of `Applicative` in such a way that we simply supply the contexts as the argument to the test. This way we only define the properties once.
 
 :::{.numberLines}
 ```scala
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.propspec.AnyPropSpec
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+trait ApplicativeLaws { this: Laws with FunctorLaws =>
 
-trait ApplicativeLaws { this: AnyPropSpec with ScalaCheckPropertyChecks with Matchers =>
-
-  import Applicative.Syntax._
-  import LiftedGen.Syntax._
-
-  def checkApplicativeLaws[F[_]: Applicative: LiftedGen](): Unit = {
-    property("Applicative preserves identity functions") {
+  /** Defined per Applicative laws taken from the Haskell wiki:
+    * [[https://en.wikibooks.org/wiki/Haskell/Applicative_functors#Applicative_functor_laws]]
+    *
+    * These laws extend the Functor laws, so the Functor laws don't need to be
+    * registered explicitly.
+    *
+    * @param TT The type tag of the context
+    * @tparam F The context type being tested
+    */
+  def checkApplicativeLaws[F[_]: Applicative: LiftedGen]()(implicit TT: TypeTag[F[Any]]): Unit = {
+    property(s"${TT.name} Applicative preserves identity functions") {
+      // A lifted identity function applied to a lifted argument is the same as
+      // the identity function applied directly to the lifted argument.
       forAll(arbitrary[Double].lift) { v =>
+        // Haskell: pure id <*> v = v
         (identity[Double] _).pure.ap(v) mustBe identity(v)
       }
     }
-    property("Applicative preserves function homomorphism") {
+    property(s"${TT.name} Applicative preserves function homomorphism") {
+      // Lifting a function and an argument then applying them produces the
+      // same result as applying the unlifted function and unlifted argument
+      // then lifting the result.
       forAll(for {
         f <- arbitrary[Double => String]
         x <- arbitrary[Double]
       } yield (f, x)) { case (f, x) =>
+        // Haskell: pure f <*> pure x = pure (f x)
         f.pure.ap(x.pure) mustBe f(x).pure
       }
     }
-    property("Applicative preserves function interchange") {
+    property(s"${TT.name} Applicative preserves function interchange") {
+      // Applying a lifted function to a lifted value produces the same result
+      // as a lifted function of the unlifted function applied to the unlifted
+      // value applied to the lifted function. (What a mouthful!)
       forAll(for {
         u <- arbitrary[Double => String].lift
         y <- arbitrary[Double]
       } yield (u, y)) { case (u, y) =>
+        // Haskell: u <*> pure y = pure ($ y) <*> u
         u.ap(y.pure) mustBe ((f: Double => String) => f(y)).pure.ap(u)
       }
     }
-    property("Applicative preserves function composition") {
+    property(s"${TT.name} Applicative preserves function composition") {
+      // Given lifted functions `ff: F[A => B]` and `fg: F[B => C]` and
+      // argument `fa: F[A]`: lifting `compose()` and applying `fg`, `ff`, and
+      // `fa` produces the same result as applying `fg` after applying `ff` to
+      // `fa`.
       val compose: (String => Int) => (Double => String) => Double => Int = g => f => g compose f
       forAll(for {
         u <- arbitrary[String => Int].lift
         v <- arbitrary[Double => String].lift
         w <- arbitrary[Double].lift
       } yield (u, v, w)) { case (u, v, w) =>
+        // Haskell: pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
         compose.pure.ap(u).ap(v).ap(w) mustBe u.ap(v.ap(w))
       }
     }
@@ -665,16 +698,12 @@ trait ApplicativeLaws { this: AnyPropSpec with ScalaCheckPropertyChecks with Mat
 ```
 :::
 
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/ApplicativeLaws.scala) for the full definition of the trait.
+
 With this trait, laws specs can be written for each context.
 
 :::{.numberLines}
 ```scala
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.Gen
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.propspec.AnyPropSpec
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-
 class OptionLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
 
   import Option.Instances._
@@ -690,7 +719,7 @@ class OptionLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matc
        )
    }
 
-   checkApplicativeLaws()
+   checkApplicativeLaws[Option]()
 }
 
 class EitherLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
@@ -728,12 +757,17 @@ class ListLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matche
      }
    }
 
-   checkApplicativeLaws()
+   checkApplicativeLaws[List]()
 }
 ```
 :::
 
-Try running these specs!
+> See these laws specs for
+> [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala#L116-L136),
+> [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/EitherSpec.scala#L112-L135),
+> and [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala#L158-L181) in the sample repository.
+
+_Try running these specs!_
 
 ### Implications of the applicative laws
 
