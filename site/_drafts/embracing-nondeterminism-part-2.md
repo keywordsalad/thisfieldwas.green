@@ -704,60 +704,65 @@ With this trait, laws specs can be written for each context.
 
 :::{.numberLines}
 ```scala
-class OptionLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
+abstract class Laws extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers {
+
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(minSuccessful = 100)
+}
+
+class OptionLawsSpec extends Laws with FunctorLaws with ApplicativeLaws {
 
   import Option.Instances._
 
-   implicit val optionLiftedGen: LiftedGen[Option] = new LiftedGen[Option] {
+  implicit val optionLiftedGen: LiftedGen[Option] = new LiftedGen[Option] {
 
-     override def lift[A](gen: Gen[A]): Gen[Option[A]] =
-       Gen.lzy(
-         Gen.oneOf(
-           gen.map(Some(_)),
-           Gen.const(None),
-         )
-       )
-   }
+    override def lift[A](gen: Gen[A]): Gen[Option[A]] =
+      Gen.lzy(
+        Gen.oneOf(
+          gen.map(Some(_)),
+          Gen.const(None),
+        )
+      )
+  }
 
-   checkApplicativeLaws[Option]()
+  checkFunctorLaws[Option]()
+  checkApplicativeLaws[Option]()
 }
 
-class EitherLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
+class EitherLawsSpec extends Laws with FunctorLaws with ApplicativeLaws {
 
   import Either.Instances._
 
-   implicit def eitherLiftedGen[X: Arbitrary]: LiftedGen[Either[X, *]] = new LiftedGen[Either[X, *]] {
+  implicit def eitherLiftedGen[X: Arbitrary]: LiftedGen[Either[X, *]] = new LiftedGen[Either[X, *]] {
 
-     override def lift[A](gen: Gen[A]): Gen[Either[X, A]] =
-       Gen.lzy(
-         Gen.oneOf(
-           gen.map(Right(_)),
-           arbitrary[X].map(Left(_)),
-         )
-       )
-   }
+    override def lift[A](gen: Gen[A]): Gen[Either[X, A]] =
+      Gen.lzy(
+        Gen.oneOf(
+          gen.map(Right(_)),
+          arbitrary[X].map(Left(_)),
+        )
+      )
+  }
 
-   checkApplicativeLaws[Either[String, *]]()
+  checkFunctorLaws[Either[String, *]]()
+  checkApplicativeLaws[Either[String, *]]()
 }
 
-class ListLawsSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers with ApplicativeLaws {
+class ListLawsSpec extends Laws with FunctorLaws with ApplicativeLaws {
 
   import List.Instances._
 
-   implicit val listLiftedGen: LiftedGen[List] = new LiftedGen[List] {
+  implicit val listLiftedGen: LiftedGen[List] = new LiftedGen[List] {
 
-     override def lift[A](gen: Gen[A]): Gen[List[A]] = {
-       def go(length: Int, acc: List[A]): Gen[List[A]] =
-         if (length == 0) {
-           Gen.const(acc)
-         } else {
-           gen.flatMap(a => go(length - 1, a :: acc))
-         }
-       Gen.choose(0, 100).flatMap(go(_, Nil))
-     }
-   }
+    override def lift[A](gen: Gen[A]): Gen[List[A]] =
+      for {
+        size <- Gen.sized(Gen.choose(0, _))
+        items <- Gen.listOfN(size, gen)
+      } yield List(items: _*)
+  }
 
-   checkApplicativeLaws[List]()
+  checkFunctorLaws[List]()
+  checkApplicativeLaws[List]()
 }
 ```
 :::
