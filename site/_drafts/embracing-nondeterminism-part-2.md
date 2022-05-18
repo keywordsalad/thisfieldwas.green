@@ -776,8 +776,16 @@ _Try running these specs!_
 
 ### Implications of the applicative laws
 
-Each of `Option`, `Either`, and `List` conform to the applicative laws and we only had to write the properties once. These properties prove that functions and arguments used within these contexts maintain referential transparency in their arrangments and that the specific contexts do not change the factoring semantics of the code.
+Each of `Option`, `Either`, and `List` conform to the applicative laws and we only had to write the properties once. These properties prove that functions and arguments used within these contexts maintain referential transparency in their arrangements and that the specific contexts do not change the factoring semantics of the code.
 
 What does change, however, are these contexts' specific effects. For example, you would not have to refactor code abstracted by applicative operations if you changed the backing implementation from `Either` to `List`, but your code would produce potentially more than one result in the desired case.
 
 This is the goal, however, as these effects' dimensions of unknown quantity should not burden our code. Instead, we push the complexity to the edge of the context, where it is important that our context is an `Either` or a `List`, and keep our business logic focused on individual instances contained within each context.
+
+## What is enabled by applicatives?
+
+Applicatives primarily offer parallel computation. Specifically, the arguments to applicative operations such as `ap()`, `map2()`, or `sequence()` are evaluated independently of one another, and their individual outputs as a whole influence the combined output of the operations consuming them.
+
+When all inputs to an applicative operation are in the desired case, then the output of the operation will also be in the desired case. Conversely, if any input is in the undesired case, then it will be propagated through the operation's output, and the other cases will be discarded. In this regard, applicative operations provide an _all-or-nothing_ output.
+
+Parallel computation provides some level of control flow, but it doesn't guide execution in terms of allowing execution to proceed only if the previous execution has succeeded, as all operations are independent of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need another specialization of the `Functor`: the infamous _`Monad`_, which we will explore in my next post.
