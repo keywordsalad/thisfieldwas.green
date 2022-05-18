@@ -44,6 +44,24 @@ Contexts that are functors thus allow abstraction over unknown cases. For exampl
 
 What this means is that for any context in the desired case, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. they propagate the _undesired case_.
 
+You can try for yourself from the console:
+
+:::{.numberLines}
+```scala
+scala> val desiredOption: Option[Int] = Some(42)
+val desiredOption: Option[Int] = Some(42)
+
+scala> desiredOption.map(_.toString).map(_.reverse)
+res0: Option[String] = Some("24")
+
+scala> val undesiredOption: Option[Int] = None
+val undesiredOption: Option[Int] = None
+
+scala> undesiredOption.map(_.toString).map(_.reverse)
+res1: Option[String] = None
+```
+:::
+
 Functors however only allow transformation of data from a sole instance of a context. This means that functions applicable to `map()` may only have the form `f: A => B`. Multiple inputs to a function lifted with `map()` are not possible with this abstraction. Consequently, as there is only one input, control flow is not possible as `map()` always applies `f` if the context is in its desired case, and no instance of the term `A` will cause `map()` to return the context in an undesired case to halt further computation against the context. There is no way to control the flow of execution against contexts by using functors.
 
 ## Control flow
