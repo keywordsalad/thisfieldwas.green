@@ -15,7 +15,7 @@ og:
 code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2
 ---
 
-Remember functors? Recall from my last post, {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}, they are structures that define a single operation: `map()`. What `map()` allows you to do is lift a function into a context and apply it to its term if the context is in the desired case, but performing no action if not. In this post we will explore how to exploit contexts in their undesired cases to halt computations in order to express control flow.
+Remember functors? Recall from my last post, {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}, they are structures that define a single function: `map()`. What `map()` allows you to do is lift a function into a context and so that it may be applied to the context's term if the context is in the desired case, but performing no action if the context is not. In this post we will explore how to exploit contexts in their undesired cases to halt computations in order to express control flow.
 
 <!--more-->
 
@@ -40,9 +40,9 @@ object Functor {
 
 For any context `F[A]`, the `map()` function accepts another function `f: A => B` and applies it to the term within the context, giving back `F[B]`.
 
-Contexts that are functors thus allow abstraction over unknown cases. For example, a function `f: A => B` may be lifted into an `Option[A]` and applied if an instance of `A` is present. If no instance of `A` is present, then nothing happens. Specifically, by using `map()` the function `f` is unconcerned with the unknown quantity of `A`'s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities.
+Contexts that are functors thus allow abstraction over unknown cases. For example, a function `f: A => B` may be lifted into an `Option[A]` and applied if an instance of `A` is present. If no instance of `A` is present, then nothing happens. Specifically, by using `map()` the function `f` is unconcerned with the unknown quantity of `A`'s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities, allowing the business logic expressed by the lifted functions to focus only on the terms the operate against.
 
-What this means is that for any context in the desired case, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. they propagate the _undesired case_.
+What this means is that for any context in the desired case, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. they _propagate_ the undesired case.
 
 You can try for yourself from the console:
 
@@ -64,7 +64,7 @@ res1: Option[String] = None
 
 Functors however only allow transformation of data from a sole instance of a context. This means that functions applicable to `map()` may only have the form `f: A => B`. Multiple inputs to a function lifted with `map()` are not possible with this abstraction. Consequently, as there is only one input, control flow is not possible as `map()` always applies `f` if the context is in its desired case, and no instance of the term `A` will cause `map()` to return the context in an undesired case to halt further computation against the context. There is no way to control the flow of execution against contexts by using functors.
 
-## Control flow
+## Introducing control flow
 
 What function might allow for control flow against contexts? There is one, `map2()`:
 
@@ -74,7 +74,7 @@ def map2[F[_], A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C]
 ```
 :::
 
-This two-argument analog of `map()` unlocks a key capability: controlling whether proceed or halt computation against the context. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` against which the function `f` may be applied. But if either one or both are in the undesired case, `f` does not apply, and the undesired cases are propagated through `F[C]`. This means that `fa` and `fb` become levers with which to halt computations against the context `F[C]`.
+This two-argument analog of `map()` unlocks a key capability: controlling whether to proceed or halt computation against the terms contained within the contexts `fa` and `fb`. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` against which the function `f` may be applied. But if either one or both are in the undesired case, `f` does not apply, and the undesired cases are propagated through `F[C]`. This means that `fa` and `fb` become levers with which to halt computations against the produced context `F[C]`.
 
 Take for example addition lifted into the context of `Option[Int]` within the example sample repository's `sbt console`:
 
@@ -96,16 +96,16 @@ scala> val F = Applicative[Option]
 val F: Applicative[Option] = Option$Instances$$anon$1
 
 scala> F.map2(Option(2), Option(2))(_ + _)
-val res2: Option[Int] = Some(4)
+val res0: Option[Int] = Some(4)
 
 scala> F.map2(Option(2), Option[Int]())(_ + _)
-val res3: Option[Int] = None
+val res1: Option[Int] = None
 
 scala> F.map2(Option[Int](), Option(2))(_ + _)
-val res4: Option[Int] = None
+val res2: Option[Int] = None
 
 scala> F.map2(Option[Int](), Option[Int]())(_ + _)
-val res5: Option[Int] = None
+val res3: Option[Int] = None
 ```
 :::
 
@@ -117,7 +117,7 @@ The `map2()` function is implemented using a new structure, a specialization of 
 
 Applicative specialization arises in the type of `A` contained within functor `F[_]`. If `A` is merely an opaque type, then `F[A]` is a functor and no more. But if however `A` is specifically known to have some type `A => B`, that is to say _`A` is a function_, then `F[A => B]` is an _applicative_ functor.
 
-Applicatives define two operations from which many more are derived, including `map2()`:
+Applicatives define two functions from which many more are derived, including `map2()`:
 
 :::{.numberLines}
 ```scala
@@ -152,14 +152,14 @@ object Applicative {
 
 > [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Applicative.scala) for the definition in the sample repository.
 
-Note that `Applicative` extends `Functor` as it is a specialization. All applicatives are also functors.
+Note that `Applicative` extends `Functor` as it is a specialization. All applicatives are also functors and therefore also provide the `map()` function.
 
-These operations afforded by applicatives offer two capabilities:
+The new functions afforded by applicatives offer two capabilities:
 
-* `pure()` which lifts the result of a pure computation `A` into the context such that `pure: A => F[A]`. This is essentially a constructor for a context in the desired case, such as `Some` for `Option[A]` or `Right` for `Either[X, A]`.
+* `pure()` which lifts the result of a pure computation `A` into the context such that `pure: A => F[A]`. This is essentially a constructor producing a context in the desired case, such as `Some` for `Option[A]` or `Right` for `Either[X, A]`.
 * `ap()`, read as _apply_, for applying a lifted function to a lifted argument.
 
-You might be wondering why a function would ever be lifted into a context. I will demonstrate why this is desirable in how `ap()` works by defining `map2()` within `Applicative`:
+You might be wondering why a function would ever be lifted into a context? I will demonstrate why this is desirable in how `ap()` works by defining `map2()` within `Applicative`:
 
 :::{.numberLines}
 ```scala
@@ -276,7 +276,7 @@ When there are two instances of `E` we don't have a way to combine them as `E` i
 
 ### Modeling combinable structures
 
-Structures defining a `combine()` operation form a typeclass known as a **semigroup** under a specific condition: that `combine()` is associative. Semigroups are very common, and constraining `E` to have an instance of `Semigroup` provides great API flexibility. First, let's see how the `Semigroup` typeclass is defined:
+Structures defining a `combine()` function form a typeclass known as a **semigroup** under a specific condition: that `combine()` is associative. Semigroups are very common, and constraining `E` to have an instance of `Semigroup` provides great API flexibility. First, let's see how the `Semigroup` typeclass is defined:
 
 :::{.numberLines}
 ```scala
@@ -299,7 +299,7 @@ A semigroup is thus an additive form of data. Here's a few familiar data types t
 * [Booleans under `&&`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/BooleanSpec.scala#L10)
 * [Sets under union]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L10)
 
-The `combine()` operation must be associative. This can be tested with a `scalacheck` property:
+The `combine()` function must be associative. This can be tested with a `scalacheck` property:
 
 :::{.numberLines}
 ```scala
@@ -340,7 +340,6 @@ implicit def validatedApplicative[E: Semigroup]: Applicative[Validated[E, *]] =
         case (_, Invalid(y))          => Invalid(y)
       }
   }
-}
 ```
 :::
 
@@ -399,7 +398,7 @@ object NonEmptyChain {
 
   object Instances {
 
-    /** `NonEmptyChain` forms a `Semigroup` under the `append()` operation.
+    /** `NonEmptyChain` forms a `Semigroup` under the `append()` function.
       */
     implicit def nonEmptyChainSemigroup[A]: Semigroup[NonEmptyChain[A]] = _ append _
   }
@@ -508,7 +507,7 @@ Applicatives thus enable entire computations to succeed if all context arguments
 
 Each of `validateUsername()`, `validateEmail()`, and `validatePassword()` act as levers on whether a `User` is successfully produced. Writing specific if-statements to guide whether a `User` is produced or errors returned instead is not required: the `Applicative` typeclass succinctly abstracts away the necessary plumbing to control the flow of logic required to handle undesired cases. Errors are declared where they should occur and the abstraction handles the rest.
 
-### Implications of independent levers
+### Independent evaluation of contexts
 
 It may not have been obvious from `validateUser()`, but each validation function evaluates independently of the other validation functions. In the `Validation` context, this means that each function executes without impacting the other functions regardless of individual success or failure. Imagine for a moment, what if the functions were evaluated within an asynchronous context?
 
@@ -539,9 +538,71 @@ val loadingUsers = Applicative[Future].sequence(List(
 
 The variable `loadingUsers` now contains `Future[List[User]]`. As each `Future[User]` resolves, they are collected into a `List`. Because each `loadUser()` function executes independently, this has a profound implication in the context of a `Future`: they are executed concurrently!
 
-Should any `User` fail to load, the undesired case will propagate and the rest of the `sequence()` operation will halt. All other `User`s are discarded.
+Should any `User` fail to load, the undesired case will propagate and the `sequence()` function will halt. All other `User`s are discarded.
 
 The pattern offered by `Applicative` is an all-or-nothing result in its output. If all inputs are in the desired case, then the output will be in the desired case as well. But if any are in an undesired case, then the undesired case propagates and computation halts.
+
+#### Products of contexts
+
+Given a 2-tuple of functors `(F[A], F[B])` you can invert the nesting of the context and the 2-tuple using the `pure()` and `ap()` functions from `Applicative` with the following steps:
+
+:::{.numberLines}
+```scala
+scala> import green.thisfieldwas.{embracingnondeterminism=>en}
+import green.thisfieldwas.{embracingnondeterminism=>en}
+
+scala> import en.effects._
+import en.effects._
+
+scala> import en.typeclasses._
+import en.typeclasses._
+
+scala> import Option.Instances._
+import Option.Instances._
+
+scala> import Applicative.Syntax._
+
+scala> val productOfSomes = (Option(42), Option("banana"))
+val productOfSomes: (Option[Int], Option[String]) = (Some(42), Some("banana"))
+
+scala> val someOfProduct = (_: Int, _: String).curried.pure[Option].ap(productOfSomes._1).ap(productOfSomes._2)
+val someOfProduct: Option[(Int, String)] = Some((42, "banana"))
+```
+:::
+
+This has an important implication, specifically that unlike the `sequence()` function these operations allow for gathering effectful operations that produce contexts with heterogeneous terms. Scala allows for tuples up to 22 elements, and it makes sense to abstract the above operations for each tuple size, especially because even at just 2 elements writing all of these out is already clunky!
+
+In the sample repository, I have written a macro which [adds two extension methods]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/GenerateTupleSyntax.scala) to each tuple size. Here's the code that is generated for the 2-tuple:
+
+:::{.numberLines}
+```scala
+implicit class Tuple2Ops[F[_], T1, T2](val t: (F[T1], F[T2])) extends AnyVal {
+
+  // Converts a product of contexts `(F[T1], F[T2])` into a context of a product `F[(T1, T2)]`
+  def tupled(implicit F: Applicative[F]): F[(T1, T2)] =
+    mapN(Tuple2.apply)
+
+  // Applies a product of contexts `(F[T1], F[T1])` to function, giving a result in context
+  def mapN[Out](f: (T1, T2) => Out)(implicit F: Applicative[F]): F[Out] =
+    F.ap(F.ap(F.pure(f.curried))(t._1))(t._2)
+}
+```
+:::
+
+Being able to invert the nesting of a tuple and a context is most powerful when constructing case classes from arguments produced by effectful operations. By using the `mapN()` function, for example, validating arguments to the `User` constructor may be rewritten like this:
+
+:::{.numberLines}
+```scala
+def validateUser(username: String, email: String, password: String): Validated[NonEmptyChain[String], User] =
+  (
+    validateUsername(username),
+    validateEmail(email),
+    validatePassword(password)
+  ).mapN(User)
+```
+:::
+
+This syntax afforded by the `mapN()` extension method is much more concise and closely matches the constructor arguments order passed to `User` itself. After all `User` is a product of results produced by contexts, which evaluate independently of each other as they do in the `sequence()` function.
 
 ## Becoming an Applicative
 
@@ -796,14 +857,16 @@ _Try running these specs!_
 
 Each of `Option`, `Either`, and `List` conform to the applicative laws and we only had to write the properties once. These properties prove that functions and arguments used within these contexts maintain referential transparency in their arrangements and that the specific contexts do not change the factoring semantics of the code.
 
-What does change, however, are these contexts' specific effects. For example, you would not have to refactor code abstracted by applicative operations if you changed the backing implementation from `Either` to `List`, but your code would produce potentially more than one result in the desired case.
+What does change, however, are these contexts' specific effects. For example, you would not have to refactor code abstracted by applicative functions if you changed the backing implementation from `Either` to `List`, but your code would produce potentially more than one result in the desired case.
 
 This is the goal, however, as these effects' dimensions of unknown quantity should not burden our code. Instead, we push the complexity to the edge of the context, where it is important that our context is an `Either` or a `List`, and keep our business logic focused on individual instances contained within each context.
 
 ## What is enabled by applicatives?
 
-Applicatives primarily offer parallel computation. Specifically, the arguments to applicative operations such as `ap()`, `map2()`, or `sequence()` are evaluated independently of one another, and their individual outputs as a whole influence the combined output of the operations consuming them.
+Applicatives primarily offer parallel computation. Specifically, the arguments to applicative functions such as `ap()`, `map2()`, or `sequence()` are evaluated independently of one another, and their individual outputs as a whole influence the combined output of the functions consuming them.
 
-When all inputs to an applicative operation are in the desired case, then the output of the operation will also be in the desired case. Conversely, if any input is in the undesired case, then it will be propagated through the operation's output, and the other cases will be discarded. In this regard, applicative operations provide an _all-or-nothing_ output.
+When all inputs to an applicative function are in the desired case, then the output of the function will also be in the desired case. Conversely, if any input is in the undesired case, then it will be propagated through the function's output, and the other cases will be discarded. In this regard, applicative functions provide an _all-or-nothing_ operation.
 
-Parallel computation provides some level of control flow, but it doesn't guide execution in terms of allowing execution to proceed only if the previous execution has succeeded, as all operations are independent of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need another specialization of the `Functor`: the infamous _`Monad`_, which we will explore in my next post.
+Parallel computation provides some level of control flow, but it doesn't guide execution to proceed only if the previous execution has succeeded, as all operations evaluate independently of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need to further specialize the applicative functor.
+
+In my next post, we will explore the infamous _**monad**_ and how it enables imperative control flow in functional programming.
