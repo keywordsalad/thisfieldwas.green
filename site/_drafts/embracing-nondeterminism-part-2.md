@@ -1,5 +1,5 @@
 ---
-title: "Embracing Nondeterminism Part II: Proceeding or halting computation"
+title: "Embracing Nondeterminism Part II: Permitting or Halting Computation"
 description: Leveraging the effects of two or more contexts to allow computations to proceed or halt.
 author: Logan McGrath
 comments: true
@@ -44,20 +44,22 @@ Contexts that are functors thus allow abstraction over unknown cases. For exampl
 
 What this means is that for any context in the desired case, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus represent a form of data transformation, as they transform data if data exists, or they simply return a void context if data does not exist, i.e. they _propagate_ the undesired case.
 
-You can try for yourself from the console:
+You can try for yourself from the sample repository's `sbt console`:
 
 :::{.numberLines}
 ```scala
+scala> :load console/imports.scala
+
 scala> val desiredOption: Option[Int] = Some(42)
 val desiredOption: Option[Int] = Some(42)
 
-scala> desiredOption.map(_.toString).map(_.reverse)
-res0: Option[String] = Some("24")
+scala> desiredOption.map(_.toString).map(numStr => s"backwards: ${numStr.reverse}")
+res0: Option[String] = Some(backwards: 24)
 
 scala> val undesiredOption: Option[Int] = None
 val undesiredOption: Option[Int] = None
 
-scala> undesiredOption.map(_.toString).map(_.reverse)
+scala> undesiredOption.map(_.toString).map(numStr => s"backwards: ${numStr.reverse}")
 res1: Option[String] = None
 ```
 :::
@@ -80,17 +82,7 @@ Take for example addition lifted into the context of `Option[Int]` within the ex
 
 :::{.numberLines}
 ```scala
-scala> import green.thisfieldwas.{embracingnondeterminism=>en}
-import green.thisfieldwas.{embracingnondeterminism=>en}
-
-scala> import en.effects._
-import en.effects._
-
-scala> import en.typeclasses._
-import en.typeclasses._
-
-scala> import Option.Instances._
-import Option.Instances._
+scala> :load console/imports.scala
 
 scala> val F = Applicative[Option]
 val F: Applicative[Option] = Option$Instances$$anon$1
@@ -548,19 +540,7 @@ Given a 2-tuple of functors `(F[A], F[B])` you can invert the nesting of the con
 
 :::{.numberLines}
 ```scala
-scala> import green.thisfieldwas.{embracingnondeterminism=>en}
-import green.thisfieldwas.{embracingnondeterminism=>en}
-
-scala> import en.effects._
-import en.effects._
-
-scala> import en.typeclasses._
-import en.typeclasses._
-
-scala> import Option.Instances._
-import Option.Instances._
-
-scala> import Applicative.Syntax._
+scala> :load console/imports.scala
 
 scala> val productOfSomes = (Option(42), Option("banana"))
 val productOfSomes: (Option[Int], Option[String]) = (Some(42), Some("banana"))
