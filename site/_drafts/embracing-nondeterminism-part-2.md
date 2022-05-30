@@ -900,6 +900,8 @@ class ValidatedLawsSpec extends Laws with FunctorLaws with ApplicativeLaws {
   checkFunctorLaws[ValidatedNec[Exception, *]]()
   checkApplicativeLaws[ValidatedNec[Exception, *]]()
 }
+```
+:::
 
 And we should also make sure `NonEmptyChain` is well-behaved as a semigroup:
 
