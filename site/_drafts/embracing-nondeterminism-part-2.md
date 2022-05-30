@@ -78,7 +78,7 @@ def map2[F[_], A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C]
 ```
 :::
 
-This two-argument analog of `map()` unlocks a key capability: controlling whether to proceed or halt computation against the terms contained within the contexts `fa` and `fb`. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` against which the function `f` may be applied. But if either one or both are in the undesired case, `f` does not apply, and the undesired cases are propagated through `F[C]`. This means that `fa` and `fb` become levers with which to halt computation that would be performed using function `f` and subsequence computation against context `F[C]`.
+This two-argument analog of `map()` unlocks a key capability: controlling whether to proceed or halt computation against the terms contained within the contexts `fa` and `fb`. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` against which the function `f` may be applied. But if either one or both are in the undesired case, `f` does not apply, and the undesired cases are propagated through `F[C]`. This means that `fa` and `fb` become levers with which to halt computation that would be performed using function `f` and subsequent computation against context `F[C]`.
 
 Take for example addition lifted into the context of `Option[Int]` within the sample repository's `sbt console`:
 
