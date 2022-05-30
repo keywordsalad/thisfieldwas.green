@@ -936,8 +936,8 @@ class NonEmptyChainLaws extends Laws with SemigroupLaws {
 :::
 
 > See these laws specs for
-> [`Validated`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L144-L170),
-> [`NonEmptyChain`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L87-L96),
+> [`Validated`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L144-L170)
+> and [`NonEmptyChain`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L87-L96)
 
 ### Implications of the applicative laws
 
