@@ -246,7 +246,7 @@ For both cases of `Left` they are immediately returned and there is no specific 
 
 ### Validation via `Applicative`
 
-`Validated` contains the valid value you want or the reasons for invalidation. We could fail to receive a `User` for three or more reasons related to `username`, `email`, and `password` all being invalid, which implies that term `E` represents some data containing zero or more of _something_. This has a specific implication on how we define an instance of `Applicative` for `Validated`:
+`Validated` contains the valid value you want or the reasons for invalidation. We could fail to receive a `User` for three or more reasons related to `username`, `email`, and `password` all being invalid, which implies that term `E` represents some data containing one or more of _something_. This has a specific implication on how we define an instance of `Applicative` for `Validated`:
 
 :::{.numberLines}
 ```scala
