@@ -66,7 +66,7 @@ res1: Option[String] = None
 ```
 :::
 
-Functors only allow lifting functions of the form`f: A => B`. The context can't be modified with a function having this signature, which means we can't use a functor specifically to influence control flow by injecting a context in its undesired case. Functors respect the existing case of a context, but they alone can't affect control flow.
+Functors only allow lifting functions of the form `f: A => B`. The context can't be modified with a function having this signature, which means we can't use a functor specifically to influence control flow by injecting a context in its undesired case. Functors respect the existing case of a context, but they alone can't affect control flow.
 
 ## Introducing control flow
 
