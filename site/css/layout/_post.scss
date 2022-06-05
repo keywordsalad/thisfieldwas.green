@@ -41,7 +41,8 @@
     font-style: italic;
   }
 
-  .post-categories a, .post-tags a {
+  .post-categories a,
+  .post-tags a {
     color: $text-color-hyperlink-complement;
   }
 }
@@ -60,7 +61,8 @@
   .teaser-item {
     border-top: $border-separator;
   }
-  header + * {
+
+  header+* {
     margin-top: 0.5rem;
   }
 }
@@ -73,8 +75,10 @@
     counter-increment: heading_l2;
     user-select: none;
   }
+
   h2 {
     counter-reset: heading_l3;
+
     &:first-of-type {
       clear: both;
     }
@@ -85,6 +89,7 @@
     counter-increment: heading_l3;
     user-select: none;
   }
+
   h3 {
     counter-reset: heading_l4;
   }
@@ -94,6 +99,7 @@
     counter-increment: heading_l4;
     user-select: none;
   }
+
   h4 {
     counter-reset: heading_l5;
   }
@@ -103,6 +109,7 @@
     counter-increment: heading_l5;
     user-select: none;
   }
+
   h5 {
     counter-reset: heading_l6;
   }

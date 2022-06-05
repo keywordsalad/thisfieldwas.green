@@ -26,13 +26,19 @@ Have you ever received an unexpected `null` reference? Have you ever written a f
 
 {{add "scrollShadowsXSelectors" "#img-tree-functor .content"}}
 
+> **This post is part of a series:**
+>
+> 1. {{title}}
+> 2. {{linkedTitle "_posts/2022-06-05-embracing-nondeterminism-part-2.md"}}
+>
+
+_The code that accompanies this post may be found [here]({{code_repo}})._
+
 Significant portions of program logic exist to address specific cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
 
 _[Defensive programming][]_ as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on _[tacit knowledge][]_ and imposes complex code to handle and recover from them. _This complex code draws focus from writing the business logic that drives the value of programs_.
 
 In this post I will provide **effects** as a model for characterizing nondeterminism and unknowns in programs. I will introduce a **design pattern** to abstract complexity using this model.
-
-> The code that accompanies this post may be found [here]({{code_repo}}).
 
 ## Conventions
 
@@ -918,7 +924,7 @@ def combine(a: A, b: B): C
 
 How do you apply `combine()` to the terms `A` and `B` produced by the contexts? What happens if one of the contexts is in an **undesired case**? At first blush it appears that `map()` might work, but `combine()` takes two arguments. You need a specialized functor in order to apply `combine()`!
 
-In my next post, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.
+In my next post {{linkedTitle "_posts/2022-06-05-embracing-nondeterminism-part-2.md"}}, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.
 
 > **Acknowledgements**
 >

@@ -126,8 +126,7 @@ linkedTitleField = constField "linkedTitle" f
   where
     f :: FunctionValue String String String
     f filePath = do
-      linkedItem <- lift $ load (fromFilePath filePath)
-      tplWithItem linkedItem do
+      tplWithItem (Item (fromFilePath filePath) "") do
         makeLink <$> getField "title" <*> getField "url"
       where
         getField key = do

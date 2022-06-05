@@ -4,8 +4,10 @@ description: Leveraging the effects of two or more contexts to allow computation
 author: Logan McGrath
 comments: true
 date: 2022-05-07T14:21:23-0700
+published: 2022-06-05T14:01:07-0700
 tags: functional programming, programming, scala, design patterns
 layout: post
+thumbnail: /images/tags/functional-programming/functional-grass-128x128.png
 twitter:
   image: /images/tags/functional-programming/functional-grass-512x512.png
 og:
@@ -19,7 +21,13 @@ Remember **functors**? Recall from my last post, {{linkedTitle "_posts/2022-03-1
 
 <!--more-->
 
-> The code that accompanies this post may be found [here]({{code_repo}}).
+> **This post is part of a series:**
+>
+> 1. {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}
+> 2. {{title}}
+>
+
+_The code that accompanies this post may be found [here]({{code_repo}})._
 
 ## Motivating applicative functors as a design pattern
 
