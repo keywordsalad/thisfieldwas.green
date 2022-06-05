@@ -42,9 +42,9 @@ For any context `F[A]`, the `map()` function accepts another function `f: A => B
 
 Contexts that are functors thus allow abstraction over unknown cases. For example, a function `f: A => B` may be lifted into an `Option[A]` and applied if an instance of `A` is present. If no instance of `A` is present, then nothing happens. Specifically, by using `map()` the function `f` is unconcerned with the unknown quantity of `A`'s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities, allowing the business logic expressed by the lifted functions to focus only on the terms that they operate against.
 
-What this means is that for any context in the desired case, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the desired case. Functors thus may be considered as enablers of data transformation, as lifted functions transform data if it exists. But if the initial context is in an undesired case, none of the lifted functions will apply.
+What this means is that for any context in the **desired case**, such as a `Some` of `Option[A]` or a `Right` of `Either[X, A]`, the function `f` will be applied when lifted with `map()`. Any number of functions may be applied to the new contexts returned by subsequent applications of `map()`, and they will all apply as the initial context was in the **desired case**. Functors thus may be considered as enablers of data transformation, as lifted functions transform data if it exists. But if the initial context is in an **undesired case**, none of the lifted functions will apply.
 
-Functions lifted into a context are permitted to compute if the context is in the desired case. But if a function is lifted into a context that is in the undesired case, then computation is halted. This means that the case of any context may control the flow of execution within a program.
+Functions lifted into a context are permitted to compute if the context is in the **desired case**. But if a function is lifted into a context that is in the **undesired case**, then computation is halted. This means that the case of any context may control the flow of execution within a program.
 
 You can try for yourself from the sample repository's `sbt console`:
 
@@ -66,7 +66,7 @@ res1: Option[String] = None
 ```
 :::
 
-Functors only allow lifting functions of the form `f: A => B`. The context can't be modified with a function having this signature, which means we can't use a functor specifically to influence control flow by injecting a context in its undesired case. Functors respect the existing case of a context, but they alone can't affect control flow.
+Functors only allow lifting functions of the form `f: A => B`. The context can't be modified with a function having this signature, which means we can't use a functor specifically to influence control flow by injecting a context in its **undesired case**. Functors respect the _existing case_ of a context: they cannot modify it.
 
 ## Introducing control flow
 
@@ -78,7 +78,7 @@ def map2[F[_], A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C]
 ```
 :::
 
-This two-argument analog of `map()` unlocks a key capability: controlling whether to proceed or halt computation against the terms contained within the contexts `fa` and `fb`. If both `fa` and `fb` are in their desired case, then there are instances of `A` and `B` against which the function `f` may be applied. But if either one or both are in the undesired case, `f` does not apply, and the undesired cases are propagated through `F[C]`. This means that `fa` and `fb` become levers with which to halt computation that would be performed using function `f` and subsequent computation against context `F[C]`.
+This two-argument analog of `map()` unlocks a key capability: controlling whether to proceed or halt computation against the terms contained within the contexts `fa` and `fb`. If both `fa` and `fb` are in their **desired case**, then there are instances of `A` and `B` against which the function `f` may be applied. But if either one or both are in their **undesired case**, then `f` does not apply, and the **undesired cases** are _propagated_ through `F[C]`. This means that `fa` and `fb` become _levers_ with which to halt computation that would be performed using function `f` and subsequent computation against context `F[C]`.
 
 Take for example addition lifted into the context of `Option[Int]` within the sample repository's `sbt console`:
 
@@ -103,13 +103,13 @@ val res3: Option[Int] = None
 ```
 :::
 
-Only when both arguments are in the desired case does the function of addition apply. If either or both arguments are in the undesired case, then the undesired case is propagated. This halts any further operations against the context. The functions that produce the two input contexts are thus capable of controlling whether computation via `f` proceeds and permits further computation against the context `F[C]`.
+Only when both arguments are in their **desired case** does the function of addition apply. If either or both arguments are in their **undesired case**, then the **undesired case** is _propagated_. This does not allow the function to apply, and halts any further operations against the context. _The functions that produce the two input contexts are thus capable of controlling whether computation via `f` proceeds and permits further computation against the context `F[C]`._
 
 ## Applicative functors
 
 The `map2()` function is implemented using a new structure, a specialization of a functor called an **applicative functor**, or simply an _applicative_.
 
-Applicative functors are a specialization that arise in the type of `A` contained within functor `F[_]`. If `A` is merely an opaque type, then `F[A]` is a functor and no more. But if `A` is specifically known to have some type `A => B`, that is to say _`A` is a function_, then `F[A => B]` is an _applicative_ functor.
+Applicative functors as a specialization arise in the type of `A` contained within a functor `F[_]`. If `A` is merely an opaque type, then `F[A]` is a functor and no more. But if `A` is specifically known to have some type `A => B`, that is to say _`A` is a function_, then `F[A => B]` is an _applicative_ functor.
 
 Applicatives define two functions from which many more are derived, including `map2()`:
 
@@ -127,19 +127,6 @@ trait Applicative[F[_]] extends Functor[F] {
 object Applicative {
 
   def apply[F: Applicative]: Applicative[F] = implicitly[Applicative[F]]
-
-  object Syntax {
-
-    implicit class ApplicativeIdOps[A](val a: A) extends AnyVal {
-
-      def pure[F[_]](implicit F: Applicative[F]): F[A] = F.pure(a)
-    }
-
-    implicit class ApplicativeOps[F[_], A, B](val ff: F[A => B]) extends AnyVal {
-
-      def ap(fa: F[A])(implicit F: Applicative[F]): F[B] = F.ap(ff)(fa)
-    }
-  }
 }
 ```
 :::
@@ -150,8 +137,8 @@ Note that `Applicative` extends `Functor` as it is a specialization. All applica
 
 The new functions defined by applicatives offer two capabilities:
 
-* `pure()` which lifts the result of a pure computation `A` into the context such that `pure: A => F[A]`. This is essentially a constructor producing a context in the desired case, such as `Some` for `Option[A]` or `Right` for `Either[X, A]`.
-* `ap()`, read as _apply_, for applying a lifted function to a lifted argument.
+* `pure()` which lifts the result of a pure computation `A` into the context such that `pure: A => F[A]`. This is essentially a constructor producing a context in the **desired case**, such as `Some` for `Option[A]` or `Right` for `Either[X, A]`. In short, `pure()` puts `A` in the box.
+* `ap()`, read as _apply_, for applying a lifted function to a lifted argument. Given two boxes, if the first contains a function and the second contains an argument, `ap()` will apply them and put them back in the box.
 
 You might be wondering why a function would ever be lifted into a context? I will demonstrate why this is desirable in how `ap()` works by defining `map2()` within `Applicative`:
 
@@ -165,11 +152,11 @@ def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] =
 Lifting `f` into the context works following these steps:
 
 1. By currying the function `f: (A, B) => C`, it becomes `A => B => C`.
-2. Lifting it with `pure()` gives `F[A => B => C]` in the desired case.
-3. In this form, `ap()` may apply the function to context argument `fa: F[A]` which will give back `F[B => C]` in the desired case if `fa` is itself in the desired case.
-4. Then `ap()` may apply the function to the context argument `fb: F[B]` which will give back `F[C]` in the desired case if `fb` is itself in the desired case.
+2. Lifting it with `pure()` gives `F[A => B => C]` in the **desired case**, which gives us a clean slate to start our computation with.
+3. Then, with `ap()` we may apply the first argument `fa: F[A]` which will give back `F[B => C]` in the **desired case** _if `fa` is itself in the desired case_.
+4. Then, with `ap()` we may apply the second argument `fb: F[B]` which will give back `F[C]` in the **desired case** _if `fb` is itself in the desired case_.
 
-Each step of lifted function application accounts for the case of the function and argument contexts and halts if either context is in the undesired case. The undesired case will propagate instead if and when it exists.
+Each step of lifted function application accounts for the case of the function and argument contexts and halts if either context is in the **undesired case**. The **undesired case** will _propagate instead_ through `F[C]` if and when it exists.
 
 You might have noticed, `map2()` looks an awful lot like `map()`. In fact, `Applicative` provides a default implementation of `map()` following the same pattern:
 
@@ -180,7 +167,7 @@ def map[A, B](fa: F[A])(f: A => B): F[B] =
 ```
 :::
 
-If your context is an applicative, then it is also a functor with no extra work. You can always provide your own implementation of `map()` if it is more efficient to do so.
+If your context implements `Applicative`, then it also implements `Functor` with no extra work. You can always provide your own implementation of `map()` if it is more efficient to do so.
 
 ## Validation as a use case
 
@@ -266,7 +253,7 @@ implicit def validatedApplicative[E]: Applicative[Validated[E, *]] =
 ```
 :::
 
-When there are two instances of `E` we don't have a way to combine them as `E` is an opaque type. Without concretely defining `E`, such as with `List[String]` or another similar structure, we won't be able to combine their values, but this creates an inflexible API. Specifically, this inability to combine `E` leaves `Validated` in the same position that `Either` is in: the first undesired case propagates and subsequent cases are swallowed. How do we combine the undesired cases?
+When there are two instances of `E` we don't have a way to combine them as `E` is an opaque type. Without concretely defining `E`, such as with `List[String]` or another similar structure, we won't be able to combine their values, but this creates an inflexible API. Specifically, this inability to combine `E` leaves `Validated` in the same position that `Either` is in: the _first_ **undesired case** propagates and subsequent cases are _swallowed_. How do we _combine_ the **undesired cases**?
 
 ### Modeling combinable structures
 
@@ -499,9 +486,9 @@ inside(validatedUser) { case Valid(user) =>
 
 > [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L50) for the specs in the sample repository.
 
-Applicatives thus enable entire computations to succeed if all context arguments are in the desired case. If any argument is in the undesired case, then this case is propagated and the computation as a whole fails.
+Applicatives thus enable entire computations to succeed if all context arguments are in the **desired case**. If any argument is in the **undesired case**, then this case is _propagated_ and the computation as a whole fails.
 
-Each of `validateUsername()`, `validateEmail()`, and `validatePassword()` act as levers on whether a `User` is successfully produced. Writing specific if-statements to guide whether a `User` is produced or errors returned instead is not required: the `Applicative` typeclass succinctly abstracts away the necessary plumbing to control the flow of logic required to handle undesired cases. Errors are declared where they should occur and the abstraction handles the rest.
+Each of `validateUsername()`, `validateEmail()`, and `validatePassword()` act as levers on whether a `User` is successfully produced. Writing specific if-statements to guide whether a `User` is produced or errors returned instead is not required: the `Applicative` typeclass succinctly abstracts away the necessary plumbing to control the flow of logic required to handle **undesired cases**. Errors are declared where they should occur and the abstraction handles the rest.
 
 ### Independent evaluation of contexts
 
@@ -534,9 +521,9 @@ val loadingUsers = Applicative[Future].sequence(List(
 
 The variable `loadingUsers` now contains `Future[List[User]]`. As each `Future[User]` resolves, they are collected into a `List`. Because each `loadUser()` function executes independently, this has a profound implication in the context of a `Future`: they are executed concurrently!
 
-Should any `User` fail to load, the undesired case will propagate and the `sequence()` function will halt. All other `User`s are discarded.
+Should any `User` fail to load, the **undesired case** will _propagate_ and the `sequence()` function will halt. _All other `User`s are discarded._
 
-The pattern offered by `Applicative` is an all-or-nothing result in its output. If all inputs are in the desired case, then the output will be in the desired case as well. But if any are in an undesired case, then the undesired case propagates and computation halts.
+The pattern offered by `Applicative` is an _all-or-nothing_ result in its output. If all inputs are in the **desired case**, then the output will be in the **desired case** as well. But if any are in an **undesired case**, then the **undesired case** _propagates_ and computation halts.
 
 #### Products of contexts
 
@@ -586,7 +573,7 @@ def validateUser(username: String, email: String, password: String): Validated[N
 ```
 :::
 
-This syntax afforded by the `mapN()` extension method is much more concise and closely matches the constructor arguments order passed to `User` itself. After all `User` is a product of results produced by contexts, which evaluate independently of each other as they do in the `sequence()` function.
+This syntax afforded by the `mapN()` extension method is much more concise and closely matches the constructor arguments order passed to `User` itself. After all, `User` is a product of results produced by contexts, which evaluate independently of each other as they do in the `sequence()` function.
 
 ## Becoming an Applicative
 
@@ -642,9 +629,9 @@ implicit val listApplicative: Applicative[List] = new Applicative[List] {
 > [`Either`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L122-L151),
 > and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206-L235) in the sample repository.
 
-`Option` and `Either`'s instances of `Applicative` are straight-forward: if a function and argument are present, they are applied and the result returned in the desired case. If either are missing, then the undesired case is propagated instead.
+`Option` and `Either`'s instances of `Applicative` are straight-forward: if a function and argument are present, they are applied and the result returned in the **desired case**. If either are missing, then the **undesired case** is _propagated_ instead.
 
-`List` looks very different at first glance, but conceptually performs the same way. Specifically, `List` performs a Cartesian product of its functions and arguments, applying each pair together and building a new `List` from the results. If either the function or argument `List` are empty, then an empty result `List` is returned, as an empty `List` represents the undesired case.
+`List` looks very different at first glance, but conceptually performs the same way. Specifically, `List` performs a Cartesian product of its functions and arguments, applying each pair together and building a new `List` from the results. If either the function or argument `List` are empty, then an empty result `List` is returned, as an empty `List` represents the **undesired case**.
 
 ## Applicative laws
 
@@ -653,8 +640,8 @@ implicit val listApplicative: Applicative[List] = new Applicative[List] {
 There are four applicative laws, which must hold for all applicatives in addition to the functor laws.
 
 1. **Preservation of identity functions**: A lifted identity function applied to a lifted argument is the same as the identity function applied directly to the lifted argument.
-2. **Preservation of function homorphism**: Lifting a function and an argument then applying them produces the same result as applying the unlifted function and unlifted argument then lifting the result.
-3. **Preservation of function interchange**: Applying a lifted function to a lifted value produces the same result as a new function taking a function argument and applying it to the unlifted argument which is iteslf lifted and applied to the lifted function. (What a mouthful! It's clearer in code.)
+2. **Preservation of function homomorphism**: Lifting a function and an argument then applying them produces the same result as applying the unlifted function and unlifted argument then lifting the result.
+3. **Preservation of function interchange**: Given a lifted function and an unlifted argument, applying the lifted function after lifting the argument should give the same result as when reversing the order of the function and argument. This is difficult to express in words, and the code is hard to follow, but roughly this translates to `ap(ff: F[A => B])(pure(a)) == ap(pure(f => f(a)))(ff)`.
 4. **Preservation of function composition**: Given lifted functions `ff: F[A => B]` and `fg: F[B => C]` and argument `fa: F[A]`: lifting `compose()` and applying `fg`, `ff`, and `fa` produces the same result as applying `fg` after applying `ff` to `fa`.
 
 These laws are rigorous and we can write tests for these to prove that our applicative instances are defined correctly.
@@ -730,10 +717,12 @@ trait ApplicativeLaws { this: Laws with FunctorLaws =>
       }
     }
     property(s"${TT.name} Applicative preserves function interchange") {
-      // Applying a lifted function to a lifted value produces the same result
-      // as a new function taking a function argument and applying it to the
-      // unlifted argument which is iteslf lifted and applied to the lifted
-      // function. (What a mouthful!)
+      // Given a lifted function and an unlifted argument, applying the lifted
+      // function after lifting the argument should give the same result as
+      // when reversing the order of the function and argument. This is
+      // difficult to express in words, and the code is hard to follow, but
+      // roughly this translates to
+      // `ap(ff: F[A => B])(pure(a)) == ap(pure(f => f(a)))(ff)`.
       forAll(for {
         u <- arbitrary[Double => String].lift
         y <- arbitrary[Double]
@@ -943,16 +932,16 @@ class NonEmptyChainLaws extends Laws with SemigroupLaws {
 
 Each of `Option`, `Either`, and `List` conform to the applicative laws and we only had to write the properties once. These properties prove that functions and arguments used within these contexts maintain referential transparency in their arrangements and that the specific contexts do not change the factoring semantics of the code.
 
-What does change, however, are these contexts' specific effects. For example, you would not have to refactor code abstracted by applicative functions if you changed the backing implementation from `Either` to `List`, but your code would produce potentially more than one result in the desired case.
+What does change, however, are these contexts' specific effects. For example, you would not have to refactor code abstracted by applicative functions if you changed the backing implementation from `Either` to `List`, but your code would produce potentially more than one result in the **desired case**.
 
 This is the goal, however, as these effects' dimensions of unknown quantity should not burden our code. Instead, we push the complexity to the edge of the context, where it is important that our context is an `Either` or a `List`, and keep our business logic focused on individual instances contained within each context.
 
 ## What is enabled by applicatives?
 
-Applicatives primarily offer parallel computation. Specifically, the arguments to applicative functions such as `ap()`, `map2()`, or `sequence()` are evaluated independently of one another, and their individual outputs as a whole influence whether the functions consuming them are permitted to compute against the outputs of their desired cases or if they should halt computation and propagate any undesired cases.
+Applicatives primarily offer independent computation. Specifically, the arguments to applicative functions such as `ap()`, `map2()`, or `sequence()` are evaluated independently of one another, and their individual outputs as a whole influence whether the functions consuming them are permitted to compute against the outputs of their **desired cases** or if they should halt computation and _propagate_ any **undesired cases**.
 
-When all inputs to an applicative function are in the desired case, then the output of the lifted functions will also be in the desired case. Conversely, if any input is in the undesired case, then it will be propagated instead, and the other cases will be discarded. In this regard, applicative functions provide an _all-or-nothing_ operation.
+When all inputs to an applicative function are in the **desired case**, then the output of the lifted functions will also be in the **desired case**. Conversely, if any input is in the **undesired case**, then it will be propagated instead, and the other cases will be _discarded_. In this regard, applicative functions provide an _all-or-nothing_ operation.
 
-Parallel computation provides some level of control flow, but it doesn't guide execution to proceed only if the previous execution has succeeded, as all operations evaluate independently of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need to further specialize the applicative functor.
+Independent computation provides some level of control flow, but it doesn't guide execution to proceed only if the previous execution has succeeded, as all operations evaluate independently of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need to further specialize the applicative functor.
 
 In my next post, we will explore the infamous _**monad**_ and how it enables imperative control flow in functional programming.
