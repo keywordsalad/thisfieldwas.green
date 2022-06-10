@@ -15,14 +15,14 @@ og:
 code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3
 ---
 
-Remember **functors** and **applicatives**? In my last post {{linkedTitle "_posts/2022-06-05-embracing-nondeterminism-part-2.md"}} we explored how functors and applicatives abstract over desired and undesired cases of **contexts** in order to express control flow and permit parallel or independent computation. In this post we will explore **monads** and how to leverage their specific abstraction to express **imperative** control flow.
+Remember **functors** and **applicatives**? In my last post {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}} we explored how functors and applicatives abstract over desired and undesired cases of **contexts** in order to express control flow and permit parallel or independent computation. In this post we will explore **monads** and how to leverage their specific abstraction to express **imperative** control flow.
 
 <!--more-->
 
 > **This post is part of a series:**
 >
 > 1. {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}
-> 2. {{linkedTitle "_posts/2022-06-05-embracing-nondeterminism-part-2.md"}}
+> 2. {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}}
 > 3. {{title}}
 
 _The code that accompanies this post may be found [here]({{code_repo}})._
