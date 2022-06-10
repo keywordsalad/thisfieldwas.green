@@ -21,7 +21,7 @@ Remember **functors** and **applicatives**? In my last post {{linkedTitle "_post
 
 > **This post is part of a series:**
 >
-> 1. {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}
+> 1. {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}
 > 2. {{linkedTitle "_posts/2022-06-05-embracing-nondeterminism-part-2.md"}}
 > 3. {{title}}
 

@@ -17,13 +17,13 @@ og:
 code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2
 ---
 
-Remember **functors**? Recall from my last post, {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}, they are structures that abstract away complexity imposed by nondeterminism present in **contexts** that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their **undesired case** and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.
+Remember **functors**? Recall from my last post, {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}, they are structures that abstract away complexity imposed by nondeterminism present in **contexts** that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their **undesired case** and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.
 
 <!--more-->
 
 > **This post is part of a series:**
 >
-> 1. {{linkedTitle "_posts/2022-03-15-embracing-nondeterminism-part-1.md"}}
+> 1. {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}
 > 2. {{title}}
 >
 
