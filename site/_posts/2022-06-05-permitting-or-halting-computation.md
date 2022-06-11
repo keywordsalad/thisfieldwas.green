@@ -643,7 +643,7 @@ implicit val listApplicative: Applicative[List] = new Applicative[List] {
 
 ## Applicative laws
 
-`Option`, `Either`, and especially `List`'s `Applicative` instances look different. How do we know that they are well-behaved as applicatives? Just like functors, applicatives are expected to conform to a set of laws defined in the higher math of category theory.
+`Option`, `Either`, and especially `List`'s `Applicative` instances look different. How do we know that they are well-behaved as applicatives? Just like functors, applicatives are expected to conform to a set of laws defined in the higher math of [category theory][].
 
 There are four applicative laws, which must hold for all applicatives in addition to the functor laws.
 
@@ -953,3 +953,5 @@ When all inputs to an applicative function are in the **desired case**, then the
 Independent computation provides some level of control flow, but it doesn't guide execution to proceed only if the previous execution has succeeded, as all operations evaluate independently of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need to further specialize the applicative functor.
 
 In my next post, we will explore the infamous _**monad**_ and how it enables imperative control flow in functional programming.
+
+[category theory]: https://en.m.wikipedia.org/wiki/Category_theory

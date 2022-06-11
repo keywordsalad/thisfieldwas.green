@@ -390,3 +390,207 @@ implicit val listMonad: Monad[List] = new Monad[List] {
 > and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206-L244) in the sample repository.
 
 In the above example, I implemented the `Monad` instances using `flatten()`. These could alternatively been implemented using `flatMap()`. You might try to do this if you wish as an exercise.
+
+## Monad laws
+
+How do we know that `Option`, `Either`, and `List`'s `Monad` instances are well-behaved as monads? Like functors, [monads are formally defined][] in the higher math of [category theory][] and expected to conform to a set of laws.
+
+There are three monad laws, which must hold for all monads in addition to the applicative and functor laws.
+
+1. **Preservation of left identity**: Kleisli omposition of `pure()` with a function of form `f: A => F[B]` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
+2. **Preservation of right identity**: Kleisli omposition of a function of form `f: A => F[B]` with `pure()` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
+3. **Associativity**: Kleisli omposition of three functions `f: A => F[B]`, `g: B => F[C]`, and `h: C => F[D]` applied to an argument `a: A` produces the same result regardless of grouping: `(f >=> g) >=> h` is the same as `f >=> (g >=> h)`.
+
+Note that `pure()` is interpreted as the identity function of the monad, as it merely lifts a value into its context, unmodified.
+
+### Defining monad laws as properties
+
+The monad laws may be defined as `scalacheck` properties, as [previously for applicatives][]. These properties assert "for all" instances of a particular monad `F[_]`, the properties should hold. We know we have a well-behaved monad if the property checks pass.
+
+:::{.numberLines}
+```scala
+
+trait MonadLaws { this: Laws with ApplicativeLaws =>
+
+  implicit def arbitraryFA[F[_]: LiftedGen, A: Arbitrary]: Arbitrary[F[A]] = Arbitrary(arbitrary[A].lift)
+
+  /** Defined per Monad laws taken from the Haskell wiki:
+    * [[https://wiki.haskell.org/Monad_laws#The_three_laws]]
+    *
+    * These laws extend the Applicative laws, so `checkApplicativeLaws[F]()` should be
+    * executed alongside this function.
+    *
+    * The laws as defined here leverage Kleisli composition, which is defined
+    * using the operator `>=>` in terms of `flatMap()`, to better highlight the
+    * left and right identities and associativity that should be exhibited by
+    * the composition of monadic operations.
+    *
+    * @param TT The type tag of the context
+    * @tparam F The context type being tested
+    */
+  def checkMonadLaws[F[_]: Monad: LiftedGen]()(implicit TT: TypeTag[F[Any]]): Unit = {
+    property(s"${TT.name} Monad composition preserves left identity") {
+      // The identity of Kleisli composition simply lifts a value into the
+      // context. Kleisli composition of a function after `pure()` when applied
+      // to a value will produce the same result as applying the function
+      // directly to the value.
+      forAll(for {
+        a <- arbitrary[Int]
+        h <- arbitrary[Int => F[String]]
+      } yield (a, h)) { case (a, h) =>
+        val leftIdentity = ((_: Int).pure[F]) >=> h
+        leftIdentity(a) mustBe h(a)
+      }
+    }
+    property(s"${TT.name} Monad composition preserves right identity") {
+      // The identity of Kleisli composition simply lifts a value into the
+      // context. Kleisli composition of `pure()` after a function when applied
+      // to a value will produce the same result as applying the function
+      // directly to the value.
+      forAll(for {
+        a <- arbitrary[Int]
+        h <- arbitrary[Int => F[String]]
+      } yield (a, h)) { case (a, h) =>
+        val rightIdentity = h >=> ((_: String).pure[F])
+        rightIdentity(a) mustBe h(a)
+      }
+    }
+    property(s"${TT.name} Monad composition is associative") {
+      // `flatMap()` and thus Kleisli composition are both associative.
+      // This means that your program may be factored with these operations
+      // in any arbitrary grouping and the output will be the same.
+      forAll(for {
+        a <- arbitrary[Double]
+        f <- arbitrary[Double => F[String]]
+        g <- arbitrary[String => F[Int]]
+        h <- arbitrary[Int => F[Boolean]]
+      } yield (a, f, g, h)) { case (a, f, g, h) =>
+        val assocLeft = (f >=> g) >=> h
+        val assocRight = f >=> (g >=> h)
+        assocLeft(a) mustBe assocRight(a)
+      }
+    }
+  }
+}
+```
+:::
+
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/MonadLaws.scala) for the definition of the trait.
+
+Our laws specs can now extend this trait and assert that their tested contexts conform to the monad laws. For example, the laws spec for `Option`:
+
+:::{.numberLines}
+```scala
+class OptionLaws extends Laws with FunctorLaws with ApplicativeLaws with MonadLaws {
+
+  import Option.Instances._
+
+  implicit val optionLiftedGen: LiftedGen[Option] = new LiftedGen[Option] {
+
+    override def lift[A](gen: Gen[A]): Gen[Option[A]] =
+      Gen.lzy(
+        Gen.oneOf(
+          Gen.const(None),
+          gen.map(Some(_)),
+        )
+      )
+  }
+
+  checkFunctorLaws[Option]()
+  checkApplicativeLaws[Option]()
+  checkMonadLaws[Option]()
+}
+```
+:::
+
+> See the laws specs for [Option]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala#L116-L137),
+> [Either]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/EitherSpec.scala#L112-L136),
+> and [List]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala#L158-L182)
+
+### Implications of the monad laws
+
+You may have noticed that the characteristics of the monad laws are somewhat different from the functor and applicative laws. They build using composition directly, specifically Kleisli composition, but don't assert that function composition generally is retained within their contexts the same way that functor or applicative's laws do.
+
+Let's review the laws by name only:
+
+1. Left identity
+2. Right identity
+3. Associativity
+
+These laws specifically also define another typeclass called a **monoid**, which is a specialization of a **semigroup** that adds an _identity_ or _empty_ element.
+
+:::{.numberLines}
+```scala
+trait Monoid[M] extends Semigroup[M] {
+
+  def empty: M
+}
+
+object Monoid {
+
+  def apply[M: Monoid]: Monoid[M] = implicitly[Monoid[M]]
+}
+```
+:::
+
+Monoids are nearly as common as semigroups, as not all semigroups are monoids, and you've probably used quite a few of them:
+
+* [Lists]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L78-L86)
+* [Strings]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L10)
+* [Integers]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22)
+* [Sets]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L78-L86)
+
+The key difference between these monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are composable using `flatMap()` via Kleisli composition to produce new functions of the same form, which means that monads form semigroups under Kleisli composition, and form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument.
+
+> To be really pedantic, monads are functors. All functors in Scala are functors from Scala types into other Scala types, making them endofunctors because they map back into the same category (Scala types). This affirms an [infamous joke][]: _Monads are just monoids in the category of endofunctors_.
+
+The real takeaway from the monad laws is that you get imperative computation as a composable structure. You retain referential transparency in that associativity guarantees that your operations may be grouped arbitrarily, allowing you to factor the steps of your program with a large degree of freedom.
+
+## What is enabled by monads?
+
+The `flatMap()` function primarily enables imperative programming through abstraction. It strictly requires that its current context be evaluated into its **desired case** before applying its function argument against the term it contains. If the context is in the **undesired case**, then all subsequent computation halts. Thus, in contrast to applicative's _all-or-nothing_ operations, monads offer a _one-after-another_ operation. Both evaluation styles complement each other and may be freely mixed, of course.
+
+### Beware the imperative trap
+
+Because monads allow you to express functional programming in a style that closely mirrors procedural code, especially within the syntax of the for comprehension, it's very easy to fall into a trap of procedural spaghetti even though you're using a functional programming abstraction. This occurs because for comprehensions allow you to expose multiple terms and pass them around at varying points within the for comprehension, mimicking procedural state-passing.
+
+:::{.numberLines}
+```scala
+def performTransaction(accountNo: Long, amount: Currency): Future[Unit] =
+  for {
+    account <- loadAccount(accountNo)
+    transaction <- beginTransaction(account)
+    balance <- getBalance(account)
+    newBalance = balance + amount
+    _ <- {
+      if (newBalance < Currency.from(0)) {
+        endTransaction(transaction)
+          .flatMap(_ => failTransaction("Insufficient funds"))
+      } else {
+        updateBalance(newBalance)
+          .flatMap(_ => endTransaction(transaction))
+      }
+    }
+  } yield ()
+```
+:::
+
+This code would be hard to refactor as there's a lot of state being passed around. It's procedural code wrapped in a for comprehension! A smell in particular is a `Unit`-return, as it indicates something is causing side-effects with no way to sense what actions have been performed or what state the total operation finished in.
+
+## Going forward
+
+These three abstractions, functors, applicatives, and monads, are just the beginning to a rich series of tools that you can leverage to express solid, maintainable, and provable programs. You may have noticed a few things in missing so far in this series, such as how to:
+
+* Report undesired cases agnostic of context
+* Collect effectful operations agnostic of container
+* Recover from undesired cases or retry failed operations
+* Allow for partial successes and failures of collective operations
+* Compose effect types
+* Encode DSLs as effects
+
+In my next post, we will explore **error reporting** agnostic of context, so that your code may abstract against typeclasses but still be able to force an undesired case.
+
+[monads are formally defined]: https://en.wikipedia.org/wiki/Monad_(category_theory)#Formal_definition
+[category theory]: https://en.m.wikipedia.org/wiki/Category_theory
+[previously for applicatives]: {{getUrl "_posts/2022-06-05-permitting-or-halting-computation.md"}}#defining-the-applicative-laws-as-properties
+[infamous joke]: https://web.archive.org/web/20220609203110/https://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html

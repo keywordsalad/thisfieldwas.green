@@ -4,35 +4,168 @@ code {
   word-wrap: normal;
   font-family: $code-font-family;
 
-  .al { color: red; } /* Alert */
-  .an { color: saddlebrown; font-weight: bold; font-style: italic; } /* Annotation */
-  .at { color: darkblue; } /* Attribute */
-  .bn { color: blue; } /* BaseN */
-  .bu { color: steelblue; } /* Builtin */
-  .cf { color: seagreen; font-weight: bold; } /* ControlFlow */
-  .ch { color: yellowgreen; } /* Char */
-  .cn { color: blueviolet; } /* Constant */
-  .co { color: gray; font-style: italic; } /* Comment */
-  .cv { color: darkgoldenrod; font-weight: bold; font-style: italic; } /* CommentVar */
-  .do { color: darkgoldenrod; font-weight: bold; font-style: italic; } /* Documentation */
-  .dt { color: blue; font-weight: bold; } /* DataType */
-  .dv { color: darkred; } /* DecVal */
-  .er { color: red; font-weight: bold; } /* Error */
-  .ex { color: seagreen } /* Extension */
-  .fl { color: darkred; } /* Float */
-  .fu { color: seagreen; } /* Function */
-  .im { color: steelblue; } /* Import */
-  .in { color: steelblue; font-weight: bold; font-style: italic; } /* Information */
-  .kw { color: seagreen; font-weight: bold; } /* Keyword */
-  .op { color: brown; font-weight: bold; } /* Operator */
-  .ot { color: slateblue; } /* Other */
-  .pp { color: saddlebrown; font-style: italic; } /* Preprocessor */
-  .sc { color: seagreen; } /* SpecialChar */
-  .ss { color: mediumspringgreen; } /* SpecialString */
-  .st { color: lightseagreen; } /* String */
-  .va { color: cornflowerblue; } /* Variable */
-  .vs { color: green; } /* VerbatimString */
-  .wa { color: orange; font-weight: bold; font-style: italic; } /* Warning */
+  .al {
+    color: red;
+  }
+
+  /* Alert */
+  .an {
+    color: saddlebrown;
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  /* Annotation */
+  .at {
+    color: darkblue;
+  }
+
+  /* Attribute */
+  .bn {
+    color: blue;
+  }
+
+  /* BaseN */
+  .bu {
+    color: steelblue;
+  }
+
+  /* Builtin */
+  .cf {
+    color: seagreen;
+    font-weight: bold;
+  }
+
+  /* ControlFlow */
+  .ch {
+    color: yellowgreen;
+  }
+
+  /* Char */
+  .cn {
+    color: blueviolet;
+  }
+
+  /* Constant */
+  .co {
+    color: gray;
+    font-style: italic;
+  }
+
+  /* Comment */
+  .cv {
+    color: darkgoldenrod;
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  /* CommentVar */
+  .do {
+    color: darkgoldenrod;
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  /* Documentation */
+  .dt {
+    color: blue;
+    font-weight: bold;
+  }
+
+  /* DataType */
+  .dv {
+    color: darkred;
+  }
+
+  /* DecVal */
+  .er {
+    color: red;
+    font-weight: bold;
+  }
+
+  /* Error */
+  .ex {
+    color: seagreen
+  }
+
+  /* Extension */
+  .fl {
+    color: darkred;
+  }
+
+  /* Float */
+  .fu {
+    color: seagreen;
+  }
+
+  /* Function */
+  .im {
+    color: steelblue;
+  }
+
+  /* Import */
+  .in {
+    color: steelblue;
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  /* Information */
+  .kw {
+    color: seagreen;
+    font-weight: bold;
+  }
+
+  /* Keyword */
+  .op {
+    color: brown;
+    font-weight: bold;
+  }
+
+  /* Operator */
+  .ot {
+    color: slateblue;
+  }
+
+  /* Other */
+  .pp {
+    color: saddlebrown;
+    font-style: italic;
+  }
+
+  /* Preprocessor */
+  .sc {
+    color: seagreen;
+  }
+
+  /* SpecialChar */
+  .ss {
+    color: green;
+  }
+
+  /* SpecialString */
+  .st {
+    color: lightseagreen;
+  }
+
+  /* String */
+  .va {
+    color: cornflowerblue;
+  }
+
+  /* Variable */
+  .vs {
+    color: green;
+  }
+
+  /* VerbatimString */
+  .wa {
+    color: orange;
+    font-weight: bold;
+    font-style: italic;
+  }
+
+  /* Warning */
 }
 
 pre.sourceCode {
@@ -56,17 +189,18 @@ pre.sourceCode {
     word-wrap: normal;
     overflow-x: scroll;
 
-    > span {
+    >span {
       display: block;
 
       &:first-child {
         padding-top: 0.3em;
       }
+
       &:last-child {
         padding-bottom: 0.3em;
       }
 
-      > a:first-child {
+      >a:first-child {
         display: inline-block;
       }
     }
@@ -76,19 +210,21 @@ pre.sourceCode {
 .numberLines code.sourceCode {
   counter-reset: line-number;
 
-  > span {
+  >span {
     counter-increment: line-number;
+
     &:target {
       background-color: $code-color-highlight;
     }
 
-    > a:first-child {
+    >a:first-child {
       width: 2em;
       padding: 0 0.5em 0 0;
       margin: 0 0.5em 0 0;
       border-right: $border-style $border-color-regular $border-width-thin;
       text-align: right;
       user-select: none;
+
       &::before {
         content: counter(line-number);
       }
@@ -111,7 +247,7 @@ a code:not(.sourceCode) {
 .nowrap {
   overflow-x: scroll;
 
-  code > span {
+  code>span {
     white-space: pre;
     word-wrap: normal;
   }
