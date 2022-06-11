@@ -64,11 +64,11 @@ object Applicative {
 > and [`Applicative`'s]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Applicative.scala)
 > definitions in the sample repository.
 
-`Functor` abstracts over contexts' unknown cases by lifting a function via `map()` and applying it to instances of the term produced by the context if they exist. Control flow can't be expressed using `map()` because it does not permit the case of the context to be modified.
+`Functor` abstracts over contexts' **unknown cases** by _lifting_ a function via `map()` and applying it to instances of the term produced by the context if they exist. Control flow can't be expressed using `map()` because it does not permit the case of the context to be modified.
 
-`Applicative` can create contexts in the desired case via `pure()`. It can also apply lifted functions to lifted arguments via `ap()` if both contexts are in their desired case. `Applicative` is capable of expessing control flow through `ap()` because supplying either the lifted function or lifted argument in an undesired case will not permit further computation. The context in the undesired case is propagated instead.
+`Applicative` can create contexts in the **desired case** via `pure()`. It can also apply _lifted_ functions to _lifted_ arguments via `ap()` if _both_ contexts are in their **desired case**. `Applicative` is capable of expessing control flow through `ap()` because supplying either the lifted function or lifted argument in an **undesired case** will not permit further computation. The context in the **undesired case** is _propagated_ instead.
 
-The problem however is that `Applicative` requires that the lifted function and lifted argument supplied to `ap()` be computed before deciding whether to permit or halt further computation. This means that regardless of whether one of the function or argument successfully computes, if the other fails the succeeding computation will be discarded. Both of these contexts are independent, and `Applicative` will only use them if they both are in their **desired case**.
+The problem however is that `Applicative` requires that _both_ the lifted function and lifted argument supplied to `ap()` be computed _before_ deciding whether to permit or halt further computation. This means that regardless of whether one of the function or argument contexts successfully computes, if the other fails the succeeding computation will be discarded. Both of these contexts' computation are independent, and `Applicative` will only use them if they are both are in their **desired case**.
 
 All functions derived from `ap()` represent _all-or-nothing_ operations accordingly, and there is no effective way of ordering the computation of the arguments or preventing computation of arguments if any dependent arguments fail to compute. Therefore, totally imperative programming is not possible using `Applicative`.
 
@@ -84,7 +84,7 @@ def flatMap[F[_], A, B](fa: F[A])(f: A => F[B]): F[B]
 ```
 :::
 
-What `flatMap()` does is allow for the injection of a context into a pipeline of computations to either permit computation to proceed or force it to halt. The function argument `f`, which you supply, has full control of what case the returned context `F[B]` should be in. If `F[B]` is in the **undesired case**, then all further computations are skipped.
+What `flatMap()` does is allow for the injection of a context into a pipeline of computations to either permit computation to proceed or force it to halt. The function argument `f`, which you supply, has full control of what case the returned context `F[B]` should be in. If `F[B]` is in the **undesired case**, then all further computations are skipped, _propagating_ this undesired case instead.
 
 Take for example this definition of a `filter()` function from the sample repository's `sbt console`:
 
@@ -106,7 +106,7 @@ val res2: Option[Int] = None
 ```
 :::
 
-This example is only very simple. But it demonstrates the key enabling feature of `flatMap()`: we are able to choose whether the context remains in its desired case. If we continue with this example, we can try chaining `map()` to the context returned by it.
+This example is only very simple. But it demonstrates the key enabling feature of `flatMap()`: we are able to _choose_ whether the context remains in its **desired case**. If we continue with this example, we can try chaining `map()` to the context returned by it.
 
 :::{.numberLines}
 ```scala
@@ -183,13 +183,14 @@ val res4: Int = 3
 
 Scala out of the box affords the `compose()` and `andThen()` functions for composing functions of the form of `A => B` together. But these composition functions don't work for the signature of `flatMap()`, which returns contexts in its signature of the form of `A => F[B]`.
 
-There is a form of composition for monads known as [_Kleisli composition_](https://blog.ploeh.dk/2022/04/04/kleisli-composition/). This composition will lift following functions into the context returned by previous functions and apply them to the term contained within the context if the context is in the desired case. Kleisli composition is expressed using the _fish_ or _arrow operator_ `>=>` which is defined in the sample repository as an extension operator on functions of the form `A => F[B]` where `F[_]` has an instance of `Monad`:
+There is a form of composition for monads known as [_Kleisli composition_](https://blog.ploeh.dk/2022/04/04/kleisli-composition/). This composition will lift the following function into the context returned by the previous function and apply it to the term contained within the context if the context is in the **desired case**. Kleisli composition is expressed using the _fish_ or _arrow operator_ `>=>` which is defined in the sample repository as an extension operator on functions of the form `A => F[B]` where `F[_]` has an instance of `Monad`:
 
 :::{.numberLines}
 ```scala
 implicit class KleisliCompositionOps[F[_], A, B](val f: A => F[B]) extends AnyVal {
 
-  def >=>[C](g: B => F[C])(implicit F: Monad[F]): A => F[C] = f(_).flatMap(g)
+  def >=>[C](g: B => F[C])(implicit F: Monad[F]): A => F[C] = 
+    (x: A) => F.flatMap(f(x))(g)
 }
 ```
 :::
@@ -254,7 +255,7 @@ Thus Kleisli composition is to `flatMap()` as function composition is to `map()`
 
 ### The _for comprehension_ and imperative programming
 
-Scala provides a syntax sugar over `flatMap()` in the form of the [_for comprehension_](https://docs.scala-lang.org/tour/for-comprehensions.html). Any type that provides both the `map()` and `flatMap()` functions are able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don't have to rely on Kleisli composition to express complex flows of logic, and that you also aren't limited to single input/output pipelines of functions.
+Scala provides a syntax sugar over `flatMap()` in the form of the [_for comprehension_](https://docs.scala-lang.org/tour/for-comprehensions.html). Any type that provides both the `map()` and `flatMap()` functions are able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don't have to rely on Kleisli composition directly to express complex flows of logic, and that you also aren't limited to single-argument input/output pipelines of functions.
 
 As a simple example, here are the above functions leveraged using a for comprehension:
 
@@ -389,7 +390,7 @@ implicit val listMonad: Monad[List] = new Monad[List] {
 > [`Either`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L122-L156),
 > and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206-L244) in the sample repository.
 
-In the above example, I implemented the `Monad` instances using `flatten()`. These could alternatively been implemented using `flatMap()`. You might try to do this if you wish as an exercise.
+In the above example, I implemented the `Monad` instances using `flatten()`. These could alternatively be implemented using `flatMap()`. You might try to do this if you wish as an exercise.
 
 ## Monad laws
 
@@ -397,11 +398,11 @@ How do we know that `Option`, `Either`, and `List`'s `Monad` instances are well-
 
 There are three monad laws, which must hold for all monads in addition to the applicative and functor laws.
 
-1. **Preservation of left identity**: Kleisli omposition of `pure()` with a function of form `f: A => F[B]` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
-2. **Preservation of right identity**: Kleisli omposition of a function of form `f: A => F[B]` with `pure()` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
+1. **Preservation of left identity**: Kleisli composition of `pure()` with a function of form `f: A => F[B]` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
+2. **Preservation of right identity**: Kleisli composition of a function of form `f: A => F[B]` with `pure()` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
 3. **Associativity**: Kleisli omposition of three functions `f: A => F[B]`, `g: B => F[C]`, and `h: C => F[D]` applied to an argument `a: A` produces the same result regardless of grouping: `(f >=> g) >=> h` is the same as `f >=> (g >=> h)`.
 
-Note that `pure()` is interpreted as the identity function of the monad, as it merely lifts a value into its context, unmodified.
+Note that `pure()` is interpreted as the identity element of the monad, as it merely lifts a value into its context, unmodified.
 
 ### Defining monad laws as properties
 
@@ -409,7 +410,6 @@ The monad laws may be defined as `scalacheck` properties, as [previously for app
 
 :::{.numberLines}
 ```scala
-
 trait MonadLaws { this: Laws with ApplicativeLaws =>
 
   implicit def arbitraryFA[F[_]: LiftedGen, A: Arbitrary]: Arbitrary[F[A]] = Arbitrary(arbitrary[A].lift)
@@ -511,13 +511,13 @@ class OptionLaws extends Laws with FunctorLaws with ApplicativeLaws with MonadLa
 
 You may have noticed that the characteristics of the monad laws are somewhat different from the functor and applicative laws. They build using composition directly, specifically Kleisli composition, but don't assert that function composition generally is retained within their contexts the same way that functor or applicative's laws do.
 
-Let's review the laws by name only:
+Let's reiterate the laws:
 
 1. Left identity
 2. Right identity
 3. Associativity
 
-These laws specifically also define another typeclass called a **monoid**, which is a specialization of a **semigroup** that adds an _identity_ or _empty_ element.
+These laws specifically also define another typeclass called a **monoid**, which is a specialization of a **semigroup** that adds an _identity_ or _empty_ element. The identity element is special in that combining it with any other element produces that other element.
 
 :::{.numberLines}
 ```scala
@@ -540,9 +540,9 @@ Monoids are nearly as common as semigroups, as not all semigroups are monoids, a
 * [`Int`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22)
 * [`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L78-L86)
 
-The key difference between monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are composable using `flatMap()` via Kleisli composition to produce new functions of the same form, which means that monads form semigroups under Kleisli composition, and form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument.
+The key difference between monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are combinable using `>=>` to produce new functions of the same form, and this operation is associative, which means that monads form semigroups under Kleisli composition. They form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument when composed to either the left or right side of a function of the form `A => F[B]`.
 
-> To be really pedantic, monads are functors. All functors in Scala are functors from Scala types into other Scala types, making them endofunctors because they map back into the same category (Scala types). This affirms an [infamous joke][]: _Monads are just monoids in the category of endofunctors_.
+> To be really pedantic, monads are functors. All functors in Scala are functors from Scala types into other Scala types, making them endofunctors because they map back into the same category--the category of Scala types. This affirms an [infamous joke][]: _Monads are just monoids in the category of endofunctors, what's the problem?_
 
 In addition to being monoids, Scala's
 [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63) and
@@ -555,11 +555,11 @@ The real takeaway from the monad laws is that you get imperative computation as 
 
 ## What is enabled by monads?
 
-The `flatMap()` function primarily enables imperative programming through abstraction. It strictly requires that its current context be evaluated into its **desired case** before applying its function argument against the term it contains. If the context is in the **undesired case**, then all subsequent computation halts. Thus, in contrast to applicative's _all-or-nothing_ operations, monads offer a _one-after-another_ operation. Both evaluation styles complement each other and may be freely mixed, of course.
+The `flatMap()` function primarily enables imperative programming through abstraction. It strictly requires that its current context be evaluated into its **desired case** before applying its function argument against the term it contains. If the context is in the **undesired case**, then all subsequent computation halts and this case _propagates_ instead. Thus, in contrast to applicative's _all-or-nothing_ operations, monads offer _one-after-another_ operations. Both evaluation styles complement each other and may be freely mixed, of course.
 
 ### Beware the imperative trap
 
-Because monads allow you to express functional programming in a style that closely mirrors procedural code, especially within the syntax of the for comprehension, it's very easy to fall into a trap of procedural spaghetti even though you're using a functional programming abstraction. This occurs because for comprehensions allow you to expose multiple terms and pass them around at varying points within the for comprehension, mimicking procedural state-passing.
+Because monads allow you to express functional programming in a style that closely mirrors procedural code, especially within the syntax of the for comprehension, it's very easy to fall into a trap of procedural spaghetti even though you're using a functional programming abstraction. This occurs because for comprehensions allow you to expose multiple terms and pass them around at varying points within the for comprehension, mimicking procedural state-passing:
 
 :::{.numberLines}
 ```scala
@@ -582,20 +582,21 @@ def performTransaction(accountNo: Long, amount: Currency): Future[Unit] =
 ```
 :::
 
-This code would be hard to refactor as there's a lot of state being passed around. It's procedural code wrapped in a for comprehension! A smell in particular is a `Unit`-return, as it indicates something is causing side-effects with no way to sense what actions have been performed or what state the total operation finished in.
+This code would be hard to refactor as there's a lot of arguments being passed around. It's procedural code wrapped in a for comprehension! A smell in particular is a `Unit`-return, as it indicates something is causing side-effects with no way to sense what actions have been performed or what state the total operation finished in.
 
 ## Going forward
 
-These three abstractions, functors, applicatives, and monads, are just the beginning to a rich series of tools that you can leverage to express solid, maintainable, and provable programs. You may have noticed a few things in missing so far in this series, such as how to:
+These three abstractions, **functors**, **applicatives**, and **monads**, are just the beginning to a rich series of tools that you can leverage to express solid, maintainable, and provable programs. But you may have noticed a few capabilities are missing so far in this series, such as how to:
 
-* Report undesired cases agnostic of context
-* Collect effectful operations agnostic of container
-* Recover from undesired cases or retry failed operations
-* Allow for partial successes and failures of collective operations
-* Compose effect types
-* Encode DSLs as effects
+* _Raise errors_, specifically as **undesired cases**, agnostic of context.
+* _Recover from errors_, transforming **undesired cases** to **desired**, agnostic of context.
+* _Attempt an alternate operation_ if the first one fails.
+* _Collect effectful operations_ agnostic of container.
+* Allow for _partial successes and failures_ within collective operations.
+* _Compose effect types_ to take advantage of their combined characteristics.
+* _Encode DSLs_ as effects.
 
-In my next post, we will explore **error reporting** agnostic of context, so that your code may abstract against typeclasses but still be able to force an undesired case.
+In my next post, we will explore **raising and recovering from errors** agnostic of context, so that your code may abstract against typeclasses but still be able to force and recover from **undesired cases**.
 
 [monads are formally defined]: https://en.wikipedia.org/wiki/Monad_(category_theory)#Formal_definition
 [category theory]: https://en.m.wikipedia.org/wiki/Category_theory
