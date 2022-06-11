@@ -535,14 +535,21 @@ object Monoid {
 
 Monoids are nearly as common as semigroups, as not all semigroups are monoids, and you've probably used quite a few of them:
 
-* [Lists]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L78-L86)
-* [Strings]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L10)
-* [Integers]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22)
-* [Sets]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L78-L86)
+* [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L78-L86)
+* [`String`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L10)
+* [`Int`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22)
+* [`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L78-L86)
 
-The key difference between these monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are composable using `flatMap()` via Kleisli composition to produce new functions of the same form, which means that monads form semigroups under Kleisli composition, and form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument.
+The key difference between monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are composable using `flatMap()` via Kleisli composition to produce new functions of the same form, which means that monads form semigroups under Kleisli composition, and form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument.
 
 > To be really pedantic, monads are functors. All functors in Scala are functors from Scala types into other Scala types, making them endofunctors because they map back into the same category (Scala types). This affirms an [infamous joke][]: _Monads are just monoids in the category of endofunctors_.
+
+In addition to being monoids, Scala's
+[`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63) and
+[`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L32-L62) are also monads and I have asserted that they are well behaved with property checks.
+[`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L30-L61)
+and [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L30-L61)
+are also monads. You've probably been using them as such without realizing!
 
 The real takeaway from the monad laws is that you get imperative computation as a composable structure. You retain referential transparency in that associativity guarantees that your operations may be grouped arbitrarily, allowing you to factor the steps of your program with a large degree of freedom.
 
