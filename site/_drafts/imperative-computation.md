@@ -348,7 +348,7 @@ In order to become a `Monad`, an effect type must implement the typeclass. Let's
 ```scala
 implicit val optionMonad: Monad[Option] = new Monad[Option] {
 
-  // keeping existing definitions
+  // keep existing definitions
 
   override def flatten[A](ffa: Option[Option[A]]): Option[A] =
     ffa match {
@@ -359,7 +359,7 @@ implicit val optionMonad: Monad[Option] = new Monad[Option] {
 
 implicit def eitherMonad[X]: Monad[Either[X, *]] = new Monad[Either[X, *]] {
 
-  // keeping existing definitions
+  // keep existing definitions
 
   override def flatten[A](ffa: Either[X, Either[X, A]]): Either[X, A] =
     ffa match {
@@ -370,7 +370,7 @@ implicit def eitherMonad[X]: Monad[Either[X, *]] = new Monad[Either[X, *]] {
 
 implicit val listMonad: Monad[List] = new Monad[List] {
 
-  // keeping existing definitions
+  // keep existing definitions
 
   override def flatten[A](ffa: List[List[A]]): List[A] =
     ffa
