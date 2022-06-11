@@ -15,7 +15,7 @@ og:
 code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3
 ---
 
-Remember **functors** and **applicatives**? In my last post {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}} we explored how functors and applicatives abstract over desired and undesired cases of **contexts** in order to express control flow and permit parallel or independent computation. In this post we will explore **monads** and how to leverage their specific abstraction to express **imperative** control flow.
+Remember **functors** and **applicatives**? In my last post {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}} we explored how functors and applicatives abstract over **desired** and **undesired cases** of **contexts** in order to express control flow and permit independent computation. In this post we will explore **monads** and how to leverage their specific abstraction to express **imperative** control flow.
 
 <!--more-->
 
@@ -68,9 +68,9 @@ object Applicative {
 
 `Applicative` can create contexts in the desired case via `pure()`. It can also apply lifted functions to lifted arguments via `ap()` if both contexts are in their desired case. `Applicative` is capable of expessing control flow through `ap()` because supplying either the lifted function or lifted argument in an undesired case will not permit further computation. The context in the undesired case is propagated instead.
 
-The problem however is that `Applicative` requires that the lifted function and lifted argument supplied to `ap()` be computed before deciding whether to permit or halt computation. This means that regradless of whether the function or argument successfully computes, if the other fails the succeeding computation will be discarded. Both of these contexts are independent, and `Applicative` will only use them if they both are in their desired case.
+The problem however is that `Applicative` requires that the lifted function and lifted argument supplied to `ap()` be computed before deciding whether to permit or halt further computation. This means that regardless of whether one of the function or argument successfully computes, if the other fails the succeeding computation will be discarded. Both of these contexts are independent, and `Applicative` will only use them if they both are in their **desired case**.
 
-All functions derived from `ap()` represent all-or-nothing operations accordingly, and there is no effective way of ordering the computation of the arguments or preventing computation of arguments if any dependent arguments fail to compute. Therefore, imperative programming is not possible using `Applicative`.
+All functions derived from `ap()` represent _all-or-nothing_ operations accordingly, and there is no effective way of ordering the computation of the arguments or preventing computation of arguments if any dependent arguments fail to compute. Therefore, totally imperative programming is not possible using `Applicative`.
 
 ## Introducing imperative control flow
 
@@ -84,7 +84,7 @@ def flatMap[F[_], A, B](fa: F[A])(f: A => F[B]): F[B]
 ```
 :::
 
-What `flatMap()` does is allow for the injection of a context into a pipeline of computations to either permit computation to proceed or halt. The function argument `f`, which you supply, has full control of what case the returned context `F[B]` should be in. If `F[B]` is in the undesired case, then all further computations after `flatMap()` are skipped.
+What `flatMap()` does is allow for the injection of a context into a pipeline of computations to either permit computation to proceed or force it to halt. The function argument `f`, which you supply, has full control of what case the returned context `F[B]` should be in. If `F[B]` is in the **undesired case**, then all further computations are skipped.
 
 Take for example this definition of a `filter()` function from the sample repository's `sbt console`:
 
@@ -142,26 +142,11 @@ trait Monad[F[_]] extends Applicative[F] {
 object Monad {
 
   def apply[F[_]: Monad]: Monad[F] = implicitly[Monad[F]]
-
-  object Syntax {
-
-    implicit class FlatMapOps[F[_], A](val fa: F[A]) extends AnyVal {
-
-      def flatMap[B](f: A => F[B])(implicit F: Monad[F]): F[B] = F.flatMap(fa)(f)
-    }
-
-    implicit class FlattenOps[F[_], A](val ffa: F[F[A]]) extends AnyVal {
-
-      def flatten(implicit F: Monad[F]): F[A] = F.flatten(ffa)
-    }
-
-    // KleisliCompositionOps described below
-  }
 }
 ```
 :::
 
-This means that in order to implement an instance of the `Monad` typeclass, you must implement one of either `flatMap()` or `flatten()` or calling one will recurse until the stack overflows. Some contexts are best defined using one or the other, and you have the choice to pick between the two.
+This means that in order to implement an instance of the `Monad` typeclass, you must implement one of either `flatMap()` or `flatten()` or calling one will recurse until the stack overflows. Some contexts are best defined using one over the other, and you have the choice to pick between the two.
 
 > [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Monad.scala) for the definition in the sample repository.
 
@@ -196,9 +181,9 @@ val res4: Int = 3
 ```
 :::
 
-Scala out of the box affords the `compose()` and `andThen()` functions for composing functions of the form of `A => B` together. But these functions don't work for the signature of `flatMap()`, which returns contexts in its signature of the form of `A => F[B]`.
+Scala out of the box affords the `compose()` and `andThen()` functions for composing functions of the form of `A => B` together. But these composition functions don't work for the signature of `flatMap()`, which returns contexts in its signature of the form of `A => F[B]`.
 
-There is a form of composition for monads known as [_Kleisli composition_](https://blog.ploeh.dk/2022/04/04/kleisli-composition/). This composition will lift following functions into the context returned by previous functions and apply them to the term contained within the context if the context is in the desired case. Kleisly composition is expressed using the _fish_ or _arrow operator_ `>=>` which is defined in the sample repository as an extension operator on functions of the form `A => F[B]` where `F[_]` has an instance of `Monad`:
+There is a form of composition for monads known as [_Kleisli composition_](https://blog.ploeh.dk/2022/04/04/kleisli-composition/). This composition will lift following functions into the context returned by previous functions and apply them to the term contained within the context if the context is in the desired case. Kleisli composition is expressed using the _fish_ or _arrow operator_ `>=>` which is defined in the sample repository as an extension operator on functions of the form `A => F[B]` where `F[_]` has an instance of `Monad`:
 
 :::{.numberLines}
 ```scala
@@ -208,6 +193,8 @@ implicit class KleisliCompositionOps[F[_], A, B](val f: A => F[B]) extends AnyVa
 }
 ```
 :::
+
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Monad.scala#L99) for the definition in the sample repository.
 
 Kleisli composition is useful for monads in that from two or more `flatMap()`-compatible functions, a single function may be created that takes an unlifted argument and produces an output context that has been applied to each function in sequence.
 
@@ -267,7 +254,7 @@ Thus Kleisli composition is to `flatMap()` as function composition is to `map()`
 
 ### The _for comprehension_ and imperative programming
 
-Scala provides a syntax sugar over `flatMap()` in the form of the [_for comprehension_](https://docs.scala-lang.org/tour/for-comprehensions.html). Any type that provides a `flatMap()` function is able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don't have to rely on Kleisli composition to express complex flows of logic, and that you also aren't limited to single input/output pipelines of functions to express the logic.
+Scala provides a syntax sugar over `flatMap()` in the form of the [_for comprehension_](https://docs.scala-lang.org/tour/for-comprehensions.html). Any type that provides both the `map()` and `flatMap()` functions are able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don't have to rely on Kleisli composition to express complex flows of logic, and that you also aren't limited to single input/output pipelines of functions.
 
 As a simple example, here are the above functions leveraged using a for comprehension:
 
@@ -310,7 +297,7 @@ val res3: Either[String,Int] = Left(Nothing's gonna happen)
 ```
 :::
 
-The key thing that a for comprehension allows is for multiple arguments to be lowered from contexts and applied to a function that returns another context. An example of such an operation might look like this:
+The key thing that a for comprehension allows is for multiple arguments to be lowered from contexts and applied to a multi-argument function that returns another context. An example of such an operation might look like this:
 
 :::{.numberLines}
 ```scala
@@ -319,21 +306,87 @@ def sendMarketingUpdate(updateId: Int, userId: Int): Future[MarketingUpdateStatu
     user <- loadUser(userId)
     marketingTemplate <- loadTemplate(updateId)
     composedEmail <- composeEmailForUser(user, marketingTemplate)
-    status <- sendEmail(composedEmail).map(_.toMarketingUpdateStatus)
-  } yield status
+    result <- sendEmail(composedEmail)
+  } yield result.toMarketingUpdateStatus
 ```
 :::
 
-Because `composeEmailForUser()` requires both a `user` and `marketingTemplate`, this function is more easily expressed using a for comprehension.
+Because `composeEmailForUser()` requires both a `user` and `marketingTemplate`, this operation function is more easily expressed using a for comprehension.
 
-***But if I really wanted to go down the rabbit hole*** I just have to use some applicative functions.
+However you don't have to abandon applicative functions when using for comprehensions. The above function may be written to parallelize loading the user and template:
 
 :::{.numberLines}
 ```scala
-def sendMarketingUpdate: (Int, Int) => Future[MarketingUpdateStatus] =
-  ((updateId: Int, templateId: Int) => (loadUser(userId), loadTemplate(templateId).tupled >=>
-    _.mapN(composeEmailForUser) >=>
-    sendEmail(_).toMarketingUpdateStatus
-
+def sendMarketingUpdate(updateId: Int, userId: Int): Future[MarketingUpdateStatus] =
+  for {
+    (user, marketingTemplate) <- (loadUser(userId), loadTemplate(updateId)).tupled
+    composedEmail <- composeEmailForUser(user, marketingTemplate)
+    result <- sendEmail(composedEmail)
+  } yield result.toMarketingUpdateStatus
 ```
 :::
+
+The code can be trimmed just a little bit more, as well:
+
+:::{.numberLines}
+```scala
+def sendMarketingUpdate(updateId: Int, userId: Int): Future[MarketingUpdateStatus] =
+  for {
+    composedEmail <- (loadUser(userId), loadTemplate(updateId)).mapN(composeEmailForUser)
+    result <- sendEmail(composedEmail)
+  } yield result.toMarketingUpdateStatus
+```
+:::
+
+This means that with applicative functions, you can express imperative code to some degree by gating functions dependent on a set of inputs, such as `composeEmailForUser()`, and lean on monad's `flatMap()` for when you need absolute ordering of computations. These two styles of computation thus complement each other.
+
+## Becoming a Monad
+
+In order to become a `Monad`, an effect type must implement the typeclass. Let's implement instances for the usual suspects, `Option`, `Either`, and `List`. As `Monad` is a specialization of `Applicative` and thus also `Functor`, we can simply upgrade our `Applicative` instances to become `Monad`s:
+
+:::{.numberLines}
+```scala
+implicit val optionMonad: Monad[Option] = new Monad[Option] {
+
+  // keeping existing definitions
+
+  override def flatten[A](ffa: Option[Option[A]]): Option[A] =
+    ffa match {
+      case Some(fa) => fa
+      case None     => None
+    }
+}
+
+implicit def eitherMonad[X]: Monad[Either[X, *]] = new Monad[Either[X, *]] {
+
+  // keeping existing definitions
+
+  override def flatten[A](ffa: Either[X, Either[X, A]]): Either[X, A] =
+    ffa match {
+      case Right(fa) => fa
+      case Left(x) => Left(x)
+    }
+}
+
+implicit val listMonad: Monad[List] = new Monad[List] {
+
+  // keeping existing definitions
+
+  override def flatten[A](ffa: List[List[A]]): List[A] =
+    ffa
+      .foldLeft(List[A]()) { (outerResult, as) =>
+        as.foldLeft(outerResult) { (innerResult, a) =>
+          a :: innerResult
+        }
+      }
+      .reverse
+}
+```
+:::
+
+> See the instances of `Monad` for
+> [`Option`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Option.scala#L127-L161),
+> [`Either`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L122-L156),
+> and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206-L244) in the sample repository.
+
+In the above example, I implemented the `Monad` instances using `flatten()`. These could alternatively been implemented using `flatMap()`. You might try to do this if you wish as an exercise.
