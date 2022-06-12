@@ -546,7 +546,13 @@ Monoids are nearly as common as semigroups, as not all semigroups are monoids, a
 
 The key difference between monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are combinable using `>=>` to produce new functions of the same form, and this operation is associative, which means that monads form semigroups under Kleisli composition. They form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument when composed to either the left or right side of a function of the form `A => F[B]`.
 
-> To be really pedantic, monads are functors. All functors in Scala are functors from Scala types into other Scala types, making them endofunctors because they map back into the same category: the category of Scala types. This affirms an [infamous joke][]: _Monads are just monoids in the category of endofunctors, what's the problem?_
+> To be really pedantic, monads are functors. All functors in Scala are functors from Scala types into other Scala types, making them endofunctors because they map back into the same category: the category of Scala types.
+>
+> This affirms an infamous joke:
+>
+>> Haskell gets some resistance due to the complexity of using monads to control side effects. Wadler tries to appease critics by explaining that _"a monad is a monoid in the category of endofunctors, what's the problem?"_
+>
+> -- From James Iry's "[A Brief, Incomplete, and Mostly Wrong History of Programming Languages](https://web.archive.org/web/20220609203110/https://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html)"
 
 In addition to being monoids, Scala's
 [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63) and
@@ -607,4 +613,3 @@ In my next post, we will explore **raising and recovering from errors** agnostic
 [monads are formally defined]: https://en.wikipedia.org/wiki/Monad_(category_theory)#Formal_definition
 [category theory]: https://en.m.wikipedia.org/wiki/Category_theory
 [previously for applicatives]: {{getUrl "_posts/2022-06-05-permitting-or-halting-computation.md"}}#defining-the-applicative-laws-as-properties
-[infamous joke]: https://web.archive.org/web/20220609203110/https://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html
