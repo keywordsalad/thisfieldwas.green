@@ -539,10 +539,10 @@ object Monoid {
 
 Monoids are nearly as common as semigroups, as not all semigroups are monoids, and you've probably used quite a few of them:
 
-* [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L78-L86)
-* [`String`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L10)
-* [`Int`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22)
-* [`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L78-L86)
+* [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L78-L86)'s identity element is the empty `List()`.
+* [`String`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L10)'s identity element is the empty `""`.
+* [`Int`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22)'s identity element is `0`.
+* [`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L78-L86)'s identity element is the empty `Set()`.
 
 The key difference between monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are combinable using `>=>` to produce new functions of the same form, and this operation is associative, which means that monads form semigroups under Kleisli composition. They form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument when composed to either the left or right side of a function of the form `A => F[B]`.
 
