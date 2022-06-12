@@ -68,9 +68,9 @@ object Applicative {
 
 `Applicative` can create contexts in the **desired case** via `pure()`. It can also apply _lifted_ functions to _lifted_ arguments via `ap()` if _both_ contexts are in their **desired case**. `Applicative` is capable of expessing control flow through `ap()` because supplying either the lifted function or lifted argument in an **undesired case** will not permit further computation. The context in the **undesired case** is _propagated_ instead.
 
-The problem however is that `Applicative` requires that _both_ the lifted function and lifted argument supplied to `ap()` be computed _before_ deciding whether to permit or halt further computation. This means that regardless of whether one of the function or argument contexts successfully computes, if the other fails the succeeding computation will be discarded. Both of these contexts' computation are independent, and `Applicative` will only use them if they are both are in their **desired case**.
+The problem however is that `Applicative` requires that _both_ the lifted function and lifted argument supplied to `ap()` be computed _before_ deciding whether to permit or halt further computation. This means that regardless of whether one of the function or argument contexts successfully computes, if the other one fails then the succeeding computation will be discarded. Both of these contexts' computation are independent, and `Applicative` will only use them if they are both are in their **desired case**.
 
-All functions derived from `ap()` represent _all-or-nothing_ operations accordingly, and there is no effective way of ordering the computation of the arguments or preventing computation of arguments if any dependent arguments fail to compute. Therefore, totally imperative programming is not possible using `Applicative`.
+All functions derived from `ap()` represent _all-or-nothing_ operations accordingly, and there is no practical way of ordering the computation of the arguments or preventing computation of all arguments if any preceding arguments fail to compute. Therefore, totally imperative programming is not possible using `Applicative`.
 
 ## Introducing imperative control flow
 
@@ -124,7 +124,11 @@ Thus we are able to gate `map()` behind the case of the context we return from t
 
 The `flatMap()` function is implemented using a new structure, a specialization of an applicative functor called a **monad**.
 
-Monads are a specialization that arise when the type of `A` contained within an applicative `F[_]`. If `A` is an opaque type, then `F[_]` is a functor and no more; if `A` is known to have type `A => B`, that is _`A` is a function_, then `F[_]` is an applicative functor. But if `A` is known to have type `F[A]`, then this means that `F[_]` is _nested within itself_ and thus a monad.
+Monads are a specialization that arises in the type of `A` contained within a context `F[_]`:
+
+* If `A` is an opaque type, then `F[A]` is a **functor**.
+* If `A` is known to have type `A => B`, that is _`A` is a function_, then `F[A => B]` is an **applicative** functor.
+* If `A` is known to have type `F[A]`, then this means that `F[F[A]]` is _nested within itself_ and thus a **monad**.
 
 The `Monad` typeclass defines two functions, which by default are defined in terms of each other:
 
@@ -152,7 +156,7 @@ This means that in order to implement an instance of the `Monad` typeclass, you 
 
 ### Composing monads
 
-`Monad` also defines a special composition operator. Recall that functions may be composed together, as in `h = g ∘ f` or _"h is g after f"_. This may be expressed a few ways in vanilla Scala. Try below using the sample repository's `sbt console`:
+`Monad` also defines a special composition operator. Recall that functions may be composed together, as in `h = g ∘ f` or _"h is g after f"_. This may be expressed in two ways in vanilla Scala. Try below using the sample repository's `sbt console`:
 
 :::{.numberLines}
 ```scala
@@ -181,9 +185,9 @@ val res4: Int = 3
 ```
 :::
 
-Scala out of the box affords the `compose()` and `andThen()` functions for composing functions of the form of `A => B` together. But these composition functions don't work for the signature of `flatMap()`, which returns contexts in its signature of the form of `A => F[B]`.
+Scala out of the box affords the `compose()` and `andThen()` functions for composing functions of the form of `A => B` together. But these composition functions don't work for the signature of `flatMap()`, which operates on functions of the form of `A => F[B]`.
 
-There is a form of composition for monads known as [_Kleisli composition_](https://blog.ploeh.dk/2022/04/04/kleisli-composition/). This composition will lift the following function into the context returned by the previous function and apply it to the term contained within the context if the context is in the **desired case**. Kleisli composition is expressed using the _fish_ or _arrow operator_ `>=>` which is defined in the sample repository as an extension operator on functions of the form `A => F[B]` where `F[_]` has an instance of `Monad`:
+There is a form of composition for monads known as _[Kleisli composition][]_. This composition will lift the following function into the context returned by the previous function and apply it to the term contained within the context if the context is in the **desired case**. Kleisli composition is expressed using the _fish_ or _arrow operator_ `>=>` which is defined in the sample repository as an extension operator on functions of the form `A => F[B]` where `F[_]` has an instance of `Monad`:
 
 :::{.numberLines}
 ```scala
@@ -197,7 +201,7 @@ implicit class KleisliCompositionOps[F[_], A, B](val f: A => F[B]) extends AnyVa
 
 > [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Monad.scala#L99) for the definition in the sample repository.
 
-Kleisli composition is useful for monads in that from two or more `flatMap()`-compatible functions, a single function may be created that takes an unlifted argument and produces an output context that has been applied to each function in sequence.
+Kleisli composition is useful for monads in that from two or more `flatMap()`-compatible functions a single function may be created that takes an unlifted argument and produces an output context that has been applied to each function in sequence.
 
 :::{.numberLines}
 ```scala
@@ -255,7 +259,7 @@ Thus Kleisli composition is to `flatMap()` as function composition is to `map()`
 
 ### The _for comprehension_ and imperative programming
 
-Scala provides a syntax sugar over `flatMap()` in the form of the [_for comprehension_](https://docs.scala-lang.org/tour/for-comprehensions.html). Any type that provides both the `map()` and `flatMap()` functions are able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don't have to rely on Kleisli composition directly to express complex flows of logic, and that you also aren't limited to single-argument input/output pipelines of functions.
+Scala provides a syntax sugar over `flatMap()` in the form of the _[for comprehension][]_. Any type that provides both the `map()` and `flatMap()` functions are able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don't have to rely on Kleisli composition directly to express complex flows of logic, and that you also aren't limited to single-argument input/output pipelines of functions.
 
 As a simple example, here are the above functions leveraged using a for comprehension:
 
@@ -400,7 +404,7 @@ There are three monad laws, which must hold for all monads in addition to the ap
 
 1. **Preservation of left identity**: Kleisli composition of `pure()` with a function of form `f: A => F[B]` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
 2. **Preservation of right identity**: Kleisli composition of a function of form `f: A => F[B]` with `pure()` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
-3. **Associativity**: Kleisli omposition of three functions `f: A => F[B]`, `g: B => F[C]`, and `h: C => F[D]` applied to an argument `a: A` produces the same result regardless of grouping: `(f >=> g) >=> h` is the same as `f >=> (g >=> h)`.
+3. **Associativity**: Kleisli composition of three functions `f: A => F[B]`, `g: B => F[C]`, and `h: C => F[D]` applied to an argument `a: A` produces the same result regardless of grouping: `(f >=> g) >=> h` is the same as `f >=> (g >=> h)`.
 
 Note that `pure()` is interpreted as the identity element of the monad, as it merely lifts a value into its context, unmodified.
 
@@ -598,6 +602,8 @@ These three abstractions, **functors**, **applicatives**, and **monads**, are ju
 
 In my next post, we will explore **raising and recovering from errors** agnostic of context, so that your code may abstract against typeclasses but still be able to force and recover from **undesired cases**.
 
+[Kleisli composition]: https://blog.ploeh.dk/2022/04/04/kleisli-composition/
+[for comprehension]: https://docs.scala-lang.org/tour/for-comprehensions.html
 [monads are formally defined]: https://en.wikipedia.org/wiki/Monad_(category_theory)#Formal_definition
 [category theory]: https://en.m.wikipedia.org/wiki/Category_theory
 [previously for applicatives]: {{getUrl "_posts/2022-06-05-permitting-or-halting-computation.md"}}#defining-the-applicative-laws-as-properties
