@@ -66,7 +66,7 @@ object Applicative {
 
 `Functor` abstracts over contexts' **unknown cases** by _lifting_ a function via `map()` and applying it to instances of the term produced by the context if they exist. Control flow can't be expressed using `map()` because it does not permit the case of the context to be modified.
 
-`Applicative` can create contexts in the **desired case** via `pure()`. It can also apply _lifted_ functions to _lifted_ arguments via `ap()` if _both_ contexts are in their **desired case**. `Applicative` is capable of expessing control flow through `ap()` because supplying either the lifted function or lifted argument in an **undesired case** will not permit further computation. The context in the **undesired case** is _propagated_ instead.
+`Applicative` can create contexts in the **desired case** via `pure()`. It can also apply _lifted_ functions to _lifted_ arguments via `ap()` if _both_ contexts are in their **desired case**. `Applicative` is capable of expressing control flow through `ap()` because supplying either the lifted function or lifted argument in an **undesired case** will not permit further computation. The context in the **undesired case** is _propagated_ instead.
 
 The problem however is that `Applicative` requires that _both_ the lifted function and lifted argument supplied to `ap()` be computed _before_ deciding whether to permit or halt further computation. This means that regardless of whether one of the function or argument contexts successfully computes, if the other one fails then the succeeding computation will be discarded. Both of these contexts' computation are independent, and `Applicative` will only use them if they are both are in their **desired case**.
 
@@ -193,7 +193,7 @@ There is a form of composition for monads known as _[Kleisli composition][]_. Th
 ```scala
 implicit class KleisliCompositionOps[F[_], A, B](val f: A => F[B]) extends AnyVal {
 
-  def >=>[C](g: B => F[C])(implicit F: Monad[F]): A => F[C] = 
+  def >=>[C](g: B => F[C])(implicit F: Monad[F]): A => F[C] =
     (x: A) => F.flatMap(f(x))(g)
 }
 ```
