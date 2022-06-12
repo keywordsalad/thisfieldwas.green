@@ -17,7 +17,7 @@ og:
     alt: Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.
 stylesheets:
   - css/posts/embracing-nondeterminism-part-1.scss
-code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1
+code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1-refactor
 ---
 
 Have you ever received an unexpected `null` reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?
@@ -181,13 +181,13 @@ Given a function `f: A => B` and another `g: B => C`: a third function `h: A => 
 
 Functions in real world programs must internally interact with implicit inputs and outputs _not present_ in the program's signature of `program: Input => Output`. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have **effects** which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of _unknown length_ and _an error might occur_ when performing a direct deposit. _These effects determine how and whether payday is successfully produced._
 
-Errors and unknown quantities as _effects_ of these operations are opaque in functions modeled as simple input to output, as in `getEmployee: Int => Employee`. The signature of this function requires _[tacit knowledge][]_ of what effects may determine how an `Employee` is produced from it. For example:
+Errors and unknown quantities as _effects_ of these operations are opaque in functions modeled as simple input to output, as in `getEmployee(): Int => Employee`. The signature of this function requires _[tacit knowledge][]_ of what effects may determine how an `Employee` is produced from it. For example:
 
 1. An associated `Employee` may not be found.
 2. The returned `Employee` may change between applications of the same `Int` employee ID.
 3. The database or network may fault and the function generates an exception that must be handled.
 
-You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are _effects_ which describe the circumstances under which an `Employee` may be produced and can be modeled accordingly as part of the typed API of `getEmployee`. Capturing these effects might look like `getEmployee: Int => Probably[Employee]`, wherein we keep these effects within the box of `Probably[_]`. I will soon explain how this modeling works; first we will consider how to characterize the complexity which defines effects.
+You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are _effects_ which describe the circumstances under which an `Employee` may be produced and can be modeled accordingly as part of the typed API of `getEmployee()`. Capturing these effects might look like `getEmployee(): Int => Probably[Employee]`, wherein we keep these effects within the box of `Probably[_]`. I will soon explain how this modeling works; first we will consider how to characterize the complexity which defines effects.
 
 ### Operations producing undesired cases
 
@@ -476,7 +476,7 @@ case object None extends Option[Nothing]
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Option.scala) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala) for the definition in the sample repository.
 
 **`Either[X, A]`** by convention is the effect of _either_ success with term `A` _or_ failure with term `X`:
 
@@ -491,7 +491,7 @@ case class Right[+X, +A](override val right: A) extends Either[X, A]
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala) for the definition in the sample repository.
 
 **`List[A]`** is the effect of _unknown length_, sort, and cardinality of instances of term `A`:
 
@@ -506,7 +506,7 @@ case object Nil extends List[Nothing]
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala) for the definition in the sample repository.
 
 ### An object-oriented approach to contexts
 
@@ -569,7 +569,7 @@ sealed trait List[A] extends Extractable[A] {
 
 _This interface however is not coherent._ Faulting on absence is preserved as a behavior in `Option[A]` and `Either[X, A]`, but Scala's `Seq[A]` is allowed to be empty per its definition. Allowing `List[A]` to be empty implies that it should be allowed to return an empty `Seq[A]` from `extract`. In order to preserve faulting on absence, `extract` must return a [`NonEmptyList[A]` instead]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/nel), as this has the effect of always having _at least one_ instance of term `A`. You're still stuck with an unknown length of instances, though.
 
-This interface essentially transforms these contexts into [`NonEmptyList[A]`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/NonEmptyList.scala) and imposes its specific complexity on all of your code. You would probably be very unhappy using it.
+This interface essentially transforms these contexts into [`NonEmptyList[A]`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala) and imposes its specific complexity on all of your code. You would probably be very unhappy using it.
 
 What about implementing `extract` for `Future[A]`? When applied to `Future[A]`, the `extract` function by its own signature is a blocking call. You want your dependency on `A` to be properly asynchronous.
 
@@ -596,7 +596,7 @@ object Functor {
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Functor.scala) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala) for the definition in the sample repository.
 
 What `map()` does is _lift_ the function `f: A => B` into the box so that it behaves as `F[A] => F[B]`, giving back `F[B]`.
 
@@ -688,36 +688,36 @@ object Functor {
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Functor.scala) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala) for the definition in the sample repository.
 
 Instances of the `Functor` typeclass implement this trait and make themselves available implicitly:
 
 :::{.numberLines}
 ```scala
-object FunctorInstances {
-  implicit val optionFunctor = new Functor[Option] {
-    def map[A, B](fa: Option[A])(f: A => B): Option[B] =
-      fa match {
-        case Some(x) => Some(f(x)) // desired case
-        case None    => None // undesired case
-      }
-  }
-  implicit def eitherFunctor[X] = new Functor[Either[X, *]] {
-    def map[A, B](fa: Either[X, A])(f: A => B): Either[X, B] =
-      fa match {
-        case Left(x)  => Left(x) // undesired case
-        case Right(a) => Right(f(a)) // desired case
-      }
-  }
-  implicit val listFunctor = new Functor[List] {
-    // the naive implementation is recursive, the sample repository demonstrates
-    // a more robust implementation
-    def map[A, B](fa: List[A])(f: A => B): List[B] =
-      fa match {
-        case a :: at => f(a) :: map(at)(f) // desired case, recurse
-        case Nil     => Nil // undesired case
-      }
-  }
+implicit val optionFunctor = new Functor[Option] {
+  def map[A, B](fa: Option[A])(f: A => B): Option[B] =
+    fa match {
+      case Some(x) => Some(f(x)) // desired case
+      case None    => None // undesired case
+    }
+}
+
+implicit def eitherFunctor[X] = new Functor[Either[X, *]] {
+  def map[A, B](fa: Either[X, A])(f: A => B): Either[X, B] =
+    fa match {
+      case Left(x)  => Left(x) // undesired case
+      case Right(a) => Right(f(a)) // desired case
+    }
+}
+
+implicit val listFunctor = new Functor[List] {
+  // the naive implementation is recursive, the sample repository demonstrates
+  // a more robust implementation
+  def map[A, B](fa: List[A])(f: A => B): List[B] =
+    fa match {
+      case a :: at => f(a) :: map(at)(f) // desired case, recurse
+      case Nil     => Nil // undesired case
+    }
 }
 ```
 :::
@@ -725,11 +725,11 @@ object FunctorInstances {
 These three instances for `Option[_]`, `Either[X, _]`, and `List[_]` show remarkable similarities, and this isn’t uncommon across functors for most data structures. Note in particular how `List[_]` is recursive, with the base case `Nil` representing void. Implementations of `Functor` are more complex in contexts such as `IO[_]` and `Future[_]` because they are managing side effects. _What is key is that the complexities imposed by each of these contexts are completely abstracted_, allowing function `f: A => B` to operate unburdened by effects with a focus on specific program logic.
 
 > Follow these links for the instances in the sample repository for
-> [Option]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Option.scala),
-> [Either]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L122),
-> [List]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206),
-> [NonEmptyList]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/NonEmptyList.scala#L90),
-> and [Id]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/package.scala#L26).
+> [Option]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L104-L126),
+> [Either]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L112-L133),
+> [List]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L237-L257),
+> [NonEmptyList]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala#L99-L119),
+> and [Id]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/package.scala#L23-L42).
 
 Can you see how functors enable control flow and short-circuiting? The **undesirable cases** are the specific branches of logic that enable this. If there’s "nothing here", then they don’t do anything. In the specific case of `Either[X, _]`, `Left` may be used to carry some error state in its term `X`. This satisfies the effect of _either_ `A` for success _or_ `X` for failure.
 
@@ -743,7 +743,7 @@ Contrasting with contexts that encode some notion of an **undesired case**, the 
 ```scala
 type Id[A] = A
 
-object FunctorInstances {
+object Id {
   implicit val idFunctor: Functor[Id] = new Functor[Id] {
     def map[A, B](fa: Id[A])(f: A => B): F[B] =
       f(fa) // map always applies!
@@ -756,10 +756,8 @@ To support an object-oriented API, the following `map(): (A => B) => F[B]` exten
 
 :::{.numberLines}
 ```scala
-object FunctorSyntax {
-  implicit class FunctorOps[F[_], A](val fa: F[A]) extends AnyVal {
-    def [B](f: A => B)(implicit F: Functor[F]): F[B] = Functor[F].map(fa)(f)
-  }
+implicit class FunctorOps[F[_], A](val fa: F[A]) extends AnyVal {
+  def [B](f: A => B)(implicit F: Functor[F]): F[B] = Functor[F].map(fa)(f)
 }
 ```
 :::
@@ -770,7 +768,6 @@ Defining a `fizzBuzz: F[Int] => F[String]` function that uses a functor looks li
 
 :::{.numberLines}
 ```scala
-import FunctorSyntax._
 def fizzBuzz[F[_]: Functor](context: F[Int]): F[String] =
   context.map { x =>
     val isFizz = x % 3 == 0
@@ -789,9 +786,6 @@ And then `fizzBuzz` may be used for all contexts implementing the `Functor` type
 
 :::{.numberLines}
 ```scala
-// import the Functor instance implicits
-import FunctorInstances._
-
 println(fizzBuzz(Some(3)))
 // => Some("fizz")
 println(fizzBuzz(None))
@@ -868,13 +862,13 @@ class ListSpec extends AnyPropSpec with ScalaCheckPropertyChecks with Matchers {
 :::
 
 > * See the functor laws applied to Scala's Standard Library
->   types [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala),
->   [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala),
->   and [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala)
-> * See the [generalized functor laws]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/FunctorLaws.scala)
->   applied to our [Option]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala),
->   [Either]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/EitherSpec.scala),
->   and [List]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala) types.
+>   types [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L12-L26),
+>   [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L12-L26),
+>   and [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L12-L26)
+> * See the [generalized functor laws]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/FunctorLaws.scala)
+>   applied to our [Option]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L109),
+>   [Either]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L132),
+>   and [List]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L169) types.
 
 These laws assert that functors preserve the behavior of functions `f` and `g` as if they were composed and also applied in sequence independent of `map()`. Functors thus _compose functional effects_ because this property of composition is retained within the context of their effects. The seam introduced by `map()` creates a hard delineation between any context's complexity of effects and the business logic of pure functions `f` and `g`.
 
