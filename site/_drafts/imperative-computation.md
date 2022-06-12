@@ -546,7 +546,7 @@ Monoids are nearly as common as semigroups, as not all semigroups are monoids, a
 
 The key difference between monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are combinable using `>=>` to produce new functions of the same form, and this operation is associative, which means that monads form semigroups under Kleisli composition. They form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument when composed to either the left or right side of a function of the form `A => F[B]`.
 
-> To be really pedantic, monads are functors. All functors in Scala are functors from Scala types into other Scala types, making them endofunctors because they map back into the same category--the category of Scala types. This affirms an [infamous joke][]: _Monads are just monoids in the category of endofunctors, what's the problem?_
+> To be really pedantic, monads are functors. All functors in Scala are functors from Scala types into other Scala types, making them endofunctors because they map back into the same category: the category of Scala types. This affirms an [infamous joke][]: _Monads are just monoids in the category of endofunctors, what's the problem?_
 
 In addition to being monoids, Scala's
 [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63) and
