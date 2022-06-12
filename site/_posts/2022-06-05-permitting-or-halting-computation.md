@@ -44,7 +44,7 @@ object Functor {
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Functor.scala) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala) for the definition in the sample repository.
 
 For any context `F[A]`, the `map()` function accepts another function `f: A => B` and applies it to the term within the context, giving back `F[B]`.
 
@@ -139,7 +139,7 @@ object Applicative {
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Applicative.scala) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala) for the definition in the sample repository.
 
 Note that `Applicative` extends `Functor` as it is a specialization. All applicatives are also functors and therefore also provide the `map()` function.
 
@@ -216,7 +216,7 @@ case class Invalid[+E](invalid: E) extends Validated[E, Nothing] {
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Validated.scala) for the definitions in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala) for the definitions in the sample repository.
 
 #### Why use a new `Validated` context instead of `Either`?
 
@@ -235,7 +235,7 @@ override def ap[A, B](ff: Either[X, A => B])(fa: Either[X, A]): Either[X, B] =
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L145-L150) for `Either`'s definition of `ap()`.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L145-L150) for `Either`'s definition of `ap()`.
 
 For both cases of `Left` they are immediately returned and there is no specific handling for situations where both `ff` and `fa` may be in the `Left` case. This means that the first `Left` propagates and all subsequent `Left`s are swallowed. In the context of validation, this means that for any number of validation errors that the context might produce, we would only receive the first error. We would have to resolve the error and re-run the operation, and repeat for each subsequent error until the operation as a whole succeeded. This makes `Either` a very poor choice for modeling validation. It represents strictly one thing or the other, whereas validation we can specialize to propagate all reasons for failure.
 
@@ -282,11 +282,11 @@ object Semigroup {
 
 A semigroup is thus an additive form of data. Here's a few familiar data types that you may have used as semigroups without realizing it:
 
-* [Lists under concatenation]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L28)
-* [Strings under concatenation]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L10)
-* [Integers under addition]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L13)
-* [Booleans under `&&`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/BooleanSpec.scala#L10)
-* [Sets under union]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L10)
+* [Lists under concatenation]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L51)
+* [Strings under concatenation]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L22)
+* [Integers under addition]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L17)
+* [Booleans under `&&`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/BooleanSpec.scala#L12)
+* [Sets under union]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L33)
 
 The `combine()` function must be associative. This can be tested with a `scalacheck` property:
 
@@ -332,7 +332,7 @@ implicit def validatedApplicative[E: Semigroup]: Applicative[Validated[E, *]] =
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Validated.scala#L98-L104) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Validated.scala#L111-L149) for the definition in the sample repository.
 
 This means that `Validated` is usable as an `Applicative` for any case where `E` is combinable. What implications does this have?
 
@@ -492,7 +492,7 @@ inside(validatedUser) { case Valid(user) =>
 ```
 :::
 
-> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L50) for the specs in the sample repository.
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L50-L141) for the specs in the sample repository.
 
 Applicatives thus enable entire computations to succeed if all context arguments are in the **desired case**. If any argument is in the **undesired case**, then this case is _propagated_ and the computation as a whole fails.
 
@@ -511,7 +511,7 @@ def sequence[A](listFa: List[F[A]]): F[List[A]] =
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Applicative.scala#L70-L71) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala#L83-L96) for the definition in the sample repository.
 
 And then if we load three `User`s at once:
 
@@ -551,7 +551,7 @@ val someOfProduct: Option[(Int, String)] = Some((42, "banana"))
 
 This has an important implication, specifically that unlike the `sequence()` function these operations allow for gathering effectful operations that produce contexts with heterogeneous terms. Scala allows for tuples up to 22 elements, and it makes sense to abstract the above operations for each tuple size, especially because even at just 2 elements writing all of these out is already clunky!
 
-In the sample repository, I have written a macro which [adds two extension methods]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/GenerateTupleSyntax.scala) to each tuple size. Here's the code that is generated for the 2-tuple:
+In the sample repository, I have written a macro which [adds two extension methods]({{code_repo}}/macro/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/GenerateTupleSyntax.scala) to each tuple size. Here's the code that is generated for the 2-tuple:
 
 :::{.numberLines}
 ```scala
@@ -633,9 +633,9 @@ implicit val listApplicative: Applicative[List] = new Applicative[List] {
 :::
 
 > See the instances of `Applicative` for
-> [`Option`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Option.scala#L127-L155),
-> [`Either`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L122-L151),
-> and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206-L235) in the sample repository.
+> [`Option`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L195),
+> [`Either`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L151),
+> and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L238-L275) in the sample repository.
 
 `Option` and `Either`'s instances of `Applicative` are straight-forward: if a function and argument are present, they are applied and the result returned in the **desired case**. If either are missing, then the **undesired case** is _propagated_ instead.
 
@@ -759,7 +759,7 @@ trait ApplicativeLaws { this: Laws with FunctorLaws =>
 ```
 :::
 
-> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/ApplicativeLaws.scala) for the full definition of the trait.
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/ApplicativeLaws.scala) for the full definition of the trait.
 
 With this trait, laws specs can be written for each context.
 
@@ -829,9 +829,9 @@ class ListLawsSpec extends Laws with FunctorLaws with ApplicativeLaws {
 :::
 
 > See these laws specs for
-> [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala#L116-L136),
+> [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala#L127-L145),
 > [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/EitherSpec.scala#L112-L135),
-> and [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala#L158-L181) in the sample repository.
+> and [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala#L159-L180) in the sample repository.
 
 _Try running these specs!_
 
@@ -934,7 +934,7 @@ class NonEmptyChainLaws extends Laws with SemigroupLaws {
 
 > See these laws specs for
 > [`Validated`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L144-L170)
-> and [`NonEmptyChain`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L87-L96)
+> and [`NonEmptyChain`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L94-L102)
 
 ### Implications of the applicative laws
 
