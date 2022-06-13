@@ -60,8 +60,8 @@ object Applicative {
 ```
 :::
 
-> See [`Functor`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Functor.scala)
-> and [`Applicative`'s]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Applicative.scala)
+> See [`Functor`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala)
+> and [`Applicative`'s]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala)
 > definitions in the sample repository.
 
 `Functor` abstracts over contexts' **unknown cases** by _lifting_ a function via `map()` and applying it to instances of the term produced by the context if they exist. Control flow can't be expressed using `map()` because it does not permit the case of the context to be modified.
@@ -152,7 +152,7 @@ object Monad {
 
 This means that in order to implement an instance of the `Monad` typeclass, you must implement one of either `flatMap()` or `flatten()` or calling one will recurse until the stack overflows. Some contexts are best defined using one over the other, and you have the choice to pick between the two.
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Monad.scala) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Monad.scala) for the definition in the sample repository.
 
 ### Composing monads
 
@@ -199,7 +199,7 @@ implicit class KleisliCompositionOps[F[_], A, B](val f: A => F[B]) extends AnyVa
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/Monad.scala#L99) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/syntax/monad.scala#L48) for the definition in the sample repository.
 
 Kleisli composition is useful for monads in that from two or more `flatMap()`-compatible functions a single function may be created that takes an unlifted argument and produces an output context that has been applied to each function in sequence.
 
@@ -390,9 +390,9 @@ implicit val listMonad: Monad[List] = new Monad[List] {
 :::
 
 > See the instances of `Monad` for
-> [`Option`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Option.scala#L127-L161),
-> [`Either`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Either.scala#L122-L156),
-> and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/List.scala#L206-L244) in the sample repository.
+> [`Option`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L218),
+> [`Either`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L174),
+> and [`List`]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L239-L302) in the sample repository.
 
 In the above example, I implemented the `Monad` instances using `flatten()`. These could alternatively be implemented using `flatMap()`. You might try to do this if you wish as an exercise.
 
@@ -479,7 +479,7 @@ trait MonadLaws { this: Laws with ApplicativeLaws =>
 ```
 :::
 
-> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/typeclasses/MonadLaws.scala) for the definition of the trait.
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/MonadLaws.scala) for the definition of the trait.
 
 Our laws specs can now extend this trait and assert that their tested contexts conform to the monad laws. For example, the laws spec for `Option`:
 
@@ -507,9 +507,9 @@ class OptionLaws extends Laws with FunctorLaws with ApplicativeLaws with MonadLa
 ```
 :::
 
-> See the laws specs for [Option]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala#L116-L137),
-> [Either]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/EitherSpec.scala#L112-L136),
-> and [List]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala#L158-L182)
+> See the laws specs for [Option]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L146),
+> [Either]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L136),
+> and [List]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L181)
 
 ### Implications of the monad laws
 
@@ -539,10 +539,10 @@ object Monoid {
 
 Monoids are nearly as common as semigroups, as not all semigroups are monoids, and you've probably used quite a few of them:
 
-* [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L78-L86)'s identity element is the empty `List()`.
-* [`String`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L10)'s identity element is the empty `""`.
+* [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L80-L88)'s identity element is the empty `List()`.
+* [`String`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L21-L29)'s identity element is the empty `""`.
 * [`Int`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22)'s identity element is `0`.
-* [`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L78-L86)'s identity element is the empty `Set()`.
+* [`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L80-L88)'s identity element is the empty `Set()`.
 
 The key difference between monads and these monoids above is that monads form an _additive function_ in contrast to _additive data_. Functions of the form `A => F[B]` are combinable using `>=>` to produce new functions of the same form, and this operation is associative, which means that monads form semigroups under Kleisli composition. They form monoids as the `pure()` function satisfies the identity element in that it doesn't alter its argument when composed to either the left or right side of a function of the form `A => F[B]`.
 
@@ -556,7 +556,7 @@ The key difference between monads and these monoids above is that monads form an
 
 In addition to being monoids, Scala's
 [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63) and
-[`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L32-L62) are also monads and I have asserted that they are well behaved with property checks.
+[`Set`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L32-L63) are also monads and I have asserted that they are well behaved with property checks.
 [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L30-L61)
 and [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L30-L61)
 are also monads. You've probably been using them as such without realizing!
