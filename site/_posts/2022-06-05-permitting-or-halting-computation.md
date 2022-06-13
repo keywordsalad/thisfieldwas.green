@@ -14,7 +14,7 @@ og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
     alt: Leveraging the effects of two or more contexts to allow computations to proceed or halt.
-code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2-refactor
+code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2
 ---
 
 Remember **functors**? Recall from my last post, {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}, they are structures that abstract away complexity imposed by nondeterminism present in **contexts** that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their **undesired case** and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.
