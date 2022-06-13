@@ -14,7 +14,7 @@ og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
     alt: Leveraging the effects of two or more contexts to allow computations to proceed or halt.
-code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2
+code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2-refactor
 ---
 
 Remember **functors**? Recall from my last post, {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}, they are structures that abstract away complexity imposed by nondeterminism present in **contexts** that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their **undesired case** and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.
@@ -294,7 +294,7 @@ The `combine()` function must be associative. This can be tested with a `scalach
 ```scala
 def checkSemigroupLaws[S: Semigroup: Arbitrary](): Unit = {
 
-  import Semigroup.Syntax._
+  import green.thisfieldwas.embracingnondeterminism.syntax.semigroup._
 
   property("Semigroup preserves associativity") {
     forAll(for {
@@ -332,7 +332,7 @@ implicit def validatedApplicative[E: Semigroup]: Applicative[Validated[E, *]] =
 ```
 :::
 
-> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/effects/Validated.scala#L111-L149) for the definition in the sample repository.
+> [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala#L111-L149) for the definition in the sample repository.
 
 This means that `Validated` is usable as an `Applicative` for any case where `E` is combinable. What implications does this have?
 
@@ -377,7 +377,6 @@ object NonEmptyChain {
     override def length: Int = 1
   }
 
-
   case class Append[+A](prefix: NonEmptyChain[A], suffix: NonEmptyChain[A]) extends NonEmptyChain[A] {
 
     override def head: A = prefix.head
@@ -387,14 +386,10 @@ object NonEmptyChain {
     override def length: Int = prefix.length + suffix.length
   }
 
-  object Instances {
-
-    /** `NonEmptyChain` forms a `Semigroup` under the `append()` function.
-      */
-    implicit def nonEmptyChainSemigroup[A]: Semigroup[NonEmptyChain[A]] = _ append _
-  }
+  /** `NonEmptyChain` forms a `Semigroup` under the `append()` function.
+    */
+  implicit def nonEmptyChainSemigroup[A]: Semigroup[NonEmptyChain[A]] = _ append _
 }
-
 ```
 :::
 
@@ -404,10 +399,8 @@ Using a `NonEmptyChain`, we can start writing validation functions for `User` to
 
 :::{.numberLines}
 ```scala
-import Applicative.Syntax._
-import NonEmptyChain.Instances._
-import Validated.Instances._
-import Validated.Syntax._
+import green.thisfieldwas.embracingnondeterminism.syntax.applicative._
+import green.thisfieldwas.embracingnondeterminism.syntax.validated._
 
 case class User(username: String, email: String, password: String)
 
@@ -492,7 +485,7 @@ inside(validatedUser) { case Valid(user) =>
 ```
 :::
 
-> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L50-L141) for the specs in the sample repository.
+> [See here]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L50-L141) for the specs in the sample repository.
 
 Applicatives thus enable entire computations to succeed if all context arguments are in the **desired case**. If any argument is in the **undesired case**, then this case is _propagated_ and the computation as a whole fails.
 
@@ -829,9 +822,9 @@ class ListLawsSpec extends Laws with FunctorLaws with ApplicativeLaws {
 :::
 
 > See these laws specs for
-> [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/OptionSpec.scala#L127-L145),
-> [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/EitherSpec.scala#L112-L135),
-> and [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ListSpec.scala#L159-L180) in the sample repository.
+> [`Option`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L145),
+> [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L135),
+> and [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L180) in the sample repository.
 
 _Try running these specs!_
 
@@ -933,7 +926,7 @@ class NonEmptyChainLaws extends Laws with SemigroupLaws {
 :::
 
 > See these laws specs for
-> [`Validated`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/effects/ValidatedSpec.scala#L144-L170)
+> [`Validated`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L144-L170)
 > and [`NonEmptyChain`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L94-L102)
 
 ### Implications of the applicative laws
