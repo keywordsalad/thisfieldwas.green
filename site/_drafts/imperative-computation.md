@@ -515,11 +515,11 @@ class OptionLaws extends Laws with FunctorLaws with ApplicativeLaws with MonadLa
 
 You may have noticed that the characteristics of the monad laws are somewhat different from the functor and applicative laws. They build using composition directly, specifically Kleisli composition, but don't assert that function composition generally is retained within their contexts the same way that functor or applicative's laws do.
 
-Let's reiterate the laws:
+**Let's reiterate the laws:**
 
-1. Left identity
-2. Right identity
-3. Associativity
+1. _Left identity_
+2. _Right identity_
+3. _Associativity_
 
 These laws specifically also define another typeclass called a **monoid**, which is a specialization of a **semigroup** that adds an _identity_ or _empty_ element. The identity element is special in that combining it with any other element produces that other element.
 
@@ -552,7 +552,7 @@ The key difference between monads and these monoids above is that monads form an
 >
 >> Haskell gets some resistance due to the complexity of using monads to control side effects. Wadler tries to appease critics by explaining that _"a monad is a monoid in the category of endofunctors, what's the problem?"_
 >
-> -- From James Iry's "[A Brief, Incomplete, and Mostly Wrong History of Programming Languages](https://web.archive.org/web/20220609203110/https://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html)"
+> -- From James Iry's "[A Brief, Incomplete, and Mostly Wrong History of Programming Languages][]"
 
 In addition to being monoids, Scala's
 [`List`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63) and
@@ -613,3 +613,4 @@ In my next post, we will explore **raising and recovering from errors** agnostic
 [monads are formally defined]: https://en.wikipedia.org/wiki/Monad_(category_theory)#Formal_definition
 [category theory]: https://en.m.wikipedia.org/wiki/Category_theory
 [previously for applicatives]: {{getUrl "_posts/2022-06-05-permitting-or-halting-computation.md"}}#defining-the-applicative-laws-as-properties
+[A Brief, Incomplete, and Mostly Wrong History of Programming Languages]: https://web.archive.org/web/20220609203110/https://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html
