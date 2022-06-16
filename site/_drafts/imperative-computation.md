@@ -84,7 +84,7 @@ def flatMap[F[_], A, B](fa: F[A])(f: A => F[B]): F[B]
 ```
 :::
 
-What `flatMap()` does is allow for the injection of a context into a pipeline of computations to either permit computation to proceed or force it to halt. The function argument `f`, which you supply, has full control of what case the returned context `F[B]` should be in. If `F[B]` is in the **undesired case**, then all further computations are skipped, _propagating_ this undesired case instead.
+What `flatMap()` does is allow for the injection of a context into a pipeline of computations to either permit computation to proceed or force it to halt. The function argument `f`, which you supply, has full control of what case the returned context `F[B]` should be in. If `F[B]` is in the **undesired case**, then all further computations are skipped, _propagating_ this **undesired case** instead.
 
 Take for example this definition of a `filter()` function from the sample repository's `sbt console`:
 
@@ -201,7 +201,7 @@ implicit class KleisliCompositionOps[F[_], A, B](val f: A => F[B]) extends AnyVa
 
 > [See here]({{code_repo}}/src/main/scala/green/thisfieldwas/embracingnondeterminism/syntax/monad.scala#L48) for the definition in the sample repository.
 
-Kleisli composition is useful for monads in that from two or more `flatMap()`-compatible functions a single function may be created that takes an unlifted argument and produces an output context that has been applied to each function in sequence.
+Kleisli composition is useful for monads in that from two or more `flatMap()`-compatible functions a single function may be created that takes an unlifted argument and produces an output context as the result of applying each function in sequence first to the unlifted argument and then to each individual functions' output contexts.
 
 :::{.numberLines}
 ```scala
@@ -259,7 +259,7 @@ Thus Kleisli composition is to `flatMap()` as function composition is to `map()`
 
 ### The _for comprehension_ and imperative programming
 
-Scala provides a syntax sugar over `flatMap()` in the form of the _[for comprehension][]_. Any type that provides both the `map()` and `flatMap()` functions are able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don't have to rely on Kleisli composition directly to express complex flows of logic, and that you also aren't limited to single-argument input/output pipelines of functions.
+Scala provides a syntax sugar over `flatMap()` in the form of the _[for comprehension][]_. Any type that provides both the `map()` and `flatMap()` functions are able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don't have to rely on Kleisli composition alone to express complex flows of logic, and that you also aren't limited to single-argument input/output pipelines of functions.
 
 As a simple example, here are the above functions leveraged using a for comprehension:
 
@@ -302,7 +302,7 @@ val res3: Either[String,Int] = Left(Nothing's gonna happen)
 ```
 :::
 
-The key thing that a for comprehension allows is for multiple arguments to be lowered from contexts and applied to a multi-argument function that returns another context. An example of such an operation might look like this:
+The key thing that a for comprehension allows for is multiple arguments to be lowered from contexts and applied to a multi-argument function that returns another context. An example of such an operation might look like this:
 
 :::{.numberLines}
 ```scala
@@ -316,9 +316,9 @@ def sendMarketingUpdate(updateId: Int, userId: Int): Future[MarketingUpdateStatu
 ```
 :::
 
-Because `composeEmailForUser()` requires both a `user` and `marketingTemplate`, this operation function is more easily expressed using a for comprehension.
+Because `composeEmailForUser()` requires both a `user` and `marketingTemplate`, this operation function is more easily expressed using a for comprehension than Kleisli composition.
 
-However you don't have to abandon applicative functions when using for comprehensions. The above function may be written to parallelize loading the user and template:
+However you don't have to abandon applicative functions when using for comprehensions. The above function may be written to independently load the user and template:
 
 :::{.numberLines}
 ```scala
@@ -400,7 +400,7 @@ In the above example, I implemented the `Monad` instances using `flatten()`. The
 
 How do we know that `Option`, `Either`, and `List`'s `Monad` instances are well-behaved as monads? Like functors, [monads are formally defined][] in the higher math of [category theory][] and expected to conform to a set of laws.
 
-There are three monad laws, which must hold for all monads in addition to the applicative and functor laws.
+There are **three monad laws**, which must hold for all monads in addition to the applicative and functor laws.
 
 1. **Preservation of left identity**: Kleisli composition of `pure()` with a function of form `f: A => F[B]` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
 2. **Preservation of right identity**: Kleisli composition of a function of form `f: A => F[B]` with `pure()` applied to an unlifted argument `a: A` is the same as applying the unlifted argument directly to `f: A => F[B]`.
