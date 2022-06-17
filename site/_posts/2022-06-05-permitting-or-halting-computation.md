@@ -5,7 +5,7 @@ author: Logan McGrath
 comments: true
 date: 2022-05-07T14:21:23-0700
 published: 2022-06-05T14:01:07-0700
-tags: functional programming, programming, scala, design patterns
+tags: functional programming, programming, scala, design patterns, contexts
 layout: post
 thumbnail: /images/tags/functional-programming/functional-grass-128x128.png
 twitter:
@@ -24,8 +24,8 @@ Remember **functors**? Recall from my last post, {{linkedTitle "_posts/2022-03-1
 > **This post is part of a series:**
 >
 > 1. {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}
-> 2. {{title}}
->
+> 2. **{{title}}**
+> 3. {{linkedTitle "_posts/2022-06-17-imperative-computation.md"}}
 
 _The code that accompanies this post may be found [here]({{code_repo}})._
 
@@ -945,6 +945,6 @@ When all inputs to an applicative function are in the **desired case**, then the
 
 Independent computation provides some level of control flow, but it doesn't guide execution to proceed only if the previous execution has succeeded, as all operations evaluate independently of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need to further specialize the applicative functor.
 
-In my next post, we will explore the infamous _**monad**_ and how it enables imperative control flow in functional programming.
+In my next post {{linkedTitle "_posts/2022-06-17-imperative-computation.md"}} we will explore the infamous _**monad**_ and how it enables imperative control flow in functional programming.
 
 [category theory]: https://en.m.wikipedia.org/wiki/Category_theory

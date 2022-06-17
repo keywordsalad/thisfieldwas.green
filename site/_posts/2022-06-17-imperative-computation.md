@@ -4,7 +4,8 @@ description: Leveraging the case of the previous effect to indicate whether comp
 author: Logan McGrath
 comments: true
 date: 2022-05-30T10:04:42-0700
-tags: functional programming, programming, scala, design patterns
+published: 2022-06-17T08:47:11-0700
+tags: functional programming, programming, scala, design patterns, contexts
 layout: post
 twitter:
   image: /images/tags/functional-programming/functional-grass-512x512.png
@@ -23,7 +24,7 @@ Remember **functors** and **applicatives**? In my last post {{linkedTitle "_post
 >
 > 1. {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}
 > 2. {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}}
-> 3. {{title}}
+> 3. **{{title}}**
 
 _The code that accompanies this post may be found [here]({{code_repo}})._
 

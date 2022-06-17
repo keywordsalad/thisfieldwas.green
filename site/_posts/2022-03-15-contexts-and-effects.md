@@ -6,7 +6,7 @@ comments: true
 date: 2022-01-24T17:14:03-0800
 published: 2022-03-15T09:20:00-0700
 updated: 2022-06-05T13:21:27-0700
-tags: functional programming, programming, scala, design patterns
+tags: functional programming, programming, scala, design patterns, contexts
 layout: post
 thumbnail: /images/tags/functional-programming/functional-grass-128x128.png
 twitter:
@@ -28,9 +28,9 @@ Have you ever received an unexpected `null` reference? Have you ever written a f
 
 > **This post is part of a series:**
 >
-> 1. {{title}}
+> 1. **{{title}}**
 > 2. {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}}
->
+> 3. {{linkedTitle "_posts/2022-06-17-imperative-computation.md"}}
 
 _The code that accompanies this post may be found [here]({{code_repo}})._
 

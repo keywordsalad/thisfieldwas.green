@@ -5,7 +5,7 @@ author: Logan McGrath
 comments: true
 date: 2022-06-16T21:29:05-0700
 published: 2022-06-16T22:22:26-0700
-tags: functional programming, programming, scala, design patterns
+tags: functional programming, programming, scala, design patterns, combinators
 layout: post
 ---
 
