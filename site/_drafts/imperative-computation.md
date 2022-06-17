@@ -561,7 +561,7 @@ In addition to being monoids, Scala's
 and [`Either`]({{code_repo}}/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L30-L61)
 are also monads. You've probably been using them as such without realizing!
 
-The real takeaway from the monad laws is that you get imperative computation as a composable structure. You retain referential transparency in that associativity guarantees that your operations may be grouped arbitrarily, allowing you to factor the steps of your program with a large degree of freedom.
+The real takeaway from the monad laws is that you get _imperative computation as a composable structure_. You retain referential transparency in that associativity guarantees that your operations may be grouped arbitrarily, allowing you to factor the steps of your program with a large degree of freedom.
 
 ## What is enabled by monads?
 
