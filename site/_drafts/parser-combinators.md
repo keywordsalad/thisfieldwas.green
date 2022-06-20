@@ -180,7 +180,7 @@ This combinator allows us to choose between possibilities of input. A simple exa
 ```
 :::
 
-## Putting the combinators together
+## Putting together what we have so far
 
 Now that we have sequential and alternative recognizers, we can start defining more complex `parse()` functions. Let's start with a term recognizer.
 
@@ -213,3 +213,157 @@ Here is the test to show that our `term()` function works, including one using t
 }
 ```
 :::
+
+## How do we get the matched input?
+
+There's a small problem with our `parse()` function. It only gives the end offset of the recognized input and there isn't any way to collect or modify the recognized input. This means we have to change the signature of the `parse()` function.
+
+### Modeling input
+
+First, we need to consider what our input needs to model. Our input is characterized by two things, the text being parsed and the offset that the current `parse()` function is operating from. This defines a _cursor_:
+
+:::{.numberLines}
+```scala
+case class InputCursor(offset: Int, input: String) {
+
+  def peek: Char = input(offset)
+
+  def +(amount: Int): InputCursor = copy(offset = offset + amount)
+
+  def -(amount: Int): InputCursor = copy(offset = offset - amount)
+}
+```
+:::
+
+A cursor allows us to hold a reference to the input itself, unmodified, but increment or decrement the position we are at within the input. As our `parse()` functions recognize input, they increment the offset so that the following functions have a place to start.
+
+### Modeling output
+
+The output of the `parse()` function changes as well. We want to be able to return the recognized input. This changes the signature of the `parse()` function:
+
+:::{.numberLines}
+```scala
+trait Parse extends (InputCursor => Either[InputCursor, (???, InputCursor)])
+```
+:::
+
+But what should be returned isn't entirely clear. If the recognizer matches a `Char`, then the `parse()` function should return a `Char`. But what about the `term()` recognizer? That should return a `String`. What if we're using a function that recognizes integers?
+
+This means that the `parse()` function is generic in its return type:
+
+:::{.numberLines}
+```scala
+trait Parse[+A] extends (InputCursor => Either[InputCursor, (+A, InputCursor)])
+```
+:::
+
+The overall return type is also becoming verbose by using the general-purpose `Either` class. So let's define something specialized:
+
+:::{.numberLines}
+```scala
+sealed trait ParseResult[+A]
+
+case class ParseFailure(cursor: InputCursor) extends ParseResult[Nothing]
+
+case class ParseSuccess[+A](result: A, cursor: InputCursor) extends ParseResult
+```
+:::
+
+_**But before we use it this means that all of our function signatures have to change!**_
+
+## The new shape of the `parse()` function
+
+Our `parse()` function will soon become generic its return type, which makes it _covariant_ in that `parse()` can be adapted to produce anything we want. What the `parse()` function produces is contextualized by whether it is recognized in the input, and as such there is a chance that nothing is produced because the input wasn't recognized. This means the the `parse()` function forms a specific structure: a _context_ with the shape of a _functor_.
+
+> I have written about contexts, functors, and related structures extensively. Start from the following article if these terms are unfamiliar to you: **{{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}**
+
+Take a look at what the `parse()` function signature will look like after we start using `ParseResult`:
+
+:::{.numberLines}
+```scala
+trait Parse[+A] extends (InputCursor => ParseResult[A])
+```
+:::
+
+Let's compare that with the shape of a _functor_: `Parse[A]` and `F[A]`.
+
+In fact, `ParseResult[A]` has the same shape!
+
+To save some time, I've added the [`cats`][] library to leverage the functor typeclass abstraction. First, let's implement the `Functor` typeclass for `ParseResult[A]`:
+
+:::{.numberLines}
+```scala
+object ParseResult {
+
+  implicit val parseResultFunctor: Functor[ParseResult] = new Functor[ParseResult] {
+
+    override def map[A, B](fa: ParseResult[A])(f: A => B): ParseResult[B] =
+      fa match {
+        case ParseFailure(failedCursor)        => ParseFailure(failedCursor)
+        case ParseSuccess(matched, nextCursor) => ParseSuccess(f(matched), nextCursor)
+      }
+  }
+}
+```
+:::
+
+This allows us to transform the contents of the `ParseResult` at-will.
+
+### Changing the contents of the `parse()` function itself
+
+The `parse()` function itself is a functor. But that doesn't quite make sense: it doesn't contain anything because it's a function!
+
+However, it still has the _shape_ of a functor. Recall the new signature that it will have `InputCursor => ParseResult[A]`. It's covariant in `A`, giving it the shape of `F[A]`. So how do we treat it as a functor? Let's change the signature first and see how the code breaks.
+
+_**And all of the `parse()` functions break!**_ So we will step through each and get them working again.
+
+1. **`satisfy()`** only requires that we change the return:
+
+    ```scala
+    def satisfy(predicate: Char => Boolean): Parse[Char] = cursor =>
+      if (predicate(cursor.peek)) {
+        ParseSuccess(cursor.peek, cursor + 1)
+      } else {
+        ParseFailure(cursor)
+      }
+    ```
+
+2. **The `&` combinator** has a `flatMap()` screaming to be abstracted:
+
+    ```scala
+    def &[B](second: Parse[B]): Parse[(A, B)] =
+      input =>
+        this(input) match {
+          case ParseFailure(failedCursor) => ParseFailure(failedCursor)
+          case ParseSuccess(firstMatched, nextCursor) =>
+            second(nextCursor).map(secondMatched => (firstMatched, secondMatched))
+        }
+    ```
+
+3. **The `|` combinator** requires an abstraction to act on failure:
+
+    ```scala
+    def |[B >: A](second: Parse[B]): Parse[B] =
+      input =>
+        this(input) match {
+          case _: ParseFailure    => second(input)
+          case s: ParseSuccess[_] => s
+        }
+    ```
+
+4. **term()** is affected the most, and the rewrite requires threading a cursor through a lot of `parse()` functions and handling the results:
+
+    ```scala
+    def term(value: String): Parse[String] = {
+      val parsers = value.map(c => satisfy(_ == c))
+      cursor =>
+        parsers
+          .foldLeft[Parse[mutable.StringBuilder]](cursor => stringBuilder()(cursor)) { (sbp, cp) => cursor =>
+            (sbp & cp)(cursor).map { case (sb, c) => sb.append(c) }
+          }(cursor)
+          .map(_.toString())
+    ```
+
+**What happens if we leverage the Functor typeclass?**
+
+[`cats`]: https://typelevel.org/cats/
