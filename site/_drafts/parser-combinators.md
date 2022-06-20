@@ -351,14 +351,17 @@ _**And all of the `parse()` functions break!**_ So we will step through each and
         }
     ```
 
-4. **term()** is affected the most, and the rewrite requires threading a cursor through a lot of `parse()` functions and handling the results:
+4. **term()** is affected the most, and the rewrite requires threading a cursor through a lot of `parse()` functions and handling the results. It even requires adding a specialized `parse()` function to always return a new `mutable.StringBuilder`!
 
     ```scala
+    def stringBuilder(): Parse[mutable.StringBuilder] =
+      cursor => ParseSuccess(new mutable.StringBuilder(), cursor)
+
     def term(value: String): Parse[String] = {
       val parsers = value.map(c => satisfy(_ == c))
       cursor =>
         parsers
-          .foldLeft[Parse[mutable.StringBuilder]](cursor => stringBuilder()(cursor)) { (sbp, cp) => cursor =>
+          .foldLeft[Parse[mutable.StringBuilder]](stringBuilder()) { (sbp, cp) => cursor =>
             (sbp & cp)(cursor).map { case (sb, c) => sb.append(c) }
           }(cursor)
           .map(_.toString())
