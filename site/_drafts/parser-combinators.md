@@ -361,12 +361,42 @@ _**And all of the `parse()` functions break!**_ So we will step through each and
       val parsers = value.map(c => satisfy(_ == c))
       cursor =>
         parsers
-          .foldLeft[Parse[mutable.StringBuilder]](stringBuilder()) { (sbp, cp) => cursor =>
+          .foldLeft(stringBuilder()) { (sbp, cp) => cursor =>
             (sbp & cp)(cursor).map { case (sb, c) => sb.append(c) }
           }(cursor)
           .map(_.toString())
     ```
 
 **What happens if we leverage the Functor typeclass?**
+
+First, let's define an instance for `Parse`:
+
+:::{.numberLines}
+```scala
+implicit val parseFunctor: Functor[Parse] = new Functor[Parse] {
+
+  override def map[A, B](fa: Parse[A])(f: A => B): Parse[B] =
+    cursor => fa(cursor).map(f)
+}
+```
+:::
+
+This leverages the ability to use `ParseResult` as a functor. The new `map()` function for `parse()` allows us to change what the function produces by wrapping the supplied function `f: A => B` in a new `parse()` function! We are effectively able to change the "contents" of the function this way.
+
+Using `parse()` as a functor, we can refactor the `term()` function:
+
+:::{.numberLines}
+```scala
+def term(value: String): Parse[String] =
+  value
+    .map(c => satisfy(_ == c))
+    .foldLeft(stringBuilder()) { (sbp, cp) =>
+      (sbp & cp).map { case (sb, c) => sb.append(c) }
+    }
+    .map(_.toString())
+```
+:::
+
+Notice that we no longer need to manually pass around the input cursor. We've simply folded a sequence of `parse()` functions to `Char` down to a single `parse()` function to `String`. The functor abstraction allowed us to declaratively create this function without having to worry about the plumbing.
 
 [`cats`]: https://typelevel.org/cats/
