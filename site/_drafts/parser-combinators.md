@@ -182,31 +182,31 @@ This combinator allows us to choose between possibilities of input. A simple exa
 
 ## Putting the combinators together
 
-Now that we have sequential and alternative recognizers, we can start defining more complex `parse()` functions. Let's start with a keyword recognizer.
+Now that we have sequential and alternative recognizers, we can start defining more complex `parse()` functions. Let's start with a term recognizer.
 
 :::{.numberLines}
 ```scala
-def keyword(value: String): Parse =
+def term(value: String): Parse =
   value.tail.foldLeft(satisfy(_ == value.head))((p, c) => p & satisfy(_ == c))
 ```
 :::
 
-By using the classic functional programming idiom `foldLeft()`, we can build a keyword recognizer using only the functions and combinators we have defined so far. Slick!
+By using the classic functional programming idiom `foldLeft()`, we can build a term recognizer using only the functions and combinators we have defined so far. Slick!
 
-Here is the test to show that our `keyword()` function works, including one using the `|` combinator with a second keyword:
+Here is the test to show that our `term()` function works, including one using the `|` combinator with a second term:
 
 :::{.numberLines}
 ```scala
-"keyword" which {
-  val parse = keyword("banana")
+"term" which {
+  val parse = term("banana")
   "recognizes a word" in {
     parse((0, "banana apple")) shouldBe Right((6, "banana apple"))
   }
   "rejects input that doesn't match" in {
     parse((0, "banapple")) shouldBe Left(4)
   }
-  "alternate with a second keyword" in {
-    val combined = parse | keyword("apple")
+  "alternate with a second term" in {
+    val combined = parse | term("apple")
     combined((0, "banana orange")) shouldBe Right((6, "banana orange"))
     combined((0, "apple orange")) shouldBe Right((5, "apple orange"))
   }
