@@ -86,7 +86,7 @@ Based on the previous example, recognizing a character with a regular expression
 :::{.numberLines}
 ```scala
 def satisfyRegex(pattern: String): Parse = {
-  val pattern = Pattern.compile("\\p{Ll}")
+  val pattern = Pattern.compile("\\\\p{Ll}")
   satisfy(c => pattern.matcher(CharBuffer.wrap(ArrayCharSequence(Array(c)))).matches())
 }
 ```
