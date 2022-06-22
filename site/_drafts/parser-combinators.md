@@ -253,7 +253,7 @@ This means that the `parse()` function is generic in its return type:
 
 :::{.numberLines}
 ```scala
-trait Parse[+A] extends (InputCursor => Either[InputCursor, (+A, InputCursor)])
+trait Parse[A] extends (InputCursor => Either[InputCursor, (A, InputCursor)])
 ```
 :::
 
@@ -261,11 +261,11 @@ The overall return type is also becoming verbose by using the general-purpose `E
 
 :::{.numberLines}
 ```scala
-sealed trait ParseResult[+A]
+sealed trait ParseResult[A]
 
 case class ParseFailure(cursor: InputCursor) extends ParseResult[Nothing]
 
-case class ParseSuccess[+A](result: A, cursor: InputCursor) extends ParseResult
+case class ParseSuccess[A](result: A, cursor: InputCursor) extends ParseResult
 ```
 :::
 
@@ -281,7 +281,7 @@ Take a look at what the `parse()` function signature will look like after we sta
 
 :::{.numberLines}
 ```scala
-trait Parse[+A] extends (InputCursor => ParseResult[A])
+trait Parse[A] extends (InputCursor => ParseResult[A])
 ```
 :::
 
@@ -459,7 +459,7 @@ Let's start at the deciding factor of success or failure of the `parse()` functi
 
 :::{.numberLines}
 ```scala
-sealed trait ParseResult[+A] {
+sealed trait ParseResult[A] {
 
   def orElse(other: => ParseResult[B]): ParseResult[B]
 }
