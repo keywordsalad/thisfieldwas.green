@@ -273,7 +273,7 @@ _**But before we use it this means that all of our function signatures have to c
 
 ## The new shape of the `parse()` function
 
-Our `parse()` function will soon become generic its return type, which makes it _covariant_ in that `parse()` can be adapted to produce anything we want. What the `parse()` function produces is contextualized by whether it is recognized in the input, and as such there is a chance that nothing is produced because the input wasn't recognized. This means the the `parse()` function forms a specific structure: a _context_ with the shape of a _functor_.
+Our `parse()` function will soon become generic its return type, which makes it _covariant_ in that `parse()` can be adapted to produce anything we want. What the `parse()` function produces is contextualized by whether it is recognized in the input, and as such there is a chance that nothing is produced because the input wasn't recognized. This means the the `parse()` function forms a specific structure: a _context_ with the shape of a **functor**.
 
 > I have written about contexts, functors, and related structures extensively. Start from the following article if these terms are unfamiliar to you: **{{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}**
 
@@ -309,13 +309,13 @@ object ParseResult {
 
 This allows us to transform the contents of the `ParseResult` at-will.
 
-### Changing the contents of the `parse()` function itself
+### Changing the return type of the `parse()` function itself
 
 The `parse()` function itself is a functor. But that doesn't quite make sense: it doesn't contain anything because it's a function!
 
 However, it still has the _shape_ of a functor. Recall the new signature that it will have `InputCursor => ParseResult[A]`. It's covariant in `A`, giving it the shape of `F[A]`. So how do we treat it as a functor? Let's change the signature first and see how the code breaks.
 
-_**And all of the `parse()` functions break!**_ So we will step through each and get them working again.
+_**And all of the `parse()` functions break!**_ So we will step through each and get them working again, and we will leverage the `ParseResult` functor.
 
 1. **`satisfy()`** only requires that we change the return:
 
@@ -332,8 +332,8 @@ _**And all of the `parse()` functions break!**_ So we will step through each and
 
     ```scala
     def &[B](second: Parse[B]): Parse[(A, B)] =
-      input =>
-        this(input) match {
+      cursor =>
+        this(cursor) match {
           case ParseFailure(failedCursor) => ParseFailure(failedCursor)
           case ParseSuccess(firstMatched, nextCursor) =>
             second(nextCursor).map(secondMatched => (firstMatched, secondMatched))
@@ -343,10 +343,10 @@ _**And all of the `parse()` functions break!**_ So we will step through each and
 3. **The `|` combinator** requires an abstraction to act on failure:
 
     ```scala
-    def |[B >: A](second: Parse[B]): Parse[B] =
-      input =>
-        this(input) match {
-          case _: ParseFailure    => second(input)
+    def |(second: Parse[A]): Parse[A] =
+      cursor =>
+        this(cursor) match {
+          case _: ParseFailure    => second(cursor)
           case s: ParseSuccess[_] => s
         }
     ```
@@ -367,9 +367,9 @@ _**And all of the `parse()` functions break!**_ So we will step through each and
           .map(_.toString())
     ```
 
-**What happens if we leverage the Functor typeclass?**
+### The `parse()` function as a functor
 
-First, let's define an instance for `Parse`:
+First, let's define a `Functor` instance for `Parse`:
 
 :::{.numberLines}
 ```scala
@@ -397,6 +397,219 @@ def term(value: String): Parse[String] =
 ```
 :::
 
-Notice that we no longer need to manually pass around the input cursor. We've simply folded a sequence of `parse()` functions to `Char` down to a single `parse()` function to `String`. The functor abstraction allowed us to declaratively create this function without having to worry about the plumbing.
+Notice that we no longer need to manually pass around the input cursor. We've simply folded a sequence of `parse()` functions to `Char` down to a single `parse()` function to `String`. The functor abstraction allowed us to declaratively create this function without having to worry about the plumbing; we don't even have to declare the cursor as an explicit input.
+
+### Sequential parsing with the `parse()` function
+
+We can't apply the functor abstraction to the `&` combinator as it sequences one `parse()` function after a successful application of a preceding `parse()` function. This means that it executes _imperatively_. The specific abstraction we have to use for this kind of execution is a **[monad][]**.
+
+A monad is a specialization of a functor. We can replace our functor instance of the `parse()` function with one for monad:
+
+:::{.numberLines}
+```scala
+implicit val parseMonad: Monad[Parse] = new Monad[Parse] {
+
+  override def flatMap[A, B](fa: Parse[A])(f: A => Parse[B]): Parse[B] =
+    cursor =>
+      fa(cursor) match {
+        case ParseFailure(failedCursor)        => ParseFailure(failedCursor)
+        case ParseSuccess(matched, nextCursor) => f(matched)(nextCursor)
+      }
+
+  override def tailRecM[A, B](a: A)(f: A => Parse[Either[A, B]]): Parse[B] = {
+    @tailrec
+    def recur(a: A, cursor: InputCursor): ParseResult[B] =
+      f(a)(cursor) match {
+        case ParseFailure(failedCursor) => ParseFailure(failedCursor)
+        case ParseSuccess(matched, nextCursor) =>
+          matched match {
+            case Left(value)  => recur(value, nextCursor)
+            case Right(value) => ParseSuccess(value, nextCursor)
+          }
+      }
+    cursor => recur(a, cursor)
+  }
+
+  override def pure[A](x: A): Parse[A] = cursor => ParseSuccess(x, cursor)
+}
+```
+:::
+
+**`Monad` gives us the following capabilities:**
+
+* We still get `map()` through a default definition.
+* `pure()` which lifts a result into a `parse()` function that will always be recognize the input without consuming from the cursor.
+* `flatMap()` which allows for sequential execution of one `parse()` function after another.
+* `tailRecM()` which provides _[monadic recursion][]_, but we won't be using this for now.
+
+Given this monad instance for the `parse()` function, we can now rewrite the `&` combinator:
+
+```scala
+def &[B](second: Parse[B]): Parse[(A, B)] =
+  this.flatMap(a => second.map(b => (a, b)))
+```
+
+This `&` combinator becomes very small. Again, like the `term()` function we no longer have to manually thread a cursor through each function: we simply declare how the individual `parse()` functions relate and modify what they collectively produce.
+
+### Alternative parsing with the `parse()` function
+
+The monad abstraction provides _imperative_ execution. This means that we can't implement the `|` combinator using `flatMap()` as it requires both the first and second `parse()` functions to succeed. We need to lean on the `Alternative` typeclass to allow us to try one function but use another if it fails.
+
+Let's start at the deciding factor of success or failure of the `parse()` function: `ParseResult`. We need to define a function that allows choice between a successful result and a failed one:
+
+:::{.numberLines}
+```scala
+sealed trait ParseResult[+A] {
+
+  def orElse(other: => ParseResult[B]): ParseResult[B]
+}
+```
+:::
+
+If our result is `ParseSuccess` then `orElse()` returns the current result. If our result is `ParseFailure` then `orElse()` evaluates the `other` argument and returns that instead, regardless of success or failure. This allows us to try producing one result, use it if it's successful, and otherwise try producing the other result.
+
+With this ability to abstract the selection of success or failure, we can now abstract the same ability for the `parse()` function. First, we need to prepare our `Parse` instances to allow for multiple typeclass declarations by modifying its existing monad instance:
+
+:::{.numberLines}
+```scala
+object Parse {
+
+  // replace the implicit Monad instance with this
+  implicit val parseInstances: ParseInstances = new ParseInstances()
+
+  class ParseInstances extends Monad[Parse] {
+
+    // put the declarations from the original Monad instance here
+  }
+}
+```
+:::
+
+The reason for this is to allow us to extend more typeclasses while keeping the signature of `parseInstances` simple. Now we can implement `Alternative` easily by adding it to the `extends` clause of `ParseInstances`:
+
+:::{.numberLines}
+```scala
+class ParseInstances extends Monad[Parse] extends Alternative[Parse] {
+
+  // monad declarations...
+
+  override def empty[A]: Parse[A] =
+    cursor => ParseFailure(cursor)
+
+  override def combineK[A](x: Parse[A], y: Parse[A]): Parse[A] =
+    cursor => x(cursor).orElse(y(cursor))
+}
+```
+:::
+
+**`Alternative` gives us the following capabilities:**
+
+* `empty` provides a `parse()` function that always fails, because it's empty.
+* `combineK()` allows for the combination of the results produced by the `parse()` function. Concretely, this means that the first function is attempted, and if it fails then the second function is attempted.
+
+Armed with abstraction over selection of success or failure, we can redefine the `|` combinator:
+
+:::{.numberLines}
+```scala
+import cats.syntax.semigroupk._
+
+def |(second: Parse[A]): Parse[A] =
+  this <+> second
+```
+:::
+
+That's all the `|` combinator is now: `this <+> second`. By leveraging the `Alternative` abstraction, we are able to declaratively specify with a single operator that the first `parse()` function should be attempted before the second.
+
+## Putting it all together
+
+Let's try defining a `parse()` function that's more complex than what we've covered so far: a generic programming language identifier recognizer.
+
+**This `parse()` function should be able to recognize the following inputs:**
+
+* Any alphabetic letter followed by zero or more of alphabetic letters, digits, or underscores.
+* Any underscore as long as it is followed by one or more of alphabetic letters, digits, or underscores.
+
+There's a lot going on in those two requirements. Let's break it down:
+
+* Recognize one of a range of possible matches from one `parse()` function.
+* Require zero or more matches from one `parse()` function.
+* Require at least one or more matches from one `parse()` function.
+
+First, we need to define a `parse()` function that can recognize one match from any number of parsers. More specifically, we need two functions in order to do this:
+
+:::{.numberLines}
+```scala
+def empty[A]: Parse[A] = Alternative[Parse].empty[A]
+
+def oneOf[A](parsers: Seq[Parse[A]]): Parse[A] =
+  parsers.foldLeft(empty[A])(_ | _)
+```
+:::
+
+Here we have a convenience `empty[A]` parser that leverages the `Alternative` typeclass we implemented earlier. By defining a `oneOf()` function that accepts a sequence of `parse()` functions, we can fold each function to the left starting with an empty parser and alternate each one. The first `parse()` function that matches will return a success result. If none match, then the final failure result will be returned instead.
+
+How do we use this to accept any one of the alphabetic letters? It would be tedious to write a `satisfy()` function for each letter by hand, so instead let's specify the letters we want as a string:
+
+:::{.numberLines}
+```scala
+def alpha: Parse[Char] =
+  oneOf((('a' to 'z') ++ ('A' to 'Z')).map(c => satisfy(_ == c)))
+```
+:::
+
+We can do the same thing with digits:
+
+:::{.numberLines}
+```scala
+def digits: Parse[Char] =
+  oneOf(('0' to '9').map(c => satisfy(_ == c)))
+```
+:::
+
+We also need a `parse()` function that allows for recognizing zero or many matches and another for one or many:
+
+:::{.numberLines}
+```
+def zeroOrMany[A](parse: Parse[A]): Parse[Seq[A]] =
+  Monad[Parse].tailRecM(Seq[A]()) { seq =>
+    parse.map(a => (seq :+ a).asLeft[Seq[A]]) |
+      seq.asRight[Seq[A]].pure[Parse]
+  }
+
+def oneOrMany[A](parse: Parse[A]): Parse[Seq[A]] =
+  (parse & zeroOrMany(parse)).map { case (a, seq) => a +: seq }
+```
+:::
+
+Notice how our `zeroOrMany()` function leverages the _monadic recursion_ capability that we didn't need from earlier! This means this function is stack-safe even though it's implemented recursively.
+
+Armed with these functions, we can now recognize identifiers!
+
+:::{.numberLines}
+```scala
+def underscore: Parse[Char] =
+  satisfy(_ = '_')
+
+def identifier: Parse[String] = {
+  val restLetters = alpha | digits | underscore
+  val startsWithAlpha = alpha & zeroOrMany(restLetters)
+  val startsWithUnderscore = underscore & oneOrMany(restLetters)
+  (startsWithAlpha | startsWithUnderscore).map { case (head, rest) => (head +: rest).mkString("") }
+}
+```
+:::
+
+But that seems almost too easy! We better write a bunch of tests to make sure this recognizes input as expected.
+
+:::{.numberLines}
+```scala
+"identifier" should {
+
+}
+```
+:::
+
 
 [`cats`]: https://typelevel.org/cats/
+[monad]: https://thisfieldwas.green/blog/2022/06/17/imperative-computation/
+[monadic recursion]: https://typelevel.org/cats/typeclasses/monad.html#tailrecm
