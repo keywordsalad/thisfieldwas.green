@@ -263,7 +263,7 @@ The overall return type is also becoming verbose by using the general-purpose `E
 ```scala
 sealed trait ParseResult[A]
 
-case class ParseFailure(cursor: InputCursor) extends ParseResult[Nothing]
+case class ParseFailure[A](cursor: InputCursor) extends ParseResult[A]
 
 case class ParseSuccess[A](result: A, cursor: InputCursor) extends ParseResult
 ```
@@ -351,20 +351,17 @@ _**And all of the `parse()` functions break!**_ So we will step through each and
         }
     ```
 
-4. **term()** is affected the most, and the rewrite requires threading a cursor through a lot of `parse()` functions and handling the results. It even requires adding a specialized `parse()` function to always return a new `mutable.StringBuilder`!
+4. **term()** is affected the most, and the rewrite requires threading a cursor through a lot of `parse()` functions and handling the results. It even requires adding a specialized `parse()` function to always return a `Unit` and succeed!
 
     ```scala
-    def stringBuilder(): Parse[mutable.StringBuilder] =
-      cursor => ParseSuccess(new mutable.StringBuilder(), cursor)
+    def unit: Parse[Unit] = cursor => ParseSuccess((), cursor)
 
-    def term(value: String): Parse[String] = {
-      val parsers = value.map(c => satisfy(_ == c))
-      cursor =>
-        parsers
-          .foldLeft(stringBuilder()) { (sbp, cp) => cursor =>
-            (sbp & cp)(cursor).map { case (sb, c) => sb.append(c) }
-          }(cursor)
-          .map(_.toString())
+    def term(value: String): Parse[String] =
+      outerCursor =>
+        value
+          .map(c => satisfy(_ == c))
+          .foldLeft(unit)((up, cp) => innerCursor => (up & cp)(innerCursor).map(_ => ()))(outerCursor)
+          .map(_ => value)
     ```
 
 ### The `parse()` function as a functor
@@ -390,10 +387,8 @@ Using `parse()` as a functor, we can refactor the `term()` function:
 def term(value: String): Parse[String] =
   value
     .map(c => satisfy(_ == c))
-    .foldLeft(stringBuilder()) { (sbp, cp) =>
-      (sbp & cp).map { case (sb, c) => sb.append(c) }
-    }
-    .map(_.toString())
+    .foldLeft(unit)((up, cp) => (up & cp).map(_ => ()))
+    .map(_ => value)
 ```
 :::
 
