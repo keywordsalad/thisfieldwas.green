@@ -457,7 +457,7 @@ This `&` combinator becomes very small. Again, like the `term()` function we no 
 
 ### Alternative parsing with the `parse()` function
 
-The monad abstraction provides _imperative_ execution. This means that we can't implement the `|` combinator using `flatMap()` as it requires both the first and second `parse()` functions to succeed. We need to lean on the `Alternative` typeclass to allow us to try one function but use another if it fails.
+The monad abstraction provides _imperative_ execution. This means that we can't implement the `|` combinator using `flatMap()` as it requires both the first and second `parse()` functions to succeed in sequence. We need to lean on the `Alternative` typeclass to allow us to try one function but use another if it fails.
 
 Let's start at the deciding factor of success or failure of the `parse()` function: `ParseResult`. We need to define a function that allows choice between a successful result and a failed one:
 
@@ -465,35 +465,22 @@ Let's start at the deciding factor of success or failure of the `parse()` functi
 ```scala
 sealed trait ParseResult[A] {
 
-  def orElse(other: => ParseResult[B]): ParseResult[B]
+  def orElse(f: => ParseResult[A]): ParseResult[A] =
+    this match {
+      case _: ParseFailure[_] => f
+      case x: ParseSuccess[_] => x
+    }
 }
 ```
 :::
 
 If our result is `ParseSuccess` then `orElse()` returns the current result. If our result is `ParseFailure` then `orElse()` evaluates the `other` argument and returns that instead, regardless of success or failure. This allows us to try producing one result, use it if it's successful, and otherwise try producing the other result.
 
-With this ability to abstract the selection of success or failure, we can now abstract the same ability for the `parse()` function. First, we need to prepare our `Parse` instances to allow for multiple typeclass declarations by modifying its existing monad instance:
+With this ability to abstract the selection of success or failure, we can now abstract the same ability for the `parse()` function by adding the `Alternative` typeclass trait it to the `extends` clause of `ParseInstances`:
 
 :::{.numberLines}
 ```scala
-object Parse {
-
-  // replace the implicit Monad instance with this
-  implicit val parseInstances: ParseInstances = new ParseInstances()
-
-  class ParseInstances extends Monad[Parse] {
-
-    // put the declarations from the original Monad instance here
-  }
-}
-```
-:::
-
-The reason for this is to allow us to extend more typeclasses while keeping the signature of `parseInstances` simple. Now we can implement `Alternative` easily by adding it to the `extends` clause of `ParseInstances`:
-
-:::{.numberLines}
-```scala
-class ParseInstances extends Monad[Parse] extends Alternative[Parse] {
+class ParseInstances extends Monad[Parse] with Alternative[Parse] {
 
   // monad declarations...
 
