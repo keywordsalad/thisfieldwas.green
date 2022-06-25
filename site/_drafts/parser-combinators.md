@@ -370,7 +370,10 @@ First, let's define a `Functor` instance for `Parse`:
 
 :::{.numberLines}
 ```scala
-implicit val parseFunctor: Functor[Parse] = new Functor[Parse] {
+
+implicit val parseInstances: ParseInstances = new ParseInstances {}
+
+trait ParseInstances extends Functor[Parse] {
 
   override def map[A, B](fa: Parse[A])(f: A => B): Parse[B] =
     cursor => fa(cursor).map(f)
