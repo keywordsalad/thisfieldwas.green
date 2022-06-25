@@ -405,7 +405,7 @@ A monad is a specialization of a functor. We can replace our functor instance of
 
 :::{.numberLines}
 ```scala
-implicit val parseMonad: Monad[Parse] = new Monad[Parse] {
+trait ParseInstances extends Monad[Parse] {
 
   override def flatMap[A, B](fa: Parse[A])(f: A => Parse[B]): Parse[B] =
     cursor =>
@@ -416,20 +416,23 @@ implicit val parseMonad: Monad[Parse] = new Monad[Parse] {
 
   override def tailRecM[A, B](a: A)(f: A => Parse[Either[A, B]]): Parse[B] = {
     @tailrec
-    def recur(a: A, cursor: InputCursor): ParseResult[B] =
-      f(a)(cursor) match {
+    def recur(cursor: InputCursor, parse: Parse[Either[A, B]]): ParseResult[B] = {
+      parse(cursor) match {
         case ParseFailure(failedCursor) => ParseFailure(failedCursor)
         case ParseSuccess(matched, nextCursor) =>
           matched match {
-            case Left(value)  => recur(value, nextCursor)
-            case Right(value) => ParseSuccess(value, nextCursor)
+            case Left(a)  => recur(nextCursor, f(a))
+            case Right(b) => ParseSuccess(b, nextCursor)
           }
       }
-    cursor => recur(a, cursor)
+    }
+    cursor => recur(cursor, f(a))
   }
 
-  override def pure[A](x: A): Parse[A] = cursor => ParseSuccess(x, cursor)
+  override def pure[A](x: A): Parse[A] =
+    cursor => ParseSuccess(x, cursor)
 }
+
 ```
 :::
 
@@ -438,16 +441,19 @@ implicit val parseMonad: Monad[Parse] = new Monad[Parse] {
 * We still get `map()` through a default definition.
 * `pure()` which lifts a result into a `parse()` function that will always be recognize the input without consuming from the cursor.
 * `flatMap()` which allows for sequential execution of one `parse()` function after another.
-* `tailRecM()` which provides _[monadic recursion][]_, but we won't be using this for now.
+* `tailRecM()` which provides _[monadic recursion][]_. We'll be using this later.
 
 Given this monad instance for the `parse()` function, we can now rewrite the `&` combinator:
 
 ```scala
 def &[B](second: Parse[B]): Parse[(A, B)] =
-  this.flatMap(a => second.map(b => (a, b)))
+  for {
+    a <- this
+    b <- second
+  } yield (a, b)
 ```
 
-This `&` combinator becomes very small. Again, like the `term()` function we no longer have to manually thread a cursor through each function: we simply declare how the individual `parse()` functions relate and modify what they collectively produce.
+This `&` combinator becomes very small. Again, like the `term()` function we no longer have to manually thread a cursor through each function: we simply declare how the individual `parse()` functions relate and modify what they collectively produce. Additionally the `parse()` function is now able to participate in the _for comprehension_ syntax sugar as it defines both the `map()` and `flatMap()` operations.
 
 ### Alternative parsing with the `parse()` function
 
