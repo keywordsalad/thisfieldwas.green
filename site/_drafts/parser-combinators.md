@@ -6,7 +6,7 @@ comments: true
 date: 2022-06-20T10:37:30-0700
 tags: functional programming, programming, scala, design patterns, combinators, parsing
 layout: post
-code_repo: https://bitsof.thisfieldwas.green/keywordsalad/parser-combinators/src/branch/main
+code_repo: https://bitsof.thisfieldwas.green/keywordsalad/parser-combinators/src/branch/post
 ---
 
 In my post {{linkedTitle "_posts/2022-06-16-set-function.md"}} I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: _parsing text_.
@@ -534,12 +534,15 @@ def empty[A]: Parse[A] = Alternative[Parse].empty[A]
 
 def oneOf[A](parsers: Seq[Parse[A]]): Parse[A] =
   parsers.foldLeft(empty[A])(_ | _)
+
+def oneOf[A](parsers: Parse[A]*): Parse[A] =
+  oneOf(parsers)
 ```
 :::
 
 Here we have a convenience `empty[A]` parser that leverages the `Alternative` typeclass we implemented earlier. By defining a `oneOf()` function that accepts a sequence of `parse()` functions, we can fold each function to the left starting with an empty parser and alternate each one. The first `parse()` function that matches will return a success result. If none match, then the final failure result will be returned instead.
 
-How do we use this to accept any one of the alphabetic letters? It would be tedious to write a `satisfy()` function for each letter by hand, so instead let's specify the letters we want as a string:
+How do we use this to accept any one of the alphabetic letters? It would be tedious to write a `satisfy()` function for each letter by hand, so instead let's specify the letters we want as a range and map over them:
 
 :::{.numberLines}
 ```scala
@@ -560,7 +563,7 @@ def digits: Parse[Char] =
 We also need a `parse()` function that allows for recognizing zero or many matches and another for one or many:
 
 :::{.numberLines}
-```
+```scala
 def zeroOrMany[A](parse: Parse[A]): Parse[Seq[A]] =
   Monad[Parse].tailRecM(Seq[A]()) { seq =>
     parse.map(a => (seq :+ a).asLeft[Seq[A]]) |
@@ -568,24 +571,22 @@ def zeroOrMany[A](parse: Parse[A]): Parse[Seq[A]] =
   }
 
 def oneOrMany[A](parse: Parse[A]): Parse[Seq[A]] =
-  (parse & zeroOrMany(parse)).map { case (a, seq) => a +: seq }
+    (parse & zeroOrMany(parse)).map { case (first, rest) => first +: rest }
 ```
 :::
 
-Notice how our `zeroOrMany()` function leverages the _monadic recursion_ capability that we didn't need from earlier! This means this function is stack-safe even though it's implemented recursively.
+Notice how our `zeroOrMany()` function leverages the _monadic recursion_ capability from earlier.
 
 Armed with these functions, we can now recognize identifiers!
 
 :::{.numberLines}
 ```scala
-def underscore: Parse[Char] =
-  satisfy(_ = '_')
-
 def identifier: Parse[String] = {
-  val restLetters = alpha | digits | underscore
-  val startsWithAlpha = alpha & zeroOrMany(restLetters)
-  val startsWithUnderscore = underscore & oneOrMany(restLetters)
-  (startsWithAlpha | startsWithUnderscore).map { case (head, rest) => (head +: rest).mkString("") }
+  val underscore = satisfy(_ == '_')
+  val rest = alpha | digit | underscore
+  val alphaHead = alpha & zeroOrMany(rest)
+  val underscoreHead = underscore & oneOrMany(rest)
+    (alphaHead | underscoreHead).map { case (head, rest) => (head +: rest).mkString }
 }
 ```
 :::
@@ -594,12 +595,38 @@ But that seems almost too easy! We better write a bunch of tests to make sure th
 
 :::{.numberLines}
 ```scala
-"identifier" should {
-
+"identifier" can {
+  "recognize a single alpha letter" in {
+    identifier(InputCursor(0, "a banana")) shouldBe ParseSuccess("a", InputCursor(1, "a banana"))
+    identifier(InputCursor(0, "y not")) shouldBe ParseSuccess("y", InputCursor(1, "y not"))
+  }
+  "recognize an alpha letter followed by alphas, digits, and underscores" in {
+    identifier(InputCursor(0, "a_123_Word <-")) shouldBe
+      ParseSuccess("a_123_Word", InputCursor(10, "a_123_Word <-"))
+  }
+  "reject a single underscore" in {
+    identifier(InputCursor(0, "_ rejected")) shouldBe ParseFailure(InputCursor(1, "_ rejected"))
+  }
+  "recognize an underscore followed by alpha digits and underscores" in {
+    identifier(InputCursor(0, "_a_123_Word <-")) shouldBe
+      ParseSuccess("_a_123_Word", InputCursor(11, "_a_123_Word <-"))
+  }
+  "reject a digit" in {
+    identifier(InputCursor(0, "1234")) shouldBe ParseFailure(InputCursor(0, "1234"))
+  }
 }
 ```
 :::
 
+## What's next?
+
+With parser combinators you are able to process text into any structure you need. In this post we only covered tuples, `Seq`s, and `String`s, but parse functions can be written to produce full AST's or even interpret scripted programs.
+
+**Some subjects for next time:**
+
+3. Parsing mathematical infix expressions and calculating their results.
+1. Error handling and recovery, an especially tricky subject!
+2. Stateful parsing, which requires lifting the `parse()` function into a higher-order monad.
 
 [`cats`]: https://typelevel.org/cats/
 [monad]: https://thisfieldwas.green/blog/2022/06/17/imperative-computation/
