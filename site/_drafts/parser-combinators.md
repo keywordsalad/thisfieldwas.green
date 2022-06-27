@@ -371,9 +371,9 @@ First, let's define a `Functor` instance for `Parse`:
 :::{.numberLines}
 ```scala
 
-implicit val parseInstances: ParseInstances = new ParseInstances {}
+implicit val parseInstances: ParseInstances = new ParseInstances()
 
-trait ParseInstances extends Functor[Parse] {
+class ParseInstances extends Functor[Parse] {
 
   override def map[A, B](fa: Parse[A])(f: A => B): Parse[B] =
     cursor => fa(cursor).map(f)
@@ -405,7 +405,7 @@ A monad is a specialization of a functor. We can replace our functor instance of
 
 :::{.numberLines}
 ```scala
-trait ParseInstances extends Monad[Parse] {
+class ParseInstances extends Monad[Parse] {
 
   override def flatMap[A, B](fa: Parse[A])(f: A => Parse[B]): Parse[B] =
     cursor =>
