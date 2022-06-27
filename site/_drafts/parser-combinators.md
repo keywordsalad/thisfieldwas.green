@@ -465,10 +465,10 @@ Let's start at the deciding factor of success or failure of the `parse()` functi
 ```scala
 sealed trait ParseResult[A] {
 
-  def orElse(f: => ParseResult[A]): ParseResult[A] =
+  def orElse(other: => ParseResult[A]): ParseResult[A] =
     this match {
-      case _: ParseFailure[_] => f
-      case x: ParseSuccess[_] => x
+      case _: ParseFailure[_] => other
+      case _: ParseSuccess[_] => this
     }
 }
 ```
