@@ -476,7 +476,7 @@ sealed trait ParseResult[A] {
 
 If our result is `ParseSuccess` then `orElse()` returns the current result. If our result is `ParseFailure` then `orElse()` evaluates the `other` argument and returns that instead, regardless of success or failure. This allows us to try producing one result, use it if it's successful, and otherwise try producing the other result.
 
-With this ability to abstract the selection of success or failure, we can now abstract the same ability for the `parse()` function by adding the `Alternative` typeclass trait it to the `extends` clause of `ParseInstances`:
+With this ability to abstract the selection of success or failure, we can now abstract the same ability for the `parse()` function by adding the `Alternative` typeclass trait to the `extends` clause of `ParseInstances`:
 
 :::{.numberLines}
 ```scala
