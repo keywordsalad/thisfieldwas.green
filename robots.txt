@@ -1,4 +1,5 @@
-# Generated from commit 60fa80c
+# Generated from commit 6370542
 User-agent: *
-Disallow: https://thisfieldwas.green/drafts/*
+Disallow: /drafts
+Disallow: /drafts/*
 Sitemap: https://thisfieldwas.green/sitemap.xml

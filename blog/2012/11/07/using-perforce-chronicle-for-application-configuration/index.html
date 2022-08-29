@@ -6,19 +6,19 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>This Field Was Green - Using Perforce Chronicle for application configuration</title>
-<link rel="canonical" href="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration">
+<link rel="canonical" href="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 
 <meta property="og:site_name" content="">
 <meta property="og:title" content="Using Perforce Chronicle for application configuration">
-<meta property="og:url" content="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration">
+<meta property="og:url" content="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/">
 <meta property="og:description" content="">
 <meta property="og:image:url" content="https://thisfieldwas.green/images/grass-256x256.png">
 
 <meta property="article:published_time" content="2012-11-07T13:54:00-06:00">
   <meta property="article:modified_time" content="2012-11-07T13:54:00-06:00">
   <meta property="article:author" content="Logan McGrath">
-  <meta property="article:tag" content="Perforce">
+  <meta property="article:tag" content="perforce">
   <meta property="article:tag" content="configuration management">
   
 <meta name="twitter:card" content="summary">
@@ -29,9 +29,22 @@
 
 <link rel="stylesheet" href="/css/main.css">
 <script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
 
 </head>
-<body class="post post-full">
+<body>
 
 <header class="page-header">
   <div class="content-bound">
@@ -40,9 +53,9 @@
       <h1 class="logo"><a href="/">This Field Was Green</a></h1>
       <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     </div>
@@ -51,25 +64,53 @@
 
 <main class="page-content">
   <div class="content-bound">
-    <h1 class="post-title">
-  <a href="/blog/2012/11/07/using-perforce-chronicle-for-application-configuration">Using Perforce Chronicle for application configuration</a>
-</h1>
+    <div class="post post-full">
+      <h1 class="post-title">Using Perforce Chronicle for application configuration</h1>
 <div class="post-meta">
   <p class="post-published">
     Posted on November  7, 2012
     by Logan McGrath
     </p>
   <p class="post-tags">
-      Tags: <a class="tag" href="/tags/perforce">Perforce</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>
+      Tags: <a class="tag" href="/tags/perforce">perforce</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>
     </p>
   </div>
-<p>Following Paul Hammant’s post <a href="http://paulhammant.com/2012/07/10/app-config-workflow-using-scm/">App-config workflow using SCM</a> and subsequent <a href="http://paulhammant.com/2012/08/14/app-config-using-git-and-angular/">proof of concept</a> backed by Git, I will show that an app-config application backed by Perforce is possible using <a href="http://www.perforce.com/products/chronicle">Perforce Chronicle</a>.</p>
+
+
+
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">15m 56s</span></p>
+</div>
+<p>Following Paul Hammant’s post <a href="http://paulhammant.com/2012/07/10/app-config-workflow-using-scm/">App-config workflow using SCM</a> and subsequent
+<a href="http://paulhammant.com/2012/08/14/app-config-using-git-and-angular/">proof of concept</a> backed by Git, I will show that an app-config application
+backed by Perforce is possible using <a href="http://www.perforce.com/products/chronicle">Perforce Chronicle</a>.</p>
 <!--more-->
 <h2 id="perforce-and-permissions-for-branches">Perforce and permissions for branches</h2>
-<p><a href="http://en.wikipedia.org/wiki/Perforce">Perforce</a> is an enterprise-class source control management (SCM) system, remarkably similar to Subversion (Subversion was inspired by Perforce :) Perforce is more bulletproof than Subversion in many ways and it’s generally faster. Git does not impose any security constraints or permissions on branches, Perforce gives comprehensive security options allowing you to control access to different branches: for example, development, staging, and production. Subversion, however, can support permissions on branches with some extra configuration (Apache plus mod_dav_svn/mod_dav_authz). For these reasons, Perforce is a better option for storing configuration data than either Git or Subversion.</p>
+<p><a href="http://en.wikipedia.org/wiki/Perforce">Perforce</a> is an enterprise-class source control management (SCM) system,
+remarkably similar to Subversion (Subversion was inspired by Perforce :)
+Perforce is more bulletproof than Subversion in many ways and it’s generally
+faster. Git does not impose any security constraints or permissions on branches,
+Perforce gives comprehensive security options allowing you to control access to
+different branches: for example, development, staging, and production.
+Subversion, however, can support permissions on branches with some extra
+configuration (Apache plus mod_dav_svn/mod_dav_authz). For these reasons,
+Perforce is a better option for storing configuration data than either Git or
+Subversion.</p>
 <h2 id="perforce-cms-as-an-application-server">Perforce CMS as an application server</h2>
-<p><a href="http://www.perforce.com/products/chronicle">Perforce Chronicle</a> is a content management system (CMS) using Perforce as the back-end store for configuration and content. The app-config application is built on top of Chronicle because Perforce does not offer a web view into the depot the way Subversion can through Apache. Branching and maintaining divergence between environments can be managed through the user interface, and Chronicle provides user authentication and management, so access between different configuration files can be restricted appropriately. The INSTALL.txt file that is distributed with Chronicle helps with an easy install, mine being set up to run locally from <code>http://localhost</code>.</p>
-<p>There is a key issue in using Chronicle, however. The system is designed for the management of <em>content</em> and not necessarily arbitrary <em>files</em>. In order to make the app-config application work, I had to add a custom content type and write a module. Configuration and HTML are both plain-text content, so I created a ” Plain Text” content type with the fields <em>title</em> and <em>content</em>:</p>
+<p><a href="http://www.perforce.com/products/chronicle">Perforce Chronicle</a> is a content management system (CMS) using Perforce as
+the back-end store for configuration and content. The app-config application is
+built on top of Chronicle because Perforce does not offer a web view into the
+depot the way Subversion can through Apache. Branching and maintaining
+divergence between environments can be managed through the user interface, and
+Chronicle provides user authentication and management, so access between
+different configuration files can be restricted appropriately. The INSTALL.txt
+file that is distributed with Chronicle helps with an easy install, mine being
+set up to run locally from <code>http://localhost</code>.</p>
+<p>There is a key issue in using Chronicle, however. The system is designed for the
+management of <em>content</em> and not necessarily arbitrary <em>files</em>. In order to make
+the app-config application work, I had to add a custom content type and write a
+module. Configuration and HTML are both plain-text content, so I created a ”
+Plain Text” content type with the fields <em>title</em> and <em>content</em>:</p>
 <ol type="1">
 <li>Go to “Manage” &gt; “Content Types”</li>
 <li>Click “Add Content Type”</li>
@@ -95,7 +136,12 @@
 <span id="cb1-18"><a href="#cb1-18"></a><span class="dt">display.filters.0 </span><span class="ot">=</span><span class="st"> HtmlSpecialChars</span></span></code></pre></div>
 <p>Click “Save”.</p>
 <h2 id="the-config-app">The Config App</h2>
-<p>I’ve borrowed heavily from Paul’s <a href="https://github.com/paul-hammant/app-config-app/blob/master/index.html">app-config HTML page</a>, which uses <a href="http://angularjs.org/">AngularJS</a> to manage the UI and interaction with the server. Where Paul’s app-config app used the <a href="http://kmkeen.com/jshon/">jshon</a> command to encode and decode JSON, Zend Framework has a utility class for encoding, decoding, and pretty-printing JSON, and Chronicle also ships with the <a href="https://github.com/paulgb/simplediff/">simplediff</a> utility for performing diffs with PHP.</p>
+<p>I’ve borrowed heavily from Paul’s <a href="https://github.com/paul-hammant/app-config-app/blob/master/index.html">app-config HTML page</a>, which uses
+<a href="http://angularjs.org/">AngularJS</a> to manage the UI and interaction with the server. Where Paul’s
+app-config app used the <a href="http://kmkeen.com/jshon/">jshon</a> command to encode and decode JSON, Zend
+Framework has a utility class for encoding, decoding, and pretty-printing JSON,
+and Chronicle also ships with the <a href="https://github.com/paulgb/simplediff/">simplediff</a> utility for performing diffs
+with PHP.</p>
 <p>The source JSON configuration is the same, albeit sorted:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode numberSource json numberLines"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">{</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a>  <span class="dt">&quot;bannedNicks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
@@ -110,7 +156,8 @@
 <span id="cb2-11"><a href="#cb2-11"></a>  <span class="dt">&quot;loadMaxPercent&quot;</span><span class="fu">:</span> <span class="st">&quot;88&quot;</span><span class="fu">,</span></span>
 <span id="cb2-12"><a href="#cb2-12"></a>  <span class="dt">&quot;nextShutdownDate&quot;</span><span class="fu">:</span> <span class="st">&quot;8</span><span class="ch">\/</span><span class="st">9</span><span class="ch">\/</span><span class="st">2012&quot;</span></span>
 <span id="cb2-13"><a href="#cb2-13"></a><span class="fu">}</span></span></code></pre></div>
-<p>The <code>index.html</code> page has been modified from the original to support only the basic <em>commit</em> and <em>diffs</em> functionality:</p>
+<p>The <code>index.html</code> page has been modified from the original to support only the
+basic <em>commit</em> and <em>diffs</em> functionality:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode numberSource html numberLines"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1"></a><span class="dt">&lt;!DOCTYPE </span>html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;</span>
 <span id="cb3-2"><a href="#cb3-2"></a>        &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;<span class="dt">&gt;</span></span>
 <span id="cb3-3"><a href="#cb3-3"></a><span class="kw">&lt;html</span> <span class="er">lang</span><span class="ot">=</span><span class="st">&quot;en&quot;</span> <span class="er">xmlns:ng</span><span class="ot">=</span><span class="st">&quot;http://angularjs.org&quot;</span><span class="kw">&gt;</span></span>
@@ -192,13 +239,24 @@
 <li>Select “Assets” &gt; “Plain Text”</li>
 <li>For “Title”, enter “<code>index.html</code>” or “<code>stack_configuration.json</code>”</li>
 <li>Paste in the appropriate “Content”</li>
-<li>Click “URL”, select “Custom”, and enter the same value as “Title” (otherwise, Chronicle will convert underscores to dashes, so be careful!)</li>
+<li>Click “URL”, select “Custom”, and enter the same value as “Title” (otherwise,
+Chronicle will convert underscores to dashes, so be careful!)</li>
 <li>Click “Save”, enter a commit message, then click the next “Save”</li>
-<li>Both assets should be viewable as mangled Chronicle content entries from <code>http://localhost/index.html</code> and <code>http://localhost/stack_configuration.json</code>. <em>You normally will not use these URLs</em>.</li>
+<li>Both assets should be viewable as mangled Chronicle content entries
+from <code>http://localhost/index.html</code>
+and <code>http://localhost/stack_configuration.json</code>. <em>You normally will not use
+these URLs</em>.</li>
 </ol>
-<p>At this point, neither asset is actually usable. Most content is heavily decorated with additional HTML and then displayed within a layout template, but I want both the <code>index.html</code> and <code>stack_configuration.json</code> assets to be viewable as standalone files and provide a REST interface for AngularJS to work against.</p>
+<p>At this point, neither asset is actually usable. Most content is heavily
+decorated with additional HTML and then displayed within a layout template, but
+I want both the <code>index.html</code> and <code>stack_configuration.json</code> assets to be
+viewable as standalone files and provide a REST interface for AngularJS to work
+against.</p>
 <h2 id="come-back-php-all-is-forgiven">Come back PHP! All is forgiven</h2>
-<p>Chronicle is largely built using <a href="http://framework.zend.com/">Zend Framework</a> and makes adding extra modules to the system pretty easy. My module needs to be able to display plaintext assets, update their content using an <code>HTTP POST</code>, and provide diffs between the last commit and the current content.</p>
+<p>Chronicle is largely built using <a href="http://framework.zend.com/">Zend Framework</a> and makes adding extra
+modules to the system pretty easy. My module needs to be able to display
+plaintext assets, update their content using an <code>HTTP POST</code>, and provide diffs
+between the last commit and the current content.</p>
 <p>To create the module, the following paths need to be added:</p>
 <ul>
 <li><code>INSTALL/application/appconfig</code></li>
@@ -233,11 +291,14 @@
 <span id="cb4-25"><a href="#cb4-25"></a><span class="dt">appconfig-operation.defaults.action </span><span class="ot">=</span><span class="st"> index</span></span>
 <span id="cb4-26"><a href="#cb4-26"></a><span class="dt">appconfig-operation.map.action </span><span class="ot">=</span><span class="st"> </span><span class="dv">1</span></span>
 <span id="cb4-27"><a href="#cb4-27"></a><span class="dt">appconfig-operation.map.resource </span><span class="ot">=</span><span class="st"> </span><span class="dv">2</span></span></code></pre></div>
-<p>Add a view script for displaying plaintext assets, <code>INSTALL/application/appconfig/views/scripts/index/index.phtml</code>:</p>
+<p>Add a view script for displaying plaintext
+assets, <code>INSTALL/application/appconfig/views/scripts/index/index.phtml</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">&lt;?</span><span class="op">=</span><span class="va">$this</span>-&gt;entry-&gt;getValue(<span class="st">&#39;content&#39;</span>) <span class="kw">?&gt;</span></span></code></pre></div>
-<p>Add a view script for displaying diffs, <code>INSTALL/application/appconfig/views/scripts/index/diffs.phtml</code>:</p>
+<p>Add a view script for displaying
+diffs, <code>INSTALL/application/appconfig/views/scripts/index/diffs.phtml</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1"></a><span class="op">&lt;</span>pre<span class="op">&gt;&lt;</span><span class="ot">?</span><span class="op">=</span><span class="va">$this</span>-&gt;diffs <span class="kw">?&gt;</span><span class="op">&lt;/</span>pre<span class="op">&gt;</span></span></code></pre></div>
-<p>And a controller at <code>INSTALL/application/appconfig/controllers/IndexController.phtml</code>:</p>
+<p>And a controller
+at <code>INSTALL/application/appconfig/controllers/IndexController.phtml</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">&lt;?php</span></span>
 <span id="cb7-2"><a href="#cb7-2"></a></span>
 <span id="cb7-3"><a href="#cb7-3"></a><span class="fu">defined</span>(<span class="st">&#39;LIBRARY_PATH&#39;</span>) <span class="op">or</span> <span class="fu">define</span>(<span class="st">&#39;LIBRARY_PATH&#39;</span><span class="ot">,</span> <span class="fu">dirname</span>(<span class="cn">__DIR__</span>))<span class="ot">;</span></span>
@@ -324,99 +385,157 @@
 <span id="cb7-84"><a href="#cb7-84"></a>    }</span>
 <span id="cb7-85"><a href="#cb7-85"></a>}</span></code></pre></div>
 <h2 id="angularjs">AngularJS</h2>
-<p>After all files are in place, Chronicle needs to be notified that the new module exists by going to “Manage” &gt; “Modules”, where the “Appconfig” module will be listed if all goes well :) Both assets will now be viewable from <code>http://localhost/appconfig/index.html</code> and <code>http://localhost/appconfig/stack_configuration.json</code>. AngularJS’ <a href="http://code.angularjs.org/0.9.19/docs-0.9.19/#!/api/angular.service.resource">resource service</a> is used in <code>index.html</code> to fetch stack_configuration.json and post changes back.</p>
-<p>From <code>http://localhost/appconfig/index.html</code>, the data from stack_configuration.json is loaded into the form:</p>
-<figure id="img-config-form-aside" class="image">
-  <p class="content">
-    <a href="/images/app-config/start.png" class="image-link">
-      <img src="/images/app-config/start.png"
-        id="img-config-form"
-        
-        >
-    </a>
-  </p>
-  
+<p>After all files are in place, Chronicle needs to be notified that the new module
+exists by going to “Manage” &gt; “Modules”, where the “Appconfig” module will be
+listed if all goes well :) Both assets will now be viewable
+from <code>http://localhost/appconfig/index.html</code>
+and <code>http://localhost/appconfig/stack_configuration.json</code>.
+AngularJS’ <a href="http://code.angularjs.org/0.9.19/docs-0.9.19/#!/api/angular.service.resource">resource service</a> is used in <code>index.html</code> to fetch
+stack_configuration.json and post changes back.</p>
+<p>From <code>http://localhost/appconfig/index.html</code>, the data from
+stack_configuration.json is loaded into the form:</p>
+<figure id="img-config-form" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/app-config/start.png" class="image-link">
+        <img src="/images/app-config/start.png" id="img-config-form-img">
+      </a>
+    </p>
+    
+  </div>
 </figure>
-<p>Edits to stack_configuration.json can be made using the form, and the diffs viewed by clicking on “View Diffs”:</p>
-<figure id="img-config-diffs-aside" class="image">
-  <p class="content">
-    <a href="/images/app-config/diffs.png" class="image-link">
-      <img src="/images/app-config/diffs.png"
-        id="img-config-diffs"
-        
-        >
-    </a>
-  </p>
-  
+<p>Edits to stack_configuration.json can be made using the form, and the diffs
+viewed by clicking on “View Diffs”:</p>
+<figure id="img-config-diffs" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/app-config/diffs.png" class="image-link">
+        <img src="/images/app-config/diffs.png" id="img-config-diffs-img">
+      </a>
+    </p>
+    
+  </div>
 </figure>
-<p>The changes can be saved by entering a commit message and clicking “Commit Changes”. After which, clicking “View Diffs” will show no changes:</p>
-<figure id="img-config-commit-aside" class="image">
-  <p class="content">
-    <a href="/images/app-config/diffs-after-commit.png" class="image-link">
-      <img src="/images/app-config/diffs-after-commit.png"
-        id="img-config-commit"
-        
-        >
-    </a>
-  </p>
-  
+<p>The changes can be saved by entering a commit message and clicking “Commit
+Changes”. After which, clicking “View Diffs” will show no changes:</p>
+<figure id="img-config-commit" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/app-config/diffs-after-commit.png" class="image-link">
+        <img src="/images/app-config/diffs-after-commit.png" id="img-config-commit-img">
+      </a>
+    </p>
+    
+  </div>
 </figure>
-<p>To show that edits have in fact been made to stack_configuration.json, go to <code>http://localhost/stack_configuration.json</code>, select “History” and click on ” History List”:</p>
-<figure id="img-config-history-aside" class="image">
-  <p class="content">
-    <a href="/images/app-config/history.png" class="image-link">
-      <img src="/images/app-config/history.png"
-        id="img-config-history"
-        
-        >
-    </a>
-  </p>
-  
+<p>To show that edits have in fact been made to stack_configuration.json, go
+to <code>http://localhost/stack_configuration.json</code>, select “History” and click on ”
+History List”:</p>
+<figure id="img-config-history" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/app-config/history.png" class="image-link">
+        <img src="/images/app-config/history.png" id="img-config-history-img">
+      </a>
+    </p>
+    
+  </div>
 </figure>
 <p>Chronicle also provides an interface for viewing diffs between revisions:</p>
-<figure id="img-config-revisions-aside" class="image">
-  <p class="content">
-    <a href="/images/app-config/history-diffs.png" class="image-link">
-      <img src="/images/app-config/history-diffs.png"
-        id="img-config-revisions"
-        
-        >
-    </a>
-  </p>
-  
+<figure id="img-config-revisions" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/app-config/history-diffs.png" class="image-link">
+        <img src="/images/app-config/history-diffs.png" id="img-config-revisions-img">
+      </a>
+    </p>
+    
+  </div>
 </figure>
 <h2 id="disk-usage">Disk Usage</h2>
-<p>Something to remember in using Chronicle is that each resource requested from Perforce is written to disk before being served to the client. This means that for each request to <code>index.html</code>, Chronicle allocates a new Perforce workspace, checks out the associated file, serves it to the client, then deletes the file and the workspace at the end of the request. This allocate/checkout/serve/delete cycle executes for stack_configuration.json and every other resource in the system.</p>
+<p>Something to remember in using Chronicle is that each resource requested from
+Perforce is written to disk before being served to the client. This means that
+for each request to <code>index.html</code>, Chronicle allocates a new Perforce workspace,
+checks out the associated file, serves it to the client, then deletes the file
+and the workspace at the end of the request. This allocate/checkout/serve/delete
+cycle executes for stack_configuration.json and every other resource in the
+system.</p>
 <h2 id="todo"><span class="citation" data-cites="TODO">@TODO</span></h2>
 <h3 id="security">Security!</h3>
-<p>There’s one major flaw with the appconfig module: it performs zero access checks. By default, Chronicle can be configured to disallow anonymous access by going to “Manage” &gt; “Permissions” and deselecting all permissions for ” anonymous” and “members”. Logging out and attempting to access either <code>http://localhost/appconfig/stack_configuration.json</code> or <code>http://localhost/appconfig/index.html</code> will now give an error page and prompt you to log in. Clicking “New User” will also give an error, as anonymous users don’t have the permission to create users.</p>
-<p>Access rights on content are checked by the content module, but are also hard-coded in the associated controllers as IF-statements. A better solution will be required for proper access management in the appconfig module.</p>
+<p>There’s one major flaw with the appconfig module: it performs zero access
+checks. By default, Chronicle can be configured to disallow anonymous access by
+going to “Manage” &gt; “Permissions” and deselecting all permissions for ”
+anonymous” and “members”. Logging out and attempting to access
+either <code>http://localhost/appconfig/stack_configuration.json</code>
+or <code>http://localhost/appconfig/index.html</code> will now give an error page and
+prompt you to log in. Clicking “New User” will also give an error, as anonymous
+users don’t have the permission to create users.</p>
+<p>Access rights on content are checked by the content module, but are also
+hard-coded in the associated controllers as IF-statements. A better solution
+will be required for proper access management in the appconfig module.</p>
 <h3 id="better-integration">Better integration</h3>
-<p>Chronicle’s content module provides JSON integration for most of its actions, but these mostly exist to support the <a href="http://dojotoolkit.org/">Dojo Toolkit</a>-enabled front-end. Integrating with these actions over JSON requires detailed knowledge of Chronicle’s form structures.</p>
-<p>Chronicle has some nice interfaces for viewing diffs. If I could call those up from <code>index.html</code> I would be major happy :)</p>
+<p>Chronicle’s content module provides JSON integration for most of its actions,
+but these mostly exist to support the <a href="http://dojotoolkit.org/">Dojo Toolkit</a>-enabled front-end.
+Integrating with these actions over JSON requires detailed knowledge of
+Chronicle’s form structures.</p>
+<p>Chronicle has some nice interfaces for viewing diffs. If I could call those up
+from <code>index.html</code> I would be major happy :)</p>
 <h3 id="automatic-creation-of-plaintext-content-type">Automatic creation of plaintext content type</h3>
-<p>Before the appconfig module is usable, the plaintext content type has to be created. I would like to automate creation of the plaintext content type when the module is first enabled.</p>
+<p>Before the appconfig module is usable, the plaintext content type has to be
+created. I would like to automate creation of the plaintext content type when
+the module is first enabled.</p>
 <h3 id="making-applications-aware-of-updates-to-configuration">Making applications aware of updates to configuration</h3>
-<p>When stack_configuration.json is updated, there’s no way to notify applications to the change, and no interface provided so they may poll for changes. I’m not entirely sure at this point what an appropriate solution would look like. In order to complete the concept, I’d first have to create a client app dependent on that configuration.</p>
+<p>When stack_configuration.json is updated, there’s no way to notify applications
+to the change, and no interface provided so they may poll for changes. I’m not
+entirely sure at this point what an appropriate solution would look like. In
+order to complete the concept, I’d first have to create a client app dependent
+on that configuration.</p>
 <h3 id="better-interfaces-for-manipulating-plaintext-assets">Better interfaces for manipulating plaintext assets</h3>
-<p>I had to fiddle with <code>index.html</code> quite a bit. This basically involved editing a local copy of <code>index.html</code>, then pasting the entire contents into the associated form in Chronicle. I have not tried checking out <code>index.html</code> directly from Perforce, and I imagine that any edits would need to be made within Chronicle. GitHub offers an in-browser raw editor, and something like that would be real handy in Chronicle.</p>
+<p>I had to fiddle with <code>index.html</code> quite a bit. This basically involved editing a
+local copy of <code>index.html</code>, then pasting the entire contents into the associated
+form in Chronicle. I have not tried checking out <code>index.html</code> directly from
+Perforce, and I imagine that any edits would need to be made within Chronicle.
+GitHub offers an in-browser raw editor, and something like that would be real
+handy in Chronicle.</p>
 <h3 id="handling-conflicts">Handling conflicts</h3>
-<p>There is no logic in the appconfig module to catch conflicts if there are two users editing the same file. Conflicts are detectable because an exception is thrown if there is a conflict, but I’m not sure what the workflow for resolution is in Chronicle terms, or how to integrate with it. Who wins?</p>
+<p>There is no logic in the appconfig module to catch conflicts if there are two
+users editing the same file. Conflicts are detectable because an exception is
+thrown if there is a conflict, but I’m not sure what the workflow for resolution
+is in Chronicle terms, or how to integrate with it. Who wins?</p>
 <h3 id="working-with-branches">Working with branches</h3>
-<p>I did not take the time to see how Chronicle manages branches. I will need to verify that Chronicle and the appconfig module can work with development, staging, and production branches, with maintained divergence. For example, we’re still trying to figure out how to attach visual clients like P4V to the repository and work independently of Chronicle.</p>
+<p>I did not take the time to see how Chronicle manages branches. I will need to
+verify that Chronicle and the appconfig module can work with development,
+staging, and production branches, with maintained divergence. For example, we’re
+still trying to figure out how to attach visual clients like P4V to the
+repository and work independently of Chronicle.</p>
 <h2 id="kudos">Kudos</h2>
-<p>I would like to thank the guys at Perforce for their assistance and answering all my questions as I worked with Chronicle, especially Randy Defauw.</p>
+<p>I would like to thank the guys at Perforce for their assistance and answering
+all my questions as I worked with Chronicle, especially Randy Defauw.</p>
 <h2 id="update-06272021">Update 06/27/2021</h2>
 <p>This is the first blog post I have ever written. Paul Hammant, who I had met in other contexts previously, happened to be working out of the ThoughtWorks office in Dallas, TX the very same day I started at ThoughtWorks. He asked me if I knew PHP, which I did, and set me off to explore Perforce Chronicle as a solution for managing configuration.</p>
 <p>I had never written professionally before or been aware of configuration management: I was very lucky to explore a passion space that Paul has worked within for a very long time. I don’t believe I ever gave him a proper thanks. He gave me an opportunity that probably not a lot of people get in their early careers, and it was an invaluable experience that I learned a lot from and think about fairly often.</p>
 <p>The other posts in this series were also written with guidance from Paul:</p>
 <ul>
-<li><a href="/blog/2012/11/16/scm-backed-application-configuration-with-perforce">SCM-Backed Application Configuration with Perforce</a></li>
-<li><a href="/blog/2012/11/20/app-config-app-in-action">App-Config-App in Action</a></li>
-<li><a href="/blog/2012/11/28/promoting-changes-with-app-config-app">Promoting changes with App-Config-App</a></li>
+<li><a href="/blog/2012/11/16/scm-backed-application-configuration-with-perforce/">SCM-Backed Application Configuration with Perforce</a></li>
+<li><a href="/blog/2012/11/20/app-config-app-in-action/">App-Config-App in Action</a></li>
+<li><a href="/blog/2012/11/28/promoting-changes-with-app-config-app/">Promoting changes with App-Config-App</a></li>
 </ul>
 <p>The subject of configuration as described in these posts is still fresh even after nearly ten years. Even now configuration as code still doesn’t have a perfect solution, though products have become available that make managing configuration easier. Changing configuration in a running process as a general solution remains elusive, as supporting it imposes a lot of constraints on design.</p>
 <p>On a more personal note: today is Pride. This is the first Pride I’ve ever participated in and only in the last two years have I felt safe enough to come out in circles beyond close friends. I was out to Paul but only as a detail I confided in passing. When I was working with Paul on these posts he advised that I should consider relocating to the Bay Area. In January, 2013, I moved to San Francisco. Discovering my own life as a <em>person</em> was set by Paul being brave enough to share a deeply personal piece of advice. I’m so thankful he said it, and I’m glad I listened.</p>
+
+    </div>
+    <div class="page-comments">
+  <p><strong>Please share with me your thoughts and feedback!</strong></p>
+  <script>
+    var remark_config = {
+      host: 'https://remark42.thisfieldwas.green',
+      site_id: 'thisfieldwas.green',
+      url: 'https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/'
+    }
+  </script>
+  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
+  <div id="remark42"></div>
+</div>
 
   </div>
 </main>
@@ -425,9 +544,9 @@
   <div class="content-bound">
     <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
@@ -435,8 +554,7 @@
       <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/4679983/site/_posts/2012-11-07-using-perforce-chronicle-for-application-configuration.md">2012-11-07-using-perforce-chronicle-for-application-configuration.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/4679983">4679983</a>.</p>
-    </div>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/7b93a82/site/_posts/2012-11-07-using-perforce-chronicle-for-application-configuration.md">2012-11-07-using-perforce-chronicle-for-application-configuration.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/7b93a82">7b93a82</a>.</p>
   </div>
 </footer>
 

@@ -8,14 +8,27 @@
 <meta name="robots" content="noindex">
 <meta name="googlebot" content="noindex">
 <title>This Field Was Green - These Drafts Are Green</title>
-<link rel="canonical" href="https://thisfieldwas.green/drafts">
+<link rel="canonical" href="https://thisfieldwas.green/drafts/">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 
 <link rel="stylesheet" href="/css/main.css">
 <script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
 
 </head>
-<body class="default">
+<body>
 
 <header class="page-header">
   <div class="content-bound">
@@ -24,9 +37,9 @@
       <h1 class="logo"><a href="/">This Field Was Green</a></h1>
       <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     </div>
@@ -35,18 +48,34 @@
 
 <main class="page-content">
   <div class="content-bound">
-    
+    <div class="">
+      
 <h1 class="page-title">These Drafts Are Green</h1>
 Here you can find all my drafts:
-<ul>
+<ul class="post-list">
   
   <li>
-    <a href="/drafts/copilot-as-a-hot-butter-knife">GitHub Copilot as a hot butter knife</a> - December 13, 2021
-  </li>
+    <p class="post-title">
+      <strong><a href="/drafts/parser-combinators/">Parser Combinators</a></strong>
+    </p>
+    <div class="post-meta">
+  <p class="post-published">
+    Drafted on June 20, 2022
+    by Logan McGrath
+    </p>
+  <p class="post-tags">
+      Tags: <a class="tag" href="/tags/functional-programming">functional programming</a>, <a class="tag" href="/tags/programming">programming</a>, <a class="tag" href="/tags/scala">scala</a>, <a class="tag" href="/tags/design-patterns">design patterns</a>, <a class="tag" href="/tags/combinators">combinators</a>, <span class="tag">parsing</span>
+    </p>
+  </div>
+
   
+  </li>
 </ul>
 
 
+
+    </div>
+    
 
   </div>
 </main>
@@ -55,9 +84,9 @@ Here you can find all my drafts:
   <div class="content-bound">
     <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
@@ -66,7 +95,6 @@ Here you can find all my drafts:
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
     <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/a96d7a9/site/drafts.html">drafts.html</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/a96d7a9">a96d7a9</a>.</p>
-    </div>
   </div>
 </footer>
 

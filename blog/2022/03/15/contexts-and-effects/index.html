@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>This Field Was Green - Embracing Nondeterminism Part I: Contexts and Effects</title>
+<link rel="canonical" href="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/">
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
+
+<meta property="og:site_name" content="">
+<meta property="og:title" content="Embracing Nondeterminism Part I: Contexts and Effects">
+<meta property="og:url" content="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/">
+<meta property="og:description" content="Ever wonder what the purpose of that map() method was on so many objects? It&#39;s not just for arrays! I wrote about its use as an abstraction, and hopefully you&#39;ll find it useful.">
+<meta property="og:image:url" content="https://thisfieldwas.green/images/tags/functional-programming/functional-grass-512x512.png">
+<meta property="og:image:alt" content="Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.">
+<meta property="article:published_time" content="2022-03-15T09:20:00-07:00">
+  <meta property="article:modified_time" content="2022-06-05T13:21:27-07:00">
+  <meta property="article:author" content="Logan McGrath">
+  <meta property="article:tag" content="functional programming">
+  <meta property="article:tag" content="programming">
+  <meta property="article:tag" content="scala">
+  <meta property="article:tag" content="design patterns">
+  <meta property="article:tag" content="contexts">
+  
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@thisgreenfield">
+<meta name="twitter:title" content="Embracing Nondeterminism Part I: Contexts and Effects">
+<meta name="twitter:description" content="Ever wonder what the purpose of that map() method was on so many objects? It&#39;s not just for arrays! I wrote about its use as an abstraction, and hopefully you&#39;ll find it useful.">
+<meta name="twitter:image" content="https://thisfieldwas.green/images/tags/functional-programming/functional-grass-512x512.png">
+
+<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/posts/embracing-nondeterminism-part-1.css"><script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode","#img-tree-functor .content",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
+
+</head>
+<body>
+
+<header class="page-header">
+  <div class="content-bound">
+    <div class="logo-icon"><a href="/"></a></div>
+    <div class="logo-nav">
+      <h1 class="logo"><a href="/">This Field Was Green</a></h1>
+      <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
+</nav>
+
+    </div>
+  </div>
+</header>
+
+<main class="page-content">
+  <div class="content-bound">
+    <div class="post post-full">
+      <h1 class="post-title">Embracing Nondeterminism Part I: Contexts and Effects</h1>
+<div class="post-meta">
+  <p class="post-published">
+    Posted on March 15, 2022
+    by Logan McGrath
+    </p>
+  <p class="post-updated">
+      Last updated on June  5, 2022
+    </p>
+  <p class="post-tags">
+      Tags: <a class="tag" href="/tags/functional-programming">functional programming</a>, <a class="tag" href="/tags/programming">programming</a>, <a class="tag" href="/tags/scala">scala</a>, <a class="tag" href="/tags/design-patterns">design patterns</a>, <a class="tag" href="/tags/contexts">contexts</a>
+    </p>
+  </div>
+
+<div class="post-thumbnail">
+  <a href="/images/tags/functional-programming/functional-grass-128x128.png">
+    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Embracing Nondeterminism Part I: Contexts and Effects" width="128" height="128">
+  </a>
+</div>
+
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">45m 2s</span></p>
+</div>
+<p>Have you ever received an unexpected <code>null</code> reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?</p>
+<!--more-->
+<blockquote>
+<p><strong>This post is part of a series:</strong></p>
+<ol type="1">
+<li><strong>Embracing Nondeterminism Part I: Contexts and Effects</strong></li>
+<li><a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a></li>
+<li><a href="/blog/2022/06/17/imperative-computation/">Embracing Nondeterminism Part III: Imperative Computation</a></li>
+</ol>
+</blockquote>
+<p><em>The code that accompanies this post may be found <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1">here</a>.</em></p>
+<p>Significant portions of program logic exist to address specific cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it’s running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a <code>null</code> reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.</p>
+<p><em><a href="https://en.wikipedia.org/wiki/Defensive_programming">Defensive programming</a></em> as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on <em><a href="https://en.wikipedia.org/wiki/Tacit_knowledge">tacit knowledge</a></em> and imposes complex code to handle and recover from them. <em>This complex code draws focus from writing the business logic that drives the value of programs</em>.</p>
+<p>In this post I will provide <strong>effects</strong> as a model for characterizing nondeterminism and unknowns in programs. I will introduce a <strong>design pattern</strong> to abstract complexity using this model.</p>
+<h2 id="conventions">Conventions</h2>
+<p><strong>This post assumes familiarity with Scala code</strong>. I will provide Scala code for concrete examples and note where they are different. Abstract examples will employ notation that looks like <strong>“math”</strong>.</p>
+<p>Terminology will leverage common functional programming vocabulary. Terms when they are first introduced will be <strong>bold</strong> and important references are <em>italicized</em>. Some terminology is provided up-front, other terms will be defined inline either explicitly or by context.</p>
+<p>Concepts and phrases that are important are <em>italicized</em>.</p>
+<p>Where there is conceptual overlap with object oriented programming, I will leverage those terms to drive the intent behind abstractions.</p>
+<h3 id="how-to-read-math">How to read “math”</h3>
+<p><strong>Uppercase letters</strong> and words starting with uppercase letters are names of <em>types</em>. For example <strong><code>A</code></strong> reads as <em>“A”</em> and means <em>“type of A”</em>.</p>
+<p><strong>Lowercase letters</strong> and words starting with a lowercase letter are functions or variables. For example <strong><code>f</code></strong> reads as <em>“f”</em> and means <em>“function f”</em> or <em>“variable f”</em>.</p>
+<p><strong><code>A =&gt; B</code></strong> reads as <em>“A to B”</em> and means <em>“function type of input type A mapped to output type B”</em>. Function types can map any kind of input type to any kind of output type, including other function types as in <code>(A =&gt; B) =&gt; C</code> or <code>A =&gt; B =&gt; C</code>. Note that the <code>=&gt;</code> operator is right-associative, such that <code>A =&gt; (B =&gt; C)</code> means the same thing as <code>A =&gt; B =&gt; C</code>.</p>
+<p><strong><code>F[_]</code></strong> reads as <em>“context F of underscore”</em> or <em>“context F”</em>. Contexts are a type constructor<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> that take types as an argument and produce another type. They become proper types when their <em>underscore</em> is replaced by another type, as in <strong><code>F[A]</code></strong> or <em>“context F of A”</em>.</p>
+<p><strong><code>()</code></strong> a pair of parentheses, reads as <em>“unit”</em> and may be treated as <em>“nothing”</em> or <em>“void”</em> as you really can’t do much with it. It is both a type and a solitary value.</p>
+<p><strong><code>f: A =&gt; B</code></strong> reads as <em>“f is A to B”</em> or <em>“function f has type of A mapped to B”</em>.</p>
+<p><strong><code>fa: F[A]</code></strong> reads as <em>“fa is F of A”</em> or <em>“variable fa has type of context F of A”</em>.</p>
+<p><strong><code>h = g ∘ f</code></strong> reads as <em>“h is g after f”</em> or <em>“h is defined as function g composed after function f”</em>. Composition is described in <a href="#terminology">Terminology</a>.</p>
+<h3 id="terminology">Terminology</h3>
+<p><strong>Functors</strong> are a programming pattern explored in this post. Think of them as an analog of a <strong>design pattern</strong> found in object-oriented programming.</p>
+<p><strong>Expressions</strong> are values that are described by some type <code>A</code>.</p>
+<p><strong>Functions</strong> are a <em>special case</em> of expressions that map some type <code>A</code> to some type <code>B</code>. They are described by function type notation <code>A =&gt; B</code>.</p>
+<p><strong>Terms</strong> are identifiers naming unitary or indivisible variables and types.</p>
+<ul>
+<li><p>For example, in the declaration:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode .scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span></span></code></pre></div>
+<p>The variable terms are <code>fa</code> and <code>f</code>, and the type terms are <code>A</code> and <code>B</code>.</p></li>
+</ul>
+<p><strong>Contexts</strong> describe circumstances within which their contents are found. They are noted using <code>F[_]</code> when their contents are unspecified, and <code>F[A]</code> when their contents are known to be of type <code>A</code>. You can think of <code>F[A]</code> as a <em>box</em> that might contain some <code>A</code>. They are more concretely defined in later sections</p>
+<p><strong>Lifting</strong> describes injecting a term <code>A</code> into a context <code>F[_]</code> such that <code>lift: A =&gt; F[A]</code>. Think of lifting as if you were to lift some <code>A</code> into the box of <code>F[_]</code>.</p>
+<p>A <strong>Lifted</strong> term or expression already has the form <code>F[A]</code>, or an <code>A</code> that is already in a box.</p>
+<p><strong>Lowering</strong> describes extracting a term <code>A</code> from a context <code>F[A]</code> such that <code>lower: F[A] =&gt; A</code>. Lowering is like taking the <code>A</code> out of the box.</p>
+<p><strong>Composition</strong> describes chaining the output of a function <code>f: A =&gt; B</code> to the input of a function <code>g: B =&gt; C</code> such that a new function <code>h: A =&gt; C</code> may defined as <code>h = g ∘ f</code>. The ring operator <code>∘</code> performs this chaining, and the odd <em>after</em> is because if you apply the literal composition to some argument <code>x</code>, as in <code>(g ∘ f)(x)</code>, this means that <code>x</code> would be applied first to <code>f</code> and then <code>g</code> is applied <em>after</em> <code>f</code>, working from right to left.</p>
+<ul>
+<li><p>This algebraic notation demonstrates how function <code>g</code> is applied <em>after</em> function <code>f</code> is applied to the argument <code>x</code>:</p>
+<pre><code>h(x) = g(f(x))</code></pre></li>
+<li><p>Compare with this definition in Scala which declares the types of the functions:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> f<span class="op">:</span> A <span class="op">=&gt;</span> B <span class="op">=</span> _</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> g<span class="op">:</span> B <span class="op">=&gt;</span> C <span class="op">=</span> _</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> h<span class="op">:</span> A <span class="op">=&gt;</span> C <span class="op">=</span> x <span class="op">=&gt;</span> <span class="fu">g</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>x<span class="op">))</span></span></code></pre></div></li>
+</ul>
+<h2 id="complexity-in-programming">Complexity in programming</h2>
+<h3 id="pure-and-impure-functions">Pure and impure functions</h3>
+<p>Programming broadly consists of two categories of functions:</p>
+<ol type="1">
+<li><strong>Pure functions</strong> which produce the same result for the same argument, for <em>all</em> arguments. They are <strong>deterministic</strong>.</li>
+<li><strong>Impure functions</strong> which produce different results for the same argument, for <em>any</em> argument. They are <strong>nondeterministic</strong>.</li>
+</ol>
+<p>Nondeterminism arises from <em>outputs dependent on factors other than input</em> to a function. These factors are referred to as <strong>side effects</strong>. <strong>Implicit input</strong> as a side effect may affect the output of a function, but in addition a function may produce side effects as <strong>implicit output</strong>.</p>
+<p>Both categories of functions may produce their results in <strong>unknown quantities</strong> along any measurable dimension, such as presence, length, or validity of their result. <em>These quantities require specific knowledge of a given input in order to be known with certainty in the result.</em> Unknown quantities are categorically nondeterministic in impure functions as they are particularly influenced by side effects.</p>
+<h3 id="manifesting-complexity">Manifesting complexity</h3>
+<h4 id="nondeterminism">Nondeterminism</h4>
+<p>Nondeterminism as a dependence on factors other than initial state and input arises when a function <code>f: A =&gt; B</code> maps to a different member of <code>B</code> for any number of times <code>f</code> has been applied to the same member of <code>A</code>. <em>This means that <code>f</code> is influenced by implicit input that occurs independent of its type signature.</em></p>
+<p>An extreme example of a nondeterministic function is a true random number generator <code>rng: () =&gt; Int</code> as it maps the solitary unit value <code>()</code> to all members of type <code>Int</code>. This mapping is influenced by some side effect or <em>implicit input</em> which is external to the function’s type signature of <code>() =&gt; Int</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb4"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">rng</span><span class="op">())</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">// 1729</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">rng</span><span class="op">())</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">// 87539319</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">rng</span><span class="op">())</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">// -2147483648</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">rng</span><span class="op">())</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">// 1337</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">rng</span><span class="op">())</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">// 42</span></span></code></pre></div>
+</div>
+<blockquote>
+<p>Psuedo-random number generators (PRNG’s) are deterministic in that the initial seed state dictates predictable output over time, but only if every mutation of this state is known up to the point of the current call site. In practice, they are considered nondeterministic.</p>
+</blockquote>
+<p>Nondeterminism is significant in that operations may be unpredictable, and that no operation in particular may be reproducible.</p>
+<h4 id="unknown-quantities">Unknown quantities</h4>
+<p>Unknown quantities along measurable dimensions arise in functions returning types such as lists, potentially <code>null</code> references, or validation results. These outputs have unknown length, presence, and validity respectively, and require specific handling for undesired cases. <em>Even pure functions produce results having unknown quantities.</em></p>
+<ul>
+<li>A simple example is a function <code>toBits: Int =&gt; List[Boolean]</code> where the known quantity of <code>Boolean</code> bits returned requires specific knowledge of the input argument.</li>
+<li>Hashmap lookups may or may not return a value associated to a given key. Unless you have specific knowledge of the key used to lookup a value and of the contents of the map itself, you don’t have any guarantee whether the value actually exists.</li>
+</ul>
+<p>Both of these operations are pure functions and are deterministic, but their results are <em>contextualized</em> by length and presence. Any unknown quantity along some measurable dimension requires specific handling in code. This means that in addition to writing code that handles a <em>desired case</em> of an operation, code must be specifically written for each dimension that exhibits unknown quantities.</p>
+<p>Side effects as <em>implicit output</em> include <strong>faults</strong> such as the <em>divide by zero</em> error and thrown exceptions. They impose an additional layer of protection to prevent or recover from them. Exceptions are categorically nondeterministic as there is no single input that guarantees that an exception will never be thrown, as some side effect as an implicit input may influence their production.</p>
+<blockquote>
+<p>In contrast with most faults, a <em>divide by zero</em> error only occurs if the input divisor is <code>0</code>. The additional check for <code>0</code> that division sometimes requires is not considered complexity in practice.</p>
+<p>Running out of memory will throw an exception even in pure functions. Exceptions are truly nondeterministic and you must choose when and how to handle their cases. Hopefully you know ahead of time where you will need to do so.</p>
+</blockquote>
+<p>In addition to being side effects as implicit output, exceptions may be reasoned about as a <em>dimension of success or failure</em> in an operation. This quantity is unknowable ahead of time and highly dependent upon implicit input.</p>
+<p>Concurrency and asynchronous operations are driven entirely by side effects, most particularly in the dimension of time. Asynchronous operations have an <em>unknown temporal quantity</em> that imposes costly specific handling, as execution must wait for operations to complete. Support for asynchronous operations requires runtimes to manage limited computing resources and scheduling of tasks, forming an entire system within a program.</p>
+<h4 id="relating-nondeterminism-and-unknown-quantities">Relating nondeterminism and unknown quantities</h4>
+<p>Side effects enable nondeterminism which influences unknown quantities in the results of operations. <em>Undesired cases</em> along dimensions such as length, presence, validity, success, and time require specific handling in addition to the code to handle the <em>desired cases</em> of operations. <em>This specific handling creates complexity and draws engineering focus away from business logic.</em> Yet side effects drive the business value of programs in the real world, which requires that we embrace nondeterminism and unknown quantities.</p>
+<p><em>How might complexity in programs be reduced if they must also be driven by side effects?</em></p>
+<h3 id="implied-complexity">Implied complexity</h3>
+<p>Given a function <code>f: A =&gt; B</code> and another <code>g: B =&gt; C</code>: a third function <code>h: A =&gt; C</code> may be composed of <code>h = g ∘ f</code> or <em>h is g after f</em>. Programs may be modeled as a function <code>program: Input =&gt; Output</code>, where <code>program</code> is composed of innumerable smaller functions, together in concert building the necessary mappings to generate the desired program output. However composition is not so simple in programs as the results of some operations may not produce the desired input for subsequent operations.</p>
+<p>Functions in real world programs must internally interact with implicit inputs and outputs <em>not present</em> in the program’s signature of <code>program: Input =&gt; Output</code>. An employee payroll system for example must make database queries and integrate with banks. These implicit inputs and outputs have <strong>effects</strong> which determine how their associated functions produce their desired outputs. For example, database queries return nondeterministic responses of <em>unknown length</em> and <em>an error might occur</em> when performing a direct deposit. <em>These effects determine how and whether payday is successfully produced.</em></p>
+<p>Errors and unknown quantities as <em>effects</em> of these operations are opaque in functions modeled as simple input to output, as in <code>getEmployee(): Int =&gt; Employee</code>. The signature of this function requires <em><a href="https://en.wikipedia.org/wiki/Tacit_knowledge">tacit knowledge</a></em> of what effects may determine how an <code>Employee</code> is produced from it. For example:</p>
+<ol type="1">
+<li>An associated <code>Employee</code> may not be found.</li>
+<li>The returned <code>Employee</code> may change between applications of the same <code>Int</code> employee ID.</li>
+<li>The database or network may fault and the function generates an exception that must be handled.</li>
+</ol>
+<p>You might be thinking that these cases are a given when working with database code, but that knowledge only comes with experience. These cases are <em>effects</em> which describe the circumstances under which an <code>Employee</code> may be produced and can be modeled accordingly as part of the typed API of <code>getEmployee()</code>. Capturing these effects might look like <code>getEmployee(): Int =&gt; Probably[Employee]</code>, wherein we keep these effects within the box of <code>Probably[_]</code>. I will soon explain how this modeling works; first we will consider how to characterize the complexity which defines effects.</p>
+<h3 id="operations-producing-undesired-cases">Operations producing undesired cases</h3>
+<p>Can you think of some program operations that produce undesired cases in addition to their desired cases? How might these cases cause code to become complex?</p>
+<div class="wide-list-items">
+<ul>
+<li>When a program starts, it may <strong>read configuration</strong> from the environment, a database, or files. Reading configuration values may be blocking or asynchronous, and some configuration keys may not have associated values.</li>
+<li><strong>Database queries</strong> produce an unknown length of rows, and may fail due to incorrect syntax, a database error, or network fault. Receiving an unknown length of rows imposes specific handling if all you want is <em>just one row</em> and any guarantees that you’re retrieving the correct one must be manually enforced.</li>
+<li><strong>API calls</strong> may be blocking or require async IO, they may fail for any reason, and the data they return may or may not conform to an expected structure.</li>
+<li><strong>Task management</strong> of long-running operations requires async IO and managing limited computing resources. Tasks may fail for any reason or they may never complete. You have to wait for the result to be available in order to use it.</li>
+<li><strong>Error handling</strong> when an operation fails may require aborting the operation and returning a default case, or retrying it. Exceptions are easy to rethrow or bubble-up the stack causing unexpected errors at runtime.</li>
+<li><strong>Retries</strong> using an <a href="https://en.wikipedia.org/wiki/Exponential_backoff">exponential back-off</a> strategy must retain their previous retry interval and apply a random jitter in order to calculate their next interval.</li>
+<li><strong>User-provided input</strong>, <strong>server requests</strong>, and <strong>API responses</strong> must be validated to assert that they conform to an expected structure and then validated for semantic content. Invalid data must be handled.</li>
+<li>Some operations <strong>produce logs and metrics</strong> as a secondary output. All components requiring logs and metrics carry an extra dependency in order to support them, and their associated operations may be blocking or require async IO.</li>
+<li><strong>Feature flags and ramps</strong> need to be queried in real-time. These queries may be blocking or asynchronous, and they may fail for any reason. Presentation of default variants in the case of failure must be reliably persisted to the current session, yet this operation may fail as well.</li>
+<li><strong>A/B testing</strong> requires reliably determining eligibility of users’ sessions per variant and persisting the associated assignments. Either of these operations may fail and presenting a default variant itself requires persistence. Retrieving assigned variants must also be reliable.</li>
+</ul>
+</div>
+<h3 id="a-model-for-characterizing-complexity">A model for characterizing complexity</h3>
+<p>Complexities can be characterized in terms of <em>effects</em>. The operations listed above impose complexity because they feature the effects of:</p>
+<dl>
+<dt>Presence</dt>
+<dd>
+Some configuration keys may not have an associated value.
+</dd>
+<dd>
+Some database queries expect one row to be returned, but instead no rows may be found.
+</dd>
+<dt>Length</dt>
+<dd>
+Database queries may return zero or many rows.
+</dd>
+<dd>
+Collections don’t have a totally guaranteed or fixed size.
+</dd>
+<dt>Validity</dt>
+<dd>
+User-provided input, server requests, and API responses all require validation before they may be used.
+</dd>
+<dt>Success</dt>
+<dd>
+Some operations fail with an exception, which can hide potential error cases.
+</dd>
+<dd>
+Some operations may be aborted.
+</dd>
+<dt>IO</dt>
+<dd>
+Operations are dependent on external systems’ state as <em>implicit input</em>.
+</dd>
+<dd>
+Operations can affect external systems’ state as <em>implicit output</em>.
+</dd>
+<dd>
+Operations may be concurrent, paused, or interrupted.
+</dd>
+<dd>
+Operations may block execution of the calling operation.
+</dd>
+<dd>
+Interacting with concurrency primitives may block execution and produce nondeterministic outputs.
+</dd>
+<dt>Time</dt>
+<dd>
+Task management makes no guarantees how long any particular task will take to run.
+</dd>
+<dd>
+API calls require an indeterminate amount of time.
+</dd>
+<dd>
+Database queries take time to run and return rows as they are found.
+</dd>
+<dd>
+Operations dependent on async output must await the result.
+</dd>
+<dt>State</dt>
+<dd>
+Retry strategies must track previous state in order to calculate their next retry periods.
+</dd>
+</dl>
+<p>The actual list of effects is innumerable, but these ones are common.</p>
+<h3 id="demonstrating-effects-in-code">Demonstrating effects in code</h3>
+<p>Take for example this Java code from a hypothetical payroll system:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb5"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PayrollRunner <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  EmployeeRepo employeeRepo<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  BankAchClient achClient<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  PayCalculator payCalc<span class="op">;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">boolean</span> <span class="fu">runPayroll</span><span class="op">(</span><span class="dt">long</span> employeeId<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      Employee employee <span class="op">=</span> employeeRepo<span class="op">.</span><span class="fu">find</span><span class="op">(</span>employeeId<span class="op">)</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>employee <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Logger</span><span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Missing employee &quot;</span> <span class="op">+</span> employeeId<span class="op">);</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      Paycheck paycheck <span class="op">=</span> payCalc<span class="op">.</span><span class="fu">calculatePaycheck</span><span class="op">(</span>employee<span class="op">);</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>paycheck <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Logger</span><span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;No paycheck for &quot;</span> <span class="op">+</span> employeeId<span class="op">);</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>      <span class="bu">String</span> companyAcctNo <span class="op">=</span> PayrollConfig<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;companyAcctNo&quot;</span><span class="op">);</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>      <span class="bu">String</span> companyRoutingNo <span class="op">=</span> PayrollConfig<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;companyRoutingNo&quot;</span><span class="op">);</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>      <span class="bu">String</span> response <span class="op">=</span> achClient<span class="op">.</span><span class="fu">depositPaycheck</span><span class="op">(</span>companyAcctNo<span class="op">,</span> companyRoutingNo<span class="op">,</span> paycheck<span class="op">);</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> response<span class="op">.</span><span class="fu">equals</span><span class="op">(</span><span class="st">&quot;SUCCESS&quot;</span><span class="op">);</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">Exception</span> e<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">RuntimeException</span><span class="op">(</span>e<span class="op">);</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>The code above demonstrates effects in the dimensions of:</p>
+<ul>
+<li><strong>IO</strong> as database queries and network calls are implicitly synchronous. Configuration acts as an implicit input.</li>
+<li><strong>Presence</strong> as an <code>Employee</code> may not be found or their <code>Paycheck</code> not calculated. Configured banking information may not have associated values.</li>
+<li><strong>Validity</strong> where the <code>"SUCCESS"</code> response from the <code>achClient</code> is the only check performed. Other responses are simply not handled.</li>
+<li><strong>Success</strong> where logging occurs but swallows errors, resulting in opaque <code>false</code> return cases. Exceptions also bubble up from database and network operations.</li>
+</ul>
+<p><em>These effects are not obvious from the code above</em>. Below I have rewritten the operation to handle all undesired cases to highlight where complexity exists:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb6"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PayrollRunner <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  EmployeeRepo employeeRepo<span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  BankAchClient achClient<span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  PayCalculator payCalc<span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="fu">runPayroll</span><span class="op">(</span><span class="dt">long</span> employeeId<span class="op">)</span> <span class="kw">throws</span> PayrollException<span class="op">,</span> MissingConfigException <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    Employee employee<span class="op">;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>      employee <span class="op">=</span> employeeRepo<span class="op">.</span><span class="fu">find</span><span class="op">(</span>employeeId<span class="op">);</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>employee <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Logger</span><span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;Missing employee &quot;</span> <span class="op">+</span> employeeId<span class="op">);</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">throw</span> <span class="kw">new</span> <span class="fu">MissingEmployeeException</span><span class="op">(</span>employeeId<span class="op">);</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span><span class="bu">SQLException</span> exception<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="fu">PayrollException</span><span class="op">(</span><span class="st">&quot;Error looking up employee &quot;</span> <span class="op">+</span> employeeId<span class="op">,</span> exception<span class="op">);</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    Paycheck paycheck <span class="op">=</span> payCalc<span class="op">.</span><span class="fu">calculatePaycheck</span><span class="op">(</span>employee<span class="op">);</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>paycheck <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>      <span class="bu">Logger</span><span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">&quot;No paycheck for &quot;</span> <span class="op">+</span> employeeId<span class="op">);</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="fu">PayrollMissingException</span><span class="op">(</span>employeeId<span class="op">);</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> companyAcctNo <span class="op">=</span> PayrollConfig<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;companyAcctNo&quot;</span><span class="op">);</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>companyAcctNo <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="fu">MissingConfigException</span><span class="op">(</span><span class="st">&quot;companyAcctNo&quot;</span><span class="op">);</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> companyRoutingNo <span class="op">=</span> PayrollConfig<span class="op">.</span><span class="fu">get</span><span class="op">(</span><span class="st">&quot;companyRoutingNo&quot;</span><span class="op">);</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>companyRoutingNo <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="fu">MissingConfigException</span><span class="op">(</span><span class="st">&quot;companyRoutingNo&quot;</span><span class="op">);</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">String</span> response<span class="op">;</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>      response <span class="op">=</span> achClient<span class="op">.</span><span class="fu">depositPaycheck</span><span class="op">(</span>companyAcctNo<span class="op">,</span> companyRoutingNo<span class="op">,</span> paycheck<span class="op">);</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(</span>AchException exception<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="fu">PayrollException</span><span class="op">(</span><span class="st">&quot;Failed to deposit paycheck for employee &quot;</span> <span class="op">+</span> employee<span class="op">,</span> exception<span class="op">);</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(!</span>response<span class="op">.</span><span class="fu">equals</span><span class="op">(</span><span class="st">&quot;SUCCESS&quot;</span><span class="op">))</span> <span class="op">{</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="fu">DepositPaycheckException</span><span class="op">(</span><span class="st">&quot;Received error response when depositing paycheck for employee &quot;</span> <span class="op">+</span> employeeId <span class="op">+</span> <span class="st">&quot;: &quot;</span> <span class="op">+</span> response<span class="op">);</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>There’s a large amount of complexity in this code due to various effects. In order to make clear all effects and where they occur, I leveraged checked exceptions and all exceptions that are known to be thrown by other functions are translated into exceptions representing the domain of this operation. As all false cases effectively communicated no information I replaced them with exceptions typed according to the reason for failure. The operation now returns void as it is side-effecting and a specific return for success would be superfluous.</p>
+<p>There are a number of checks along the <em>dimension of presence</em>. There’s several along the <em>dimension of success</em>. Each operation is dependent upon the success of the operation preceding it, following a <em>procedurally validated</em> imperative flow.</p>
+<blockquote>
+<p>I highlight <em>procedural validation</em> as a concept to illustrate that the above operation advances by manually verifying success or failure of each operation in sequence. This kind of logic is error-prone and fragile, as dependencies between operations are non-obvious and changes to error handling independent of domain logic can easily introduce bugs.</p>
+</blockquote>
+<p>There’s a lot of inner operations subject to effects within the main operation. Fortunately there are ways to model sets of these effects and contain the scope of their impact so that code is less complex. Rewriting the above code using an effect model might look like this:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb7"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">runPayroll</span><span class="op">(</span>employeeId<span class="op">:</span> <span class="ex">Long</span><span class="op">):</span> PayrollRunner<span class="op">[()]</span> <span class="op">=</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    employee <span class="op">&lt;-</span> employeeRepo<span class="op">.</span><span class="fu">find</span><span class="op">(</span>employee<span class="op">).</span><span class="fu">getOrFail</span><span class="op">(</span><span class="fu">EmployeeMissing</span><span class="op">(</span>employeeId<span class="op">))</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    paycheck <span class="op">&lt;-</span> payCalc<span class="op">.</span><span class="fu">calculatePaycheck</span><span class="op">(</span>employee<span class="op">).</span><span class="fu">getOrFail</span><span class="op">(</span><span class="fu">PaycheckMissing</span><span class="op">(</span>employeeId<span class="op">))</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    companyAcctNo <span class="op">&lt;-</span> <span class="fu">getConfig</span><span class="op">(</span><span class="st">&quot;companyAccountNo&quot;</span><span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    companyRoutingNo <span class="op">&lt;-</span> <span class="fu">getConfig</span><span class="op">(</span><span class="st">&quot;companyRoutingNo&quot;</span><span class="op">)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    response <span class="op">&lt;-</span> achClient<span class="op">.</span><span class="fu">depositPaycheck</span><span class="op">(</span>companyAcctNo<span class="op">,</span> companyRoutingNo<span class="op">,</span> paycheck<span class="op">)</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span>flatMap <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="st">&quot;SUCCESS&quot;</span> <span class="op">=&gt;</span> <span class="fu">pure</span><span class="op">(())</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> msg       <span class="op">=&gt;</span> <span class="fu">fail</span><span class="op">(</span><span class="fu">DirectDepositError</span><span class="op">(</span>employeeId<span class="op">,</span> msg<span class="op">))</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> response</span></code></pre></div>
+</div>
+<p>This code looks similar, doesn’t it? What hides between the lines here is a custom effect model <code>PayrollRunner</code> that abstracts away the effects of presence, async IO, success, and implicit input and output. This code is thus unburdened of most complexity, and makes the rest of it easier to work with.</p>
+<p>You may notice that there are no return statements for error cases: the flow of execution through this code is not performed procedurally. Instead flow is controlled by declaring where errors occur and the main operation short-circuits itself should any inner operation fail. This decouples domain logic from validating imperative operations, reducing a significant source of bugs.</p>
+<p><em>This abstraction of effects allows for safer code that better focuses on the business logic at-hand.</em></p>
+<p>Previously I described programs as a case of function composition: <code>h = g ∘ f</code>. Functors address a <em>special case</em> of function composition, the <strong>composition of functional effects</strong>. In the following sections I will describe how effects are abstracted in order to demonstrate how they compose later.</p>
+<h2 id="contexts-and-effects">Contexts and effects</h2>
+<p>What is a <strong>context</strong>? <em>A context is a setting where stuff exists under some circumstances.</em> Stuff such as instances of term <code>A</code> in the <em>context</em> of <code>F[A]</code>.</p>
+<blockquote>
+<p>Contexts in Scala may be neatly represented by a letter and brackets such as <code>F[_]</code> read as <em>context F</em> with an underscore when the type of the term is unspecified, and <code>F[A]</code> read as <em>F of A</em> when the term is known to be of type <code>A</code>. Other letters work nicely of course, as do concrete names, as in <code>Option[Int]</code> or <em>Option of Int</em>.</p>
+</blockquote>
+<p>The letter <code>F</code> is a shorthand for <em><span style="font-weight: bold; text-decoration: underline;">F</span>unctional Effect</em>, which is another term for context. Contexts each model a set of <strong>effects</strong> which represent concrete, typed APIs that describe how their terms may be produced. This mean that for any impure function <code>f: A =&gt; F[B]</code> you receive an output of type <code>B</code> whose production is contextualized by the effects of <code>F[_]</code>. A pure function <code>g: A =&gt; B</code> in comparison returns a fully-evaluated <code>B</code> absent of effects due to the application of function <code>g</code>.</p>
+<blockquote>
+<p>You might reason about contexts and their effects as a <em>probabilistic box</em> which might contain something you want. Whether something is there is what the box abstracts over, and we will expand on this later.</p>
+</blockquote>
+<p>Names of contexts can hint at the effects they model, and with some intuition you may be able to figure out what each context’s effects may be.</p>
+<h3 id="common-contexts-and-some-of-their-effects">Common contexts and some of their effects</h3>
+<p><strong>Elementary contexts representing dimensions of presence:</strong></p>
+<ul>
+<li><code>Option[A]</code> or <em>Option of A</em>: Presence, absence, or <em>optionality</em> of some instance of term <code>A</code>. Getting the term <code>A</code> when there is no instance causes a fault.</li>
+<li><code>Either[X, A]</code> or <em>Either of X and A</em>: Conventionally treated as <em>either</em> term <code>A</code> if valid <em>or</em> term <code>X</code> if invalid. Getting the wrong term causes a fault.</li>
+<li><code>List[A]</code> or <em>List of A</em>: <em>Unknown length</em>, sort, and cardinality of term <code>A</code>. Getting an <code>A</code> from an empty list or from beyond the end of it causes a fault.</li>
+<li><code>NonEmptyList[A]</code> or <em>NonEmptyList of A</em>: <em>At least one</em> of term <code>A</code> with an unknown sort and cardinality. The first <code>A</code> is guaranteed to be present.</li>
+<li><code>Id[A]</code> or <em>Identity of A</em>: This <em>is</em> <code>A</code> and is guaranteed to be present.</li>
+<li><code>Set[A]</code> or <em>Set of A</em>: A set of <em>distinct instances</em> of <code>A</code> whose size is unknown.</li>
+</ul>
+<blockquote>
+<p>Many data structures are used to model different forms of presence.</p>
+</blockquote>
+<p><strong>Contexts representing side-effects:</strong></p>
+<ul>
+<li><code>IO[A]</code> or <em>IO of A</em>: Externally-acquired term <code>A</code>.
+<ul>
+<li>The instance may be here already, eventually, or never. Execution awaits the instance until it arrives or a fault occurs.</li>
+<li>The instance is acquired externally from the program via processes that rely on and are influenced by side effects.</li>
+<li>Faults may interrupt the acquisition of the instance.</li>
+<li>Getting the instance causes a fault if acquisition has failed.</li>
+</ul></li>
+<li><code>Future[A]</code> or <em>Future of A</em>: Eventually-acquired term <code>A</code>.
+<ul>
+<li>The instance may be here already, eventually, or never.</li>
+<li>The instance may be acquired externally from the program via processes that rely on and are influenced by side effects.</li>
+<li>The instance may be produced via long-running processes.</li>
+<li>Acquisition of <code>A</code> be suspended, awaited, or run in parallel with any number of other <code>Future[_]</code>’s. This allows for task management against limited computing resources.</li>
+<li>Faults may interrupt the acquisition of the instance.</li>
+<li>Getting the instance causes a fault if acquisition is incomplete or has failed.</li>
+</ul></li>
+</ul>
+<p><strong>Contexts representing implicit input and output:</strong></p>
+<ul>
+<li><code>ReaderT[F, A]</code> or <em>Reader Transformer of context F and A</em>: Reading of implicit inputs in the context of <code>F[_]</code>.
+<ul>
+<li>Propagation of configuration usually leverages this effect by abstracting how instances of configuration values are acquired.</li>
+</ul></li>
+<li><code>WriterT[F, A]</code> or <em>Writer Transformer of context F and A</em>: Writing of implicit outputs in the context of <code>F[_]</code>.
+<ul>
+<li>Logging usually leverages this effect by abstracting how such output leaves the program.</li>
+</ul></li>
+<li><code>StateT[F, A]</code> or <em>State Transformer of context F and A</em>: Modifying implicit inputs and outputs in the context of <code>F[_]</code>.
+<ul>
+<li>Models state changing over time in an otherwise-immutable context.</li>
+</ul></li>
+</ul>
+<blockquote>
+<p>These contexts are higher-order in the term of <code>F</code>. They are listed here for illustration but won’t be explored in this post.</p>
+</blockquote>
+<p>Each of these contexts have two shared characteristics in that they <em>produce</em> some term <code>A</code> and that their effects determine <em>how</em> term <code>A</code> is produced. But with such a wide array of effects, and with so little overlap between each context, how can instances of term <code>A</code> be consumed in a manner unburdened of complexity?</p>
+<p>In order to generalize contexts, the key differentiator between them must be abstracted: <em>effects</em>. By shedding effects as an <em>implementation detail</em>, the production of term <code>A</code> remains a shared characteristic. This opens an opportunity to create a <strong>seam</strong> between an impure function <em>producing</em> the context itself and a pure function <em>consuming</em> instances of the term <code>A</code> within the context.</p>
+<p>The term <em>seam</em> comes from Michael Feathers’ <a href="https://www.amazon.com/Working-Effectively-Legacy-Michael-Feathers">Working Effectively With Legacy Code</a>: <em>“A place where you can alter behavior in your program without editing in that place.”</em> A seam is where we introduce an abstraction to separate the impure output of an operation from pure consumption of the desired case. How functions handle an unknown length of items, for example, does not change and is independent of how functions consume each item. How functions consume each item varies on a case-by-case basis, and changes frequently according to requirements within business logic. This illustrates a need for a separation of concerns that can be enabled by abstraction.</p>
+<p>Take for example the following JavaScript code:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// traversing a length of items does not change</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (<span class="kw">var</span> i<span class="op">;</span> i <span class="op">&lt;</span> businessCases<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span>) {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// businessLogic() changes frequently</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">businessLogic</span>(businessCases[i])<span class="op">;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">// asynchronous dispatch of API calls does not change</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">callApiAsynchronously</span>(<span class="st">&quot;/get/stuff&quot;</span><span class="op">,</span> <span class="kw">function</span> (stuff) {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">// doThingsWithStuff() changes frequently</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">doThingsWithStuff</span>(stuff)<span class="op">;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+<p><em>How do you create this seam?</em></p>
+<h2 id="a-design-pattern-for-contexts">A design pattern for contexts</h2>
+<p><strong>For any context <code>F[_]</code>, it produces some term <code>A</code>.</strong> If you have a function <code>f: A =&gt; B</code>, how would you apply it to the term produced by the context <code>F[A]</code>? That would require <em>lowering</em> the term. Specifically, you can’t apply the following function directly to the context:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb9"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// given a context producing term A</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">]</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">// given a function A =&gt; B</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">f</span><span class="op">(</span>x<span class="op">:</span> A<span class="op">):</span> B</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">// try to apply the function</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">f</span><span class="op">(</span>fa<span class="op">)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">// compile error!</span></span></code></pre></div>
+</div>
+<p>Recall from the previous section, contexts share two characteristics: that they <em>produce</em> a term, and that they have <em>effects</em> which determine how the term is produced. After abstracting effects, contexts do not expose an obvious shared interface to extract the term. Consider the following definitions for <code>Option[A]</code>, <code>Either[X, A]</code>, and <code>List[A]</code>:</p>
+<p><strong><code>Option[A]</code></strong> is the effect of presence, absence, or <em>optionality</em> of an instance of term <code>A</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb10"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> <span class="ex">Option</span><span class="op">[+</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> get<span class="op">:</span> A <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="bu">Some</span><span class="op">[+</span>A<span class="op">](</span><span class="kw">override</span> <span class="kw">val</span> get<span class="op">:</span> A<span class="op">)</span> <span class="kw">extends</span> <span class="ex">Option</span><span class="op">[</span>A<span class="op">]</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">object</span> <span class="bu">None</span> <span class="kw">extends</span> <span class="ex">Option</span><span class="op">[</span>Nothing<span class="op">]</span></span></code></pre></div>
+</div>
+<blockquote>
+<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala">See here</a> for the definition in the sample repository.</p>
+</blockquote>
+<p><strong><code>Either[X, A]</code></strong> by convention is the effect of <em>either</em> success with term <code>A</code> <em>or</em> failure with term <code>X</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb11"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> Either<span class="op">[+</span>X<span class="op">,</span> <span class="op">+</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> left<span class="op">:</span> X <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> right<span class="op">:</span> A <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> Left<span class="op">[+</span>X<span class="op">,</span> <span class="op">+</span>A<span class="op">](</span><span class="kw">override</span> <span class="kw">val</span> left<span class="op">:</span> X<span class="op">)</span> <span class="kw">extends</span> Either<span class="op">[</span>X<span class="op">,</span> A<span class="op">]</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> Right<span class="op">[+</span>X<span class="op">,</span> <span class="op">+</span>A<span class="op">](</span><span class="kw">override</span> <span class="kw">val</span> right<span class="op">:</span> A<span class="op">)</span> <span class="kw">extends</span> Either<span class="op">[</span>X<span class="op">,</span> A<span class="op">]</span></span></code></pre></div>
+</div>
+<blockquote>
+<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala">See here</a> for the definition in the sample repository.</p>
+</blockquote>
+<p><strong><code>List[A]</code></strong> is the effect of <em>unknown length</em>, sort, and cardinality of instances of term <code>A</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb12"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> <span class="ex">List</span><span class="op">[+</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> head<span class="op">:</span> A <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> tail<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="op">::[+</span>A<span class="op">](</span><span class="kw">override</span> <span class="kw">val</span> head<span class="op">:</span> A<span class="op">,</span> <span class="kw">override</span> <span class="kw">val</span> tail<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">])</span> <span class="kw">extends</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">]</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">object</span> Nil <span class="kw">extends</span> <span class="ex">List</span><span class="op">[</span>Nothing<span class="op">]</span></span></code></pre></div>
+</div>
+<blockquote>
+<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala">See here</a> for the definition in the sample repository.</p>
+</blockquote>
+<h3 id="an-object-oriented-approach-to-contexts">An object-oriented approach to contexts</h3>
+<p>Both <code>Option[A]</code> and <code>Either[X, A]</code> have roughly the same <em>structure</em> in that there either is or isn’t an instance of the desired term <code>A</code>. Because of this, a <em>lowering</em> operation <code>extract: F[A] =&gt; A</code> is possible as it means the same thing between both of them: <code>extract</code> either gets the existing instance of the term <code>A</code> or it faults. In object oriented programming, <code>Option[A]</code> and <code>Either[X, A]</code> might expose such an interface:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb13"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Extractable<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">extract</span><span class="op">():</span> A</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> <span class="ex">Option</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> Extractable<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> get<span class="op">:</span> A <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">extract</span><span class="op">():</span> A <span class="op">=</span> get</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">isPresent</span><span class="op">():</span> <span class="ex">Boolean</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span>isInstanceOf<span class="op">[</span><span class="bu">Some</span><span class="op">[</span>A<span class="op">]]</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> Either<span class="op">[</span>X<span class="op">,</span> A<span class="op">]</span> <span class="kw">extends</span> Extractable<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> left<span class="op">:</span> X <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> right<span class="op">:</span> A <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">extract</span><span class="op">():</span> A <span class="op">=</span> right</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">isPresent</span><span class="op">():</span> <span class="ex">Boolean</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span>isInstanceOf<span class="op">[</span>Right<span class="op">[</span>X<span class="op">,</span> A<span class="op">]]</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<blockquote>
+<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/one">See here</a> for the definitions of <code>Option</code>, <code>Either</code>, and <code>List</code> using the single-value <code>Extractable</code> interface.</p>
+</blockquote>
+<h4 id="generalizing-for-an-unknown-length-of-term-a">Generalizing for an unknown length of term <code>A</code></h4>
+<p>How do you <code>extract</code> the term <code>A</code> from a <code>List[A]</code> such that it means the same thing as in <code>Option[A]</code> and <code>Either[X, A]</code>?</p>
+<p>As in <code>Option[A]</code> and <code>Either[X, A]</code> there is a notion of the presence or absence of an instance of the term <code>A</code>, but presence in <code>List[A]</code> implies <em>one to many</em> instances. A solution inspired by object oriented programming might change the interface thusly:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb14"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Extractable<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">extract</span><span class="op">():</span> <span class="bu">Seq</span><span class="op">[</span>A<span class="op">]</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">isPresent</span><span class="op">():</span> <span class="ex">Boolean</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> <span class="ex">Option</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> Extractable<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> get<span class="op">:</span> A <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">extract</span><span class="op">():</span> <span class="bu">Seq</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> <span class="bu">Seq</span><span class="op">(</span>get<span class="op">)</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">isPresent</span><span class="op">():</span> <span class="ex">Boolean</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span>isInstanceOf<span class="op">[</span><span class="bu">Some</span><span class="op">[</span>A<span class="op">]]</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> Either<span class="op">[</span>X<span class="op">,</span> A<span class="op">]</span> <span class="kw">extends</span> Extractable<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> left<span class="op">:</span> X <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> right<span class="op">:</span> A <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">extract</span><span class="op">():</span> <span class="bu">Seq</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> <span class="bu">Seq</span><span class="op">(</span>right<span class="op">)</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">isPresent</span><span class="op">():</span> <span class="ex">Boolean</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span>isInstanceOf<span class="op">[</span>Right<span class="op">[</span>X<span class="op">,</span> A<span class="op">]]</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> Extractable<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> head<span class="op">:</span> A <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> tail<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">Exception</span><span class="op">()</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">extract</span><span class="op">():</span> <span class="bu">Seq</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> <span class="op">???</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">isPresent</span><span class="op">():</span> <span class="ex">Boolean</span> <span class="op">=</span> <span class="kw">this</span><span class="op">.</span>isInstanceOf<span class="op">[::[</span>A<span class="op">]]</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<blockquote>
+<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/seq">See here</a> for the definitions of <code>Option</code>, <code>Either</code>, and <code>List</code> using the multi-value <code>Extractable</code> interface with <code>Seq</code>.</p>
+</blockquote>
+<p><em>This interface however is not coherent.</em> Faulting on absence is preserved as a behavior in <code>Option[A]</code> and <code>Either[X, A]</code>, but Scala’s <code>Seq[A]</code> is allowed to be empty per its definition. Allowing <code>List[A]</code> to be empty implies that it should be allowed to return an empty <code>Seq[A]</code> from <code>extract</code>. In order to preserve faulting on absence, <code>extract</code> must return a <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/nel"><code>NonEmptyList[A]</code> instead</a>, as this has the effect of always having <em>at least one</em> instance of term <code>A</code>. You’re still stuck with an unknown length of instances, though.</p>
+<p>This interface essentially transforms these contexts into <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala"><code>NonEmptyList[A]</code></a> and imposes its specific complexity on all of your code. You would probably be very unhappy using it.</p>
+<p>What about implementing <code>extract</code> for <code>Future[A]</code>? When applied to <code>Future[A]</code>, the <code>extract</code> function by its own signature is a blocking call. You want your dependency on <code>A</code> to be properly asynchronous.</p>
+<p>This interface does not generalize for more than the contexts of <code>Option</code> and <code>Either</code>, and it requires that they both subclass a shared trait. A better interface exists. It also doesn’t force these types into the same hierarchy.</p>
+<blockquote>
+<p>This interface also suffers from a certain <a href="https://en.wikipedia.org/wiki/Schrödinger&#39;s_cat">Schrödinger’s cat</a> problem, where you’re effectively peeking inside the box and sometimes finding out that the cat isn’t there.</p>
+</blockquote>
+<h3 id="motivating-functors-as-a-design-pattern">Motivating functors as a design pattern</h3>
+<p><code>Option[A]</code>, <code>Either[X, A]</code>, <code>List[A]</code>, <code>Future[A]</code>, and <code>IO[A]</code> each have different effects that determine how term <code>A</code> is produced. You must follow an axiom from object oriented programming: <em>abstract what changes</em>. Therefore you have to shed effects as an implementation detail. How might that impact lowering the term <code>A</code>?</p>
+<p>You may be unsatisfied by the answer: <em>extraction cannot be generalized</em>. All you know is that there is term <code>A</code>. You don’t know whether an instance is present, how many of it there are, whether it’s here already, or if it’s arriving later. How do you consume term <code>A</code> when you know nothing about its instances’ nature of existence? You have a box that might contain what you want, but you won’t know unless you open it up; it might explode if you do. Functors solve this problem.</p>
+<p><strong>Functors</strong> are abstractions that allow you to consume term <code>A</code> within the context of <code>F[A]</code>. Functors are a class of types for which they have defined a single function, one that you might have seen in the wild, called <code>map()</code>. Functors in Scala may be formally declared using the <code>Functor</code> typeclass:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb15"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Functor<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Functor <span class="op">{</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> apply<span class="op">[</span>F<span class="op">[</span>_<span class="op">]:</span> Functor<span class="op">]:</span> Functor<span class="op">[</span>F<span class="op">]</span> <span class="op">=</span> implicitly<span class="op">[</span>Functor<span class="op">[</span>F<span class="op">]]</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<blockquote>
+<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
+</blockquote>
+<p>What <code>map()</code> does is <em>lift</em> the function <code>f: A =&gt; B</code> into the box so that it behaves as <code>F[A] =&gt; F[B]</code>, giving back <code>F[B]</code>.</p>
+<p>This <em>lifting</em> of functions that <code>map()</code> performs is <em>coherent across contexts</em>. With <code>map()</code> you can apply <code>f: A =&gt; B</code> to any <code>List[A]</code> just as you can any <code>IO[A]</code>. The results of both operations are predictable: your <code>List[A]</code> maps to <code>List[B]</code> and your <code>IO[A]</code> maps to <code>IO[B]</code>.</p>
+<p>How would you consume the term produced by <code>Future[A]</code> or <code>Option[A]</code>? You would also use <code>map()</code>.</p>
+<p>What this enables is your function <code>f: A =&gt; B</code> to be used with any functor regardless of its specific effects. Your function <code>f: A =&gt; B</code> is immediately reusable across all contexts and can be unit tested in isolation of effects. It no longer matters whether the box contains what you want, as it will use your function if something is there.</p>
+<h4 id="why-does-the-map-function-return-fb">Why does the <code>map()</code> function return <code>F[B]</code>?</h4>
+<p>Recall that contexts generally do not permit extracting terms. Think for a moment: what does extracting the term mean if you’re using a context like <code>Option[A]</code>? What about <code>Future[A]</code>? <em>Would their effects change how extraction of the term would work?</em></p>
+<p>Extracting <em>the</em> term from <code>List[A]</code> flatly doesn’t make sense as it has the effect of an unknown number of instances.</p>
+<p>Because there is no way to generalize extracting a term from a context, functors don’t allow you to operate on contexts in such a way that an instance of the term can <em>escape</em> them.</p>
+<p>Most importantly, by keeping all operations against terms within their context, contexts’ specific effects remain abstracted. Asynchronous operations with <code>Future[A]</code> remain asynchronous, the length of <code>List[A]</code> remains unknown, and <code>Option[A]</code> may or may not be present.</p>
+<p>Functors thus <em>preserve structure</em> by keeping operations within the context. For example, applying <code>map()</code> on a <code>List[A]</code> or <code>BinaryTree[A]</code>.</p>
+<div id="functor-diagrams">
+<figure id="img-list-functor" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/embracing-nondeterminism/list-functor-512x512.png" class="image-link">
+        <img src="/images/embracing-nondeterminism/list-functor-512x512.png" id="img-list-functor-img" title="Applying <code>map</code> to a <code>List[Int]</code>." alt="Applying <code>map</code> to a <code>List[Int]</code>.">
+      </a>
+    </p>
+    <figcaption>Applying <code>map</code> to a <code>List[Int]</code>.</figcaption>
+  </div>
+</figure>
+<figure id="img-tree-functor" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/embracing-nondeterminism/binary-tree-functor-1024x340.png" class="image-link">
+        <img src="/images/embracing-nondeterminism/binary-tree-functor-1024x340.png" id="img-tree-functor-img" title="Applying <code>map</code> to a <code>BinaryTree[Int]</code>." alt="Applying <code>map</code> to a <code>BinaryTree[Int]</code>.">
+      </a>
+    </p>
+    <figcaption>Applying <code>map</code> to a <code>BinaryTree[Int]</code>.</figcaption>
+  </div>
+</figure>
+</div>
+<p>The application of <code>map()</code> produces two new and identifiable <code>List[B]</code> and <code>BinaryTree[B]</code>s. The values internally change, as a function has been applied to them, and <code>BinaryTree[B]</code> may re-balance itself accordingly. What matters here is that the structures are coherent and identifiable. Both <code>List[B]</code> and <code>BinaryTree[B]</code> are created from this operation and the originating <code>List[A]</code> and <code>BinaryTree[A]</code> still exist in their original state.</p>
+<p>Compare with using iteration over an array using a <code>for</code> loop in this JavaScript code:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb16"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> array <span class="op">=</span> [<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">6</span><span class="op">,</span> <span class="dv">7</span>]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> square <span class="op">=</span> x <span class="kw">=&gt;</span> x <span class="op">*</span> x</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (<span class="kw">const</span> x <span class="kw">in</span> array) {</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> x2 <span class="op">=</span> <span class="fu">square</span>(x) <span class="co">// apply function to the current value</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  results<span class="op">.</span><span class="fu">push</span>(x2) <span class="co">// append to a new array</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<p>Iteration as a form of lowering <em>destroys structure</em>. In order to get a <code>array</code> back you have to rebuild it yourself and any structural guarantees must be manually implemented following <em>procedural steps</em>. This means that you have to open the box, manipulate what it contains, then put the result in a new box yourself.</p>
+<p>This isn’t to say that functional programming is only about iteration and loops versus <code>map()</code>. Can you think of other operations that might destroy structure? For example, if you use an <code>await()</code> operation on a <code>Future[A]</code> you will destroy its <em>asynchronous structure</em> and potentially harm the performance of your program.</p>
+<p><em>This doesn’t mean that you should never look in the box.</em> For example, where the type of your context is known, it may make sense to take the box apart to extract the term. A common use case with <code>Option</code> is to extract the term if it is present and provide a default instance otherwise:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb17"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> myLookup <span class="op">=</span> map<span class="op">.</span><span class="fu">find</span><span class="op">(</span><span class="st">&quot;myKey&quot;</span><span class="op">).</span><span class="fu">getOrElse</span><span class="op">(</span><span class="st">&quot;myDefault&quot;</span><span class="op">)</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> myMatchingLookup <span class="op">=</span> map<span class="op">.</span><span class="fu">find</span><span class="op">(</span><span class="st">&quot;myKey&quot;</span><span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">Some</span><span class="op">(</span>myValue<span class="op">)</span> <span class="op">=&gt;</span> myValue</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="bu">None</span> <span class="op">=&gt;</span> <span class="st">&quot;myDefault&quot;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<h4 id="context-fa-must-produce-some-term-a">Context <code>F[A]</code> must produce some term <code>A</code></h4>
+<p>Recall from above: For any context <code>F[_]</code>, it produces some term <code>A</code>_. If a context were guaranteed to have an instance of a term <code>A</code> then you should be able to consume it with your function <code>f: A =&gt; B</code>, right?</p>
+<p>But what if there’s nothing there, as in there are <em>zero</em> instances of term <code>A</code>? Can you do anything? When a context has this kind of effect, a sort of “nothing here” or <em>void</em>, then the <code>map()</code> function above doesn’t do anything because there isn’t anything to do. If you try to <code>map()</code> a <em>void</em> <code>F[A]</code> with <code>f: A =&gt; B</code> then it returns a <em>void</em> <code>F[B]</code> as there’s “nothing here”. <em>It does this without having used <code>f: A =&gt; B</code> to get there.</em></p>
+<p>This is called the <strong>undesired case</strong> of a context as it means your box didn’t contain something you wanted. This case isn’t necessarily void, however, as void this context simply means that a particular context has a case where no instances of its term <code>A</code> exist, even though the context itself may contain other data, such as errors.</p>
+<p>This behavior of “doing nothing” is referred to as <em>short-circuiting</em> and it is a key feature of contexts that encode some notion of an <strong>undesired case</strong>. It is exploited in particular to enable two key features of <em>imperative programming</em>, control flow and error handling, which I will expand on in later parts of this series.</p>
+<blockquote>
+<p>The two contexts <code>Option[A]</code> and <code>Either[X, A]</code> demonstrate simple short-circuiting. An <code>Option[A]</code> will only <code>map()</code> an instance of its term <code>A</code> if it is present as the <strong>desired case</strong> of <code>Some[A]</code>, and an <code>Either[X, A]</code> will only <code>map()</code> if an instance of the desired term <code>A</code> is present as the <strong>desired case</strong> of <code>Right[X, A]</code>.</p>
+<p>In contrast with <code>Option[A]</code> and <code>Either[X, A]</code>, the <code>Id[A]</code> context has the effect of the <em>identity</em> of term <code>A</code>. To put it plainly, <code>Id[A]</code> <em>is</em> the instance of term <code>A</code>: as the instance is always present, the <code>Id[A]</code> context is <em>solely the <strong>desired case</strong></em> and never short-circuits.</p>
+</blockquote>
+<h3 id="implementing-functors-in-scala">Implementing functors in Scala</h3>
+<p>Each context must provide its own implementation of <code>map()</code> in order for it to be used as a functor. Functor implementations in Scala are provided via typeclasses, and any type that has the <em>shape</em> of <code>F[_]</code> may become a functor by implementing the <code>Functor</code> typeclass from above:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb18"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Functor<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Functor <span class="op">{</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> apply<span class="op">[</span>F<span class="op">[</span>_<span class="op">]:</span> Functor<span class="op">]:</span> Functor<span class="op">[</span>F<span class="op">]</span> <span class="op">=</span> implicitly<span class="op">[</span>Functor<span class="op">[</span>F<span class="op">]]</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<blockquote>
+<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
+</blockquote>
+<p>Instances of the <code>Functor</code> typeclass implement this trait and make themselves available implicitly:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb19"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">val</span> optionFunctor <span class="op">=</span> <span class="kw">new</span> Functor<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> <span class="ex">Option</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    fa <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="bu">Some</span><span class="op">(</span>x<span class="op">)</span> <span class="op">=&gt;</span> <span class="bu">Some</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>x<span class="op">))</span> <span class="co">// desired case</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="bu">None</span>    <span class="op">=&gt;</span> <span class="bu">None</span> <span class="co">// undesired case</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">def</span> eitherFunctor<span class="op">[</span>X<span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> Functor<span class="op">[</span>Either<span class="op">[</span>X<span class="op">,</span> <span class="op">*]]</span> <span class="op">{</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> Either<span class="op">[</span>X<span class="op">,</span> A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> Either<span class="op">[</span>X<span class="op">,</span> B<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    fa <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="fu">Left</span><span class="op">(</span>x<span class="op">)</span>  <span class="op">=&gt;</span> <span class="fu">Left</span><span class="op">(</span>x<span class="op">)</span> <span class="co">// undesired case</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="fu">Right</span><span class="op">(</span>a<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">Right</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>a<span class="op">))</span> <span class="co">// desired case</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">val</span> listFunctor <span class="op">=</span> <span class="kw">new</span> Functor<span class="op">[</span><span class="ex">List</span><span class="op">]</span> <span class="op">{</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">// the naive implementation is recursive, the sample repository demonstrates</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// a more robust implementation</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> <span class="ex">List</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    fa <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> a <span class="op">::</span> at <span class="op">=&gt;</span> <span class="fu">f</span><span class="op">(</span>a<span class="op">)</span> <span class="op">::</span> <span class="fu">map</span><span class="op">(</span>at<span class="op">)(</span>f<span class="op">)</span> <span class="co">// desired case, recurse</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> Nil     <span class="op">=&gt;</span> Nil <span class="co">// undesired case</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>These three instances for <code>Option[_]</code>, <code>Either[X, _]</code>, and <code>List[_]</code> show remarkable similarities, and this isn’t uncommon across functors for most data structures. Note in particular how <code>List[_]</code> is recursive, with the base case <code>Nil</code> representing void. Implementations of <code>Functor</code> are more complex in contexts such as <code>IO[_]</code> and <code>Future[_]</code> because they are managing side effects. <em>What is key is that the complexities imposed by each of these contexts are completely abstracted</em>, allowing function <code>f: A =&gt; B</code> to operate unburdened by effects with a focus on specific program logic.</p>
+<blockquote>
+<p>Follow these links for the instances in the sample repository for
+<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L104-L126">Option</a>,
+<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L112-L133">Either</a>,
+<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L237-L257">List</a>,
+<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala#L99-L119">NonEmptyList</a>,
+and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/package.scala#L23-L42">Id</a>.</p>
+</blockquote>
+<p>Can you see how functors enable control flow and short-circuiting? The <strong>undesirable cases</strong> are the specific branches of logic that enable this. If there’s “nothing here”, then they don’t do anything. In the specific case of <code>Either[X, _]</code>, <code>Left</code> may be used to carry some error state in its term <code>X</code>. This satisfies the effect of <em>either</em> <code>A</code> for success <em>or</em> <code>X</code> for failure.</p>
+<blockquote>
+<p>As functors, contexts and effects may be reasoned about as a box that alleviates you from having to inspect the box for whether it contains something you want in order to operate on it. You also don’t risk mishandling the box and causing an explosion by opening it when what you want doesn’t exist. The box contains the specific complexity required to obtain what you want, and with it your worries.</p>
+<p>You can think of <code>Right</code>’s term as being “the right instance you want” because it’s “correct”. <em>Right?</em> This pun is why <code>Either</code> is conventionally leveraged for the effect of correct vs. incorrect or success vs. failure.</p>
+</blockquote>
+<p>Contrasting with contexts that encode some notion of an <strong>undesired case</strong>, the <code>Functor</code> instance for <code>Id[_]</code> will always apply the function in <code>map()</code> as it is <em>always</em> the <strong>desired case</strong>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb20"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Id<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> A</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Id <span class="op">{</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">implicit</span> <span class="kw">val</span> idFunctor<span class="op">:</span> Functor<span class="op">[</span>Id<span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> Functor<span class="op">[</span>Id<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> Id<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">f</span><span class="op">(</span>fa<span class="op">)</span> <span class="co">// map always applies!</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>To support an object-oriented API, the following <code>map(): (A =&gt; B) =&gt; F[B]</code> extension method may be defined:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb21"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">class</span> FunctorOps<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> A<span class="op">](</span><span class="kw">val</span> fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])</span> <span class="kw">extends</span> AnyVal <span class="op">{</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="op">[</span>B<span class="op">](</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">)(</span><span class="kw">implicit</span> F<span class="op">:</span> Functor<span class="op">[</span>F<span class="op">]):</span> F<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> Functor<span class="op">[</span>F<span class="op">].</span><span class="fu">map</span><span class="op">(</span>fa<span class="op">)(</span>f<span class="op">)</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<h4 id="using-scala-functors-as-a-general-abstraction">Using Scala functors as a general abstraction</h4>
+<p>Defining a <code>fizzBuzz: F[Int] =&gt; F[String]</code> function that uses a functor looks like this:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb22"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fizzBuzz<span class="op">[</span>F<span class="op">[</span>_<span class="op">]:</span> Functor<span class="op">](</span>context<span class="op">:</span> F<span class="op">[</span><span class="bu">Int</span><span class="op">]):</span> F<span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  context<span class="op">.</span>map <span class="op">{</span> x <span class="op">=&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> isFizz <span class="op">=</span> x <span class="op">%</span> <span class="dv">3</span> <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> isBuzz <span class="op">=</span> x <span class="op">%</span> <span class="dv">5</span> <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>isFizz<span class="op">,</span> isBuzz<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="op">(</span><span class="kw">true</span><span class="op">,</span> <span class="kw">true</span><span class="op">)</span> <span class="op">=&gt;</span> <span class="st">&quot;fizzbuzz&quot;</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="op">(</span><span class="kw">true</span><span class="op">,</span> _<span class="op">)</span> <span class="op">=&gt;</span> <span class="st">&quot;fizz&quot;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="op">(</span>_<span class="op">,</span> <span class="kw">true</span><span class="op">)</span> <span class="op">=&gt;</span> <span class="st">&quot;buzz&quot;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> _ <span class="op">=&gt;</span> x<span class="op">.</span>toString</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+</div>
+<p>And then <code>fizzBuzz</code> may be used for all contexts implementing the <code>Functor</code> typeclass:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb23"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">fizzBuzz</span><span class="op">(</span><span class="bu">Some</span><span class="op">(</span><span class="dv">3</span><span class="op">)))</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co">// =&gt; Some(&quot;fizz&quot;)</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">fizzBuzz</span><span class="op">(</span><span class="bu">None</span><span class="op">))</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co">// =&gt; None</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">fizzBuzz</span><span class="op">(</span><span class="fu">Right</span><span class="op">(</span><span class="dv">5</span><span class="op">)))</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co">// =&gt; Right(&quot;buzz&quot;)</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">fizzBuzz</span><span class="op">(</span><span class="fu">Left</span><span class="op">(</span><span class="st">&quot;no fizz or buzz&quot;</span><span class="op">)))</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">// =&gt; Left(&quot;no fizz or buzz&quot;)</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">fizzBuzz</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">15</span><span class="op">)))</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="co">// =&gt; List(&quot;1&quot;, &quot;2&quot;, &quot;fizz&quot;, &quot;4&quot;, &quot;buzz&quot;, &quot;fizzbuzz&quot;)</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="fu">println</span><span class="op">(</span><span class="fu">fizzBuzz</span><span class="op">(</span><span class="ex">List</span><span class="op">()))</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="co">// =&gt; List()</span></span></code></pre></div>
+</div>
+<p>By using functors, the <code>fizzBuzz</code> function is free to focus on its specific program logic:</p>
+<ul>
+<li>Produce “fizz” when <code>x</code> is divisible by <code>3</code></li>
+<li>Produce “buzz” when <code>x</code> is divisible by <code>5</code></li>
+<li>Produce “fizzbuzz” when <code>x</code> is divisible by both <code>3</code> and <code>5</code></li>
+<li>Produce <code>x</code> printed as a <code>String</code> otherwise</li>
+</ul>
+<p>At no point is <code>fizzBuzz</code> burdened by the effects of the context it executes against. Given a <code>Functor</code> instance for them, it’s usable against <code>IO[Int]</code> and <code>Future[Int]</code> as well!</p>
+<h3 id="why-do-so-many-objects-define-map">Why do so many objects define <code>map()</code>?</h3>
+<p>You might be thinking that this functor pattern is superfluous, or even that the concept itself has dubious value. Lists and arrays in the wild already have a <code>map()</code> operation available after all, and they don’t necessarily require special knowledge in order to use them. Yet the pattern of a <code>map()</code> operation exists in many places: <code>Promise</code>s in JavaScript for example have their own <code>map()</code> operation named <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#chained_promises"><code>then()</code></a>.</p>
+<p>But think for a moment: This means you’ve been using functors for a while and never realized!</p>
+<p>That so many functors appear in the wild is no coincidence. Functors appear anywhere stuff exists under some circumstances, and most frequently that is concretely realized in collections such as lists. The existence of <code>Promise</code> with its <code>then()</code> operation in JavaScript demonstrates that the pattern appears in a very general manner. Functors as a formal abstraction API, such as in the <code>Functor</code> typeclass defined above, find their strongest use in cases where the concrete type of the context is unimportant. However, the <em>structure</em> of functors appears in many places without being <em>called</em> a functor, which implies a certain <em>universal quality</em> of functors as a pattern.</p>
+<p>Strikingly, this pattern manifests as a <a href="https://en.m.wikipedia.org/wiki/Functor">formal definition</a> within the higher math of <a href="https://en.m.wikipedia.org/wiki/Category_theory">category theory</a>, which gives functors a particular property: they can be mathematically proven.</p>
+<p>In order to be a functor, a context defining a <code>map()</code> operation must satisfy the two <strong>functor laws</strong>:</p>
+<ol type="1">
+<li><p>Preservation of identity functions:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>context<span class="op">.</span><span class="fu">map</span><span class="op">(</span>identity<span class="op">)</span> <span class="op">==</span> <span class="fu">identity</span><span class="op">(</span>context<span class="op">)</span></span></code></pre></div></li>
+<li><p>Preservation of function composition:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>context<span class="op">.</span><span class="fu">map</span><span class="op">(</span>g compose f<span class="op">)</span> <span class="op">==</span> context<span class="op">.</span><span class="fu">map</span><span class="op">(</span>f<span class="op">).</span><span class="fu">map</span><span class="op">(</span>g<span class="op">)</span></span></code></pre></div></li>
+</ol>
+<p>Here are the two laws applied against Scala’s builtin <code>List</code> type using <code>scalacheck</code> properties. The <code>List</code> type defines its own <code>map()</code> operation, and these properties prove that it is also a functor:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb26"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ListSpec <span class="kw">extends</span> AnyPropSpec <span class="kw">with</span> ScalaCheckPropertyChecks <span class="kw">with</span> Matchers <span class="op">{</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">property</span><span class="op">(</span><span class="st">&quot;List.map() preserves identity functions&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">forAll</span><span class="op">(</span>arbitrary<span class="op">[</span><span class="ex">List</span><span class="op">[</span><span class="bu">Int</span><span class="op">]])</span> <span class="op">{</span> fa <span class="op">=&gt;</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>      fa<span class="op">.</span><span class="fu">map</span><span class="op">(</span>identity<span class="op">)</span> mustBe <span class="fu">identity</span><span class="op">(</span>fa<span class="op">)</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">property</span><span class="op">(</span><span class="st">&quot;List.map() preserves function composition&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">forAll</span><span class="op">(</span><span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>      fa <span class="op">&lt;-</span> arbitrary<span class="op">[</span><span class="ex">List</span><span class="op">[</span><span class="ex">Double</span><span class="op">]]</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>      f <span class="op">&lt;-</span> arbitrary<span class="op">[</span><span class="ex">Double</span> <span class="op">=&gt;</span> <span class="ex">String</span><span class="op">]</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>      g <span class="op">&lt;-</span> arbitrary<span class="op">[</span><span class="ex">String</span> <span class="op">=&gt;</span> <span class="bu">Int</span><span class="op">]</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">yield</span> <span class="op">(</span>fa<span class="op">,</span> f<span class="op">,</span> g<span class="op">))</span> <span class="op">{</span> <span class="cf">case</span> <span class="op">(</span>fa<span class="op">,</span> f<span class="op">,</span> g<span class="op">)</span> <span class="op">=&gt;</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>      fa<span class="op">.</span><span class="fu">map</span><span class="op">(</span>g compose f<span class="op">)</span> mustBe fa<span class="op">.</span><span class="fu">map</span><span class="op">(</span>f<span class="op">).</span><span class="fu">map</span><span class="op">(</span>g<span class="op">)</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<blockquote>
+<ul>
+<li>See the functor laws applied to Scala’s Standard Library
+types <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L12-L26"><code>Either</code></a>,
+<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L12-L26"><code>List</code></a>,
+and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L12-L26"><code>Option</code></a></li>
+<li>See the <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/FunctorLaws.scala">generalized functor laws</a>
+applied to our <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L109">Option</a>,
+<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L132">Either</a>,
+and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L169">List</a> types.</li>
+</ul>
+</blockquote>
+<p>These laws assert that functors preserve the behavior of functions <code>f</code> and <code>g</code> as if they were composed and also applied in sequence independent of <code>map()</code>. Functors thus <em>compose functional effects</em> because this property of composition is retained within the context of their effects. The seam introduced by <code>map()</code> creates a hard delineation between any context’s complexity of effects and the business logic of pure functions <code>f</code> and <code>g</code>.</p>
+<blockquote>
+<p>Functors may be universally regarded as a <em>context of effects</em>. Because <code>map()</code> is rigorously defined, the operation is ideally and <em>provably</em> the same regardless of specific context. This means that functors as a design pattern represent a concept that <em>transcends</em> codebases and languages. In contrast, design patterns as they are realized in object-oriented programming form idioms that must be relearned between codebases written even in the same language.</p>
+</blockquote>
+<h2 id="building-upon-functors">Building upon functors</h2>
+<p>In this post I introduced functors as an elementary abstraction which permit you to separate business logic in function <code>f</code> from complex operations producing instances of term <code>A</code> in context <code>F[A]</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb27"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span></span></code></pre></div>
+</div>
+<p>This abstraction is enabling on its own, as it frees the logic in function <code>f</code> from the burden of complexity present in the context of <code>F[_]</code>. However this is only an <em>elementary</em> abstraction as it simply provides a mechanism for <em>composing functions</em> in serial within the context of effects. Our goal eventually is to abstract effects in <em>imperative</em> code as in the custom effect model from the above <code>runPayroll</code> function:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb28"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">runPayroll</span><span class="op">(</span>employeeId<span class="op">:</span> <span class="ex">Long</span><span class="op">):</span> PayrollRunner<span class="op">[()]</span> <span class="op">=</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    employee <span class="op">&lt;-</span> employeeRepo<span class="op">.</span><span class="fu">find</span><span class="op">(</span>employee<span class="op">).</span><span class="fu">getOrFail</span><span class="op">(</span><span class="fu">EmployeeMissing</span><span class="op">(</span>employeeId<span class="op">))</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    paycheck <span class="op">&lt;-</span> payCalc<span class="op">.</span><span class="fu">calculatePaycheck</span><span class="op">(</span>employee<span class="op">).</span><span class="fu">getOrFail</span><span class="op">(</span><span class="fu">PaycheckMissing</span><span class="op">(</span>employeeId<span class="op">))</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    companyAcctNo <span class="op">&lt;-</span> <span class="fu">getConfig</span><span class="op">(</span><span class="st">&quot;companyAccountNo&quot;</span><span class="op">)</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    companyRoutingNo <span class="op">&lt;-</span> <span class="fu">getConfig</span><span class="op">(</span><span class="st">&quot;companyRoutingNo&quot;</span><span class="op">)</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    response <span class="op">&lt;-</span> achClient<span class="op">.</span><span class="fu">depositPaycheck</span><span class="op">(</span>companyAcctNo<span class="op">,</span> companyRoutingNo<span class="op">,</span> paycheck<span class="op">)</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span>flatMap <span class="op">{</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="st">&quot;SUCCESS&quot;</span> <span class="op">=&gt;</span> <span class="fu">pure</span><span class="op">(())</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> msg       <span class="op">=&gt;</span> <span class="fu">fail</span><span class="op">(</span><span class="fu">DirectDepositError</span><span class="op">(</span>employeeId<span class="op">,</span> msg<span class="op">))</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> response</span></code></pre></div>
+</div>
+<p>Consider for a moment: with a functor you are able to work against a function’s <strong>desired case</strong>. You can chain any number of <code>map()</code> operations against a context, or <code>map()</code> any number of composed functions against it. Given a context in the desired case, after applying <code>map()</code> you will still have a context that is in the <strong>desired case</strong>. In order to write <em>imperative</em> code, you have to be able to force an <strong>undesired case</strong> so that subsequent operations are skipped.</p>
+<p>Working against <em>two or more contexts at once</em> opens opportunities to introduce <strong>undesired cases</strong>. Take for example these two instances of the context <code>F[_]</code> and the function signature for <code>combine()</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb29"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">]</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> fb<span class="op">:</span> F<span class="op">[</span>B<span class="op">]</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">combine</span><span class="op">(</span>a<span class="op">:</span> A<span class="op">,</span> b<span class="op">:</span> B<span class="op">):</span> C</span></code></pre></div>
+</div>
+<p>How do you apply <code>combine()</code> to the terms <code>A</code> and <code>B</code> produced by the contexts? What happens if one of the contexts is in an <strong>undesired case</strong>? At first blush it appears that <code>map()</code> might work, but <code>combine()</code> takes two arguments. You need a specialized functor in order to apply <code>combine()</code>!</p>
+<p>In my next post <a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a>, we will explore how <strong>applicatives</strong> enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.</p>
+<blockquote>
+<p><strong>Acknowledgements</strong></p>
+<p>Many of my professional network, colleagues, and friends helped me develop this material and proof read my many drafts. I would like to especially thank:</p>
+<ul>
+<li><a href="https://www.linkedin.com/in/angishen/">Angi Shen</a>, my team mate at Credit Karma, for her many questions about functors and related patterns and forcing me to learn how to teach these subjects.</li>
+<li><a href="https://www.linkedin.com/in/shushu-huang-b2123324/">Ivy Huang</a>, my team mate at Credit Karma, for providing the initial impetus to write this piece, and for helping me develop this material both in this format and for use in technical training.</li>
+<li><a href="https://www.linkedin.com/in/rexmas/">Rex Fenley</a>, my category theory study buddy, for helping me refine concepts and develop vocabulary to carry the subject.</li>
+<li><a href="https://www.linkedin.com/in/rodrigo-manubens-7a862260/">Rodrigo Manubens</a>, my friend and colleague at Credit Karma, for highlighting the hard parts and praising the good parts.</li>
+<li><a href="https://www.linkedin.com/in/mindy-or-2658857a/">Mindy Or</a>, my friend and former ThoughtWorks colleague, for providing perspectives for those new to this subject matter and forcing me to think about what points I was actually trying to make.</li>
+<li><a href="https://www.linkedin.com/in/aaronerickson/">Aaron Erickson</a>, my former ThoughtWorks colleague and seasoned functional programmer, for proof reading and providing criticism.</li>
+</ul>
+</blockquote>
+<section class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p><code>F[_]</code> specifically is a <a href="https://danso.ca/blog/higher-kinded-types/">higher-kinded type</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+    </div>
+    <div class="page-comments">
+  <p><strong>Please share with me your thoughts and feedback!</strong></p>
+  <script>
+    var remark_config = {
+      host: 'https://remark42.thisfieldwas.green',
+      site_id: 'thisfieldwas.green',
+      url: 'https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/'
+    }
+  </script>
+  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
+  <div id="remark42"></div>
+</div>
+
+  </div>
+</main>
+
+<footer class="page-footer">
+  <div class="content-bound">
+    <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
+</nav>
+
+    <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
+    <ul class="acks">
+      <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
+      <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
+    </ul>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/214aec6/site/_posts/2022-03-15-contexts-and-effects.md">2022-03-15-contexts-and-effects.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/214aec6">214aec6</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

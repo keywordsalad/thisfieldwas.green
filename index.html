@@ -23,10 +23,23 @@
 
 
 <link rel="stylesheet" href="/css/main.css">
-<script src="/js/main.js"></script>
+<link rel="stylesheet" href="/css/pages/homepage.css"><script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
 
 </head>
-<body class="homepage">
+<body>
 
 <header class="page-header">
   <div class="content-bound">
@@ -35,9 +48,9 @@
       <h1 class="logo"><a href="/">This Field Was Green</a></h1>
       <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     </div>
@@ -46,10 +59,12 @@
 
 <main class="page-content">
   <div class="content-bound">
-    
+    <div class="homepage">
+      
 <h1 class="page-title">Mowing My Technical Lawn</h1>
-<section class="intro">
-  <aside class="meatball-headshot">
+<h2>Hello!</h2>
+<aside class="meatball-headshot">
+  <div class="aside-content">
     <picture>
       <img width="288" height="384"
         src="/images/about-me/headshot-w-meatball-doge_400w.png"
@@ -57,23 +72,49 @@
         alt="Mysql and Meatball">
     </picture>
     <p>Myself and Meatball, who is a very good boy and wearing his very best treat face.</p>
-  </aside>
-  <h2>Hello!</h2>
-  <p>
-    I'm Logan McGrath, I'm a senior software engineer, and I specialize in a segment of software applications engineering that sits between the framework and the business logic. In my day job at <a href="https://creditkarma.com">Credit Karma</a> I work with a team to provide building blocks with which my fellow product engineers can write less code and more quickly deliver valuable features to members. By night I dabble in esoteric programming languages, theories, and tools to better hone my craft. It's what I like to do when my husband isn't encouraging me to go play outside.
-  </p>
-  <p>
-    I have been working in tech since 2007, where I started as just a wee web developer putting together shopping carts. I've since found my way into bigger projects.
-  </p>
-  <h2>My Life Away from Work</h2>
-  <p>
-    When I'm away from the computer I'm spending time with my husband Dr. Corey Blanchette and our two dogs, Jellybean and Meatball. Corey cooks and I do the dishes if I can beat him to them. Most evenings we can be found on the patio enjoying my latest mixology attempt while he tries to teach me ways to remember different parts of human anatomy. For the most part all I can retain are the acronyms that sound inappropriate, and I'm happy to share them over a drink. One of my favorites is a mnemonic he was taught in school to name the "carpals", which I'm pretty sure is a kind of bone.
-  </p>
-</section>
+  </div>
+</aside>
+<p>
+  I'm Logan McGrath, I'm a senior software engineer, and I specialize in a segment of software applications engineering that sits between the framework and the business logic. In my day job at <a href="https://creditkarma.com">Credit Karma</a> I work with a team to provide building blocks with which my fellow product engineers can write less code and more quickly deliver valuable features to members. By night I dabble in esoteric programming languages, theories, and tools to better hone my craft. It's what I like to do when my husband isn't encouraging me to go play outside.
+</p>
+<p>
+  I have been working in tech since 2007, where I started as just a wee web developer putting together shopping carts. I've since found my way into bigger projects.
+</p>
 
-<section class="professional-offering clear">
-  <h2>My Professional Offering</h2>
-  <section class="skills foundations">
+<h2>I blog when I can</h2>
+<p>Here's a sampling of things I've blogged about. A complete selection may be found on their <a href="/blog/">dedicated page</a>.</p>
+<ul>
+  
+  <li>
+    <a href="/blog/2022/06/17/imperative-computation/">Embracing Nondeterminism Part III: Imperative Computation</a> - June 17, 2022
+  </li>
+  
+  <li>
+    <a href="/blog/2022/06/16/set-function/">The Set Function</a> - June 16, 2022
+  </li>
+  
+  <li>
+    <a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a> - June  5, 2022
+  </li>
+  
+  <li>
+    <a href="/blog/2022/03/15/contexts-and-effects/">Embracing Nondeterminism Part I: Contexts and Effects</a> - March 15, 2022
+  </li>
+  
+  <li>
+    <a href="/blog/2022/02/09/persistent-ssh-tunnels/">Highly available ssh tunnels</a> - February  9, 2022
+  </li>
+  
+</ul>
+
+<h2>My life away from work</h2>
+<p>
+  When I'm away from the computer I'm spending time with my husband Dr. Corey Blanchette and our two dogs, Jellybean and Meatball. Corey cooks and I do the dishes if I can beat him to them. Most evenings we can be found on the patio enjoying my latest mixology attempt while he tries to teach me ways to remember different parts of human anatomy. For the most part all I can retain are the acronyms that sound inappropriate, and I'm happy to share them over a drink. One of my favorites is a mnemonic he was taught in school to name the "carpals", which I'm pretty sure is a kind of bone. Corey jokingly dismisses my technical jargon as magic, but I admit his skillset feels a skosh wizardly to me!
+</p>
+
+<h2>My Professional Offering</h2>
+<div class="professional-offering">
+  <div class="pane foundations-and-practices">
     <h3>Foundations and Practices</h3>
     <ul>
       <li>Frameworks and Platforms</li>
@@ -90,8 +131,8 @@
       <li>Continuous Improvement</li>
       <li>Always Learning</li>
     </ul>
-  </section>
-  <section class="skills languages">
+  </div>
+  <div class="pane languages">
     <h3>Languages</h3>
     <ul>
       <li>Scala</li>
@@ -104,8 +145,8 @@
       <li>TypeScript</li>
       <li>Sometimes Go!</li>
     </ul>
-  </section>
-  <section class="skills databases">
+  </div>
+  <div class="pane databases">
     <h3>Databases</h3>
     <ul>
       <li>Postgres</li>
@@ -116,8 +157,8 @@
       <li>Firebase</li>
       <li>Thumb Drive</li>
     </ul>
-  </section>
-  <section class="skills integrations">
+  </div>
+  <div class="pane integrations">
     <h3>Integrations</h3>
     <ul>
       <li>GraphQL</li>
@@ -126,60 +167,48 @@
       <li>gRPC</li>
       <li>REST</li>
     </ul>
-  </section>
-  <section class="skills interfaces">
+  </div>
+  <div class="pane interfaces">
     <h3>Interfaces</h3>
     <ul>
       <li>React</li>
       <li>Angular</li>
       <li>HTML, <em>by hand!</em></li>
     </ul>
-  </section>
-  <h3>Putting Technology to Work</h3>
-  <p>
-    My primary customers are technical teams looking to accelerate time to market for new features and changes. Product teams need solid building blocks to deliver these features and I work as a force multiplier by providing the low code frameworks, tools, and infrastructure required to ship quickly and be nimble to change. My goal as a professional is to craft systems that reduce the number of teams and organizations, and more importantly <em>time and cost</em>, required to ship work in order to maximize value to the business and better serve customers.
-  </p>
-  <h3>Making the Hard Work Matter</h3>
-  <p>
-    Engineers are too expensive to be putting together bespoke content with high rates of churn. Low code allows engineers to focus on the hard problems and enables more opportunities for businesses to better harness the value they bring. I mentor engineers to help them realize their full potential as technologists and become drivers in better engineering with less code.
-  </p>
-  <h3>Some Writing</h3>
-  <p>Here's a sampling of things I've blogged about. A complete selection may be found on their <a href="/blog">dedicated page</a>.</p>
-  <ul>
-    
-    <li>
-      <a href="/blog/2021/12/11/reasons-why-my-website-is-offline">Reasons why my website is offline</a> - December 11, 2021
-    </li>
-    
-    <li>
-      <a href="/blog/2021/12/05/redoing-my-website">Redoing my website with Haskell and Hakyll</a> - December  5, 2021
-    </li>
-    
-    <li>
-      <a href="/blog/2012/11/28/promoting-changes-with-app-config-app">Promoting changes with App-Config-App</a> - November 28, 2012
-    </li>
-    
-    <li>
-      <a href="/blog/2012/11/20/app-config-app-in-action">App-Config-App in Action</a> - November 20, 2012
-    </li>
-    
-    <li>
-      <a href="/blog/2012/11/16/scm-backed-application-configuration-with-perforce">SCM-Backed Application Configuration with Perforce</a> - November 16, 2012
-    </li>
-    
-  </ul>
-</section>
+  </div>
+  <div class="pane to-work">
+    <h3>Putting Technology to Work</h3>
+    <p>
+      My primary customers are technical teams looking to accelerate time to market for new features and changes. Product teams need solid building blocks to deliver these features and I work as a force multiplier by providing the low code frameworks, tools, and infrastructure required to ship quickly and be nimble to change. My goal as a professional is to craft systems that reduce the number of teams and organizations, and more importantly <em>time and cost</em>, required to ship work in order to maximize value to the business and better serve customers.
+    </p>
+  </div>
+  <div class="pane hard-work">
+    <h3>Making the Hard Work Matter</h3>
+    <p>
+      Engineers are too expensive to be putting together bespoke content with high rates of churn. Low code allows engineers to focus on the hard problems and enables more opportunities for businesses to better harness the value they bring. I mentor engineers to help them realize their full potential as technologists and become drivers in better engineering with less code.
+    </p>
+  </div>
+  <div class="pane employment">
+    <h3>Looking for an engineer?</h3>
+    <p>
+  For prospective employers, referrals, and recruiters: <em>I am happily employed</em>, though I welcome chats about prospects if you believe I am a good fit for your technical needs. I apply what works from my experience to technical teams and reinforce what the teams are already doing well both internally and within the broader context of the engineering organization they support.
+</p>
+<p>
+  Sometimes my existing toolbelt doesn't work out of the box because unexpected problems can be hard and no two teams or orgs are the same, but that's ok. Together we'll find a way to make things better, and hopefully make some employees a bit happier and rise higher to meet business needs. Success is more for less effort, and the destination is very much worth the travel.
+</p>
+<p>
+  I likely won't be available, but I might know someone who can help you out.
+</p>
 
-<section>
-  <h2>Looking for an Engineer?</h2>
-  <p>
-    For prospective employers, referrals, and recruiters: <em>I am happily employed</em>, though I welcome chats about prospects if you believe I am a good fit for your technical needs. I apply what works from my experience to technical teams and reinforce what the teams are already doing well both internally and within the broader context of the engineering organization they support. Sometimes my existing toolbelt doesn't work so well because unexpected problems can be hard and no two teams or orgs are the same, but that's ok. Together we'll find a way to make things better, and hopefully make some employees a bit happier and rise a bit higher to meet business needs. Success is more for less effort, and the destination is very much worth the travel.
-  </p>
-</section>
+  </div>
+</div>
 
-
-<section class="personal-stuff">
-  <aside class="meatball-jellybean">
+<h2>My Life as It Relates to My Site</h2>
+<p>
+  <em>As this is my site and my life, all opinions I express here are my own. Opinions being what they are, I recognize that I might be wrong and openly invite learning opportunities.</em>
+</p>
+<aside class="meatball-jellybean">
+  <div class="aside-content">
     <picture>
       <img width="200" height="266"
         src="/images/about-me/meatball-n-jelly-doges_400w.png"
@@ -187,19 +216,21 @@
         alt="Meatball and Jellybean">
     </picture>
     <p>The little one is Meatball, the big one is Jellybean. Both are very good boys, <em>and they both know I have a treat in my hand.</em></p>
-  </aside>
-  <h2>My Life as It Relates to My Site</h2>
-  <p>
-    <em>As this is my site and my life, all opinions I express here are my own. Opinions being what they are, I recognize that I might be wrong and openly invite learning opportunities.</em>
-  </p>
-  <p>
-    I like to share what makes life worthwhile. Sometimes that's helping my dogs figure out something new, or finding a really cool trick at work that helps my team out. Sometimes hard things have to happen in order for life to be worthwhile, and I can't promise that reading about what I share is easy. I've come to good places by way of some painful lessons both personally and professionally.
-  </p>
-  <p>
-    My goal isn't to express edgy opinions, technical or otherwise. It's as easy to express something <em>objectively harmful</em> and empower grotesque behavior as it is to simply to hate on <em>technology</em> and get some fake internet points. Anyone can write a page full of salt. Salt's a popular, low-effort genre. I want show people things that can be constructive, and I think this is an important bar for myself.
-  </p>
-</section>
+  </div>
+</aside>
+<p>
+  I like to share what makes life worthwhile. Sometimes that's helping my dogs figure out something new, or finding a really cool trick at work that helps my team out. Sometimes hard things have to happen in order for life to be worthwhile, and I can't promise that reading about what I share is easy. I've come to good places by way of some painful lessons both personally and professionally.
+</p>
+<p>
+  My goal isn't to express edgy opinions, technical or otherwise. It's as easy to express something <em>objectively harmful</em> and empower grotesque behavior as it is to simply to hate on <em>technology</em> and get some fake internet points. Anyone can write a page full of salt. Salt's a popular, low-effort genre. I want show people things that can be constructive, and I think this is an important bar for myself.
+</p>
+<p>
+  If a subject makes me feel salty, I'll denote it with a <em>salt</em> tag so that you know I'm simply complaining into a vacuum wherein I don't see solutions by choice or otherwise.
+</p>
 
+
+    </div>
+    
 
   </div>
 </main>
@@ -208,9 +239,9 @@
   <div class="content-bound">
     <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
@@ -218,8 +249,7 @@
       <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/a96d7a9/site/index.html">index.html</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/a96d7a9">a96d7a9</a>.</p>
-    </div>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/d8fe9fe/site/index.html">index.html</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/d8fe9fe">d8fe9fe</a>.</p>
   </div>
 </footer>
 

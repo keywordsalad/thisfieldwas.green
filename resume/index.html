@@ -6,12 +6,12 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>This Field Was Green - My Resume</title>
-<link rel="canonical" href="https://thisfieldwas.green/resume">
+<link rel="canonical" href="https://thisfieldwas.green/resume/">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 
 <meta property="og:site_name" content="">
 <meta property="og:title" content="My Resume">
-<meta property="og:url" content="https://thisfieldwas.green/resume">
+<meta property="og:url" content="https://thisfieldwas.green/resume/">
 <meta property="og:description" content="">
 <meta property="og:image:url" content="https://thisfieldwas.green/images/grass-256x256.png">
 
@@ -24,9 +24,22 @@
 
 <link rel="stylesheet" href="/css/main.css">
 <script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
 
 </head>
-<body class="default">
+<body>
 
 <header class="page-header">
   <div class="content-bound">
@@ -35,9 +48,9 @@
       <h1 class="logo"><a href="/">This Field Was Green</a></h1>
       <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     </div>
@@ -46,9 +59,16 @@
 
 <main class="page-content">
   <div class="content-bound">
-    
+    <div class="">
+      
 <h1 class="page-title">My Resume</h1>
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">2s</span></p>
+</div>
 <p>Please see my <a href="https://www.linkedin.com/in/loganmcgrath">LinkedIn profile</a> for my employment history.</p>
+
+    </div>
+    
 
   </div>
 </main>
@@ -57,9 +77,9 @@
   <div class="content-bound">
     <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
@@ -68,7 +88,6 @@
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
     <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/e3d184c/site/_pages/resume.md">resume.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/e3d184c">e3d184c</a>.</p>
-    </div>
   </div>
 </footer>
 

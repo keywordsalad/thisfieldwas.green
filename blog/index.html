@@ -6,17 +6,17 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>This Field Was Green - Writing about the greenest things</title>
-<link rel="canonical" href="https://thisfieldwas.green/blog">
+<link rel="canonical" href="https://thisfieldwas.green/blog/">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 
 <meta property="og:site_name" content="">
 <meta property="og:title" content="Writing about the greenest things">
-<meta property="og:url" content="https://thisfieldwas.green/blog">
+<meta property="og:url" content="https://thisfieldwas.green/blog/">
 <meta property="og:description" content="The latest and greenest of things I&#39;ve written about">
 <meta property="og:image:url" content="https://thisfieldwas.green/images/grass-256x256.png">
 
 
-  <meta property="article:modified_time" content="2021-12-11T14:43:25-08:00">
+  <meta property="article:modified_time" content="2022-06-17T08:47:11-07:00">
   <meta property="article:author" content="Logan McGrath">
   
 <meta name="twitter:card" content="summary">
@@ -27,9 +27,22 @@
 
 <link rel="stylesheet" href="/css/main.css">
 <script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
 
 </head>
-<body class="blog">
+<body>
 
 <header class="page-header">
   <div class="content-bound">
@@ -38,9 +51,9 @@
       <h1 class="logo"><a href="/">This Field Was Green</a></h1>
       <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     </div>
@@ -49,103 +62,126 @@
 
 <main class="page-content">
   <div class="content-bound">
-    
+    <div class="blog">
+      
 <h1 class="page-title">Writing about the greenest things</h1>
 
+  <h2 class="post-title"><a href="/blog/2022/06/17/imperative-computation/">Embracing Nondeterminism Part III: Imperative Computation</a></h2>
+  <p class="latest-post-label">Latest Post!</p>
+  <div class="post-meta">
+  <p class="post-published">
+    Posted on June 17, 2022
+    by Logan McGrath
+    </p>
+  <p class="post-tags">
+      Tags: <a class="tag" href="/tags/functional-programming">functional programming</a>, <a class="tag" href="/tags/programming">programming</a>, <a class="tag" href="/tags/scala">scala</a>, <a class="tag" href="/tags/design-patterns">design patterns</a>, <a class="tag" href="/tags/contexts">contexts</a>
+    </p>
+  </div>
+
   
-    <h2 class="post-title">
-  <a href="/blog/2021/12/11/reasons-why-my-website-is-offline">Reasons why my website is offline</a>
-</h2>
-<p class="latest-post-label">Latest Post!</p>
-<div class="post-meta">
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">21m 28s</span></p>
+</div>
+<p>Remember <strong>functors</strong> and <strong>applicatives</strong>? In my last post <a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a> we explored how functors and applicatives abstract over <strong>desired</strong> and <strong>undesired cases</strong> of <strong>contexts</strong> in order to express control flow and permit independent computation. In this post we will explore <strong>monads</strong> and how to leverage their specific abstraction to express <strong>imperative</strong> control flow.</p>
+
+  <p class="read-more no-border"><a href="/blog/2022/06/17/imperative-computation/">Read more...</a></p>
+
+<h2 class="tags hard-section">Tag Cloud</h2>
+<p class="tag-cloud" data-show-count><a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/angularjs">angularjs</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/combinators">combinators</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:5" href="/tags/configuration-management">configuration management</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/contexts">contexts</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/design-patterns">design patterns</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:5" href="/tags/duct-tape">duct tape</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/functional-programming">functional programming</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/hakyll">hakyll</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/haskell">haskell</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/perforce">perforce</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:5" href="/tags/programming">programming</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/scala">scala</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:5" href="/tags/self-host">self host</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/sinatra">sinatra</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/tinfoil-hat">tinfoil hat</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/yak-shave">yak shave</a></p>
+<h2>Previous posts</h2>
+
+<h3 class="post-title"><a href="/blog/2022/06/16/set-function/">The Set Function</a></h3>
+  <div class="post-meta">
   <p class="post-published">
-    Posted on December 11, 2021
+    Posted on June 16, 2022
     by Logan McGrath
     </p>
   <p class="post-tags">
-      Tags: <a class="tag" href="/tags/self-host">self host</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>, <a class="tag" href="/tags/tinfoil-hat">tinfoil hat</a>
+      Tags: <a class="tag" href="/tags/functional-programming">functional programming</a>, <a class="tag" href="/tags/programming">programming</a>, <a class="tag" href="/tags/scala">scala</a>, <a class="tag" href="/tags/design-patterns">design patterns</a>, <a class="tag" href="/tags/combinators">combinators</a>
     </p>
   </div>
 
-  <p>My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and <a href="https://internetwebsite.ofvlad.xyz">low-key minimalist</a>, found next to the garbage chute at his condo building.</p>
+  
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">2m 58s</span></p>
+</div>
+<p>What is a <code>Set</code>? A <code>Set</code> can tell you whether or not an <code>value</code> is a member of the <code>Set</code>. This means that a <code>Set</code> is merely a function, specifically of <code>A =&gt; Boolean</code>. In this post I will explore the usage of <strong>combinators</strong> to build a <code>Set</code> from elementary functions alone.</p>
 
-  <p class="read-more"><a href="/blog/2021/12/11/reasons-why-my-website-is-offline">Read more...</a></p>
-
-<h2 class="hard-section">Other Recent Posts</h2>
-
-    <h3 class="post-title">
-  <a href="/blog/2021/12/05/redoing-my-website">Redoing my website with Haskell and Hakyll</a>
-</h3>
-<div class="post-meta">
+  <p class="read-more"><a href="/blog/2022/06/16/set-function/">Read more...</a></p>
+<h3 class="post-title"><a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a></h3>
+  <div class="post-meta">
   <p class="post-published">
-    Posted on December  5, 2021
+    Posted on June  5, 2022
     by Logan McGrath
     </p>
   <p class="post-tags">
-      Tags: <a class="tag" href="/tags/hakyll">hakyll</a>, <a class="tag" href="/tags/haskell">Haskell</a>
+      Tags: <a class="tag" href="/tags/functional-programming">functional programming</a>, <a class="tag" href="/tags/programming">programming</a>, <a class="tag" href="/tags/scala">scala</a>, <a class="tag" href="/tags/design-patterns">design patterns</a>, <a class="tag" href="/tags/contexts">contexts</a>
     </p>
   </div>
 
-  <p>I’m picking up a COVID project: <em>Redoing my website!</em></p>
-<p>My website prior to 2021 was authored using <a href="http://octopress.org/"><code>octopress</code></a> or <a href="https://jekyllrb.com/"><code>jekyll</code></a>. Truthfully I don’t remember which as I haven’t touched my website in quite a few years. I want to update my homepage and I’m in a bind because I don’t know how to produce a build after I make changes.</p>
+  <div class="post-thumbnail">
+  <a href="/images/tags/functional-programming/functional-grass-128x128.png">
+    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Embracing Nondeterminism Part II: Permitting or Halting Computation" width="128" height="128">
+  </a>
+</div>
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">32m 7s</span></p>
+</div>
+<p>Remember <strong>functors</strong>? Recall from my last post, <a href="/blog/2022/03/15/contexts-and-effects/">Embracing Nondeterminism Part I: Contexts and Effects</a>, they are structures that abstract away complexity imposed by nondeterminism present in <strong>contexts</strong> that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their <strong>undesired case</strong> and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.</p>
 
-  <p class="read-more"><a href="/blog/2021/12/05/redoing-my-website">Read more...</a></p>
-
-    <h3 class="post-title">
-  <a href="/blog/2012/11/28/promoting-changes-with-app-config-app">Promoting changes with App-Config-App</a>
-</h3>
-<div class="post-meta">
+  <p class="read-more"><a href="/blog/2022/06/05/permitting-or-halting-computation/">Read more...</a></p>
+<h3 class="post-title"><a href="/blog/2022/03/15/contexts-and-effects/">Embracing Nondeterminism Part I: Contexts and Effects</a></h3>
+  <div class="post-meta">
   <p class="post-published">
-    Posted on November 28, 2012
+    Posted on March 15, 2022
+    by Logan McGrath
+    </p>
+  <p class="post-updated">
+      Last updated on June  5, 2022
+    </p>
+  <p class="post-tags">
+      Tags: <a class="tag" href="/tags/functional-programming">functional programming</a>, <a class="tag" href="/tags/programming">programming</a>, <a class="tag" href="/tags/scala">scala</a>, <a class="tag" href="/tags/design-patterns">design patterns</a>, <a class="tag" href="/tags/contexts">contexts</a>
+    </p>
+  </div>
+
+  <div class="post-thumbnail">
+  <a href="/images/tags/functional-programming/functional-grass-128x128.png">
+    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Embracing Nondeterminism Part I: Contexts and Effects" width="128" height="128">
+  </a>
+</div>
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">45m 2s</span></p>
+</div>
+<p>Have you ever received an unexpected <code>null</code> reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?</p>
+
+  <p class="read-more"><a href="/blog/2022/03/15/contexts-and-effects/">Read more...</a></p>
+<h3 class="post-title"><a href="/blog/2022/02/09/persistent-ssh-tunnels/">Highly available ssh tunnels</a></h3>
+  <div class="post-meta">
+  <p class="post-published">
+    Posted on February  9, 2022
     by Logan McGrath
     </p>
   <p class="post-tags">
-      Tags: <a class="tag" href="/tags/angular-js">AngularJS</a>, <a class="tag" href="/tags/perforce">Perforce</a>, <a class="tag" href="/tags/sinatra">Sinatra</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>
+      Tags: <a class="tag" href="/tags/self-host">self host</a>, <a class="tag" href="/tags/duct-tape">duct tape</a>, <a class="tag" href="/tags/yak-shave">yak shave</a>
     </p>
   </div>
 
-  <p>The App-Config-App now lets you promote changes between environments!</p>
+  <div class="post-thumbnail">
+  <a href="/images/tags/duct-tape/duct-tape-128x128.png">
+    <img src="/images/tags/duct-tape/duct-tape-128x128.png" alt="Highly available ssh tunnels" width="128" height="128">
+  </a>
+</div>
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">4m 20s</span></p>
+</div>
+<p>In my previous post, <a href="/blog/2021/12/11/reasons-why-my-website-is-offline/">Reasons why my website is offline</a>, I complained about <code>systemd</code> giving up when it fails to maintain <code>ssh</code> tunnels. In this post, I complain about <code>systemd</code> a bit more and how I gave up and stopped using it for managing my <code>ssh</code> tunnels.</p>
 
-  <p class="read-more"><a href="/blog/2012/11/28/promoting-changes-with-app-config-app">Read more...</a></p>
+  <p class="read-more"><a href="/blog/2022/02/09/persistent-ssh-tunnels/">Read more...</a></p>
+<p class="view-all-posts"><a href="/archives/">View all posts</a></p>
 
-    <h3 class="post-title">
-  <a href="/blog/2012/11/20/app-config-app-in-action">App-Config-App in Action</a>
-</h3>
-<div class="post-meta">
-  <p class="post-published">
-    Posted on November 20, 2012
-    by Logan McGrath
-    </p>
-  <p class="post-tags">
-      Tags: <a class="tag" href="/tags/angular-js">AngularJS</a>, <a class="tag" href="/tags/perforce">Perforce</a>, <a class="tag" href="/tags/sinatra">Sinatra</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>
-    </p>
-  </div>
 
-  <p>Paul Hammant found this cool <a href="https://github.com/lmcgrath/angular-java-server-midi">Server-Side Piano</a> and I’ve modified it to be configurable from a running App-Config-App. Because the sound is generated at the server, you’re able to see (hear) the Server-Side Piano change its configuration without reloading the UI.</p>
-
-  <p class="read-more"><a href="/blog/2012/11/20/app-config-app-in-action">Read more...</a></p>
-
-    <h3 class="post-title">
-  <a href="/blog/2012/11/16/scm-backed-application-configuration-with-perforce">SCM-Backed Application Configuration with Perforce</a>
-</h3>
-<div class="post-meta">
-  <p class="post-published">
-    Posted on November 16, 2012
-    by Logan McGrath
-    </p>
-  <p class="post-tags">
-      Tags: <a class="tag" href="/tags/configuration-management">configuration management</a>, <a class="tag" href="/tags/perforce">Perforce</a>, <a class="tag" href="/tags/sinatra">Sinatra</a>, <a class="tag" href="/tags/angular-js">AngularJS</a>
-    </p>
-  </div>
-
-  <p>Continuing from my <a href="/blog/2012/11/07/using-perforce-chronicle-for-application-configuration">last post</a>, I’ve <a href="https://github.com/lmcgrath/App-Config-App/">forked</a> Paul Hammant’s original App-Config-App and modified it to work against Perforce. I’ve decided not to continue using Perforce Chronicle as it is primarily intended for content management.</p>
-
-  <p class="read-more"><a href="/blog/2012/11/16/scm-backed-application-configuration-with-perforce">Read more...</a></p>
-<p class="view-all-posts"><a href="/archives">View all posts</a></p>
-
-<h2 class="hard-section">Tags</h2>
-<p class="tag-cloud" data-show-count><a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/angular-js">AngularJS</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/haskell">Haskell</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/perforce">Perforce</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/sinatra">Sinatra</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:5" href="/tags/configuration-management">configuration management</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/hakyll">hakyll</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/self-host">self host</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/tinfoil-hat">tinfoil hat</a></p>
-
+    </div>
+    
 
   </div>
 </main>
@@ -154,9 +190,9 @@
   <div class="content-bound">
     <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
@@ -164,8 +200,7 @@
       <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/d70ba81/site/blog.html">blog.html</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/d70ba81">d70ba81</a>.</p>
-    </div>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/ff7c20b/site/blog.html">blog.html</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/ff7c20b">ff7c20b</a>.</p>
   </div>
 </footer>
 

@@ -6,12 +6,12 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>This Field Was Green - Reasons why my website is offline</title>
-<link rel="canonical" href="https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline">
+<link rel="canonical" href="https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline/">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 
 <meta property="og:site_name" content="">
 <meta property="og:title" content="Reasons why my website is offline">
-<meta property="og:url" content="https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline">
+<meta property="og:url" content="https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline/">
 <meta property="og:description" content="My website comes out of the closet. This is from where I host several of my services, but the uptime is terrible!">
 <meta property="og:image:url" content="https://thisfieldwas.green/images/reasons-my-website-is-offline/coming-out-of-the-closet-512x512.png">
 <meta property="og:image:alt" content="The closet computer, in context">
@@ -21,6 +21,8 @@
   <meta property="article:tag" content="self host">
   <meta property="article:tag" content="configuration management">
   <meta property="article:tag" content="tinfoil hat">
+  <meta property="article:tag" content="duct tape">
+  <meta property="article:tag" content="yak shave">
   
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@thisgreenfield">
@@ -30,9 +32,22 @@
 
 <link rel="stylesheet" href="/css/main.css">
 <script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
 
 </head>
-<body class="post post-full">
+<body>
 
 <header class="page-header">
   <div class="content-bound">
@@ -41,9 +56,9 @@
       <h1 class="logo"><a href="/">This Field Was Green</a></h1>
       <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     </div>
@@ -52,18 +67,27 @@
 
 <main class="page-content">
   <div class="content-bound">
-    <h1 class="post-title">
-  <a href="/blog/2021/12/11/reasons-why-my-website-is-offline">Reasons why my website is offline</a>
-</h1>
+    <div class="post post-full">
+      <h1 class="post-title">Reasons why my website is offline</h1>
 <div class="post-meta">
   <p class="post-published">
     Posted on December 11, 2021
     by Logan McGrath
     </p>
   <p class="post-tags">
-      Tags: <a class="tag" href="/tags/self-host">self host</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>, <a class="tag" href="/tags/tinfoil-hat">tinfoil hat</a>
+      Tags: <a class="tag" href="/tags/self-host">self host</a>, <a class="tag" href="/tags/configuration-management">configuration management</a>, <a class="tag" href="/tags/tinfoil-hat">tinfoil hat</a>, <a class="tag" href="/tags/duct-tape">duct tape</a>, <a class="tag" href="/tags/yak-shave">yak shave</a>
     </p>
   </div>
+
+<div class="post-thumbnail">
+  <a href="/images/reasons-my-website-is-offline/coming-out-of-the-closet-128x128.png">
+    <img src="/images/reasons-my-website-is-offline/coming-out-of-the-closet-128x128.png" alt="Reasons why my website is offline" width="128" height="128">
+  </a>
+</div>
+
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">15m 25s</span></p>
+</div>
 <p>My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and <a href="https://internetwebsite.ofvlad.xyz">low-key minimalist</a>, found next to the garbage chute at his condo building.</p>
 <!--more-->
 <blockquote>
@@ -154,16 +178,15 @@
 <h2 id="duct-tape-and-rainbows">Duct tape and rainbows</h2>
 <p>I have a lot of problems hosting my website and source code from my <em>closet computer</em> in terms of uptime. Mostly related to tripping over the power cable, though in other ways the setup isn’t resilient. It’s been a really rewarding experience nonetheless. I’m working with tech that I use all the time as a consumer, but have never myself had to engineer or maintain. It’s a fun puzzle.</p>
 <p>Hosting my website and source code myself feels very empowering. I feel as if I reclaimed a little piece of the internet. For that alone I want to see what more I can self host. The internet today clusters around a centralizing oligopoly of services, and I pine for the days when every odd person had their own small, weird website, and frequented a handful of small, niche forums, each with just enough users to be interesting. Now there’s Facebook. GitHub. Google… If I name a <em>thing</em>: there’s likely a single site that I would go to for that <em>thing</em>. That <em>thing</em> has likely regressed in quality towards the mean and mediocre. And when I go to that site for that <em>thing</em>, I can’t tell whether I’ve found the <em>thing</em> or an ad for a subscription service that gives me access to the <em>thing</em> at a markup.</p>
-<figure id="closet-computer-in-context-aside" class="image">
-  <p class="content">
-    <a href="/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png" class="image-link">
-      <img src="/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png"
-        id="closet-computer-in-context"
-        title="Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first."
-        alt="Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.">
-    </a>
-  </p>
-  <figcaption>Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.</figcaption>
+<figure id="closet-computer-in-context" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png" class="image-link">
+        <img src="/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png" id="closet-computer-in-context-img" title="Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first." alt="Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.">
+      </a>
+    </p>
+    <figcaption>Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.</figcaption>
+  </div>
 </figure>
 <p>I severely took for granted the uptime that a third party service could give me. It’s making me rethink what the total cost of what third party hosting actually looks like, not only in terms of dollars and nebulous ideals, but more importantly in terms of peace of mind. Terms such as <em>will the promotion committee be able to see that writeup I referred them to?</em> I would absolutely benefit from hosting my website from my <em>bastion server</em> instead, but perhaps after I reread <code>linode</code>’s service agreements to allay my confounding mind.</p>
 <p>Regarding nebulous ideals, Copilot makes a very strong case for treating <a href="https://www.brookings.edu/blog/techtank/2018/02/21/should-we-treat-data-as-labor-lets-open-up-the-discussion/">data as a form of labor</a>. At the time of this writing, Wed Dec 8, 2021, Copilot is in technical review and accessible via waitlist. I can’t find any mention of licensing cost, or whether there will be a distinction between paid and community editions. If Copilot is available as an exclusively free service, then I believe it stands as an excellent reinvestment back into the community and profession as a whole. If someone is paying for Copilot, then we are collectively exploited within some legally-accepted gray area, because we agreed to be.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
@@ -172,7 +195,7 @@
 <p>I might give Copilot a go soon. I’m reading some good things about how it cuts through boilerplate like a hot knife through butter. Reviews such as this help me conceptualize how it might fit into my own workflow, and that its role is more augmentation than replacement. Especially now that I’ve had time to step back. I would be over the moon to have an intelligent assist for the boring parts of my job. I suppose that was GitHub’s goal, too.</p>
 <p>On the lighter side, being professionally out and telling people that my website is coming out of the closet gives me a certain subversive glee that I never realized I needed. It’s a great lead into how the computer got there, too.</p>
 <p>For now, I host my source code at <a href="https://bitsof.thisfieldwas.green">bitsof.thisfieldwas.green</a>. My website source repository is directly accessible from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green">keywordsalad/thisfieldwas.green</a>.</p>
-<section class="footnotes" role="doc-endnotes">
+<section class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
 <li id="fn1" role="doc-endnote"><p>Meme reference: <a href="https://knowyourmeme.com/memes/btw-i-use-arch">btw i use arch</a> – When Vlad proofread this post, he informed me that it was customary to let the reader know that one uses Arch, btw.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
@@ -182,6 +205,20 @@
 </ol>
 </section>
 
+    </div>
+    <div class="page-comments">
+  <p><strong>Please share with me your thoughts and feedback!</strong></p>
+  <script>
+    var remark_config = {
+      host: 'https://remark42.thisfieldwas.green',
+      site_id: 'thisfieldwas.green',
+      url: 'https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline/'
+    }
+  </script>
+  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
+  <div id="remark42"></div>
+</div>
+
   </div>
 </main>
 
@@ -189,9 +226,9 @@
   <div class="content-bound">
     <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
@@ -199,8 +236,7 @@
       <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/4679983/site/_posts/2021-12-11-reasons-why-my-website-is-offline.md">2021-12-11-reasons-why-my-website-is-offline.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/4679983">4679983</a>.</p>
-    </div>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/ff7c20b/site/_posts/2021-12-11-reasons-why-my-website-is-offline.md">2021-12-11-reasons-why-my-website-is-offline.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/ff7c20b">ff7c20b</a>.</p>
   </div>
 </footer>
 

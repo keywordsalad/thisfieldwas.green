@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="googlebot" content="noindex">
+<title>This Field Was Green - Parser Combinators</title>
+<link rel="canonical" href="https://thisfieldwas.green/drafts/parser-combinators/">
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
+
+<meta property="og:site_name" content="">
+<meta property="og:title" content="Parser Combinators">
+<meta property="og:url" content="https://thisfieldwas.green/drafts/parser-combinators/">
+<meta property="og:description" content="Combining functions to build a parser">
+<meta property="og:image:url" content="https://thisfieldwas.green/images/grass-256x256.png">
+
+<meta property="article:published_time" content="2022-06-20T10:37:30-07:00">
+  <meta property="article:modified_time" content="2022-06-20T10:37:30-07:00">
+  <meta property="article:author" content="Logan McGrath">
+  <meta property="article:tag" content="functional programming">
+  <meta property="article:tag" content="programming">
+  <meta property="article:tag" content="scala">
+  <meta property="article:tag" content="design patterns">
+  <meta property="article:tag" content="combinators">
+  <meta property="article:tag" content="parsing">
+  
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@thisgreenfield">
+<meta name="twitter:title" content="Parser Combinators">
+<meta name="twitter:description" content="Combining functions to build a parser">
+
+
+<link rel="stylesheet" href="/css/main.css">
+<script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
+
+</head>
+<body>
+
+<header class="page-header">
+  <div class="content-bound">
+    <div class="logo-icon"><a href="/"></a></div>
+    <div class="logo-nav">
+      <h1 class="logo"><a href="/">This Field Was Green</a></h1>
+      <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
+</nav>
+
+    </div>
+  </div>
+</header>
+
+<main class="page-content">
+  <div class="content-bound">
+    <div class="post post-full">
+      <h1 class="post-title">Parser Combinators</h1>
+<div class="post-meta">
+  <p class="post-published">
+    Drafted on June 20, 2022
+    by Logan McGrath
+    </p>
+  <p class="post-tags">
+      Tags: <a class="tag" href="/tags/functional-programming">functional programming</a>, <a class="tag" href="/tags/programming">programming</a>, <a class="tag" href="/tags/scala">scala</a>, <a class="tag" href="/tags/design-patterns">design patterns</a>, <a class="tag" href="/tags/combinators">combinators</a>, <span class="tag">parsing</span>
+    </p>
+  </div>
+
+
+
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">18m 21s</span></p>
+</div>
+<p>In my post <a href="/blog/2022/06/16/set-function/">The Set Function</a> I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: <em>parsing text</em>.</p>
+<!--more-->
+<blockquote>
+<p>The code that accompanies this post may be found <a href="https://bitsof.thisfieldwas.green/keywordsalad/parser-combinators/src/branch/post/parser-combinators">here</a>.</p>
+</blockquote>
+<h2 id="the-parse-function">The <code>parse()</code> function</h2>
+<p>Parsers begin as a simple signature, a function called <code>parse()</code> from an input <code>Int</code> offset and <code>String</code> to either a failed offset or matched offset.</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb1"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Parse <span class="kw">extends</span> <span class="op">(((</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">))</span> <span class="op">=&gt;</span> Either<span class="op">[</span><span class="bu">Int</span><span class="op">,</span> <span class="op">(</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">)])</span></span></code></pre></div>
+</div>
+<p><strong>This signature enables two capabilities:</strong></p>
+<ol type="1">
+<li>On failure the offset where the <code>parse()</code> function failed to recognize the input is returned.</li>
+<li>On success the offset where the end of the recognized input is returned along with the input, which can be used to extract the matched input and also be passed to the next <code>parse()</code> function as its starting point.</li>
+</ol>
+<p><em>Below we will introduce specialized <code>parse()</code> functions within the <code>Parse</code> companion object.</em></p>
+<h3 id="implementing-the-first-parse-function">Implementing the first <code>parse()</code> function</h3>
+<p>The first <code>parse()</code> function we can implement is <code>satisfy()</code>. This function works by using a <em>predicate</em> to match the <code>Char</code> at the current offset within the input.</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb2"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">satisfy</span><span class="op">(</span>predicate<span class="op">:</span> <span class="bu">Char</span> <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">):</span> Parse <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="op">(</span>offset<span class="op">,</span> input<span class="op">)</span> <span class="cf">if</span> <span class="fu">predicate</span><span class="op">(</span><span class="fu">input</span><span class="op">(</span>offset<span class="op">))</span> <span class="op">=&gt;</span> <span class="fu">Right</span><span class="op">(</span>offset <span class="op">+</span> <span class="dv">1</span><span class="op">,</span> input<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="op">(</span>offset<span class="op">,</span> _<span class="op">)</span>                                 <span class="op">=&gt;</span> <span class="fu">Left</span><span class="op">(</span>offset<span class="op">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>This function is very simple; it can match single <code>Char</code>s easily.</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb3"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;satisfy&quot;</span> can <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognize a single character if it matches&quot;</span> in <span class="op">{</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> parse <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> <span class="ch">&#39;a&#39;</span><span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;abc&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">1</span><span class="op">,</span> <span class="st">&quot;abc&quot;</span><span class="op">))</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;reject a character that doesn&#39;t match&quot;</span> in <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> parse <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> <span class="ch">&#39;a&#39;</span><span class="op">)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;xyz&quot;</span><span class="op">))</span> shouldBe <span class="fu">Left</span><span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>With a little more work, it can be made to match Unicode <code>Char</code>s!</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb4"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;recognize Unicode characters&quot;</span> in <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> parse <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> pattern <span class="op">=</span> <span class="ex">Pattern</span><span class="op">.</span><span class="fu">compile</span><span class="op">(</span><span class="st">&quot;</span><span class="ch">\\</span><span class="st">p{Ll}&quot;</span><span class="op">)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">satisfy</span><span class="op">(</span>c <span class="op">=&gt;</span> pattern<span class="op">.</span><span class="fu">matcher</span><span class="op">(</span><span class="ex">CharBuffer</span><span class="op">.</span><span class="fu">wrap</span><span class="op">(</span><span class="fu">ArrayCharSequence</span><span class="op">(</span><span class="ex">Array</span><span class="op">(</span>c<span class="op">)))).</span><span class="fu">matches</span><span class="op">())</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;π is pi&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">1</span><span class="op">,</span> <span class="st">&quot;π is pi&quot;</span><span class="op">))</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;Π is uppercase pi&quot;</span><span class="op">))</span> shouldBe <span class="fu">Left</span><span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>Thus <code>satisfy()</code> is sufficiently versatile to meet a wide range of needs, though it requires that you be creative in how you create your predicates.</p>
+<h3 id="specializing-the-satisfy-parse-function">Specializing the <code>satisfy()</code> parse function</h3>
+<p>Based on the previous example, recognizing a character with a regular expression is really cumbersome. Let’s define a <code>parse()</code> function that makes this kind of recognizer easier to define.</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb5"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">satisfyRegex</span><span class="op">(</span>pattern<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> Parse <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> pattern <span class="op">=</span> <span class="ex">Pattern</span><span class="op">.</span><span class="fu">compile</span><span class="op">(</span><span class="st">&quot;</span><span class="ch">\\</span><span class="st">p{Ll}&quot;</span><span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">satisfy</span><span class="op">(</span>c <span class="op">=&gt;</span> pattern<span class="op">.</span><span class="fu">matcher</span><span class="op">(</span><span class="ex">CharBuffer</span><span class="op">.</span><span class="fu">wrap</span><span class="op">(</span><span class="fu">ArrayCharSequence</span><span class="op">(</span><span class="ex">Array</span><span class="op">(</span>c<span class="op">)))).</span><span class="fu">matches</span><span class="op">())</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>Now a regular expression can be provided without creating the boilerplate to support the predicate directly. The test to show that the <code>satisfyRegex()</code> function is identical to the original, as well.</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb6"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;satisfyRegex&quot;</span> can <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognize a character using a regex&quot;</span> in <span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> parse <span class="op">=</span> <span class="fu">satisfyRegex</span><span class="op">(</span><span class="st">&quot;</span><span class="ch">\\</span><span class="st">p{Ll}&quot;</span><span class="op">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;π is lowercase pi&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">1</span><span class="op">,</span> <span class="st">&quot;π is lowercase pi&quot;</span><span class="op">))</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;Π is uppercase pi&quot;</span><span class="op">))</span> shouldBe <span class="fu">Left</span><span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<h2 id="parser-combinators">Parser combinators</h2>
+<p>So far we have two <code>parse()</code> functions: <code>satisfy()</code> and <code>satisfyRegex()</code>. Neither of these do more than recognize single <code>Char</code>s and advance the offset of the input. We want to be able to recognize sections of input.</p>
+<p>Let’s start first by recognizing two letters, one after the other, with our first combinator: the <code>&amp;</code> combinator.</p>
+<p><strong>What is a combinator?</strong> A combinator is a function that builds a function from other functions. In this case, we will be building a new <code>parse()</code> function that <em>combines</em> the capabilities of two other <code>parse()</code> functions.</p>
+<p>Here is how we define the combinator on the <code>Parse</code> trait:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb7"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="op">&amp;(</span>second<span class="op">:</span> Parse<span class="op">):</span> Parse <span class="op">=</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  input <span class="op">=&gt;</span> <span class="kw">this</span><span class="op">(</span>input<span class="op">).</span><span class="fu">flatMap</span><span class="op">(</span>nextInput <span class="op">=&gt;</span> <span class="fu">second</span><span class="op">(</span>nextInput<span class="op">))</span></span></code></pre></div>
+</div>
+<p>By using the <code>&amp;</code> combinator we can define new <code>parse()</code> functions from two existing ones, allowing us to recognize a length of input. Here is a short example using a test:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb8"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&amp;&quot;</span> which <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> parseFirst <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> <span class="ch">&#39;a&#39;</span><span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> parseSecond <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> <span class="ch">&#39;b&#39;</span><span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> parse <span class="op">=</span> parseFirst <span class="op">&amp;</span> parseSecond</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognizes the first letter and then the second&quot;</span> in <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;abc&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">2</span><span class="op">,</span> <span class="st">&quot;abc&quot;</span><span class="op">))</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognizes the first letter but rejects the second&quot;</span> in <span class="op">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;acc&quot;</span><span class="op">))</span> shouldBe <span class="fu">Left</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;rejects the first letter&quot;</span> in <span class="op">{</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;ccc&quot;</span><span class="op">))</span> shouldBe <span class="fu">Left</span><span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<h3 id="recognizing-alternatives-with-a-second-parse-function">Recognizing alternatives with a second <code>parse()</code> function</h3>
+<p>Given the possibility that a <code>parse()</code> function may fail to recognize the input, is there a way that we could fall back to an alternative <code>parse()</code> function that would be able to recognize it? There is!</p>
+<p>The next combinator is <code>|</code>. This combinator tries to recognize the input with the first <code>parse()</code> function and will use the second <code>parse()</code> function if it fails.</p>
+<p>Here is how we define the combinator on the <code>Parse</code> trait:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb9"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="op">|(</span>second<span class="op">:</span> Parse<span class="op">):</span> Parse <span class="op">=</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  input <span class="op">=&gt;</span> <span class="kw">this</span><span class="op">(</span>input<span class="op">).</span>left<span class="op">.</span><span class="fu">flatMap</span><span class="op">(</span>_ <span class="op">=&gt;</span> <span class="fu">second</span><span class="op">(</span>input<span class="op">))</span></span></code></pre></div>
+</div>
+<p>This combinator allows us to choose between possibilities of input. A simple example is demonstrated in its test:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb10"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;|&quot;</span> which <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> parseFirst <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> <span class="ch">&#39;a&#39;</span><span class="op">)</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> parseSecond <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> <span class="ch">&#39;b&#39;</span><span class="op">)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> parse <span class="op">=</span> parseFirst <span class="op">|</span> parseSecond</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognizes using the first parse function&quot;</span> in <span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;abc&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">1</span><span class="op">,</span> <span class="st">&quot;abc&quot;</span><span class="op">))</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognizes using the second parse function&quot;</span> in <span class="op">{</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;bcd&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">1</span><span class="op">,</span> <span class="st">&quot;bcd&quot;</span><span class="op">))</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;rejects if neither parser recognizes&quot;</span> in <span class="op">{</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;cde&quot;</span><span class="op">))</span> shouldBe <span class="fu">Left</span><span class="op">(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<h2 id="putting-together-what-we-have-so-far">Putting together what we have so far</h2>
+<p>Now that we have sequential and alternative recognizers, we can start defining more complex <code>parse()</code> functions. Let’s start with a term recognizer.</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb11"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">term</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> Parse <span class="op">=</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  value<span class="op">.</span>tail<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span><span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> value<span class="op">.</span>head<span class="op">))((</span>p<span class="op">,</span> c<span class="op">)</span> <span class="op">=&gt;</span> p <span class="op">&amp;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> c<span class="op">))</span></span></code></pre></div>
+</div>
+<p>By using the classic functional programming idiom <code>foldLeft()</code>, we can build a term recognizer using only the functions and combinators we have defined so far. Slick!</p>
+<p>Here is the test to show that our <code>term()</code> function works, including one using the <code>|</code> combinator with a second term:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb12"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;term&quot;</span> which <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> parse <span class="op">=</span> <span class="fu">term</span><span class="op">(</span><span class="st">&quot;banana&quot;</span><span class="op">)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognizes a word&quot;</span> in <span class="op">{</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;banana apple&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">6</span><span class="op">,</span> <span class="st">&quot;banana apple&quot;</span><span class="op">))</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;rejects input that doesn&#39;t match&quot;</span> in <span class="op">{</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">parse</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;banapple&quot;</span><span class="op">))</span> shouldBe <span class="fu">Left</span><span class="op">(</span><span class="dv">4</span><span class="op">)</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;alternate with a second term&quot;</span> in <span class="op">{</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> combined <span class="op">=</span> parse <span class="op">|</span> <span class="fu">term</span><span class="op">(</span><span class="st">&quot;apple&quot;</span><span class="op">)</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">combined</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;banana orange&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">6</span><span class="op">,</span> <span class="st">&quot;banana orange&quot;</span><span class="op">))</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">combined</span><span class="op">((</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;apple orange&quot;</span><span class="op">))</span> shouldBe <span class="fu">Right</span><span class="op">((</span><span class="dv">5</span><span class="op">,</span> <span class="st">&quot;apple orange&quot;</span><span class="op">))</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<h2 id="how-do-we-get-the-matched-input">How do we get the matched input?</h2>
+<p>There’s a small problem with our <code>parse()</code> function. It only gives the end offset of the recognized input and there isn’t any way to collect or modify the recognized input. This means we have to change the signature of the <code>parse()</code> function.</p>
+<h3 id="modeling-input">Modeling input</h3>
+<p>First, we need to consider what our input needs to model. Our input is characterized by two things, the text being parsed and the offset that the current <code>parse()</code> function is operating from. This defines a <em>cursor</em>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb13"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">InputCursor</span><span class="op">(</span>offset<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> input<span class="op">:</span> <span class="ex">String</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> peek<span class="op">:</span> <span class="bu">Char</span> <span class="op">=</span> <span class="fu">input</span><span class="op">(</span>offset<span class="op">)</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="op">+(</span>amount<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> InputCursor <span class="op">=</span> <span class="fu">copy</span><span class="op">(</span>offset <span class="op">=</span> offset <span class="op">+</span> amount<span class="op">)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="op">-(</span>amount<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> InputCursor <span class="op">=</span> <span class="fu">copy</span><span class="op">(</span>offset <span class="op">=</span> offset <span class="op">-</span> amount<span class="op">)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>A cursor allows us to hold a reference to the input itself, unmodified, but increment or decrement the position we are at within the input. As our <code>parse()</code> functions recognize input, they increment the offset so that the following functions have a place to start.</p>
+<h3 id="modeling-output">Modeling output</h3>
+<p>The output of the <code>parse()</code> function changes as well. We want to be able to return the recognized input. This changes the signature of the <code>parse()</code> function:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb14"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Parse <span class="kw">extends</span> <span class="op">(</span>InputCursor <span class="op">=&gt;</span> Either<span class="op">[</span>InputCursor<span class="op">,</span> <span class="op">(???,</span> InputCursor<span class="op">)])</span></span></code></pre></div>
+</div>
+<p>But what should be returned isn’t entirely clear. If the recognizer matches a <code>Char</code>, then the <code>parse()</code> function should return a <code>Char</code>. But what about the <code>term()</code> recognizer? That should return a <code>String</code>. What if we’re using a function that recognizes integers?</p>
+<p>This means that the <code>parse()</code> function is generic in its return type:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb15"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> <span class="op">(</span>InputCursor <span class="op">=&gt;</span> Either<span class="op">[</span>InputCursor<span class="op">,</span> <span class="op">(</span>A<span class="op">,</span> InputCursor<span class="op">)])</span></span></code></pre></div>
+</div>
+<p>The overall return type is also becoming verbose by using the general-purpose <code>Either</code> class. So let’s define something specialized:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb16"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> ParseResult<span class="op">[</span>A<span class="op">]</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> ParseFailure<span class="op">[</span>A<span class="op">](</span>cursor<span class="op">:</span> InputCursor<span class="op">)</span> <span class="kw">extends</span> ParseResult<span class="op">[</span>A<span class="op">]</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> ParseSuccess<span class="op">[</span>A<span class="op">](</span>result<span class="op">:</span> A<span class="op">,</span> cursor<span class="op">:</span> InputCursor<span class="op">)</span> <span class="kw">extends</span> ParseResult</span></code></pre></div>
+</div>
+<p><em><strong>But before we use it this means that all of our function signatures have to change!</strong></em></p>
+<h2 id="the-new-shape-of-the-parse-function">The new shape of the <code>parse()</code> function</h2>
+<p>Our <code>parse()</code> function will soon become generic its return type, which makes it <em>covariant</em> in that <code>parse()</code> can be adapted to produce anything we want. What the <code>parse()</code> function produces is contextualized by whether it is recognized in the input, and as such there is a chance that nothing is produced because the input wasn’t recognized. This means the the <code>parse()</code> function forms a specific structure: a <em>context</em> with the shape of a <strong>functor</strong>.</p>
+<blockquote>
+<p>I have written about contexts, functors, and related structures extensively. Start from the following article if these terms are unfamiliar to you: <strong><a href="/blog/2022/03/15/contexts-and-effects/">Embracing Nondeterminism Part I: Contexts and Effects</a></strong></p>
+</blockquote>
+<p>Take a look at what the <code>parse()</code> function signature will look like after we start using <code>ParseResult</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb17"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> <span class="op">(</span>InputCursor <span class="op">=&gt;</span> ParseResult<span class="op">[</span>A<span class="op">])</span></span></code></pre></div>
+</div>
+<p>Let’s compare that with the shape of a <em>functor</em>: <code>Parse[A]</code> and <code>F[A]</code>.</p>
+<p>In fact, <code>ParseResult[A]</code> has the same shape!</p>
+<p>To save some time, I’ve added the <a href="https://typelevel.org/cats/"><code>cats</code></a> library to leverage the functor typeclass abstraction. First, let’s implement the <code>Functor</code> typeclass for <code>ParseResult[A]</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb18"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> ParseResult <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">implicit</span> <span class="kw">val</span> parseResultFunctor<span class="op">:</span> Functor<span class="op">[</span>ParseResult<span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> Functor<span class="op">[</span>ParseResult<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> ParseResult<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> ParseResult<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>      fa <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">ParseFailure</span><span class="op">(</span>failedCursor<span class="op">)</span>        <span class="op">=&gt;</span> <span class="fu">ParseFailure</span><span class="op">(</span>failedCursor<span class="op">)</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">ParseSuccess</span><span class="op">(</span>matched<span class="op">,</span> nextCursor<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">ParseSuccess</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>matched<span class="op">),</span> nextCursor<span class="op">)</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>This allows us to transform the contents of the <code>ParseResult</code> at-will.</p>
+<h3 id="changing-the-return-type-of-the-parse-function-itself">Changing the return type of the <code>parse()</code> function itself</h3>
+<p>The <code>parse()</code> function itself is a functor. But that doesn’t quite make sense: it doesn’t contain anything because it’s a function!</p>
+<p>However, it still has the <em>shape</em> of a functor. Recall the new signature that it will have <code>InputCursor =&gt; ParseResult[A]</code>. It’s covariant in <code>A</code>, giving it the shape of <code>F[A]</code>. So how do we treat it as a functor? Let’s change the signature first and see how the code breaks.</p>
+<p><em><strong>And all of the <code>parse()</code> functions break!</strong></em> So we will step through each and get them working again, and we will leverage the <code>ParseResult</code> functor.</p>
+<ol type="1">
+<li><p><strong><code>satisfy()</code></strong> only requires that we change the return:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">satisfy</span><span class="op">(</span>predicate<span class="op">:</span> <span class="bu">Char</span> <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">):</span> Parse<span class="op">[</span><span class="bu">Char</span><span class="op">]</span> <span class="op">=</span> cursor <span class="op">=&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span><span class="fu">predicate</span><span class="op">(</span>cursor<span class="op">.</span>peek<span class="op">))</span> <span class="op">{</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ParseSuccess</span><span class="op">(</span>cursor<span class="op">.</span>peek<span class="op">,</span> cursor <span class="op">+</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ParseFailure</span><span class="op">(</span>cursor<span class="op">)</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div></li>
+<li><p><strong>The <code>&amp;</code> combinator</strong> has a <code>flatMap()</code> screaming to be abstracted:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="op">&amp;[</span>B<span class="op">](</span>second<span class="op">:</span> Parse<span class="op">[</span>B<span class="op">]):</span> Parse<span class="op">[(</span>A<span class="op">,</span> B<span class="op">)]</span> <span class="op">=</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  cursor <span class="op">=&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">(</span>cursor<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="fu">ParseFailure</span><span class="op">(</span>failedCursor<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">ParseFailure</span><span class="op">(</span>failedCursor<span class="op">)</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="fu">ParseSuccess</span><span class="op">(</span>firstMatched<span class="op">,</span> nextCursor<span class="op">)</span> <span class="op">=&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">second</span><span class="op">(</span>nextCursor<span class="op">).</span><span class="fu">map</span><span class="op">(</span>secondMatched <span class="op">=&gt;</span> <span class="op">(</span>firstMatched<span class="op">,</span> secondMatched<span class="op">))</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div></li>
+<li><p><strong>The <code>|</code> combinator</strong> requires an abstraction to act on failure:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="op">|(</span>second<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">]):</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  cursor <span class="op">=&gt;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">(</span>cursor<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> _<span class="op">:</span> ParseFailure    <span class="op">=&gt;</span> <span class="fu">second</span><span class="op">(</span>cursor<span class="op">)</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> s<span class="op">:</span> ParseSuccess<span class="op">[</span>_<span class="op">]</span> <span class="op">=&gt;</span> s</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span></code></pre></div></li>
+<li><p><strong>term()</strong> is affected the most, and the rewrite requires threading a cursor through a lot of <code>parse()</code> functions and handling the results. It even requires adding a specialized <code>parse()</code> function to always return a <code>Unit</code> and succeed!</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="dt">unit</span><span class="op">:</span> Parse<span class="op">[</span><span class="bu">Unit</span><span class="op">]</span> <span class="op">=</span> cursor <span class="op">=&gt;</span> <span class="fu">ParseSuccess</span><span class="op">((),</span> cursor<span class="op">)</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">term</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> Parse<span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  outerCursor <span class="op">=&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    value</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">map</span><span class="op">(</span>c <span class="op">=&gt;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> c<span class="op">))</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span><span class="dt">unit</span><span class="op">)((</span>up<span class="op">,</span> cp<span class="op">)</span> <span class="op">=&gt;</span> innerCursor <span class="op">=&gt;</span> <span class="op">(</span>up <span class="op">&amp;</span> cp<span class="op">)(</span>innerCursor<span class="op">).</span><span class="fu">map</span><span class="op">(</span>_ <span class="op">=&gt;</span> <span class="op">()))(</span>outerCursor<span class="op">)</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">map</span><span class="op">(</span>_ <span class="op">=&gt;</span> value<span class="op">)</span></span></code></pre></div></li>
+</ol>
+<h3 id="the-parse-function-as-a-functor">The <code>parse()</code> function as a functor</h3>
+<p>First, let’s define a <code>Functor</code> instance for <code>Parse</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb23"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">val</span> parseInstances<span class="op">:</span> ParseInstances <span class="op">=</span> <span class="kw">new</span> <span class="fu">ParseInstances</span><span class="op">()</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ParseInstances <span class="kw">extends</span> Functor<span class="op">[</span>Parse<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> Parse<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    cursor <span class="op">=&gt;</span> <span class="fu">fa</span><span class="op">(</span>cursor<span class="op">).</span><span class="fu">map</span><span class="op">(</span>f<span class="op">)</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>This leverages the ability to use <code>ParseResult</code> as a functor. The new <code>map()</code> function for <code>parse()</code> allows us to change what the function produces by wrapping the supplied function <code>f: A =&gt; B</code> in a new <code>parse()</code> function! We are effectively able to change the “contents” of the function this way.</p>
+<p>Using <code>parse()</code> as a functor, we can refactor the <code>term()</code> function:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb24"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">term</span><span class="op">(</span>value<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> Parse<span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  value</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">map</span><span class="op">(</span>c <span class="op">=&gt;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> c<span class="op">))</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span><span class="dt">unit</span><span class="op">)((</span>up<span class="op">,</span> cp<span class="op">)</span> <span class="op">=&gt;</span> <span class="op">(</span>up <span class="op">&amp;</span> cp<span class="op">).</span><span class="fu">map</span><span class="op">(</span>_ <span class="op">=&gt;</span> <span class="op">()))</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">map</span><span class="op">(</span>_ <span class="op">=&gt;</span> value<span class="op">)</span></span></code></pre></div>
+</div>
+<p>Notice that we no longer need to manually pass around the input cursor. We’ve simply folded a sequence of <code>parse()</code> functions to <code>Char</code> down to a single <code>parse()</code> function to <code>String</code>. The functor abstraction allowed us to declaratively create this function without having to worry about the plumbing; we don’t even have to declare the cursor as an explicit input.</p>
+<h3 id="sequential-parsing-with-the-parse-function">Sequential parsing with the <code>parse()</code> function</h3>
+<p>We can’t apply the functor abstraction to the <code>&amp;</code> combinator as it sequences one <code>parse()</code> function after a successful application of a preceding <code>parse()</code> function. This means that it executes <em>imperatively</em>. The specific abstraction we have to use for this kind of execution is a <strong><a href="https://thisfieldwas.green/blog/2022/06/17/imperative-computation/">monad</a></strong>.</p>
+<p>A monad is a specialization of a functor. We can replace our functor instance of the <code>parse()</code> function with one for monad:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb25"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ParseInstances <span class="kw">extends</span> Monad<span class="op">[</span>Parse<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> flatMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> Parse<span class="op">[</span>B<span class="op">]):</span> Parse<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    cursor <span class="op">=&gt;</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fa</span><span class="op">(</span>cursor<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">ParseFailure</span><span class="op">(</span>failedCursor<span class="op">)</span>        <span class="op">=&gt;</span> <span class="fu">ParseFailure</span><span class="op">(</span>failedCursor<span class="op">)</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">ParseSuccess</span><span class="op">(</span>matched<span class="op">,</span> nextCursor<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">f</span><span class="op">(</span>matched<span class="op">)(</span>nextCursor<span class="op">)</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> tailRecM<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>a<span class="op">:</span> A<span class="op">)(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> Parse<span class="op">[</span>Either<span class="op">[</span>A<span class="op">,</span> B<span class="op">]]):</span> Parse<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    @tailrec</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">recur</span><span class="op">(</span>cursor<span class="op">:</span> InputCursor<span class="op">,</span> parse<span class="op">:</span> Parse<span class="op">[</span>Either<span class="op">[</span>A<span class="op">,</span> B<span class="op">]]):</span> ParseResult<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">parse</span><span class="op">(</span>cursor<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">ParseFailure</span><span class="op">(</span>failedCursor<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">ParseFailure</span><span class="op">(</span>failedCursor<span class="op">)</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="fu">ParseSuccess</span><span class="op">(</span>matched<span class="op">,</span> nextCursor<span class="op">)</span> <span class="op">=&gt;</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>          matched <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">case</span> <span class="fu">Left</span><span class="op">(</span>a<span class="op">)</span>  <span class="op">=&gt;</span> <span class="fu">recur</span><span class="op">(</span>nextCursor<span class="op">,</span> <span class="fu">f</span><span class="op">(</span>a<span class="op">))</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">case</span> <span class="fu">Right</span><span class="op">(</span>b<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">ParseSuccess</span><span class="op">(</span>b<span class="op">,</span> nextCursor<span class="op">)</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>          <span class="op">}</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>    cursor <span class="op">=&gt;</span> <span class="fu">recur</span><span class="op">(</span>cursor<span class="op">,</span> <span class="fu">f</span><span class="op">(</span>a<span class="op">))</span></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> pure<span class="op">[</span>A<span class="op">](</span>x<span class="op">:</span> A<span class="op">):</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>    cursor <span class="op">=&gt;</span> <span class="fu">ParseSuccess</span><span class="op">(</span>x<span class="op">,</span> cursor<span class="op">)</span></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p><strong><code>Monad</code> gives us the following capabilities:</strong></p>
+<ul>
+<li>We still get <code>map()</code> through a default definition.</li>
+<li><code>pure()</code> which lifts a result into a <code>parse()</code> function that will always be recognize the input without consuming from the cursor.</li>
+<li><code>flatMap()</code> which allows for sequential execution of one <code>parse()</code> function after another.</li>
+<li><code>tailRecM()</code> which provides <em><a href="https://typelevel.org/cats/typeclasses/monad.html#tailrecm">monadic recursion</a></em>. We’ll be using this later.</li>
+</ul>
+<p>Given this monad instance for the <code>parse()</code> function, we can now rewrite the <code>&amp;</code> combinator:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="op">&amp;[</span>B<span class="op">](</span>second<span class="op">:</span> Parse<span class="op">[</span>B<span class="op">]):</span> Parse<span class="op">[(</span>A<span class="op">,</span> B<span class="op">)]</span> <span class="op">=</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">{</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    a <span class="op">&lt;-</span> <span class="kw">this</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    b <span class="op">&lt;-</span> second</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> <span class="op">(</span>a<span class="op">,</span> b<span class="op">)</span></span></code></pre></div>
+<p>This <code>&amp;</code> combinator becomes very small. Again, like the <code>term()</code> function we no longer have to manually thread a cursor through each function: we simply declare how the individual <code>parse()</code> functions relate and modify what they collectively produce. Additionally the <code>parse()</code> function is now able to participate in the <em>for comprehension</em> syntax sugar as it defines both the <code>map()</code> and <code>flatMap()</code> operations.</p>
+<h3 id="alternative-parsing-with-the-parse-function">Alternative parsing with the <code>parse()</code> function</h3>
+<p>The monad abstraction provides <em>imperative</em> execution. This means that we can’t implement the <code>|</code> combinator using <code>flatMap()</code> as it requires both the first and second <code>parse()</code> functions to succeed in sequence. We need to lean on the <code>Alternative</code> typeclass to allow us to try one function but use another if it fails.</p>
+<p>Let’s start at the deciding factor of success or failure of the <code>parse()</code> function: <code>ParseResult</code>. We need to define a function that allows choice between a successful result and a failed one:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb27"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> ParseResult<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">orElse</span><span class="op">(</span>other<span class="op">:</span> <span class="op">=&gt;</span> ParseResult<span class="op">[</span>A<span class="op">]):</span> ParseResult<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> _<span class="op">:</span> ParseFailure<span class="op">[</span>_<span class="op">]</span> <span class="op">=&gt;</span> other</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> _<span class="op">:</span> ParseSuccess<span class="op">[</span>_<span class="op">]</span> <span class="op">=&gt;</span> <span class="kw">this</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>If our result is <code>ParseSuccess</code> then <code>orElse()</code> returns the current result. If our result is <code>ParseFailure</code> then <code>orElse()</code> evaluates the <code>other</code> argument and returns that instead, regardless of success or failure. This allows us to try producing one result, use it if it’s successful, and otherwise try producing the other result.</p>
+<p>With this ability to abstract the selection of success or failure, we can now abstract the same ability for the <code>parse()</code> function by adding the <code>Alternative</code> typeclass trait to the <code>extends</code> clause of <code>ParseInstances</code>:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb28"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ParseInstances <span class="kw">extends</span> Monad<span class="op">[</span>Parse<span class="op">]</span> <span class="kw">with</span> Alternative<span class="op">[</span>Parse<span class="op">]</span> <span class="op">{</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// monad declarations...</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> empty<span class="op">[</span>A<span class="op">]:</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    cursor <span class="op">=&gt;</span> <span class="fu">ParseFailure</span><span class="op">(</span>cursor<span class="op">)</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> combineK<span class="op">[</span>A<span class="op">](</span>x<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">],</span> y<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">]):</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    cursor <span class="op">=&gt;</span> <span class="fu">x</span><span class="op">(</span>cursor<span class="op">).</span><span class="fu">orElse</span><span class="op">(</span><span class="fu">y</span><span class="op">(</span>cursor<span class="op">))</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p><strong><code>Alternative</code> gives us the following capabilities:</strong></p>
+<ul>
+<li><code>empty</code> provides a <code>parse()</code> function that always fails, because it’s empty.</li>
+<li><code>combineK()</code> allows for the combination of the results produced by the <code>parse()</code> function. Concretely, this means that the first function is attempted, and if it fails then the second function is attempted.</li>
+</ul>
+<p>Armed with abstraction over selection of success or failure, we can redefine the <code>|</code> combinator:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb29"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> cats<span class="op">.</span>syntax<span class="op">.</span>semigroupk<span class="op">.</span>_</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="op">|(</span>second<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">]):</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">this</span> <span class="op">&lt;+&gt;</span> second</span></code></pre></div>
+</div>
+<p>That’s all the <code>|</code> combinator is now: <code>this &lt;+&gt; second</code>. By leveraging the <code>Alternative</code> abstraction, we are able to declaratively specify with a single operator that the first <code>parse()</code> function should be attempted before the second.</p>
+<h2 id="putting-it-all-together">Putting it all together</h2>
+<p>Let’s try defining a <code>parse()</code> function that’s more complex than what we’ve covered so far: a generic programming language identifier recognizer.</p>
+<p><strong>This <code>parse()</code> function should be able to recognize the following inputs:</strong></p>
+<ul>
+<li>Any alphabetic letter followed by zero or more of alphabetic letters, digits, or underscores.</li>
+<li>Any underscore as long as it is followed by one or more of alphabetic letters, digits, or underscores.</li>
+</ul>
+<p>There’s a lot going on in those two requirements. Let’s break it down:</p>
+<ul>
+<li>Recognize one of a range of possible matches from one <code>parse()</code> function.</li>
+<li>Require zero or more matches from one <code>parse()</code> function.</li>
+<li>Require at least one or more matches from one <code>parse()</code> function.</li>
+</ul>
+<p>First, we need to define a <code>parse()</code> function that can recognize one match from any number of parsers. More specifically, we need two functions in order to do this:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb30"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> empty<span class="op">[</span>A<span class="op">]:</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> Alternative<span class="op">[</span>Parse<span class="op">].</span>empty<span class="op">[</span>A<span class="op">]</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> oneOf<span class="op">[</span>A<span class="op">](</span>parsers<span class="op">:</span> <span class="bu">Seq</span><span class="op">[</span>Parse<span class="op">[</span>A<span class="op">]]):</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  parsers<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span>empty<span class="op">[</span>A<span class="op">])(</span>_ <span class="op">|</span> _<span class="op">)</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> oneOf<span class="op">[</span>A<span class="op">](</span>parsers<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">]*):</span> Parse<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">oneOf</span><span class="op">(</span>parsers<span class="op">)</span></span></code></pre></div>
+</div>
+<p>Here we have a convenience <code>empty[A]</code> parser that leverages the <code>Alternative</code> typeclass we implemented earlier. By defining a <code>oneOf()</code> function that accepts a sequence of <code>parse()</code> functions, we can fold each function to the left starting with an empty parser and alternate each one. The first <code>parse()</code> function that matches will return a success result. If none match, then the final failure result will be returned instead.</p>
+<p>How do we use this to accept any one of the alphabetic letters? It would be tedious to write a <code>satisfy()</code> function for each letter by hand, so instead let’s specify the letters we want as a range and map over them:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb31"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> alpha<span class="op">:</span> Parse<span class="op">[</span><span class="bu">Char</span><span class="op">]</span> <span class="op">=</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">oneOf</span><span class="op">(((</span><span class="ch">&#39;a&#39;</span> to <span class="ch">&#39;z&#39;</span><span class="op">)</span> <span class="op">++</span> <span class="op">(</span><span class="ch">&#39;A&#39;</span> to <span class="ch">&#39;Z&#39;</span><span class="op">)).</span><span class="fu">map</span><span class="op">(</span>c <span class="op">=&gt;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> c<span class="op">)))</span></span></code></pre></div>
+</div>
+<p>We can do the same thing with digits:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb32"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> digits<span class="op">:</span> Parse<span class="op">[</span><span class="bu">Char</span><span class="op">]</span> <span class="op">=</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">oneOf</span><span class="op">((</span><span class="ch">&#39;0&#39;</span> to <span class="ch">&#39;9&#39;</span><span class="op">).</span><span class="fu">map</span><span class="op">(</span>c <span class="op">=&gt;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> c<span class="op">)))</span></span></code></pre></div>
+</div>
+<p>We also need a <code>parse()</code> function that allows for recognizing zero or many matches and another for one or many:</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb33"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zeroOrMany<span class="op">[</span>A<span class="op">](</span>parse<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">]):</span> Parse<span class="op">[</span><span class="bu">Seq</span><span class="op">[</span>A<span class="op">]]</span> <span class="op">=</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  Monad<span class="op">[</span>Parse<span class="op">].</span><span class="fu">tailRecM</span><span class="op">(</span><span class="bu">Seq</span><span class="op">[</span>A<span class="op">]())</span> <span class="op">{</span> seq <span class="op">=&gt;</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    parse<span class="op">.</span><span class="fu">map</span><span class="op">(</span>a <span class="op">=&gt;</span> <span class="op">(</span>seq <span class="op">:+</span> a<span class="op">).</span>asLeft<span class="op">[</span><span class="bu">Seq</span><span class="op">[</span>A<span class="op">]])</span> <span class="op">|</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>      seq<span class="op">.</span>asRight<span class="op">[</span><span class="bu">Seq</span><span class="op">[</span>A<span class="op">]].</span>pure<span class="op">[</span>Parse<span class="op">]</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> oneOrMany<span class="op">[</span>A<span class="op">](</span>parse<span class="op">:</span> Parse<span class="op">[</span>A<span class="op">]):</span> Parse<span class="op">[</span><span class="bu">Seq</span><span class="op">[</span>A<span class="op">]]</span> <span class="op">=</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>parse <span class="op">&amp;</span> <span class="fu">zeroOrMany</span><span class="op">(</span>parse<span class="op">)).</span>map <span class="op">{</span> <span class="cf">case</span> <span class="op">(</span>first<span class="op">,</span> rest<span class="op">)</span> <span class="op">=&gt;</span> first <span class="op">+:</span> rest <span class="op">}</span></span></code></pre></div>
+</div>
+<p>Notice how our <code>zeroOrMany()</code> function leverages the <em>monadic recursion</em> capability from earlier.</p>
+<p>Armed with these functions, we can now recognize identifiers!</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb34"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> identifier<span class="op">:</span> Parse<span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> underscore <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">==</span> <span class="ch">&#39;_&#39;</span><span class="op">)</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> rest <span class="op">=</span> alpha <span class="op">|</span> digit <span class="op">|</span> underscore</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> alphaHead <span class="op">=</span> alpha <span class="op">&amp;</span> <span class="fu">zeroOrMany</span><span class="op">(</span>rest<span class="op">)</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> underscoreHead <span class="op">=</span> underscore <span class="op">&amp;</span> <span class="fu">oneOrMany</span><span class="op">(</span>rest<span class="op">)</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>alphaHead <span class="op">|</span> underscoreHead<span class="op">).</span>map <span class="op">{</span> <span class="cf">case</span> <span class="op">(</span>head<span class="op">,</span> rest<span class="op">)</span> <span class="op">=&gt;</span> <span class="op">(</span>head <span class="op">+:</span> rest<span class="op">).</span>mkString <span class="op">}</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<p>But that seems almost too easy! We better write a bunch of tests to make sure this recognizes input as expected.</p>
+<div class="numberLines">
+<div class="sourceCode" id="cb35"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;identifier&quot;</span> can <span class="op">{</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognize a single alpha letter&quot;</span> in <span class="op">{</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">identifier</span><span class="op">(</span><span class="fu">InputCursor</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;a banana&quot;</span><span class="op">))</span> shouldBe <span class="fu">ParseSuccess</span><span class="op">(</span><span class="st">&quot;a&quot;</span><span class="op">,</span> <span class="fu">InputCursor</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="st">&quot;a banana&quot;</span><span class="op">))</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">identifier</span><span class="op">(</span><span class="fu">InputCursor</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;y not&quot;</span><span class="op">))</span> shouldBe <span class="fu">ParseSuccess</span><span class="op">(</span><span class="st">&quot;y&quot;</span><span class="op">,</span> <span class="fu">InputCursor</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="st">&quot;y not&quot;</span><span class="op">))</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognize an alpha letter followed by alphas, digits, and underscores&quot;</span> in <span class="op">{</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">identifier</span><span class="op">(</span><span class="fu">InputCursor</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;a_123_Word &lt;-&quot;</span><span class="op">))</span> shouldBe</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ParseSuccess</span><span class="op">(</span><span class="st">&quot;a_123_Word&quot;</span><span class="op">,</span> <span class="fu">InputCursor</span><span class="op">(</span><span class="dv">10</span><span class="op">,</span> <span class="st">&quot;a_123_Word &lt;-&quot;</span><span class="op">))</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;reject a single underscore&quot;</span> in <span class="op">{</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">identifier</span><span class="op">(</span><span class="fu">InputCursor</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;_ rejected&quot;</span><span class="op">))</span> shouldBe <span class="fu">ParseFailure</span><span class="op">(</span><span class="fu">InputCursor</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="st">&quot;_ rejected&quot;</span><span class="op">))</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;recognize an underscore followed by alpha digits and underscores&quot;</span> in <span class="op">{</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">identifier</span><span class="op">(</span><span class="fu">InputCursor</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;_a_123_Word &lt;-&quot;</span><span class="op">))</span> shouldBe</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ParseSuccess</span><span class="op">(</span><span class="st">&quot;_a_123_Word&quot;</span><span class="op">,</span> <span class="fu">InputCursor</span><span class="op">(</span><span class="dv">11</span><span class="op">,</span> <span class="st">&quot;_a_123_Word &lt;-&quot;</span><span class="op">))</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;reject a digit&quot;</span> in <span class="op">{</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">identifier</span><span class="op">(</span><span class="fu">InputCursor</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;1234&quot;</span><span class="op">))</span> shouldBe <span class="fu">ParseFailure</span><span class="op">(</span><span class="fu">InputCursor</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="st">&quot;1234&quot;</span><span class="op">))</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+</div>
+<h2 id="whats-next">What’s next?</h2>
+<p>With parser combinators you are able to process text into any structure you need. In this post we only covered tuples, <code>Seq</code>s, and <code>String</code>s, but parse functions can be written to produce full AST’s or even interpret scripted programs.</p>
+<p><strong>Some subjects for next time:</strong></p>
+<ol start="3" type="1">
+<li>Parsing mathematical infix expressions and calculating their results.</li>
+<li>Error handling and recovery, an especially tricky subject!</li>
+<li>Stateful parsing, which requires lifting the <code>parse()</code> function into a higher-order monad.</li>
+</ol>
+
+    </div>
+    <div class="page-comments">
+  <p><strong>Please share with me your thoughts and feedback!</strong></p>
+  <script>
+    var remark_config = {
+      host: 'https://remark42.thisfieldwas.green',
+      site_id: 'thisfieldwas.green',
+      url: 'https://thisfieldwas.green/drafts/parser-combinators/'
+    }
+  </script>
+  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
+  <div id="remark42"></div>
+</div>
+
+  </div>
+</main>
+
+<footer class="page-footer">
+  <div class="content-bound">
+    <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
+</nav>
+
+    <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
+    <ul class="acks">
+      <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
+      <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
+    </ul>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/84d9f7b/site/_drafts/parser-combinators.md">parser-combinators.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/84d9f7b">84d9f7b</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

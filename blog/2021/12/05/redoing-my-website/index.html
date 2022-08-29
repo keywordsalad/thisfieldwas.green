@@ -6,12 +6,12 @@
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>This Field Was Green - Redoing my website with Haskell and Hakyll</title>
-<link rel="canonical" href="https://thisfieldwas.green/blog/2021/12/05/redoing-my-website">
+<link rel="canonical" href="https://thisfieldwas.green/blog/2021/12/05/redoing-my-website/">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 
 <meta property="og:site_name" content="">
 <meta property="og:title" content="Redoing my website with Haskell and Hakyll">
-<meta property="og:url" content="https://thisfieldwas.green/blog/2021/12/05/redoing-my-website">
+<meta property="og:url" content="https://thisfieldwas.green/blog/2021/12/05/redoing-my-website/">
 <meta property="og:description" content="">
 <meta property="og:image:url" content="https://thisfieldwas.green/images/grass-256x256.png">
 
@@ -19,7 +19,9 @@
   <meta property="article:modified_time" content="2021-12-05T08:08:32-08:00">
   <meta property="article:author" content="Logan McGrath">
   <meta property="article:tag" content="hakyll">
-  <meta property="article:tag" content="Haskell">
+  <meta property="article:tag" content="haskell">
+  <meta property="article:tag" content="yak shave">
+  <meta property="article:tag" content="programming">
   
 <meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@thisgreenfield">
@@ -29,9 +31,22 @@
 
 <link rel="stylesheet" href="/css/main.css">
 <script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
 
 </head>
-<body class="post post-full">
+<body>
 
 <header class="page-header">
   <div class="content-bound">
@@ -40,9 +55,9 @@
       <h1 class="logo"><a href="/">This Field Was Green</a></h1>
       <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     </div>
@@ -51,18 +66,23 @@
 
 <main class="page-content">
   <div class="content-bound">
-    <h1 class="post-title">
-  <a href="/blog/2021/12/05/redoing-my-website">Redoing my website with Haskell and Hakyll</a>
-</h1>
+    <div class="post post-full">
+      <h1 class="post-title">Redoing my website with Haskell and Hakyll</h1>
 <div class="post-meta">
   <p class="post-published">
     Posted on December  5, 2021
     by Logan McGrath
     </p>
   <p class="post-tags">
-      Tags: <a class="tag" href="/tags/hakyll">hakyll</a>, <a class="tag" href="/tags/haskell">Haskell</a>
+      Tags: <a class="tag" href="/tags/hakyll">hakyll</a>, <a class="tag" href="/tags/haskell">haskell</a>, <a class="tag" href="/tags/yak-shave">yak shave</a>, <a class="tag" href="/tags/programming">programming</a>
     </p>
   </div>
+
+
+
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">15m 44s</span></p>
+</div>
 <p>I’m picking up a COVID project: <em>Redoing my website!</em></p>
 <p>My website prior to 2021 was authored using <a href="http://octopress.org/"><code>octopress</code></a> or <a href="https://jekyllrb.com/"><code>jekyll</code></a>. Truthfully I don’t remember which as I haven’t touched my website in quite a few years. I want to update my homepage and I’m in a bind because I don’t know how to produce a build after I make changes.</p>
 <!--more-->
@@ -153,16 +173,15 @@
 <span id="cb2-2"><a href="#cb2-2"></a>constField <span class="st">&quot;layout&quot;</span> (<span class="st">&quot;page&quot;</span><span class="ot"> ::</span> <span class="dt">String</span>)</span></code></pre></div>
 <p>That particular instance above is due to a <a href="http://dev.stephendiehl.com/hask/#overlappinginstances">footgun</a> I use so that lists of type <code>[a]</code> are treated generally and <code>Strings</code>, which are just <code>[Char]</code>, are treated specially. Haskell can’t tell the difference in this case unless I provide the extra type information.</p>
 <h3 id="using-css-is-still-like-the-family-guy-meme">Using <code>css</code> is still like the Family Guy meme</h3>
-<figure id="family-guy-css-aside" class="image">
-  <p class="content">
-    <a href="/images/redoing-my-website/family-guy-css.gif" class="image-link">
-      <img src="/images/redoing-my-website/family-guy-css.gif"
-        id="family-guy-css"
-        title="<code>css</code>: it's still like this, but it got prettier"
-        alt="<code>css</code>: it's still like this, but it got prettier">
-    </a>
-  </p>
-  <figcaption><code>css</code>: it's still like this, but it got prettier</figcaption>
+<figure id="family-guy-css" class="image">
+  <div class="aside-content">
+    <p class="content">
+      <a href="/images/redoing-my-website/family-guy-css.gif" class="image-link">
+        <img src="/images/redoing-my-website/family-guy-css.gif" id="family-guy-css-img" title="<code>css</code>: it's still like this, but it got prettier" alt="<code>css</code>: it's still like this, but it got prettier">
+      </a>
+    </p>
+    <figcaption><code>css</code>: it's still like this, but it got prettier</figcaption>
+  </div>
 </figure>
 <p>I probably haven’t touched <code>css</code> since 2013, which right now is about 8 years ago. It feels the same, with a few upgrades that are in very much the same vein as the old stuff. It’s still weird and clunky, at least to me. For as frustrated as I find myself with it, I am happy with how the site looks considering that I don’t particularly know what I’m doing.</p>
 <p>Despite feeling as though I’m fumbling about, I’m so proud to have figured out how to style my site so that looks great on both desktop and mobile, that it scales across multiple resolutions, but that it especially feels like I did not compromise on aesthetics or functionality. Try looking at this or other pages from desktop or phone, and try especially comparing landscape vs. portrait!</p>
@@ -198,6 +217,20 @@
 <h2 id="i-rather-like-hakyll-and-haskell">I rather like <code>hakyll</code> and Haskell!</h2>
 <p>I’m really happy with <code>hakyll</code>! I’m also really happy with Haskell. My website is taking some investment, but it’s been worth the effort especially given the quality of the output. I think I’m going to keep this setup for a while yet.</p>
 
+    </div>
+    <div class="page-comments">
+  <p><strong>Please share with me your thoughts and feedback!</strong></p>
+  <script>
+    var remark_config = {
+      host: 'https://remark42.thisfieldwas.green',
+      site_id: 'thisfieldwas.green',
+      url: 'https://thisfieldwas.green/blog/2021/12/05/redoing-my-website/'
+    }
+  </script>
+  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
+  <div id="remark42"></div>
+</div>
+
   </div>
 </main>
 
@@ -205,9 +238,9 @@
   <div class="content-bound">
     <nav class="main-nav">
   <a href="/">Home</a>
-  <a href="/blog">Blog</a>
-  <a href="/resume">Resume</a>
-  <a href="/contact">Contact</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
 </nav>
 
     <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
@@ -215,8 +248,7 @@
       <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/4679983/site/_posts/2021-12-05-redoing-my-website.md">2021-12-05-redoing-my-website.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/4679983">4679983</a>.</p>
-    </div>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/c84f909/site/_posts/2021-12-05-redoing-my-website.md">2021-12-05-redoing-my-website.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/c84f909">c84f909</a>.</p>
   </div>
 </footer>
 

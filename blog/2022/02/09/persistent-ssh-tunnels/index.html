@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>This Field Was Green - Highly available ssh tunnels</title>
+<link rel="canonical" href="https://thisfieldwas.green/blog/2022/02/09/persistent-ssh-tunnels/">
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
+
+<meta property="og:site_name" content="">
+<meta property="og:title" content="Highly available ssh tunnels">
+<meta property="og:url" content="https://thisfieldwas.green/blog/2022/02/09/persistent-ssh-tunnels/">
+<meta property="og:description" content="Duct tape performs better than systemd for keeping my webserver&#39;s ssh tunnels open">
+<meta property="og:image:url" content="https://thisfieldwas.green/images/tags/duct-tape/duct-tape-512x512.png">
+<meta property="og:image:alt" content="I duct-taped my ssh tunnels open!">
+<meta property="article:published_time" content="2022-02-09T16:02:28-08:00">
+  <meta property="article:modified_time" content="2022-02-09T16:02:28-08:00">
+  <meta property="article:author" content="Logan McGrath">
+  <meta property="article:tag" content="self host">
+  <meta property="article:tag" content="duct tape">
+  <meta property="article:tag" content="yak shave">
+  
+<meta name="twitter:card" content="summary">
+<meta name="twitter:site" content="@thisgreenfield">
+<meta name="twitter:title" content="Highly available ssh tunnels">
+<meta name="twitter:description" content="Duct tape performs better than systemd for keeping my webserver&#39;s ssh tunnels open">
+<meta name="twitter:image" content="https://thisfieldwas.green/images/tags/duct-tape/duct-tape-512x512.png">
+
+<link rel="stylesheet" href="/css/main.css">
+<script src="/js/main.js"></script>
+<script src="/js/scroll-shadows.js"></script>
+<script>
+  let scrollShadowsXSelectors = ["pre.sourceCode",]
+  let scrollShadowsYSelectors = []
+  window.addEventListener("load", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+    scrollShadowsYSelectors.forEach(updateScrollShadowsYSelector)
+  })
+  window.addEventListener("resize", () => {
+    scrollShadowsXSelectors.forEach(updateScrollShadowsXSelector)
+  })
+</script>
+
+
+</head>
+<body>
+
+<header class="page-header">
+  <div class="content-bound">
+    <div class="logo-icon"><a href="/"></a></div>
+    <div class="logo-nav">
+      <h1 class="logo"><a href="/">This Field Was Green</a></h1>
+      <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
+</nav>
+
+    </div>
+  </div>
+</header>
+
+<main class="page-content">
+  <div class="content-bound">
+    <div class="post post-full">
+      <h1 class="post-title">Highly available ssh tunnels</h1>
+<div class="post-meta">
+  <p class="post-published">
+    Posted on February  9, 2022
+    by Logan McGrath
+    </p>
+  <p class="post-tags">
+      Tags: <a class="tag" href="/tags/self-host">self host</a>, <a class="tag" href="/tags/duct-tape">duct tape</a>, <a class="tag" href="/tags/yak-shave">yak shave</a>
+    </p>
+  </div>
+
+<div class="post-thumbnail">
+  <a href="/images/tags/duct-tape/duct-tape-128x128.png">
+    <img src="/images/tags/duct-tape/duct-tape-128x128.png" alt="Highly available ssh tunnels" width="128" height="128">
+  </a>
+</div>
+
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">4m 20s</span></p>
+</div>
+<p>In my previous post, <a href="/blog/2021/12/11/reasons-why-my-website-is-offline/">Reasons why my website is offline</a>, I complained about <code>systemd</code> giving up when it fails to maintain <code>ssh</code> tunnels. In this post, I complain about <code>systemd</code> a bit more and how I gave up and stopped using it for managing my <code>ssh</code> tunnels.</p>
+<!--more-->
+<h2 id="recall-from-my-last-post">Recall from my last post</h2>
+<ol type="1">
+<li>My website is hosted from my <em>closet computer</em>, an old PC tower that sits in my bedroom closet</li>
+<li>I have no static IP address</li>
+<li>I maintain a remote <code>ssh</code> tunnel from a <em>bastion server</em> hosted on a <a href="https://linode.com"><code>linode</code></a> to my <em>closet computer</em></li>
+<li>My host names’ DNS point to the IP address of the <em>bastion server</em></li>
+<li>The <em>bastion server</em> acts as a proxy into the <code>ssh</code> tunnels to the <em>closet computer</em></li>
+<li>The <em>closet computer</em> handles the traffic it receives</li>
+</ol>
+<p><strong>This is how it looks:</strong></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>         +-BASTION-SERVER--------------\</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>         | &lt;=proxy=&gt; | &lt;===remote tunnel===&gt; +-CLOSET-COMPUTER---\</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>SSH ---&gt; | *:22----&gt; | localhost:10022 | --&gt; | *:22 SSH          |</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>HTTP --&gt; | *:80----&gt; | localhost:10080 | --&gt; | *:80 goto 443 duh |</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>HTTPS -&gt; | *:443---&gt; | localhost:10443 | --&gt; | *:443 my website  |</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>         `-----------+-----------------+     `-------------------+</span></code></pre></div>
+<h2 id="failure-systemd-and-duct-tape">Failure, <code>systemd</code>, and duct tape</h2>
+<p>When my home internet connection is down, the remote <code>ssh</code> tunnels into the <em>closet computer</em> fail to reopen. I have been using <code>systemd</code> on <em>closet computer</em> to manage these tunnels, and <code>systemd</code> will eventually stop trying to open the tunnels if the network remains inaccessible. This retry-then-give-up behavior that <code>systemd</code> exhibits is to safeguard against situations such as the <a href="https://en.wikipedia.org/wiki/Thundering_herd_problem">thundering herd problem</a> and <a href="https://unix.stackexchange.com/questions/289629/systemd-restart-always-is-not-honored">this Stackoverflow question</a> highlights the specific levers used to configure <code>systemd</code>’s retry behavior. To paraphrase, <code>systemd</code> tries to recover within a fixed amount of tries before it gives up. Given that there is a retry limit, I can’t reasonably extend the interval between tries so that my webserver recovers from a multi-hour outage without personally intervening. Moreover, I have to be physically next to the computer to recover it when this happens.</p>
+<p>I can’t make any guarantees about my internet connection’s uptime and that I’m not at risk of unleashing a thundering herd against my own infrastructure. As a solution, <code>systemd</code> therefore does not make sense for keeping my <code>ssh</code> tunnels tunnels open.</p>
+<p>As a better solution, one both held together by duct tape and recommended by <a href="https://internetwebsite.ofvlad.xyz">Vlad</a>, I have instead leveraged a simple cronjob:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>*/5 * * * * ssh closet.thisfieldwas.green true || ssh -fN bastion.thisfieldwas.green</span></code></pre></div>
+<p>And added the following <code>ssh</code> configuration to the <code>autossh</code> user that opens the tunnels:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Host bastion.thisfieldwas.green</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Port 22</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    RemoteForward 10022 localhost:22</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    RemoteForward 10080 localhost:80</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    RemoteForward 10443 localhost:443</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>Host closet.thisfieldwas.green</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ProxyCommand ssh jump_user@bastion.thisfieldwas.green -W 127.0.0.1:10022</span></code></pre></div>
+<p>This simple setup works by testing every five minutes whether the <code>ssh</code> tunnel to <em>closet computer</em> is open by <code>ssh</code>’ing in by its external hostname via <code>ssh closet.thisfieldwas.green true</code>. There is an account named <code>jump_user</code> that is allowed to <code>ssh</code> into the tunnels open on the <em>bastion server</em> and all <code>ssh</code> requests to <em>closet computer</em> proxy through this user account. If an <code>ssh</code> connection cannot be made, then the remote tunnels are opened via <code>ssh -fN bastion.thisfieldwas.green</code>. This setup works when I reboot the <em>closet computer</em>, if I unplug my router, or if my internet connection drops.</p>
+<p>I don’t have to worry about my husband Corey accidentally tripping over the power cable because I know that he will plug it back in. When the <em>closet computer</em> has powered back on, the tunnels open shortly after, and I’m offline for about five minutes for a small hiccup. For a self-hosted webserver, I think this is acceptable.</p>
+<h2 id="todo"><span class="citation" data-cites="TODO">@TODO</span></h2>
+<h3 id="a-better-way-to-recover-from-bad-configuration">A better way to recover from bad configuration</h3>
+<p>I’ve managed to disable my <code>ssh</code> tunnels three times now by changing host keys, the <code>autossh</code> user’s keys, or the <code>jump_user</code>’s allowed keys. I don’t have a quick solve for these instances beyond manually stepping through and fixing each <code>ssh</code> key error as it comes up, and I would much prefer a solution that’s no more manual than running a single command.</p>
+<h3 id="better-uptime-but-from-the-closet">Better uptime, but from the closet</h3>
+<p>While using a cronjob to keep <code>ssh</code> tunnels open is a step towards higher availability for my website, I still have some distance to cover before my maximum downtime is one minute or less per incident. For instance, last Sunday, Feb 6, 2022 at 12pm PST, a 3.1 earthquake struck; its epicenter barely a mile from my home and it felt like a large truck had collided with the house! That earthquake could have cut my internet connection for multiple days.</p>
+<blockquote>
+<p>I am also a bad Californian and underprepared for a worse earthquake, but that’s another matter.</p>
+</blockquote>
+<p>I could simply host my website from the <em>bastion server</em>, but physically it’s located in Fremont, CA, where it could still be knocked offline by a Bay Area earthquake. And sure, <code>linode</code> has other locations, but simply hosting from anywhere that isn’t my closet would deprive me of a good yak shave.</p>
+<p>As an exercise, I want to duct tape my own high availability solution together while still serving my website from my <em>closet computer</em> as the primary node. It is fun to tell people that my professional site is coming out of the closet, after all.</p>
+
+    </div>
+    <div class="page-comments">
+  <p><strong>Please share with me your thoughts and feedback!</strong></p>
+  <script>
+    var remark_config = {
+      host: 'https://remark42.thisfieldwas.green',
+      site_id: 'thisfieldwas.green',
+      url: 'https://thisfieldwas.green/blog/2022/02/09/persistent-ssh-tunnels/'
+    }
+  </script>
+  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
+  <div id="remark42"></div>
+</div>
+
+  </div>
+</main>
+
+<footer class="page-footer">
+  <div class="content-bound">
+    <nav class="main-nav">
+  <a href="/">Home</a>
+  <a href="/blog/">Blog</a>
+  <a href="/resume/">Resume</a>
+  <a href="/contact/">Contact</a>
+</nav>
+
+    <p class="copyright">Copyright &copy; <span class="copyright-date">2012</span> Logan McGrath. All rights reserved.</p>
+    <ul class="acks">
+      <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
+      <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
+    </ul>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/ff7c20b/site/_posts/2022-02-09-persistent-ssh-tunnels.md">2022-02-09-persistent-ssh-tunnels.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/ff7c20b">ff7c20b</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>
