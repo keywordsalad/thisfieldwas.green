@@ -173,7 +173,7 @@ Concurrency and asynchronous operations are driven entirely by side effects, mos
 
 Side effects enable nondeterminism which influences unknown quantities in the results of operations. _Undesired cases_ along dimensions such as length, presence, validity, success, and time require specific handling in addition to the code to handle the _desired cases_ of operations. _This specific handling creates complexity and draws engineering focus away from business logic._ Yet side effects drive the business value of programs in the real world, which requires that we embrace nondeterminism and unknown quantities.
 
-_How might complexity in programs be reduced if they must also be driven byside effects?_
+_How might complexity in programs be reduced if they must also be driven by side effects?_
 
 ### Implied complexity
 
