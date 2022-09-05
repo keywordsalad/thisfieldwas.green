@@ -4,6 +4,7 @@ description: Combining functions to build a parser
 author: Logan McGrath
 comments: true
 date: 2022-06-20T10:37:30-0700
+published: 2022-09-05T12:55:18-0700
 tags: functional programming, programming, scala, design patterns, combinators, parsing
 layout: post
 code_repo: https://bitsof.thisfieldwas.green/keywordsalad/parser-combinators/src/branch/post/parser-combinators
