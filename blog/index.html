@@ -16,7 +16,7 @@
 <meta property="og:image:url" content="https://thisfieldwas.green/images/grass-256x256.png">
 
 
-  <meta property="article:modified_time" content="2022-06-17T08:47:11-07:00">
+  <meta property="article:modified_time" content="2022-09-05T12:55:18-07:00">
   <meta property="article:author" content="Logan McGrath">
   
 <meta name="twitter:card" content="summary">
@@ -66,8 +66,31 @@
       
 <h1 class="page-title">Writing about the greenest things</h1>
 
-  <h2 class="post-title"><a href="/blog/2022/06/17/imperative-computation/">Embracing Nondeterminism Part III: Imperative Computation</a></h2>
+  <h2 class="post-title"><a href="/blog/2022/09/05/parser-combinators/">Parser Combinators</a></h2>
   <p class="latest-post-label">Latest Post!</p>
+  <div class="post-meta">
+  <p class="post-published">
+    Posted on September  5, 2022
+    by Logan McGrath
+    </p>
+  <p class="post-tags">
+      Tags: <a class="tag" href="/tags/functional-programming">functional programming</a>, <a class="tag" href="/tags/programming">programming</a>, <a class="tag" href="/tags/scala">scala</a>, <a class="tag" href="/tags/design-patterns">design patterns</a>, <a class="tag" href="/tags/combinators">combinators</a>, <a class="tag" href="/tags/parsing">parsing</a>
+    </p>
+  </div>
+
+  
+<div class="estimated-reading-time">
+<p>Estimated reading time: <span class="length">18m 21s</span></p>
+</div>
+<p>In my post <a href="/blog/2022/06/16/set-function/">The Set Function</a> I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: <em>parsing text</em>.</p>
+
+  <p class="read-more no-border"><a href="/blog/2022/09/05/parser-combinators/">Read more...</a></p>
+
+<h2 class="tags hard-section">Tag Cloud</h2>
+<p class="tag-cloud" data-show-count><a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:6" href="/tags/angularjs">angularjs</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:6" href="/tags/combinators">combinators</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:6" href="/tags/configuration-management">configuration management</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:6" href="/tags/contexts">contexts</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:6" href="/tags/design-patterns">design patterns</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:6" href="/tags/duct-tape">duct tape</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:6" href="/tags/functional-programming">functional programming</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:6" href="/tags/hakyll">hakyll</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:6" href="/tags/haskell">haskell</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:6" href="/tags/parsing">parsing</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:6" href="/tags/perforce">perforce</a> <a data-count="6" class="tag" style=";--count:6;--min-count:1;--max-count:6" href="/tags/programming">programming</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:6" href="/tags/scala">scala</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:6" href="/tags/self-host">self host</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:6" href="/tags/sinatra">sinatra</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:6" href="/tags/tinfoil-hat">tinfoil hat</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:6" href="/tags/yak-shave">yak shave</a></p>
+<h2>Previous posts</h2>
+
+<h3 class="post-title"><a href="/blog/2022/06/17/imperative-computation/">Embracing Nondeterminism Part III: Imperative Computation</a></h3>
   <div class="post-meta">
   <p class="post-published">
     Posted on June 17, 2022
@@ -84,12 +107,7 @@
 </div>
 <p>Remember <strong>functors</strong> and <strong>applicatives</strong>? In my last post <a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a> we explored how functors and applicatives abstract over <strong>desired</strong> and <strong>undesired cases</strong> of <strong>contexts</strong> in order to express control flow and permit independent computation. In this post we will explore <strong>monads</strong> and how to leverage their specific abstraction to express <strong>imperative</strong> control flow.</p>
 
-  <p class="read-more no-border"><a href="/blog/2022/06/17/imperative-computation/">Read more...</a></p>
-
-<h2 class="tags hard-section">Tag Cloud</h2>
-<p class="tag-cloud" data-show-count><a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/angularjs">angularjs</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/combinators">combinators</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:5" href="/tags/configuration-management">configuration management</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/contexts">contexts</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/design-patterns">design patterns</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:5" href="/tags/duct-tape">duct tape</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/functional-programming">functional programming</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/hakyll">hakyll</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/haskell">haskell</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/perforce">perforce</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:5" href="/tags/programming">programming</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:5" href="/tags/scala">scala</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:5" href="/tags/self-host">self host</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/sinatra">sinatra</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:5" href="/tags/tinfoil-hat">tinfoil hat</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:5" href="/tags/yak-shave">yak shave</a></p>
-<h2>Previous posts</h2>
-
+  <p class="read-more"><a href="/blog/2022/06/17/imperative-computation/">Read more...</a></p>
 <h3 class="post-title"><a href="/blog/2022/06/16/set-function/">The Set Function</a></h3>
   <div class="post-meta">
   <p class="post-published">
@@ -155,28 +173,6 @@
 <p>Have you ever received an unexpected <code>null</code> reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?</p>
 
   <p class="read-more"><a href="/blog/2022/03/15/contexts-and-effects/">Read more...</a></p>
-<h3 class="post-title"><a href="/blog/2022/02/09/persistent-ssh-tunnels/">Highly available ssh tunnels</a></h3>
-  <div class="post-meta">
-  <p class="post-published">
-    Posted on February  9, 2022
-    by Logan McGrath
-    </p>
-  <p class="post-tags">
-      Tags: <a class="tag" href="/tags/self-host">self host</a>, <a class="tag" href="/tags/duct-tape">duct tape</a>, <a class="tag" href="/tags/yak-shave">yak shave</a>
-    </p>
-  </div>
-
-  <div class="post-thumbnail">
-  <a href="/images/tags/duct-tape/duct-tape-128x128.png">
-    <img src="/images/tags/duct-tape/duct-tape-128x128.png" alt="Highly available ssh tunnels" width="128" height="128">
-  </a>
-</div>
-<div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">4m 20s</span></p>
-</div>
-<p>In my previous post, <a href="/blog/2021/12/11/reasons-why-my-website-is-offline/">Reasons why my website is offline</a>, I complained about <code>systemd</code> giving up when it fails to maintain <code>ssh</code> tunnels. In this post, I complain about <code>systemd</code> a bit more and how I gave up and stopped using it for managing my <code>ssh</code> tunnels.</p>
-
-  <p class="read-more"><a href="/blog/2022/02/09/persistent-ssh-tunnels/">Read more...</a></p>
 <p class="view-all-posts"><a href="/archives/">View all posts</a></p>
 
 

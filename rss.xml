@@ -17,10 +17,24 @@
   <language>en-US</language>
   <managingEditor>logan.mcgrath@thisfieldwas.green (Logan McGrath)</managingEditor>
   <webMaster>logan.mcgrath@thisfieldwas.green (Logan McGrath)</webMaster>
-  <pubDate>Fri, 17 Jun 2022 08:47:11 -0700</pubDate>
-  <lastBuildDate>Fri, 17 Jun 2022 08:47:11 -0700</lastBuildDate>
+  <pubDate>Mon, 05 Sep 2022 12:55:18 -0700</pubDate>
+  <lastBuildDate>Mon, 05 Sep 2022 12:55:18 -0700</lastBuildDate>
   <generator>Hakyll</generator>
   <copyright>Copyright &#169; 2012-2022 Logan McGrath. All rights reserved.</copyright>
+  <item>
+      <title>Parser Combinators</title>
+      <description>Combining functions to build a parser</description>
+      <dc:creator>Logan McGrath</dc:creator>
+      <link>https://thisfieldwas.green/blog/2022/09/05/parser-combinators/</link>
+      <guid>https://thisfieldwas.green/blog/2022/09/05/parser-combinators/</guid>
+      <pubDate>Mon, 05 Sep 2022 12:55:18 -0700</pubDate>
+      <category>functional programming</category>
+      <category>programming</category>
+      <category>scala</category>
+      <category>design patterns</category>
+      <category>combinators</category>
+      <category>parsing</category>
+      </item>
   <item>
       <title>Embracing Nondeterminism Part III: Imperative Computation</title>
       <description>Leveraging the case of the previous effect to indicate whether computation of the next effect should proceed.</description>
