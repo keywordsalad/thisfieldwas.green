@@ -18,9 +18,9 @@
 {{-partial "social/twitter-card"-}}
 {{-#end-}}
 
-<link rel="stylesheet" href="/css/main.css">
+<link rel="stylesheet" href="/css/main.css" media="print" onload="this.media='all'">
 {{#for stylesheets-}}
-<link rel="stylesheet" href="{{getUrl item}}">
+<link rel="stylesheet" href="{{getUrl item}}" media="print" onload="this.media='all'">
 {{-#end-}}
 
 <script src="{{getUrl 'js/main.js'}}" async></script>
