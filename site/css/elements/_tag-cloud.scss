@@ -13,16 +13,9 @@
   justify-content: center;
 
   .tag {
-    --norm: calc(
-      (var(--count) - var(--min-count))
-        / (var(--max-count) - var(--min-count))
-    );
-    --size: calc(
-      var(--norm)
-        * (var(--max-size) - var(--min-size))
-        + var(--min-size)
-    );
-    color: $text-color-hyperlink-complement;
+    --norm: calc((var(--count) - var(--min-count)) / (var(--max-count) - var(--min-count)));
+    --size: calc(var(--norm) * (var(--max-size) - var(--min-size)) + var(--min-size));
+    color: $text-color-hyperlink;
     display: block;
     font-size: calc(var(--size) * 1em);
     padding: 0.125em 0.25em;

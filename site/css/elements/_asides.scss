@@ -1,4 +1,5 @@
-aside, figure {
+aside,
+figure {
   @include contain-floats;
   color: $text-color-dark;
   background-color: $aside-background;
@@ -42,12 +43,13 @@ aside, figure {
     margin: 1em 0.5em;
   }
 
-  .image-link, picture {
+  .image-link,
+  picture {
     display: block;
     overflow-x: auto;
     margin: 0 auto;
 
-    > img {
+    >img {
       display: block;
       margin: 0 auto;
       padding: 0;
@@ -57,11 +59,11 @@ aside, figure {
   .aside-content {
     padding: 1em 0.5em;
 
-    & > *:first-child {
+    &>*:first-child {
       margin-top: 0;
     }
 
-    & > *:last-child {
+    &>*:last-child {
       margin-bottom: 0;
     }
   }

@@ -24,7 +24,10 @@ body {
   overflow: scroll;
 }
 
-strong, em, b, i {
+strong,
+em,
+b,
+i {
   color: $text-color-emphasize;
 }
 
@@ -32,12 +35,13 @@ p {
   @include block;
 }
 
-ul, ol {
+ul,
+ol {
   margin: 1em 0;
   padding: 0;
 }
 
-li > ul {
+li>ul {
   margin: 0.5rem 0;
 }
 
@@ -50,7 +54,7 @@ dl {
   @include block;
 }
 
-dd + dt {
+dd+dt {
   margin-top: 1em;
 }
 
@@ -59,27 +63,30 @@ dt {
   font-weight: bold;
 }
 
-dd, li {
+dd,
+li {
   display: list-item;
   list-style-type: disc;
   margin-left: 1.5em;
 }
 
-ol > li {
+ol>li {
   list-style-type: decimal;
 }
 
 blockquote {
   background-color: $aside-background;
-  margin: 1.5rem 1rem;
+  margin: 1.5rem 0rem 0rem 1rem;
   padding: 0.5rem 1rem;
   border-left: $border-style $border-color-regular $border-width-regular;
   border-right: $border-style $border-color-regular $border-width-thin;
   font-style: italic;
-  & > *:first-child {
+
+  &>*:first-child {
     margin-top: 0;
   }
-  & > *:last-child {
+
+  &>*:last-child {
     margin-bottom: 0;
   }
 }
@@ -99,7 +106,8 @@ a {
   text-decoration: underline;
 }
 
-a em, a strong {
+a em,
+a strong {
   color: $text-color-hyperlink;
 }
 

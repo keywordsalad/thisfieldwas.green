@@ -43,7 +43,7 @@
 
   .post-categories a,
   .post-tags a {
-    color: $text-color-hyperlink-complement;
+    color: $text-color-hyperlink;
   }
 }
 
@@ -51,10 +51,6 @@
   color: $text-color-light;
   font-size: $text-font-size-small;
   font-style: italic;
-
-  .length {
-    color: $text-color-emphasize;
-  }
 }
 
 .teaser-list {

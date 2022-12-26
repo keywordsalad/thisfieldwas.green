@@ -5,8 +5,7 @@ $signature-green: darkgreen;
 $font-family-sans-serif: "Noto Sans", sans-serif;
 $font-family-serif: "Noto Serif", serif;
 
-// $root-background: aliceblue; // #f0f8ff
-$root-background: #fdfffe; // original: aliceblue / #f0f8ff
+$root-background: #ffffff;
 $root-font-family: $font-family-sans-serif;
 $root-font-size: 1rem;
 $root-line-height: 1.6;
@@ -14,16 +13,15 @@ $root-line-height: 1.6;
 $body-max-width: 65rem;
 
 $header-color: $signature-green;
-$header-font-family: $font-family-serif;
+$header-font-family: $font-family-sans-serif;
 $header-font-size-ratio: 1.14;
 $header-font-size-base: 0.8;
 
-$text-color: darkslategray;
+$text-color: #1f2f2f;
 $text-color-dark: color.adjust($signature-green, $lightness: 1%);
-$text-color-light: slategray;
-$text-color-hyperlink: dodgerblue;
-$text-color-hyperlink-complement: indianred;
-$text-color-emphasize: saddlebrown;
+$text-color-light: #3f5f5f;
+$text-color-hyperlink: #008Bff;
+$text-color-emphasize: #335f5f;
 $text-font-size: $root-font-size;
 $text-font-size-small: $text-font-size * 0.9;
 $text-font-size-tiny: $text-font-size * 0.85;
@@ -32,15 +30,14 @@ $text-font-size-large: $text-font-size * 1.1;
 
 $code-font-family: "Noto Sans Mono", monospace;
 $code-font-size: 0.9em;
-$code-color: darkgreen;
-$source-code-color: teal;
+$code-color: #005300;
+$source-code-color: #004a4a;
 $code-font-weight: bold;
 $code-color-inline: saddlebrown;
 $code-color-highlight: yellow;
 $code-color-hyperlink: $text-color-hyperlink;
 
-// $aside-background: color.adjust(honeydew, $hue: -10%, $saturation: -50%, $lightness: -3%);
-$aside-background: #f0fff0; // original: honeydew / #f0fff0
+$aside-background: #f0fff0;
 $aside-font-family: $font-family-sans-serif;
 $aside-font-size: 1.1em;
 
