@@ -21,29 +21,33 @@
 }
 
 .post-meta {
-  font-size: $text-font-size-small;
-
-  p {
-    margin: 0;
-  }
+  color: $text-color-light;
 
   .post-published {
-    color: $text-color-light;
+    font-size: $text-font-size-small;
+  }
+
+  @include media(">=tablet") {
+
+    .post-categories,
+    .post-tags {
+      font-size: $text-font-size-small;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  @include media("<tablet") {
+    p {
+      margin: 0 0 0.5rem;
+    }
   }
 
   .post-updated {
-    color: $text-color-light;
-    font-size: $text-font-size-tiny;
+    font-size: $text-font-size-small;
     font-style: italic;
-  }
-
-  .post-categories {
-    font-style: italic;
-  }
-
-  .post-categories a,
-  .post-tags a {
-    color: $text-color-hyperlink;
   }
 }
 
