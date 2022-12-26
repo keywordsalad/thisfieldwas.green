@@ -2,7 +2,7 @@
   <div class="aside-content">
     <p class="content">
       <a href="{{src}}" class="image-link">
-        <img src="{{src}}"{{#if id}} id="{{id}}-img"{{#end-}}
+        <img src="{{src}}"{{#if id}} id="{{id}}-img"{{#end-}} loading="lazy"
                           {{#if title}} title="{{title}}"{{#end-}}
                           {{#if (alt | default title)}} alt="{{alt | default title}}"{{#end-}}
                           {{#if width}} width="{{width}}"{{#end-}}
