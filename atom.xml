@@ -1883,7 +1883,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
       <updated>2022-06-05T13:21:27-07:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;45m 2s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;45m 6s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Have you ever received an unexpected &lt;code&gt;null&lt;/code&gt; reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?&lt;/p&gt;
 </summary>
@@ -1891,7 +1891,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;45m 2s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;45m 6s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Have you ever received an unexpected &lt;code&gt;null&lt;/code&gt; reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?&lt;/p&gt;
 &lt;!--more--&gt;
@@ -2399,7 +2399,8 @@ Retry strategies must track previous state in order to calculate their next retr
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/embracing-nondeterminism/list-functor-512x512.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/embracing-nondeterminism/list-functor-512x512.png&quot; id=&quot;img-list-functor-img&quot; title=&quot;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;List[Int]&lt;/code&gt;.&quot; alt=&quot;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;List[Int]&lt;/code&gt;.&quot;&gt;
+        &lt;img src=&quot;/images/embracing-nondeterminism/list-functor-512x512.png&quot; id=&quot;img-list-functor-img&quot;loading=&quot;lazy&quot;
+                           title=&quot;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;List[Int]&lt;/code&gt;.&quot; alt=&quot;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;List[Int]&lt;/code&gt;.&quot;&gt;
       &lt;/a&gt;
     &lt;/p&gt;
     &lt;figcaption&gt;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;List[Int]&lt;/code&gt;.&lt;/figcaption&gt;
@@ -2409,7 +2410,8 @@ Retry strategies must track previous state in order to calculate their next retr
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/embracing-nondeterminism/binary-tree-functor-1024x340.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/embracing-nondeterminism/binary-tree-functor-1024x340.png&quot; id=&quot;img-tree-functor-img&quot; title=&quot;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;BinaryTree[Int]&lt;/code&gt;.&quot; alt=&quot;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;BinaryTree[Int]&lt;/code&gt;.&quot;&gt;
+        &lt;img src=&quot;/images/embracing-nondeterminism/binary-tree-functor-1024x340.png&quot; id=&quot;img-tree-functor-img&quot;loading=&quot;lazy&quot;
+                           title=&quot;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;BinaryTree[Int]&lt;/code&gt;.&quot; alt=&quot;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;BinaryTree[Int]&lt;/code&gt;.&quot;&gt;
       &lt;/a&gt;
     &lt;/p&gt;
     &lt;figcaption&gt;Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;BinaryTree[Int]&lt;/code&gt;.&lt;/figcaption&gt;
@@ -2723,7 +2725,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
       <updated>2021-12-11T14:43:25-08:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 25s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 27s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and &lt;a href=&quot;https://internetwebsite.ofvlad.xyz&quot;&gt;low-key minimalist&lt;/a&gt;, found next to the garbage chute at his condo building.&lt;/p&gt;
 </summary>
@@ -2731,7 +2733,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 25s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 27s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and &lt;a href=&quot;https://internetwebsite.ofvlad.xyz&quot;&gt;low-key minimalist&lt;/a&gt;, found next to the garbage chute at his condo building.&lt;/p&gt;
 &lt;!--more--&gt;
@@ -2827,7 +2829,8 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png&quot; id=&quot;closet-computer-in-context-img&quot; title=&quot;Cables and all, the &lt;em&gt;closet computer&lt;/em&gt; in context. Corey asked me to dust first.&quot; alt=&quot;Cables and all, the &lt;em&gt;closet computer&lt;/em&gt; in context. Corey asked me to dust first.&quot;&gt;
+        &lt;img src=&quot;/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png&quot; id=&quot;closet-computer-in-context-img&quot;loading=&quot;lazy&quot;
+                           title=&quot;Cables and all, the &lt;em&gt;closet computer&lt;/em&gt; in context. Corey asked me to dust first.&quot; alt=&quot;Cables and all, the &lt;em&gt;closet computer&lt;/em&gt; in context. Corey asked me to dust first.&quot;&gt;
       &lt;/a&gt;
     &lt;/p&gt;
     &lt;figcaption&gt;Cables and all, the &lt;em&gt;closet computer&lt;/em&gt; in context. Corey asked me to dust first.&lt;/figcaption&gt;
@@ -2856,7 +2859,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
       <updated>2021-12-05T08:08:32-08:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2021/12/05/redoing-my-website/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 44s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 46s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;I’m picking up a COVID project: &lt;em&gt;Redoing my website!&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;My website prior to 2021 was authored using &lt;a href=&quot;http://octopress.org/&quot;&gt;&lt;code&gt;octopress&lt;/code&gt;&lt;/a&gt; or &lt;a href=&quot;https://jekyllrb.com/&quot;&gt;&lt;code&gt;jekyll&lt;/code&gt;&lt;/a&gt;. Truthfully I don’t remember which as I haven’t touched my website in quite a few years. I want to update my homepage and I’m in a bind because I don’t know how to produce a build after I make changes.&lt;/p&gt;
@@ -2865,7 +2868,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 44s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 46s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;I’m picking up a COVID project: &lt;em&gt;Redoing my website!&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;My website prior to 2021 was authored using &lt;a href=&quot;http://octopress.org/&quot;&gt;&lt;code&gt;octopress&lt;/code&gt;&lt;/a&gt; or &lt;a href=&quot;https://jekyllrb.com/&quot;&gt;&lt;code&gt;jekyll&lt;/code&gt;&lt;/a&gt;. Truthfully I don’t remember which as I haven’t touched my website in quite a few years. I want to update my homepage and I’m in a bind because I don’t know how to produce a build after I make changes.&lt;/p&gt;
@@ -2961,7 +2964,8 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/redoing-my-website/family-guy-css.gif&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/redoing-my-website/family-guy-css.gif&quot; id=&quot;family-guy-css-img&quot; title=&quot;&lt;code&gt;css&lt;/code&gt;: it&#39;s still like this, but it got prettier&quot; alt=&quot;&lt;code&gt;css&lt;/code&gt;: it&#39;s still like this, but it got prettier&quot;&gt;
+        &lt;img src=&quot;/images/redoing-my-website/family-guy-css.gif&quot; id=&quot;family-guy-css-img&quot;loading=&quot;lazy&quot;
+                           title=&quot;&lt;code&gt;css&lt;/code&gt;: it&#39;s still like this, but it got prettier&quot; alt=&quot;&lt;code&gt;css&lt;/code&gt;: it&#39;s still like this, but it got prettier&quot;&gt;
       &lt;/a&gt;
     &lt;/p&gt;
     &lt;figcaption&gt;&lt;code&gt;css&lt;/code&gt;: it&#39;s still like this, but it got prettier&lt;/figcaption&gt;
@@ -3007,7 +3011,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
       <updated>2012-11-28T13:04:00-06:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2012/11/28/promoting-changes-with-app-config-app/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;4m 11s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;4m 23s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;The App-Config-App now lets you promote changes between environments!&lt;/p&gt;
 </summary>
@@ -3015,7 +3019,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;4m 11s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;4m 23s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;The App-Config-App now lets you promote changes between environments!&lt;/p&gt;
 &lt;!--more--&gt;
@@ -3043,7 +3047,8 @@ showing these relationships:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config3/promote_changes.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config3/promote_changes.png&quot; id=&quot;img-promote-changes-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config3/promote_changes.png&quot; id=&quot;img-promote-changes-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3058,7 +3063,8 @@ the changes by clicking on the “Pending Changes” link.&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config3/promote_result.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config3/promote_result.png&quot; id=&quot;img-promote-result-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config3/promote_result.png&quot; id=&quot;img-promote-result-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3069,7 +3075,8 @@ the changes by clicking on the “Pending Changes” link.&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config3/pending_changes.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config3/pending_changes.png&quot; id=&quot;img-pending-changes-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config3/pending_changes.png&quot; id=&quot;img-pending-changes-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3086,7 +3093,8 @@ promotion from “qa” to “dev”:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config3/p4v.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config3/p4v.png&quot; id=&quot;img-config-promotion-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config3/p4v.png&quot; id=&quot;img-config-promotion-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3104,7 +3112,8 @@ promotion from “qa” to “dev”:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config3/p4v_integrate.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config3/p4v_integrate.png&quot; id=&quot;img-config-integrate-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config3/p4v_integrate.png&quot; id=&quot;img-config-integrate-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3116,7 +3125,8 @@ the changes are:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config3/p4v_integrate_result.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config3/p4v_integrate_result.png&quot; id=&quot;img-config-results-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config3/p4v_integrate_result.png&quot; id=&quot;img-config-results-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3193,7 +3203,7 @@ Additional details may be found in the application’s &lt;a href=&quot;https://
       <updated>2012-11-16T17:00:00-06:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2012/11/16/scm-backed-application-configuration-with-perforce/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;6m 0s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;6m 9s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Continuing from my &lt;a href=&quot;/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/&quot;&gt;last post&lt;/a&gt;, I’ve &lt;a href=&quot;https://github.com/lmcgrath/App-Config-App/&quot;&gt;forked&lt;/a&gt; Paul Hammant’s original
 App-Config-App and modified it to work against Perforce. I’ve decided not to
@@ -3204,7 +3214,7 @@ management.&lt;/p&gt;
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;6m 0s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;6m 9s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Continuing from my &lt;a href=&quot;/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/&quot;&gt;last post&lt;/a&gt;, I’ve &lt;a href=&quot;https://github.com/lmcgrath/App-Config-App/&quot;&gt;forked&lt;/a&gt; Paul Hammant’s original
 App-Config-App and modified it to work against Perforce. I’ve decided not to
@@ -3237,7 +3247,8 @@ also added a few other things:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config2/start.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config2/start.png&quot; id=&quot;img-app-start-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config2/start.png&quot; id=&quot;img-app-start-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3251,7 +3262,8 @@ up a form for editing &lt;code&gt;aardvark_configuration.json&lt;/code&gt; as in
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config2/aardvark_configuration.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config2/aardvark_configuration.png&quot; id=&quot;img-app-config-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config2/aardvark_configuration.png&quot; id=&quot;img-app-config-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3265,7 +3277,8 @@ change the email address and fiddle around with the banned nicks, then go click
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config2/changes.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config2/changes.png&quot; id=&quot;img-app-changes-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config2/changes.png&quot; id=&quot;img-app-changes-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3280,7 +3293,8 @@ the form:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config2/aardvark_configuration-changed.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config2/aardvark_configuration-changed.png&quot; id=&quot;image-app-commit-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config2/aardvark_configuration-changed.png&quot; id=&quot;image-app-commit-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3367,7 +3381,7 @@ per-branch permissions.&lt;/p&gt;</content>
       <updated>2012-11-07T13:54:00-06:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 56s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;16m 6s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Following Paul Hammant’s post &lt;a href=&quot;http://paulhammant.com/2012/07/10/app-config-workflow-using-scm/&quot;&gt;App-config workflow using SCM&lt;/a&gt; and subsequent
 &lt;a href=&quot;http://paulhammant.com/2012/08/14/app-config-using-git-and-angular/&quot;&gt;proof of concept&lt;/a&gt; backed by Git, I will show that an app-config application
@@ -3377,7 +3391,7 @@ backed by Perforce is possible using &lt;a href=&quot;http://www.perforce.com/pr
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;15m 56s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;16m 6s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Following Paul Hammant’s post &lt;a href=&quot;http://paulhammant.com/2012/07/10/app-config-workflow-using-scm/&quot;&gt;App-config workflow using SCM&lt;/a&gt; and subsequent
 &lt;a href=&quot;http://paulhammant.com/2012/08/14/app-config-using-git-and-angular/&quot;&gt;proof of concept&lt;/a&gt; backed by Git, I will show that an app-config application
@@ -3696,7 +3710,8 @@ stack_configuration.json is loaded into the form:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config/start.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config/start.png&quot; id=&quot;img-config-form-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config/start.png&quot; id=&quot;img-config-form-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3708,7 +3723,8 @@ viewed by clicking on “View Diffs”:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config/diffs.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config/diffs.png&quot; id=&quot;img-config-diffs-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config/diffs.png&quot; id=&quot;img-config-diffs-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3720,7 +3736,8 @@ Changes”. After which, clicking “View Diffs” will show no changes:&lt;/p&g
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config/diffs-after-commit.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config/diffs-after-commit.png&quot; id=&quot;img-config-commit-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config/diffs-after-commit.png&quot; id=&quot;img-config-commit-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3733,7 +3750,8 @@ History List”:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config/history.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config/history.png&quot; id=&quot;img-config-history-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config/history.png&quot; id=&quot;img-config-history-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
@@ -3744,7 +3762,8 @@ History List”:&lt;/p&gt;
   &lt;div class=&quot;aside-content&quot;&gt;
     &lt;p class=&quot;content&quot;&gt;
       &lt;a href=&quot;/images/app-config/history-diffs.png&quot; class=&quot;image-link&quot;&gt;
-        &lt;img src=&quot;/images/app-config/history-diffs.png&quot; id=&quot;img-config-revisions-img&quot;&gt;
+        &lt;img src=&quot;/images/app-config/history-diffs.png&quot; id=&quot;img-config-revisions-img&quot;loading=&quot;lazy&quot;
+                          &gt;
       &lt;/a&gt;
     &lt;/p&gt;
     
