@@ -23,10 +23,16 @@
       display: block;
       background-image: url("/images/grass.svg");
       background-size: $logo-icon-width;
-      &, & > a {
+
+      &,
+      &>a {
         width: $logo-icon-width;
         height: $logo-icon-width;
         display: block;
+
+        span {
+          display: none;
+        }
       }
     }
 
@@ -36,6 +42,7 @@
       font-weight: bold;
       font-size: $text-font-size * 1.4;
       text-align: left;
+
       a {
         color: $signature-green;
         text-decoration: none;
