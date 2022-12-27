@@ -21,7 +21,7 @@
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;18m 21s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;In my post &lt;a href=&quot;/blog/2022/06/16/set-function/&quot;&gt;The Set Function&lt;/a&gt; I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: &lt;em&gt;parsing text&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;In my post &lt;a href=&quot;/blog/2022/06/16/set-function/&quot; title=&quot;The Set Function&quot;&gt;The Set Function&lt;/a&gt; I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: &lt;em&gt;parsing text&lt;/em&gt;.&lt;/p&gt;
 </summary>
       <author>
         <name>Logan McGrath</name>
@@ -29,10 +29,10 @@
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;18m 21s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;In my post &lt;a href=&quot;/blog/2022/06/16/set-function/&quot;&gt;The Set Function&lt;/a&gt; I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: &lt;em&gt;parsing text&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;In my post &lt;a href=&quot;/blog/2022/06/16/set-function/&quot; title=&quot;The Set Function&quot;&gt;The Set Function&lt;/a&gt; I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: &lt;em&gt;parsing text&lt;/em&gt;.&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;blockquote&gt;
-&lt;p&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/parser-combinators/src/branch/post/parser-combinators&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/parser-combinators/src/branch/post/parser-combinators&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id=&quot;the-parse-function&quot;&gt;The &lt;code&gt;parse()&lt;/code&gt; function&lt;/h2&gt;
 &lt;p&gt;Parsers begin as a simple signature, a function called &lt;code&gt;parse()&lt;/code&gt; from an input &lt;code&gt;Int&lt;/code&gt; offset and &lt;code&gt;String&lt;/code&gt; to either a failed offset or matched offset.&lt;/p&gt;
@@ -208,7 +208,7 @@
 &lt;h2 id=&quot;the-new-shape-of-the-parse-function&quot;&gt;The new shape of the &lt;code&gt;parse()&lt;/code&gt; function&lt;/h2&gt;
 &lt;p&gt;Our &lt;code&gt;parse()&lt;/code&gt; function will soon become generic its return type, which makes it &lt;em&gt;covariant&lt;/em&gt; in that &lt;code&gt;parse()&lt;/code&gt; can be adapted to produce anything we want. What the &lt;code&gt;parse()&lt;/code&gt; function produces is contextualized by whether it is recognized in the input, and as such there is a chance that nothing is produced because the input wasn’t recognized. This means the the &lt;code&gt;parse()&lt;/code&gt; function forms a specific structure: a &lt;em&gt;context&lt;/em&gt; with the shape of a &lt;strong&gt;functor&lt;/strong&gt;.&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;I have written about contexts, functors, and related structures extensively. Start from the following article if these terms are unfamiliar to you: &lt;strong&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;I have written about contexts, functors, and related structures extensively. Start from the following article if these terms are unfamiliar to you: &lt;strong&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot; title=&quot;Contexts and Effects in Functional Programming&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Take a look at what the &lt;code&gt;parse()&lt;/code&gt; function signature will look like after we start using &lt;code&gt;ParseResult&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -472,7 +472,7 @@
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;21m 26s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
+&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot; title=&quot;Enabling Control Flow in Functional Programming&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
 </summary>
       <author>
         <name>Logan McGrath</name>
@@ -480,17 +480,17 @@
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;21m 26s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
+&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot; title=&quot;Enabling Control Flow in Functional Programming&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;This post is part of a series:&lt;/strong&gt;&lt;/p&gt;
 &lt;ol type=&quot;1&quot;&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot; title=&quot;Contexts and Effects in Functional Programming&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot; title=&quot;Enabling Control Flow in Functional Programming&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Imperative Computation in Functional Programming&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&quot;motivating-monads-as-a-design-pattern&quot;&gt;Motivating monads as a design pattern&lt;/h2&gt;
 &lt;p&gt;Recall the &lt;code&gt;Functor&lt;/code&gt; and &lt;code&gt;Applicative&lt;/code&gt; typeclasses:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -1100,7 +1100,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;32m 5s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
+&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot; title=&quot;Contexts and Effects in Functional Programming&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
 </summary>
       <author>
         <name>Logan McGrath</name>
@@ -1108,17 +1108,17 @@ are also monads. You’ve probably been using them as such without realizing!&lt
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;32m 5s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
+&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot; title=&quot;Contexts and Effects in Functional Programming&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;This post is part of a series:&lt;/strong&gt;&lt;/p&gt;
 &lt;ol type=&quot;1&quot;&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot; title=&quot;Contexts and Effects in Functional Programming&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Enabling Control Flow in Functional Programming&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot; title=&quot;Imperative Computation in Functional Programming&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&quot;motivating-applicative-functors-as-a-design-pattern&quot;&gt;Motivating applicative functors as a design pattern&lt;/h2&gt;
 &lt;p&gt;Recall the &lt;code&gt;Functor&lt;/code&gt; typeclass:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -1875,7 +1875,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;p&gt;Applicatives primarily offer independent computation. Specifically, the arguments to applicative functions such as &lt;code&gt;ap()&lt;/code&gt;, &lt;code&gt;map2()&lt;/code&gt;, or &lt;code&gt;sequence()&lt;/code&gt; are evaluated independently of one another, and their individual outputs as a whole influence whether the functions consuming them are permitted to compute against the outputs of their &lt;strong&gt;desired cases&lt;/strong&gt; or if they should halt computation and &lt;em&gt;propagate&lt;/em&gt; any &lt;strong&gt;undesired cases&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;When all inputs to an applicative function are in the &lt;strong&gt;desired case&lt;/strong&gt;, then the output of the lifted functions will also be in the &lt;strong&gt;desired case&lt;/strong&gt;. Conversely, if any input is in the &lt;strong&gt;undesired case&lt;/strong&gt;, then it will be propagated instead, and the other cases will be &lt;em&gt;discarded&lt;/em&gt;. In this regard, applicative functions provide an &lt;em&gt;all-or-nothing&lt;/em&gt; operation.&lt;/p&gt;
 &lt;p&gt;Independent computation provides some level of control flow, but it doesn’t guide execution to proceed only if the previous execution has succeeded, as all operations evaluate independently of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need to further specialize the applicative functor.&lt;/p&gt;
-&lt;p&gt;In my next post &lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt; we will explore the infamous &lt;em&gt;&lt;strong&gt;monad&lt;/strong&gt;&lt;/em&gt; and how it enables imperative control flow in functional programming.&lt;/p&gt;</content>
+&lt;p&gt;In my next post &lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot; title=&quot;Imperative Computation in Functional Programming&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt; we will explore the infamous &lt;em&gt;&lt;strong&gt;monad&lt;/strong&gt;&lt;/em&gt; and how it enables imperative control flow in functional programming.&lt;/p&gt;</content>
     </entry>
   <entry>
       <id>https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/</id>
@@ -1899,11 +1899,11 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;p&gt;&lt;strong&gt;This post is part of a series:&lt;/strong&gt;&lt;/p&gt;
 &lt;ol type=&quot;1&quot;&gt;
 &lt;li&gt;&lt;strong&gt;Contexts and Effects in Functional Programming&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot; title=&quot;Enabling Control Flow in Functional Programming&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot; title=&quot;Imperative Computation in Functional Programming&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Significant portions of program logic exist to address specific cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it’s running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a &lt;code&gt;null&lt;/code&gt; reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Defensive_programming&quot;&gt;Defensive programming&lt;/a&gt;&lt;/em&gt; as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on &lt;em&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Tacit_knowledge&quot;&gt;tacit knowledge&lt;/a&gt;&lt;/em&gt; and imposes complex code to handle and recover from them. &lt;em&gt;This complex code draws focus from writing the business logic that drives the value of programs&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;In this post I will provide &lt;strong&gt;effects&lt;/strong&gt; as a model for characterizing nondeterminism and unknowns in programs. I will introduce a &lt;strong&gt;design pattern&lt;/strong&gt; to abstract complexity using this model.&lt;/p&gt;
@@ -2638,7 +2638,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;span id=&quot;cb29-4&quot;&gt;&lt;a href=&quot;#cb29-4&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;&lt;span class=&quot;kw&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;fu&quot;&gt;combine&lt;/span&gt;&lt;span class=&quot;op&quot;&gt;(&lt;/span&gt;a&lt;span class=&quot;op&quot;&gt;:&lt;/span&gt; A&lt;span class=&quot;op&quot;&gt;,&lt;/span&gt; b&lt;span class=&quot;op&quot;&gt;:&lt;/span&gt; B&lt;span class=&quot;op&quot;&gt;):&lt;/span&gt; C&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;p&gt;How do you apply &lt;code&gt;combine()&lt;/code&gt; to the terms &lt;code&gt;A&lt;/code&gt; and &lt;code&gt;B&lt;/code&gt; produced by the contexts? What happens if one of the contexts is in an &lt;strong&gt;undesired case&lt;/strong&gt;? At first blush it appears that &lt;code&gt;map()&lt;/code&gt; might work, but &lt;code&gt;combine()&lt;/code&gt; takes two arguments. You need a specialized functor in order to apply &lt;code&gt;combine()&lt;/code&gt;!&lt;/p&gt;
-&lt;p&gt;In my next post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;, we will explore how &lt;strong&gt;applicatives&lt;/strong&gt; enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.&lt;/p&gt;
+&lt;p&gt;In my next post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot; title=&quot;Enabling Control Flow in Functional Programming&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;, we will explore how &lt;strong&gt;applicatives&lt;/strong&gt; enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Acknowledgements&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Many of my professional network, colleagues, and friends helped me develop this material and proof read my many drafts. I would like to especially thank:&lt;/p&gt;
@@ -2666,7 +2666,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;4m 20s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;In my previous post, &lt;a href=&quot;/blog/2021/12/11/reasons-why-my-website-is-offline/&quot;&gt;Reasons why my website is offline&lt;/a&gt;, I complained about &lt;code&gt;systemd&lt;/code&gt; giving up when it fails to maintain &lt;code&gt;ssh&lt;/code&gt; tunnels. In this post, I complain about &lt;code&gt;systemd&lt;/code&gt; a bit more and how I gave up and stopped using it for managing my &lt;code&gt;ssh&lt;/code&gt; tunnels.&lt;/p&gt;
+&lt;p&gt;In my previous post, &lt;a href=&quot;/blog/2021/12/11/reasons-why-my-website-is-offline/&quot; title=&quot;Reasons why my website is offline&quot;&gt;Reasons why my website is offline&lt;/a&gt;, I complained about &lt;code&gt;systemd&lt;/code&gt; giving up when it fails to maintain &lt;code&gt;ssh&lt;/code&gt; tunnels. In this post, I complain about &lt;code&gt;systemd&lt;/code&gt; a bit more and how I gave up and stopped using it for managing my &lt;code&gt;ssh&lt;/code&gt; tunnels.&lt;/p&gt;
 </summary>
       <author>
         <name>Logan McGrath</name>
@@ -2674,7 +2674,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;4m 20s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;In my previous post, &lt;a href=&quot;/blog/2021/12/11/reasons-why-my-website-is-offline/&quot;&gt;Reasons why my website is offline&lt;/a&gt;, I complained about &lt;code&gt;systemd&lt;/code&gt; giving up when it fails to maintain &lt;code&gt;ssh&lt;/code&gt; tunnels. In this post, I complain about &lt;code&gt;systemd&lt;/code&gt; a bit more and how I gave up and stopped using it for managing my &lt;code&gt;ssh&lt;/code&gt; tunnels.&lt;/p&gt;
+&lt;p&gt;In my previous post, &lt;a href=&quot;/blog/2021/12/11/reasons-why-my-website-is-offline/&quot; title=&quot;Reasons why my website is offline&quot;&gt;Reasons why my website is offline&lt;/a&gt;, I complained about &lt;code&gt;systemd&lt;/code&gt; giving up when it fails to maintain &lt;code&gt;ssh&lt;/code&gt; tunnels. In this post, I complain about &lt;code&gt;systemd&lt;/code&gt; a bit more and how I gave up and stopped using it for managing my &lt;code&gt;ssh&lt;/code&gt; tunnels.&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;h2 id=&quot;recall-from-my-last-post&quot;&gt;Recall from my last post&lt;/h2&gt;
 &lt;ol type=&quot;1&quot;&gt;
@@ -3833,9 +3833,9 @@ all my questions as I worked with Chronicle, especially Randy Defauw.&lt;/p&gt;
 &lt;p&gt;I had never written professionally before or been aware of configuration management: I was very lucky to explore a passion space that Paul has worked within for a very long time. I don’t believe I ever gave him a proper thanks. He gave me an opportunity that probably not a lot of people get in their early careers, and it was an invaluable experience that I learned a lot from and think about fairly often.&lt;/p&gt;
 &lt;p&gt;The other posts in this series were also written with guidance from Paul:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2012/11/16/scm-backed-application-configuration-with-perforce/&quot;&gt;SCM-Backed Application Configuration with Perforce&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2012/11/20/app-config-app-in-action/&quot;&gt;App-Config-App in Action&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2012/11/28/promoting-changes-with-app-config-app/&quot;&gt;Promoting changes with App-Config-App&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2012/11/16/scm-backed-application-configuration-with-perforce/&quot; title=&quot;SCM-Backed Application Configuration with Perforce&quot;&gt;SCM-Backed Application Configuration with Perforce&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2012/11/20/app-config-app-in-action/&quot; title=&quot;App-Config-App in Action&quot;&gt;App-Config-App in Action&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2012/11/28/promoting-changes-with-app-config-app/&quot; title=&quot;Promoting changes with App-Config-App&quot;&gt;Promoting changes with App-Config-App&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;The subject of configuration as described in these posts is still fresh even after nearly ten years. Even now configuration as code still doesn’t have a perfect solution, though products have become available that make managing configuration easier. Changing configuration in a running process as a general solution remains elusive, as supporting it imposes a lot of constraints on design.&lt;/p&gt;
 &lt;p&gt;On a more personal note: today is Pride. This is the first Pride I’ve ever participated in and only in the last two years have I felt safe enough to come out in circles beyond close friends. I was out to Paul but only as a detail I confided in passing. When I was working with Paul on these posts he advised that I should consider relocating to the Bay Area. In January, 2013, I moved to San Francisco. Discovering my own life as a &lt;em&gt;person&lt;/em&gt; was set by Paul being brave enough to share a deeply personal piece of advice. I’m so thankful he said it, and I’m glad I listened.&lt;/p&gt;</content>
