@@ -133,8 +133,8 @@ linkedTitleField = constField "linkedTitle" f
           context <- tplContext
           fromValue =<< unContext context key
         makeLink title url
-          | ".html" `isSuffixOf` filePath = "<a href=\"" ++ url ++ "\">" ++ escapeHtml title ++ "</a>"
-          | ".md" `isSuffixOf` filePath = "[" ++ escapeHtml title ++ "](" ++ url ++ ")"
+          | ".html" `isSuffixOf` filePath = "<a href=\"" ++ url ++ "\" title=\"" ++ escapeHtml title ++ "\">" ++ escapeHtml title ++ "</a>"
+          | ".md" `isSuffixOf` filePath = "[" ++ escapeHtml title ++ "](" ++ url ++ " \"" ++ escapeHtml title ++ "\")"
           | otherwise = title ++ " <" ++ url ++ ">"
 
 metadataField :: forall a. Context a

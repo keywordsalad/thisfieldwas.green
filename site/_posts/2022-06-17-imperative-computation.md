@@ -30,7 +30,7 @@ Remember **functors** and **applicatives**? In my last post {{linkedTitle "_post
 > 2. {{linkedTitle "_posts/2022-06-05-enabling-control-flow.md"}}
 > 3. **{{title}}**
 
-_The code that accompanies this post may be found [here]({{code_repo}})._
+_The code that accompanies this post may be found [here]({{code_repo}} "Accompanying code repository")._
 
 ## Motivating monads as a design pattern
 

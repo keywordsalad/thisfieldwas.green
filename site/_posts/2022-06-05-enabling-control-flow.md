@@ -32,7 +32,7 @@ Remember **functors**? Recall from my last post, {{linkedTitle "_posts/2022-03-1
 > 2. **{{title}}**
 > 3. {{linkedTitle "_posts/2022-06-17-imperative-computation.md"}}
 
-_The code that accompanies this post may be found [here]({{code_repo}})._
+_The code that accompanies this post may be found [here]({{code_repo}} "Accompanying code repository")._
 
 ## Motivating applicative functors as a design pattern
 

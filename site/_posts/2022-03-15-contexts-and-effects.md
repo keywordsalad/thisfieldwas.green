@@ -34,7 +34,7 @@ Have you ever received an unexpected `null` reference? Have you ever written a f
 > 2. {{linkedTitle "_posts/2022-06-05-enabling-control-flow.md"}}
 > 3. {{linkedTitle "_posts/2022-06-17-imperative-computation.md"}}
 
-_The code that accompanies this post may be found [here]({{code_repo}})._
+_The code that accompanies this post may be found [here]({{code_repo}} "Accompanying code repository")._
 
 Significant portions of program logic exist to address specific cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it's running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a `null` reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.
 

@@ -20,7 +20,7 @@ In my post {{linkedTitle "_posts/2022-06-16-set-function.md"}} I introduced func
 
 <!--more-->
 
-> The code that accompanies this post may be found [here]({{code_repo}}).
+> The code that accompanies this post may be found [here]({{code_repo}} "Accompanying code repository").
 
 ## The `parse()` function
 
