@@ -1,5 +1,5 @@
 ---
-title: "Embracing Nondeterminism Part III: Imperative Computation"
+title: Imperative Computation in Functional Programming
 description: Leveraging the case of the previous effect to indicate whether computation of the next effect should proceed.
 author: Logan McGrath
 date: 2022-05-30T10:04:42-0700
@@ -13,8 +13,6 @@ description: >-
   express imperative control flow.
 layout: post
 comments: true
-twitter:
-  image: /images/tags/functional-programming/functional-grass-512x512.png
 og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
@@ -22,14 +20,14 @@ og:
 code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3
 ---
 
-Remember **functors** and **applicatives**? In my last post {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}} we explored how functors and applicatives abstract over **desired** and **undesired cases** of **contexts** in order to express control flow and permit independent computation. In this post we will explore **monads** and how to leverage their specific abstraction to express **imperative** control flow.
+Remember **functors** and **applicatives**? In my last post {{linkedTitle "_posts/2022-06-05-enabling-control-flow.md"}} we explored how functors and applicatives abstract over **desired** and **undesired cases** of **contexts** in order to express control flow and permit independent computation. In this post we will explore **monads** and how to leverage their specific abstraction to express **imperative** control flow.
 
 <!--more-->
 
 > **This post is part of a series:**
 >
 > 1. {{linkedTitle "_posts/2022-03-15-contexts-and-effects.md"}}
-> 2. {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}}
+> 2. {{linkedTitle "_posts/2022-06-05-enabling-control-flow.md"}}
 > 3. **{{title}}**
 
 _The code that accompanies this post may be found [here]({{code_repo}})._
@@ -619,5 +617,5 @@ In my next post, we will explore **raising and recovering from errors** agnostic
 [for comprehension]: https://docs.scala-lang.org/tour/for-comprehensions.html
 [monads are formally defined]: https://en.wikipedia.org/wiki/Monad_(category_theory)#Formal_definition
 [category theory]: https://en.m.wikipedia.org/wiki/Category_theory
-[previously for applicatives]: {{getUrl "_posts/2022-06-05-permitting-or-halting-computation.md"}}#defining-the-applicative-laws-as-properties
+[previously for applicatives]: {{getUrl "_posts/2022-06-05-enabling-control-flow.md"}}#defining-the-applicative-laws-as-properties
 [A Brief, Incomplete, and Mostly Wrong History of Programming Languages]: https://web.archive.org/web/20220609203110/https://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html

@@ -48,8 +48,6 @@ customContext config = self
           constField "authorName" (info ^. siteAuthorName),
           constField "author" (info ^. siteAuthorName), -- default to authorName
           constField "linkedInProfile" (info ^. siteLinkedInProfile),
-          constField "twitterProfile" (info ^. siteTwitterProfile),
-          constField "twitterHandle" (info ^. siteTwitterHandle),
           constField "githubProfile" (info ^. siteGitHubProfile),
           constField "giteaProfile" (info ^. siteGiteaProfile),
           constField "useSocial" True,

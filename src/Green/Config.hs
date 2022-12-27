@@ -49,7 +49,6 @@ data SiteInfo = SiteInfo
     _siteAuthorName :: String,
     _siteAuthorEmail :: String,
     _siteLinkedInProfile :: String,
-    _siteTwitterProfile :: String,
     _siteGitHubProfile :: String,
     _siteGiteaProfile :: String,
     _siteGiteaWebUrl :: String
@@ -57,10 +56,6 @@ data SiteInfo = SiteInfo
   deriving (Show)
 
 makeLenses ''SiteInfo
-
-siteTwitterHandle :: SimpleGetter SiteInfo String
-siteTwitterHandle = to \info ->
-  '@' : (reverse . takeWhile (/= '/') . reverse $ info ^. siteTwitterProfile)
 
 instance FromJSON SiteInfo where
   parseJSON = withObject "SiteInfo" \info ->
@@ -72,13 +67,12 @@ instance FromJSON SiteInfo where
       <*> info .: "author-name"
       <*> info .: "author-email"
       <*> info .: "linkedin-profile"
-      <*> info .: "twitter-profile"
       <*> info .: "github-profile"
       <*> info .: "gitea-profile"
       <*> info .: "gitea-web-url"
 
 instance ToJSON SiteInfo where
-  toJSON info@SiteInfo {..} =
+  toJSON SiteInfo {..} =
     object
       [ "root" .= _siteRoot,
         "title" .= _siteTitle,
@@ -87,8 +81,6 @@ instance ToJSON SiteInfo where
         "author-name" .= _siteAuthorName,
         "author-email" .= _siteAuthorEmail,
         "linkedin-profile" .= _siteLinkedInProfile,
-        "twitter-profile" .= _siteTwitterProfile,
-        "twitter-handle" .= (info ^. siteTwitterHandle),
         "github-profile" .= _siteGitHubProfile,
         "gitea-profile" .= _siteGiteaProfile,
         "gitea-web-url" .= _siteGiteaWebUrl

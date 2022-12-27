@@ -1,5 +1,5 @@
 ---
-title: "Embracing Nondeterminism Part II: Permitting or Halting Computation"
+title: Enabling Control Flow in Functional Programming
 description: Leveraging the effects of two or more contexts to allow computations to proceed or halt.
 author: Logan McGrath
 date: 2022-05-07T14:21:23-0700
@@ -15,8 +15,6 @@ description: >-
 layout: post
 comments: true
 thumbnail: /images/tags/functional-programming/functional-grass-128x128.png
-twitter:
-  image: /images/tags/functional-programming/functional-grass-512x512.png
 og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png

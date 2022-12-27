@@ -39,7 +39,6 @@ defaultSiteConfigWith hakyllConfig =
             _siteAuthorName = "Old Blogger",
             _siteAuthorEmail = "blogger@thisold.blog",
             _siteLinkedInProfile = "https://linkedin.com/in/xyz1abc2def3ghi4jkl5mno6pqr7stu8vw",
-            _siteTwitterProfile = "https://twitter.com/thisold.blog",
             _siteGitHubProfile = "https://github.com/thisold.blog",
             _siteGiteaProfile = "https://bitsof.thisold.blog/blogger",
             _siteGiteaWebUrl = "https://bitsof.thisold.blog/blogger/blog",

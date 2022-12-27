@@ -1,5 +1,5 @@
 ---
-title: "Embracing Nondeterminism Part I: Contexts and Effects"
+title: Contexts and Effects in Functional Programming
 description: "Ever wonder what the purpose of that map() method was on so many objects? It's not just for arrays! I wrote about its use as an abstraction, and hopefully you'll find it useful."
 author: Logan McGrath
 date: 2022-01-24T17:14:03-0800
@@ -13,8 +13,6 @@ description: >-
 layout: post
 comments: true
 thumbnail: /images/tags/functional-programming/functional-grass-128x128.png
-twitter:
-  image: /images/tags/functional-programming/functional-grass-512x512.png
 og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
@@ -33,7 +31,7 @@ Have you ever received an unexpected `null` reference? Have you ever written a f
 > **This post is part of a series:**
 >
 > 1. **{{title}}**
-> 2. {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}}
+> 2. {{linkedTitle "_posts/2022-06-05-enabling-control-flow.md"}}
 > 3. {{linkedTitle "_posts/2022-06-17-imperative-computation.md"}}
 
 _The code that accompanies this post may be found [here]({{code_repo}})._
@@ -922,7 +920,7 @@ def combine(a: A, b: B): C
 
 How do you apply `combine()` to the terms `A` and `B` produced by the contexts? What happens if one of the contexts is in an **undesired case**? At first blush it appears that `map()` might work, but `combine()` takes two arguments. You need a specialized functor in order to apply `combine()`!
 
-In my next post {{linkedTitle "_posts/2022-06-05-permitting-or-halting-computation.md"}}, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.
+In my next post {{linkedTitle "_posts/2022-06-05-enabling-control-flow.md"}}, we will explore how **applicatives** enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.
 
 > **Acknowledgements**
 >

@@ -12,8 +12,6 @@ description: >-
 layout: post
 comments: true
 thumbnail: /images/tags/duct-tape/duct-tape-128x128.png
-twitter:
-  image: /images/tags/duct-tape/duct-tape-512x512.png
 og:
   image:
     url: /images/tags/duct-tape/duct-tape-512x512.png

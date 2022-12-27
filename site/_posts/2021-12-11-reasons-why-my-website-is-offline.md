@@ -13,8 +13,6 @@ description: >-
 layout: post
 comments: true
 thumbnail: /images/reasons-my-website-is-offline/coming-out-of-the-closet-128x128.png
-twitter:
-  image: /images/reasons-my-website-is-offline/coming-out-of-the-closet-512x512.png
 og:
   image:
     url: /images/reasons-my-website-is-offline/coming-out-of-the-closet-512x512.png

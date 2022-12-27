@@ -7,7 +7,6 @@ default: &default
     author-name: Logan McGrath
     author-email: logan.mcgrath@thisfieldwas.green
     linkedin-profile: https://www.linkedin.com/in/loganmcgrath
-    twitter-profile: https://twitter.com/thisgreenfield
     github-profile: https://github.com/keywordsalad
     gitea-profile: https://bitsof.thisfieldwas.green/keywordsalad
     gitea-web-url: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit
