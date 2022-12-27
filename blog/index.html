@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This Field Was Green - Writing about the greenest things</title>
+<meta name="description" content="The latest and greenest of things I&#39;ve written about"><title>Writing about the greenest things - This Field Was Green</title>
 <link rel="canonical" href="https://thisfieldwas.green/blog/">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 
@@ -19,12 +19,6 @@
   <meta property="article:modified_time" content="2022-09-05T12:55:18-07:00">
   <meta property="article:author" content="Logan McGrath">
   
-<meta name="twitter:card" content="summary">
-<meta name="twitter:site" content="@thisgreenfield">
-<meta name="twitter:title" content="Writing about the greenest things">
-<meta name="twitter:description" content="The latest and greenest of things I&#39;ve written about">
-
-
 <link rel="stylesheet" href="/css/main.css">
 <script src="/js/main.js" async></script>
 <script src="/js/scroll-shadows.js" async></script>
@@ -90,7 +84,7 @@
 <p class="tag-cloud" data-show-count><a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:6" href="/tags/angularjs">angularjs</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:6" href="/tags/combinators">combinators</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:6" href="/tags/configuration-management">configuration management</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:6" href="/tags/contexts">contexts</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:6" href="/tags/design-patterns">design patterns</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:6" href="/tags/duct-tape">duct tape</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:6" href="/tags/functional-programming">functional programming</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:6" href="/tags/hakyll">hakyll</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:6" href="/tags/haskell">haskell</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:6" href="/tags/parsing">parsing</a> <a data-count="4" class="tag" style=";--count:4;--min-count:1;--max-count:6" href="/tags/perforce">perforce</a> <a data-count="6" class="tag" style=";--count:6;--min-count:1;--max-count:6" href="/tags/programming">programming</a> <a data-count="5" class="tag" style=";--count:5;--min-count:1;--max-count:6" href="/tags/scala">scala</a> <a data-count="2" class="tag" style=";--count:2;--min-count:1;--max-count:6" href="/tags/self-host">self host</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:6" href="/tags/sinatra">sinatra</a> <a data-count="1" class="tag" style=";--count:1;--min-count:1;--max-count:6" href="/tags/tinfoil-hat">tinfoil hat</a> <a data-count="3" class="tag" style=";--count:3;--min-count:1;--max-count:6" href="/tags/yak-shave">yak shave</a></p>
 <h2>Previous posts</h2>
 
-<h3 class="post-title"><a href="/blog/2022/06/17/imperative-computation/">Embracing Nondeterminism Part III: Imperative Computation</a></h3>
+<h3 class="post-title"><a href="/blog/2022/06/17/imperative-computation/">Imperative Computation in Functional Programming</a></h3>
   <div class="post-meta">
   <p class="post-published">
     Posted on June 17, 2022
@@ -103,9 +97,9 @@
 
   
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">21m 28s</span></p>
+<p>Estimated reading time: <span class="length">21m 26s</span></p>
 </div>
-<p>Remember <strong>functors</strong> and <strong>applicatives</strong>? In my last post <a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a> we explored how functors and applicatives abstract over <strong>desired</strong> and <strong>undesired cases</strong> of <strong>contexts</strong> in order to express control flow and permit independent computation. In this post we will explore <strong>monads</strong> and how to leverage their specific abstraction to express <strong>imperative</strong> control flow.</p>
+<p>Remember <strong>functors</strong> and <strong>applicatives</strong>? In my last post <a href="/blog/2022/06/05/enabling-control-flow/">Enabling Control Flow in Functional Programming</a> we explored how functors and applicatives abstract over <strong>desired</strong> and <strong>undesired cases</strong> of <strong>contexts</strong> in order to express control flow and permit independent computation. In this post we will explore <strong>monads</strong> and how to leverage their specific abstraction to express <strong>imperative</strong> control flow.</p>
 
   <p class="read-more"><a href="/blog/2022/06/17/imperative-computation/">Read more...</a></p>
 <h3 class="post-title"><a href="/blog/2022/06/16/set-function/">The Set Function</a></h3>
@@ -123,10 +117,10 @@
 <div class="estimated-reading-time">
 <p>Estimated reading time: <span class="length">2m 58s</span></p>
 </div>
-<p>What is a <code>Set</code>? A <code>Set</code> can tell you whether or not an <code>value</code> is a member of the <code>Set</code>. This means that a <code>Set</code> is merely a function, specifically of <code>A =&gt; Boolean</code>. In this post I will explore the usage of <strong>combinators</strong> to build a <code>Set</code> from elementary functions alone.</p>
+<p>What is a <code>Set</code>? A <code>Set</code> can tell you whether or not an <code>value</code> is a member of the <code>Set</code>. This means that a <code>Set</code> is merely a function, specifically of type <code>A =&gt; Boolean</code>. In this post I will explore the usage of <strong>combinators</strong> to build a <code>Set</code> from elementary functions alone.</p>
 
   <p class="read-more"><a href="/blog/2022/06/16/set-function/">Read more...</a></p>
-<h3 class="post-title"><a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a></h3>
+<h3 class="post-title"><a href="/blog/2022/06/05/enabling-control-flow/">Enabling Control Flow in Functional Programming</a></h3>
   <div class="post-meta">
   <p class="post-published">
     Posted on June  5, 2022
@@ -139,16 +133,16 @@
 
   <div class="post-thumbnail">
   <a href="/images/tags/functional-programming/functional-grass-128x128.png">
-    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Embracing Nondeterminism Part II: Permitting or Halting Computation" width="128" height="128" loading="lazy">
+    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Enabling Control Flow in Functional Programming" width="128" height="128" loading="lazy">
   </a>
 </div>
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">32m 7s</span></p>
+<p>Estimated reading time: <span class="length">32m 5s</span></p>
 </div>
-<p>Remember <strong>functors</strong>? Recall from my last post, <a href="/blog/2022/03/15/contexts-and-effects/">Embracing Nondeterminism Part I: Contexts and Effects</a>, they are structures that abstract away complexity imposed by nondeterminism present in <strong>contexts</strong> that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their <strong>undesired case</strong> and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.</p>
+<p>Remember <strong>functors</strong>? Recall from my last post, <a href="/blog/2022/03/15/contexts-and-effects/">Contexts and Effects in Functional Programming</a>, they are structures that abstract away complexity imposed by nondeterminism present in <strong>contexts</strong> that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their <strong>undesired case</strong> and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.</p>
 
-  <p class="read-more"><a href="/blog/2022/06/05/permitting-or-halting-computation/">Read more...</a></p>
-<h3 class="post-title"><a href="/blog/2022/03/15/contexts-and-effects/">Embracing Nondeterminism Part I: Contexts and Effects</a></h3>
+  <p class="read-more"><a href="/blog/2022/06/05/enabling-control-flow/">Read more...</a></p>
+<h3 class="post-title"><a href="/blog/2022/03/15/contexts-and-effects/">Contexts and Effects in Functional Programming</a></h3>
   <div class="post-meta">
   <p class="post-published">
     Posted on March 15, 2022
@@ -164,11 +158,11 @@
 
   <div class="post-thumbnail">
   <a href="/images/tags/functional-programming/functional-grass-128x128.png">
-    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Embracing Nondeterminism Part I: Contexts and Effects" width="128" height="128" loading="lazy">
+    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Contexts and Effects in Functional Programming" width="128" height="128" loading="lazy">
   </a>
 </div>
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">45m 6s</span></p>
+<p>Estimated reading time: <span class="length">45m 3s</span></p>
 </div>
 <p>Have you ever received an unexpected <code>null</code> reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?</p>
 

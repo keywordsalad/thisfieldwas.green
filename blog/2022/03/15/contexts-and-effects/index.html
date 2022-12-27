@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>This Field Was Green - Embracing Nondeterminism Part I: Contexts and Effects</title>
+<meta name="description" content="Have you ever received an unexpected null reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?"><title>Contexts and Effects in Functional Programming - This Field Was Green</title>
 <link rel="canonical" href="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 
 <meta property="og:site_name" content="">
-<meta property="og:title" content="Embracing Nondeterminism Part I: Contexts and Effects">
+<meta property="og:title" content="Contexts and Effects in Functional Programming">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/">
-<meta property="og:description" content="Ever wonder what the purpose of that map() method was on so many objects? It&#39;s not just for arrays! I wrote about its use as an abstraction, and hopefully you&#39;ll find it useful.">
+<meta property="og:description" content="Have you ever received an unexpected null reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?">
 <meta property="og:image:url" content="https://thisfieldwas.green/images/tags/functional-programming/functional-grass-512x512.png">
 <meta property="og:image:alt" content="Abstracting nondeterminism and complexity by modeling effects as first class concepts in programs.">
 <meta property="article:published_time" content="2022-03-15T09:20:00-07:00">
@@ -24,12 +24,6 @@
   <meta property="article:tag" content="design patterns">
   <meta property="article:tag" content="contexts">
   
-<meta name="twitter:card" content="summary">
-<meta name="twitter:site" content="@thisgreenfield">
-<meta name="twitter:title" content="Embracing Nondeterminism Part I: Contexts and Effects">
-<meta name="twitter:description" content="Ever wonder what the purpose of that map() method was on so many objects? It&#39;s not just for arrays! I wrote about its use as an abstraction, and hopefully you&#39;ll find it useful.">
-<meta name="twitter:image" content="https://thisfieldwas.green/images/tags/functional-programming/functional-grass-512x512.png">
-
 <link rel="stylesheet" href="/css/main.css">
 <link rel="stylesheet" href="/css/posts/embracing-nondeterminism-part-1.css"><script src="/js/main.js" async></script>
 <script src="/js/scroll-shadows.js" async></script>
@@ -68,7 +62,7 @@
 <main class="page-content">
   <div class="content-bound">
     <div class="post post-full">
-      <h1 class="post-title">Embracing Nondeterminism Part I: Contexts and Effects</h1>
+      <h1 class="post-title">Contexts and Effects in Functional Programming</h1>
 <div class="post-meta">
   <p class="post-published">
     Posted on March 15, 2022
@@ -84,21 +78,21 @@
 
 <div class="post-thumbnail">
   <a href="/images/tags/functional-programming/functional-grass-128x128.png">
-    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Embracing Nondeterminism Part I: Contexts and Effects" width="128" height="128" loading="lazy">
+    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Contexts and Effects in Functional Programming" width="128" height="128" loading="lazy">
   </a>
 </div>
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">45m 6s</span></p>
+<p>Estimated reading time: <span class="length">45m 3s</span></p>
 </div>
 <p>Have you ever received an unexpected <code>null</code> reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?</p>
 <!--more-->
 <blockquote>
 <p><strong>This post is part of a series:</strong></p>
 <ol type="1">
-<li><strong>Embracing Nondeterminism Part I: Contexts and Effects</strong></li>
-<li><a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a></li>
-<li><a href="/blog/2022/06/17/imperative-computation/">Embracing Nondeterminism Part III: Imperative Computation</a></li>
+<li><strong>Contexts and Effects in Functional Programming</strong></li>
+<li><a href="/blog/2022/06/05/enabling-control-flow/">Enabling Control Flow in Functional Programming</a></li>
+<li><a href="/blog/2022/06/17/imperative-computation/">Imperative Computation in Functional Programming</a></li>
 </ol>
 </blockquote>
 <p><em>The code that accompanies this post may be found <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1">here</a>.</em></p>
@@ -836,7 +830,7 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">combine</span><span class="op">(</span>a<span class="op">:</span> A<span class="op">,</span> b<span class="op">:</span> B<span class="op">):</span> C</span></code></pre></div>
 </div>
 <p>How do you apply <code>combine()</code> to the terms <code>A</code> and <code>B</code> produced by the contexts? What happens if one of the contexts is in an <strong>undesired case</strong>? At first blush it appears that <code>map()</code> might work, but <code>combine()</code> takes two arguments. You need a specialized functor in order to apply <code>combine()</code>!</p>
-<p>In my next post <a href="/blog/2022/06/05/permitting-or-halting-computation/">Embracing Nondeterminism Part II: Permitting or Halting Computation</a>, we will explore how <strong>applicatives</strong> enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.</p>
+<p>In my next post <a href="/blog/2022/06/05/enabling-control-flow/">Enabling Control Flow in Functional Programming</a>, we will explore how <strong>applicatives</strong> enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.</p>
 <blockquote>
 <p><strong>Acknowledgements</strong></p>
 <p>Many of my professional network, colleagues, and friends helped me develop this material and proof read my many drafts. I would like to especially thank:</p>
@@ -887,7 +881,7 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
       <li>Site proudly generated by <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/214aec6/site/_posts/2022-03-15-contexts-and-effects.md">2022-03-15-contexts-and-effects.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/214aec6">214aec6</a>.</p>
+    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/aa0b4f7/site/_posts/2022-03-15-contexts-and-effects.md">2022-03-15-contexts-and-effects.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/aa0b4f7">aa0b4f7</a>.</p>
   </div>
 </footer>
 

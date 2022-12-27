@@ -208,7 +208,7 @@
 &lt;h2 id=&quot;the-new-shape-of-the-parse-function&quot;&gt;The new shape of the &lt;code&gt;parse()&lt;/code&gt; function&lt;/h2&gt;
 &lt;p&gt;Our &lt;code&gt;parse()&lt;/code&gt; function will soon become generic its return type, which makes it &lt;em&gt;covariant&lt;/em&gt; in that &lt;code&gt;parse()&lt;/code&gt; can be adapted to produce anything we want. What the &lt;code&gt;parse()&lt;/code&gt; function produces is contextualized by whether it is recognized in the input, and as such there is a chance that nothing is produced because the input wasn’t recognized. This means the the &lt;code&gt;parse()&lt;/code&gt; function forms a specific structure: a &lt;em&gt;context&lt;/em&gt; with the shape of a &lt;strong&gt;functor&lt;/strong&gt;.&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;I have written about contexts, functors, and related structures extensively. Start from the following article if these terms are unfamiliar to you: &lt;strong&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Embracing Nondeterminism Part I: Contexts and Effects&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;I have written about contexts, functors, and related structures extensively. Start from the following article if these terms are unfamiliar to you: &lt;strong&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Take a look at what the &lt;code&gt;parse()&lt;/code&gt; function signature will look like after we start using &lt;code&gt;ParseResult&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -466,28 +466,28 @@
     </entry>
   <entry>
       <id>https://thisfieldwas.green/blog/2022/06/17/imperative-computation/</id>
-      <title>Embracing Nondeterminism Part III: Imperative Computation</title>
+      <title>Imperative Computation in Functional Programming</title>
       <updated>2022-06-17T08:47:11-07:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2022/06/17/imperative-computation/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;21m 28s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;21m 26s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/permitting-or-halting-computation/&quot;&gt;Embracing Nondeterminism Part II: Permitting or Halting Computation&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
+&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
 </summary>
       <author>
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;21m 28s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;21m 26s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/permitting-or-halting-computation/&quot;&gt;Embracing Nondeterminism Part II: Permitting or Halting Computation&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
+&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;This post is part of a series:&lt;/strong&gt;&lt;/p&gt;
 &lt;ol type=&quot;1&quot;&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Embracing Nondeterminism Part I: Contexts and Effects&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/06/05/permitting-or-halting-computation/&quot;&gt;Embracing Nondeterminism Part II: Permitting or Halting Computation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Embracing Nondeterminism Part III: Imperative Computation&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Imperative Computation in Functional Programming&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
@@ -797,7 +797,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;/ol&gt;
 &lt;p&gt;Note that &lt;code&gt;pure()&lt;/code&gt; is interpreted as the identity element of the monad, as it merely lifts a value into its context, unmodified.&lt;/p&gt;
 &lt;h3 id=&quot;defining-monad-laws-as-properties&quot;&gt;Defining monad laws as properties&lt;/h3&gt;
-&lt;p&gt;The monad laws may be defined as &lt;code&gt;scalacheck&lt;/code&gt; properties, as &lt;a href=&quot;/blog/2022/06/05/permitting-or-halting-computation/#defining-the-applicative-laws-as-properties&quot;&gt;previously for applicatives&lt;/a&gt;. These properties assert “for all” instances of a particular monad &lt;code&gt;F[_]&lt;/code&gt;, the properties should hold. We know we have a well-behaved monad if the property checks pass.&lt;/p&gt;
+&lt;p&gt;The monad laws may be defined as &lt;code&gt;scalacheck&lt;/code&gt; properties, as &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/#defining-the-applicative-laws-as-properties&quot;&gt;previously for applicatives&lt;/a&gt;. These properties assert “for all” instances of a particular monad &lt;code&gt;F[_]&lt;/code&gt;, the properties should hold. We know we have a well-behaved monad if the property checks pass.&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
 &lt;div class=&quot;sourceCode&quot; id=&quot;cb15&quot;&gt;&lt;pre class=&quot;sourceCode scala&quot;&gt;&lt;code class=&quot;sourceCode scala&quot;&gt;&lt;span id=&quot;cb15-1&quot;&gt;&lt;a href=&quot;#cb15-1&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;&lt;span class=&quot;kw&quot;&gt;trait&lt;/span&gt; MonadLaws &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;op&quot;&gt;:&lt;/span&gt; Laws &lt;span class=&quot;kw&quot;&gt;with&lt;/span&gt; ApplicativeLaws &lt;span class=&quot;op&quot;&gt;=&amp;gt;&lt;/span&gt;&lt;/span&gt;
 &lt;span id=&quot;cb15-2&quot;&gt;&lt;a href=&quot;#cb15-2&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;&lt;/span&gt;
@@ -979,7 +979,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;2m 58s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;What is a &lt;code&gt;Set&lt;/code&gt;? A &lt;code&gt;Set&lt;/code&gt; can tell you whether or not an &lt;code&gt;value&lt;/code&gt; is a member of the &lt;code&gt;Set&lt;/code&gt;. This means that a &lt;code&gt;Set&lt;/code&gt; is merely a function, specifically of &lt;code&gt;A =&amp;gt; Boolean&lt;/code&gt;. In this post I will explore the usage of &lt;strong&gt;combinators&lt;/strong&gt; to build a &lt;code&gt;Set&lt;/code&gt; from elementary functions alone.&lt;/p&gt;
+&lt;p&gt;What is a &lt;code&gt;Set&lt;/code&gt;? A &lt;code&gt;Set&lt;/code&gt; can tell you whether or not an &lt;code&gt;value&lt;/code&gt; is a member of the &lt;code&gt;Set&lt;/code&gt;. This means that a &lt;code&gt;Set&lt;/code&gt; is merely a function, specifically of type &lt;code&gt;A =&amp;gt; Boolean&lt;/code&gt;. In this post I will explore the usage of &lt;strong&gt;combinators&lt;/strong&gt; to build a &lt;code&gt;Set&lt;/code&gt; from elementary functions alone.&lt;/p&gt;
 </summary>
       <author>
         <name>Logan McGrath</name>
@@ -987,7 +987,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
 &lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;2m 58s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;What is a &lt;code&gt;Set&lt;/code&gt;? A &lt;code&gt;Set&lt;/code&gt; can tell you whether or not an &lt;code&gt;value&lt;/code&gt; is a member of the &lt;code&gt;Set&lt;/code&gt;. This means that a &lt;code&gt;Set&lt;/code&gt; is merely a function, specifically of &lt;code&gt;A =&amp;gt; Boolean&lt;/code&gt;. In this post I will explore the usage of &lt;strong&gt;combinators&lt;/strong&gt; to build a &lt;code&gt;Set&lt;/code&gt; from elementary functions alone.&lt;/p&gt;
+&lt;p&gt;What is a &lt;code&gt;Set&lt;/code&gt;? A &lt;code&gt;Set&lt;/code&gt; can tell you whether or not an &lt;code&gt;value&lt;/code&gt; is a member of the &lt;code&gt;Set&lt;/code&gt;. This means that a &lt;code&gt;Set&lt;/code&gt; is merely a function, specifically of type &lt;code&gt;A =&amp;gt; Boolean&lt;/code&gt;. In this post I will explore the usage of &lt;strong&gt;combinators&lt;/strong&gt; to build a &lt;code&gt;Set&lt;/code&gt; from elementary functions alone.&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;h2 id=&quot;modeling-a-set&quot;&gt;Modeling a &lt;code&gt;Set&lt;/code&gt;&lt;/h2&gt;
 &lt;p&gt;I’m going to use a trait to model a &lt;code&gt;Set&lt;/code&gt;:&lt;/p&gt;
@@ -1093,29 +1093,29 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;p&gt;This seems like a cool way to model &lt;code&gt;Set&lt;/code&gt;s, but that’s about where the utility stops. As an exercise, it’s fun to see what you can do to model &lt;code&gt;Set&lt;/code&gt;s using functions alone, as this is an excellent vehicle for learning functional composition with combinators. In practice this would produce a &lt;code&gt;Set&lt;/code&gt; with linear-time performance, and you don’t want that.&lt;/p&gt;</content>
     </entry>
   <entry>
-      <id>https://thisfieldwas.green/blog/2022/06/05/permitting-or-halting-computation/</id>
-      <title>Embracing Nondeterminism Part II: Permitting or Halting Computation</title>
+      <id>https://thisfieldwas.green/blog/2022/06/05/enabling-control-flow/</id>
+      <title>Enabling Control Flow in Functional Programming</title>
       <updated>2022-06-05T14:01:07-07:00</updated>
-      <link rel="alternate" href="https://thisfieldwas.green/blog/2022/06/05/permitting-or-halting-computation/" />
+      <link rel="alternate" href="https://thisfieldwas.green/blog/2022/06/05/enabling-control-flow/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;32m 7s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;32m 5s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Embracing Nondeterminism Part I: Contexts and Effects&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
+&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
 </summary>
       <author>
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;32m 7s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;32m 5s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Embracing Nondeterminism Part I: Contexts and Effects&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
+&lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;This post is part of a series:&lt;/strong&gt;&lt;/p&gt;
 &lt;ol type=&quot;1&quot;&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Embracing Nondeterminism Part I: Contexts and Effects&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Embracing Nondeterminism Part II: Permitting or Halting Computation&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Embracing Nondeterminism Part III: Imperative Computation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Enabling Control Flow in Functional Programming&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
@@ -1875,15 +1875,15 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;p&gt;Applicatives primarily offer independent computation. Specifically, the arguments to applicative functions such as &lt;code&gt;ap()&lt;/code&gt;, &lt;code&gt;map2()&lt;/code&gt;, or &lt;code&gt;sequence()&lt;/code&gt; are evaluated independently of one another, and their individual outputs as a whole influence whether the functions consuming them are permitted to compute against the outputs of their &lt;strong&gt;desired cases&lt;/strong&gt; or if they should halt computation and &lt;em&gt;propagate&lt;/em&gt; any &lt;strong&gt;undesired cases&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;When all inputs to an applicative function are in the &lt;strong&gt;desired case&lt;/strong&gt;, then the output of the lifted functions will also be in the &lt;strong&gt;desired case&lt;/strong&gt;. Conversely, if any input is in the &lt;strong&gt;undesired case&lt;/strong&gt;, then it will be propagated instead, and the other cases will be &lt;em&gt;discarded&lt;/em&gt;. In this regard, applicative functions provide an &lt;em&gt;all-or-nothing&lt;/em&gt; operation.&lt;/p&gt;
 &lt;p&gt;Independent computation provides some level of control flow, but it doesn’t guide execution to proceed only if the previous execution has succeeded, as all operations evaluate independently of each other. Applicatives therefore do not provide a mechanism to support imperative programming. For this kind of control flow, you need to further specialize the applicative functor.&lt;/p&gt;
-&lt;p&gt;In my next post &lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Embracing Nondeterminism Part III: Imperative Computation&lt;/a&gt; we will explore the infamous &lt;em&gt;&lt;strong&gt;monad&lt;/strong&gt;&lt;/em&gt; and how it enables imperative control flow in functional programming.&lt;/p&gt;</content>
+&lt;p&gt;In my next post &lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt; we will explore the infamous &lt;em&gt;&lt;strong&gt;monad&lt;/strong&gt;&lt;/em&gt; and how it enables imperative control flow in functional programming.&lt;/p&gt;</content>
     </entry>
   <entry>
       <id>https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/</id>
-      <title>Embracing Nondeterminism Part I: Contexts and Effects</title>
+      <title>Contexts and Effects in Functional Programming</title>
       <updated>2022-06-05T13:21:27-07:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;45m 6s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;45m 3s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Have you ever received an unexpected &lt;code&gt;null&lt;/code&gt; reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?&lt;/p&gt;
 </summary>
@@ -1891,16 +1891,16 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;45m 6s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;45m 3s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Have you ever received an unexpected &lt;code&gt;null&lt;/code&gt; reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;This post is part of a series:&lt;/strong&gt;&lt;/p&gt;
 &lt;ol type=&quot;1&quot;&gt;
-&lt;li&gt;&lt;strong&gt;Embracing Nondeterminism Part I: Contexts and Effects&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/06/05/permitting-or-halting-computation/&quot;&gt;Embracing Nondeterminism Part II: Permitting or Halting Computation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Embracing Nondeterminism Part III: Imperative Computation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Contexts and Effects in Functional Programming&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
@@ -2638,7 +2638,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;span id=&quot;cb29-4&quot;&gt;&lt;a href=&quot;#cb29-4&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;&lt;span class=&quot;kw&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;fu&quot;&gt;combine&lt;/span&gt;&lt;span class=&quot;op&quot;&gt;(&lt;/span&gt;a&lt;span class=&quot;op&quot;&gt;:&lt;/span&gt; A&lt;span class=&quot;op&quot;&gt;,&lt;/span&gt; b&lt;span class=&quot;op&quot;&gt;:&lt;/span&gt; B&lt;span class=&quot;op&quot;&gt;):&lt;/span&gt; C&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;p&gt;How do you apply &lt;code&gt;combine()&lt;/code&gt; to the terms &lt;code&gt;A&lt;/code&gt; and &lt;code&gt;B&lt;/code&gt; produced by the contexts? What happens if one of the contexts is in an &lt;strong&gt;undesired case&lt;/strong&gt;? At first blush it appears that &lt;code&gt;map()&lt;/code&gt; might work, but &lt;code&gt;combine()&lt;/code&gt; takes two arguments. You need a specialized functor in order to apply &lt;code&gt;combine()&lt;/code&gt;!&lt;/p&gt;
-&lt;p&gt;In my next post &lt;a href=&quot;/blog/2022/06/05/permitting-or-halting-computation/&quot;&gt;Embracing Nondeterminism Part II: Permitting or Halting Computation&lt;/a&gt;, we will explore how &lt;strong&gt;applicatives&lt;/strong&gt; enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.&lt;/p&gt;
+&lt;p&gt;In my next post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt;, we will explore how &lt;strong&gt;applicatives&lt;/strong&gt; enable working within two or more contexts at the same time, as well as the many ways that you will be able to exploit this capability in your programs to express control flow.&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Acknowledgements&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Many of my professional network, colleagues, and friends helped me develop this material and proof read my many drafts. I would like to especially thank:&lt;/p&gt;

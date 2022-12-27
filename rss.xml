@@ -23,7 +23,7 @@
   <copyright>Copyright &#169; 2012-2022 Logan McGrath. All rights reserved.</copyright>
   <item>
       <title>Parser Combinators</title>
-      <description>Combining functions to build a parser</description>
+      <description>In my post I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: parsing text.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2022/09/05/parser-combinators/</link>
       <guid>https://thisfieldwas.green/blog/2022/09/05/parser-combinators/</guid>
@@ -36,8 +36,8 @@
       <category>parsing</category>
       </item>
   <item>
-      <title>Embracing Nondeterminism Part III: Imperative Computation</title>
-      <description>Leveraging the case of the previous effect to indicate whether computation of the next effect should proceed.</description>
+      <title>Imperative Computation in Functional Programming</title>
+      <description>Remember functors and applicatives? In my last post we explored how functors and applicatives abstract over desired and undesired cases of contexts in order to express control flow and permit independent computation. In this post we will explore monads and how to leverage their specific abstraction to express imperative control flow.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2022/06/17/imperative-computation/</link>
       <guid>https://thisfieldwas.green/blog/2022/06/17/imperative-computation/</guid>
@@ -50,7 +50,7 @@
       </item>
   <item>
       <title>The Set Function</title>
-      <description>Modeling a mathematical set as a function.</description>
+      <description>What is a Set? A Set can tell you whether or not an value is a member of the Set. This means that a Set is merely a function, specifically of type A to Boolean. In this post I will explore the usage of **combinators** to build a Set from elementary functions alone.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2022/06/16/set-function/</link>
       <guid>https://thisfieldwas.green/blog/2022/06/16/set-function/</guid>
@@ -62,11 +62,11 @@
       <category>combinators</category>
       </item>
   <item>
-      <title>Embracing Nondeterminism Part II: Permitting or Halting Computation</title>
-      <description>Leveraging the effects of two or more contexts to allow computations to proceed or halt.</description>
+      <title>Enabling Control Flow in Functional Programming</title>
+      <description>Remember functors? They are structures that abstract away complexity imposed by nondeterminism present in contexts that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their undesired case and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.</description>
       <dc:creator>Logan McGrath</dc:creator>
-      <link>https://thisfieldwas.green/blog/2022/06/05/permitting-or-halting-computation/</link>
-      <guid>https://thisfieldwas.green/blog/2022/06/05/permitting-or-halting-computation/</guid>
+      <link>https://thisfieldwas.green/blog/2022/06/05/enabling-control-flow/</link>
+      <guid>https://thisfieldwas.green/blog/2022/06/05/enabling-control-flow/</guid>
       <pubDate>Sun, 05 Jun 2022 14:01:07 -0700</pubDate>
       <category>functional programming</category>
       <category>programming</category>
@@ -75,8 +75,8 @@
       <category>contexts</category>
       </item>
   <item>
-      <title>Embracing Nondeterminism Part I: Contexts and Effects</title>
-      <description>Ever wonder what the purpose of that map() method was on so many objects? It&#39;s not just for arrays! I wrote about its use as an abstraction, and hopefully you&#39;ll find it useful.</description>
+      <title>Contexts and Effects in Functional Programming</title>
+      <description>Have you ever received an unexpected null reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/</link>
       <guid>https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/</guid>
@@ -89,7 +89,7 @@
       </item>
   <item>
       <title>Highly available ssh tunnels</title>
-      <description>Duct tape performs better than systemd for keeping my webserver&#39;s ssh tunnels open</description>
+      <description>In my previous post I complained about systemd giving up when it fails to maintain ssh tunnels. In this post, I complain about systemd a bit more and how I gave up and stopped using it for managing my ssh tunnels.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2022/02/09/persistent-ssh-tunnels/</link>
       <guid>https://thisfieldwas.green/blog/2022/02/09/persistent-ssh-tunnels/</guid>
@@ -100,7 +100,7 @@
       </item>
   <item>
       <title>Reasons why my website is offline</title>
-      <description>My website comes out of the closet. This is from where I host several of my services, but the uptime is terrible!</description>
+      <description>My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and low-key minimalist, found next to the garbage chute at his condo building.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline/</link>
       <guid>https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline/</guid>
@@ -113,7 +113,7 @@
       </item>
   <item>
       <title>Redoing my website with Haskell and Hakyll</title>
-      <description></description>
+      <description>My website prior to 2021 was authored using octopress or jekyll. Truthfully I don&#39;t remember which as I haven&#39;t touched my website in quite a few years. I want to update my homepage and I&#39;m in a bind because I don&#39;t know how to produce a build after I make changes.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2021/12/05/redoing-my-website/</link>
       <guid>https://thisfieldwas.green/blog/2021/12/05/redoing-my-website/</guid>
@@ -125,7 +125,7 @@
       </item>
   <item>
       <title>Promoting changes with App-Config-App</title>
-      <description></description>
+      <description>The App-Config-App now lets you promote changes between environments!</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2012/11/28/promoting-changes-with-app-config-app/</link>
       <guid>https://thisfieldwas.green/blog/2012/11/28/promoting-changes-with-app-config-app/</guid>
@@ -137,7 +137,7 @@
       </item>
   <item>
       <title>App-Config-App in Action</title>
-      <description></description>
+      <description>Paul Hammant found this cool Server-Side Piano and I&#39;ve modified it to be configurable from a running App-Config-App. Because the sound is generated at the server, you&#39;re able to see (hear) the Server-Side Piano change its configuration without reloading the UI.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2012/11/20/app-config-app-in-action/</link>
       <guid>https://thisfieldwas.green/blog/2012/11/20/app-config-app-in-action/</guid>
@@ -149,7 +149,7 @@
       </item>
   <item>
       <title>SCM-Backed Application Configuration with Perforce</title>
-      <description></description>
+      <description>Continuing from my last post, I&#39;ve forked Paul Hammant&#39;s original App-Config-App and modified it to work against Perforce. I&#39;ve decided not to continue using Perforce Chronicle as it is primarily intended for content management.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2012/11/16/scm-backed-application-configuration-with-perforce/</link>
       <guid>https://thisfieldwas.green/blog/2012/11/16/scm-backed-application-configuration-with-perforce/</guid>
@@ -161,7 +161,7 @@
       </item>
   <item>
       <title>Using Perforce Chronicle for application configuration</title>
-      <description></description>
+      <description>Following Paul Hammant&#39;s post App-config workflow using SCM and subsequent proof of concept backed by Git, I will show that an app-config application backed by Perforce is possible using Perforce Chronicle.</description>
       <dc:creator>Logan McGrath</dc:creator>
       <link>https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/</link>
       <guid>https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/</guid>

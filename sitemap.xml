@@ -168,7 +168,7 @@
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://thisfieldwas.green/blog/2022/06/05/permitting-or-halting-computation/</loc>
+        <loc>https://thisfieldwas.green/blog/2022/06/05/enabling-control-flow/</loc>
         <lastmod>2022-09-05T12:55:18-07:00</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
@@ -194,7 +194,7 @@
     <url>
         <loc>https://thisfieldwas.green/blog/2021/12/05/redoing-my-website/</loc>
         <lastmod>2022-09-05T12:55:18-07:00</lastmod>
-        <changefreq>daily</changefreq>
+        <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
