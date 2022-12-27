@@ -27,18 +27,18 @@ code {
 
   /* BaseN */
   .bu {
-    color: steelblue;
+    color: #003a99;
   }
 
   /* Builtin */
   .cf {
-    color: seagreen;
+    color: #006833;
     font-weight: bold;
   }
 
   /* ControlFlow */
   .ch {
-    color: yellowgreen;
+    color: #007f33;
   }
 
   /* Char */
@@ -48,7 +48,7 @@ code {
 
   /* Constant */
   .co {
-    color: gray;
+    color: darkslategray;
     font-style: italic;
   }
 
@@ -85,7 +85,7 @@ code {
 
   /* Error */
   .ex {
-    color: seagreen
+    color: #006833
   }
 
   /* Extension */
@@ -95,24 +95,24 @@ code {
 
   /* Float */
   .fu {
-    color: seagreen;
+    color: #006833;
   }
 
   /* Function */
   .im {
-    color: steelblue;
+    color: #003a99;
   }
 
   /* Import */
   .in {
-    color: steelblue;
+    color: #003a99;
     font-weight: bold;
     font-style: italic;
   }
 
   /* Information */
   .kw {
-    color: seagreen;
+    color: #006833;
     font-weight: bold;
   }
 
@@ -135,17 +135,17 @@ code {
 
   /* Preprocessor */
   .sc {
-    color: seagreen;
+    color: #006833;
   }
 
   /* SpecialChar */
   .ss {
-    color: green;
+    color: #007f33;
   }
 
   /* SpecialString */
   .st {
-    color: lightseagreen;
+    color: light#006833;
   }
 
   /* String */
@@ -155,7 +155,7 @@ code {
 
   /* Variable */
   .vs {
-    color: green;
+    color: #007f33;
   }
 
   /* VerbatimString */
