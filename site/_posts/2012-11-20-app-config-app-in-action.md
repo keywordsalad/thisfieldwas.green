@@ -3,9 +3,14 @@ title: App-Config-App in Action
 author: Logan McGrath
 date: 2012-11-20T17:00:00-0600
 published: 2012-11-20T17:00:00-0600
-comments: true
 tags: angularjs, perforce, sinatra, configuration management
+description: >-
+  Paul Hammant found this cool Server-Side Piano and I've modified it to be
+  configurable from a running App-Config-App. Because the sound is generated at
+  the server, you're able to see (hear) the Server-Side Piano change its
+  configuration without reloading the UI.
 layout: post
+comments: true
 ---
 
 Paul Hammant found this cool [Server-Side Piano][] and I've modified it to be

@@ -4,10 +4,14 @@ description: >-
   My website comes out of the closet. This is from where I host several of my
   services, but the uptime is terrible!
 author: Logan McGrath
-comments: true
 published: 2021-12-11T14:43:25-0800
 tags: self host, configuration management, tinfoil hat, duct tape, yak shave
+description: >-
+  My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad,
+  a privacy buff and low-key minimalist, found next to the garbage chute at his
+  condo building.
 layout: post
+comments: true
 thumbnail: /images/reasons-my-website-is-offline/coming-out-of-the-closet-128x128.png
 twitter:
   image: /images/reasons-my-website-is-offline/coming-out-of-the-closet-512x512.png

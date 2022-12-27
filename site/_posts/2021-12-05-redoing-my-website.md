@@ -3,11 +3,15 @@ title: Redoing my website with Haskell and Hakyll
 author: Logan McGrath
 date: 2021-12-05T08:08:32-0800
 published: 2021-12-05T08:08:32-0800
-comments: true
 tags: hakyll, haskell, yak shave, programming
+description: >-
+  My website prior to 2021 was authored using octopress or jekyll. Truthfully I
+  don't remember which as I haven't touched my website in quite a few years. I
+  want to update my homepage and I'm in a bind because I don't know how to
+  produce a build after I make changes.
 layout: post
+comments: true
 contentClass: redoing-my-website
-changefreq: daily
 ---
 
 I'm picking up a COVID project: _Redoing my website!_

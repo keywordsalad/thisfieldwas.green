@@ -2,12 +2,16 @@
 title: "Embracing Nondeterminism Part I: Contexts and Effects"
 description: "Ever wonder what the purpose of that map() method was on so many objects? It's not just for arrays! I wrote about its use as an abstraction, and hopefully you'll find it useful."
 author: Logan McGrath
-comments: true
 date: 2022-01-24T17:14:03-0800
 published: 2022-03-15T09:20:00-0700
 updated: 2022-06-05T13:21:27-0700
 tags: functional programming, programming, scala, design patterns, contexts
+description: >-
+  Have you ever received an unexpected null reference? Have you ever written a
+  function to validate some input only to have it turn into spaghetti over time?
+  How do you anticipate exceptions and protect against them at runtime?
 layout: post
+comments: true
 thumbnail: /images/tags/functional-programming/functional-grass-128x128.png
 twitter:
   image: /images/tags/functional-programming/functional-grass-512x512.png

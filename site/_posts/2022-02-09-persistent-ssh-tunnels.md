@@ -2,11 +2,15 @@
 title: Highly available ssh tunnels
 description: Duct tape performs better than systemd for keeping my webserver's ssh tunnels open
 author: Logan McGrath
-comments: true
 date: 2022-02-08T14:27:57-0800
 published: 2022-02-09T16:02:28-0800
 tags: self host, duct tape, yak shave
+description: >-
+  In my previous post I complained about systemd giving up when it fails to
+  maintain ssh tunnels. In this post, I complain about systemd a bit more and
+  how I gave up and stopped using it for managing my ssh tunnels.
 layout: post
+comments: true
 thumbnail: /images/tags/duct-tape/duct-tape-128x128.png
 twitter:
   image: /images/tags/duct-tape/duct-tape-512x512.png

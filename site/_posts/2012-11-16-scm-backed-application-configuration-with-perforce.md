@@ -3,8 +3,13 @@ title: SCM-Backed Application Configuration with Perforce
 author: Logan McGrath
 date: 2012-11-16T17:00:00-0600
 published: 2012-11-16T17:00:00-0600
-comments: true
 tags: configuration management, perforce, sinatra, angularjs
+description: >-
+  Continuing from my last post, I've forked Paul Hammant's original
+  App-Config-App and modified it to work against Perforce. I've decided not to
+  continue using Perforce Chronicle as it is primarily intended for content
+  management.
+comments: true
 layout: post
 ---
 
