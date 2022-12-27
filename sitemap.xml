@@ -12,6 +12,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>https://thisfieldwas.green/privacy-policy/</loc>
+        <lastmod>2022-09-05T12:55:18-07:00</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>https://thisfieldwas.green/resume/</loc>
         <lastmod>2022-09-05T12:55:18-07:00</lastmod>
         <changefreq>monthly</changefreq>
