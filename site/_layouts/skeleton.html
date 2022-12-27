@@ -18,6 +18,10 @@
 {{-partial "social/twitter-card"-}}
 {{-#end-}}
 
+{{#for preloadImages-}}
+<link rel="preload" as="image" href="{{getUrl item}}">
+{{-#end-}}
+
 <link rel="stylesheet" href="/css/main.css">
 {{#for stylesheets-}}
 <link rel="stylesheet" href="{{getUrl item}}">
