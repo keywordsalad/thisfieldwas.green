@@ -3,3 +3,7 @@ User-agent: *
 Disallow: /drafts
 Disallow: /drafts/*
 Sitemap: {{siteRoot}}/sitemap.xml
+
+User-agent: GPTBot
+Disallow: /
+
