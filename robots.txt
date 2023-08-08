@@ -1,5 +1,9 @@
-# Generated from commit 6370542
+# Generated from commit 6fa70ef
 User-agent: *
 Disallow: /drafts
 Disallow: /drafts/*
 Sitemap: https://thisfieldwas.green/sitemap.xml
+
+User-agent: GPTBot
+Disallow: /
+

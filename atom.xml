@@ -11,7 +11,7 @@
     <name>Logan McGrath</name>
     <email>logan.mcgrath@thisfieldwas.green</email>
   </author>
-  <rights>Copyright &#169; 2012-2022 Logan McGrath. All rights reserved.</rights>
+  <rights>Copyright &#169; 2012-2023 Logan McGrath. All rights reserved.</rights>
   <generator uri="https://jaspervdj.be/hakyll/">Hakyll</generator>
   <entry>
       <id>https://thisfieldwas.green/blog/2022/09/05/parser-combinators/</id>
