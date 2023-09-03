@@ -19,7 +19,7 @@
 
     .logo-icon {
       grid-area: logo-icon;
-      grid-column: 2 / rem($logo-icon-width);
+      grid-column: 2 / 3rem;
       display: block;
       background-image: url("/images/grass.svg");
       background-size: $logo-icon-width;
