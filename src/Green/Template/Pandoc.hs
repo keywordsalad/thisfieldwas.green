@@ -75,16 +75,16 @@ documentLength (Pandoc _ blocks') = blocksLength blocks'
       HorizontalRule -> 1
       Table _ cap _ th tbs tf -> captionLength cap + lettersFromHeader th + sum (tableLength <$> tbs) + lettersFromFooter tf
         where
-          captionLength (Caption inlines blocks) = maybe 0 inlinesLength inlines + blocksLength blocks
           tableLength (TableBody _ _ rows1 rows2) = sum (lettersFromRow <$> rows1) + sum (lettersFromRow <$> rows2)
           lettersFromHeader (TableHead _ rows) = sum (lettersFromRow <$> rows)
           lettersFromRow (Row _ cells) = sum (lettersFromCell <$> cells)
           lettersFromCell (Cell _ _ _ _ blocks) = sum (blockLength <$> blocks)
           lettersFromFooter (TableFoot _ rows) = sum (lettersFromRow <$> rows)
       Div _ blocks -> blocksLength blocks
-      Null -> 0
+      Figure _ caption blocks -> captionLength caption + blocksLength blocks
       where
         blocksListLength blocksList = sum (blocksLength <$> blocksList)
+        captionLength (Caption inlines blocks) = maybe 0 inlinesLength inlines + blocksLength blocks
 
     inlinesLength = sum . (inlineLength <$>)
       where

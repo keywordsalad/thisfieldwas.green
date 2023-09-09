@@ -32,7 +32,7 @@ import Data.Functor ((<&>))
 import Data.List (intercalate, isPrefixOf, isSuffixOf)
 import Data.Maybe (fromJust, fromMaybe, isJust, isNothing, maybe, maybeToList)
 import Data.Time (ZonedTime)
-import Data.Time.Format (TimeLocale, formatTime, parseTime, parseTimeM)
+import Data.Time.Format (TimeLocale, formatTime, parseTimeM)
 import Hakyll
   ( -- types
     Compiler,

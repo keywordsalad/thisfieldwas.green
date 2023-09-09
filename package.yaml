@@ -117,6 +117,7 @@ default-extensions:
   - TemplateHaskell
   - TupleSections
   - TypeFamilies
+  - TypeOperators
   - TypeSynonymInstances
   - UndecidableInstances
   - ViewPatterns
