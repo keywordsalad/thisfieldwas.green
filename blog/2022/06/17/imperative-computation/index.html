@@ -10,7 +10,7 @@
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
 
-<meta property="og:site_name" content="">
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:title" content="Imperative Computation in Functional Programming">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2022/06/17/imperative-computation/">
 <meta property="og:description" content="Remember functors and applicatives? In my last post we explored how functors and applicatives abstract over desired and undesired cases of contexts in order to express control flow and permit independent computation. In this post we will explore monads and how to leverage their specific abstraction to express imperative control flow.">
@@ -77,7 +77,7 @@
 
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">21m 26s</span></p>
+<p>Estimated reading time: <span class="length">1h 25m 32s</span></p>
 </div>
 <p>Remember <strong>functors</strong> and <strong>applicatives</strong>? In my last post <a href="/blog/2022/06/05/enabling-control-flow/" title="Enabling Control Flow in Functional Programming">Enabling Control Flow in Functional Programming</a> we explored how functors and applicatives abstract over <strong>desired</strong> and <strong>undesired cases</strong> of <strong>contexts</strong> in order to express control flow and permit independent computation. In this post we will explore <strong>monads</strong> and how to leverage their specific abstraction to express <strong>imperative</strong> control flow.</p>
 <!--more-->
@@ -93,7 +93,8 @@
 <h2 id="motivating-monads-as-a-design-pattern">Motivating monads as a design pattern</h2>
 <p>Recall the <code>Functor</code> and <code>Applicative</code> typeclasses:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb1"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Functor<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
+<div id="cb1" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Functor<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Functor <span class="op">{</span></span>
@@ -116,7 +117,8 @@
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Applicative <span class="op">{</span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> apply<span class="op">[</span>F<span class="op">:</span> Applicative<span class="op">]:</span> Applicative<span class="op">[</span>F<span class="op">]</span> <span class="op">=</span> implicitly<span class="op">[</span>Applicative<span class="op">[</span>F<span class="op">]]</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p>See <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala"><code>Functor</code></a>
@@ -131,12 +133,15 @@ definitions in the sample repository.</p>
 <p>In order to restrict computation such that subsequent computation occurs only if previous computation succeeds, we must introduce a new abstraction over the cases of contexts.</p>
 <p>What function might limit subsequent computations from running if a previous one has failed? There is one, and you’ve probably seen it out in the wild:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb2"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flatMap<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> F<span class="op">[</span>B<span class="op">]):</span> F<span class="op">[</span>B<span class="op">]</span></span></code></pre></div>
+<div id="cb2" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> flatMap<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> F<span class="op">[</span>B<span class="op">]):</span> F<span class="op">[</span>B<span class="op">]</span></span></code></pre>
+</div>
 </div>
 <p>What <code>flatMap()</code> does is allow for the injection of a context into a pipeline of computations to either permit computation to proceed or force it to halt. The function argument <code>f</code>, which you supply, has full control of what case the returned context <code>F[B]</code> should be in. If <code>F[B]</code> is in the <strong>undesired case</strong>, then all further computations are skipped, <em>propagating</em> this <strong>undesired case</strong> instead.</p>
 <p>Take for example this definition of a <code>filter()</code> function from the sample repository’s <code>sbt console</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb3"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
+<div id="cb3" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">def</span> filter<span class="op">[</span>A<span class="op">](</span>fa<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">)</span> <span class="op">=</span> fa<span class="op">.</span>flatMap <span class="op">{</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>     <span class="op">|</span>   <span class="cf">case</span> a <span class="cf">if</span> <span class="fu">f</span><span class="op">(</span>a<span class="op">)</span> <span class="op">=&gt;</span> <span class="bu">Some</span><span class="op">(</span>a<span class="op">)</span></span>
@@ -148,15 +153,18 @@ definitions in the sample repository.</p>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res1<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">Some</span><span class="op">(</span><span class="dv">4</span><span class="op">)</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="fu">filter</span><span class="op">(</span><span class="bu">Some</span><span class="op">(</span><span class="dv">3</span><span class="op">))(</span>_ <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res2<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span></code></pre></div>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res2<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span></code></pre>
+</div>
 </div>
 <p>This example is only very simple. But it demonstrates the key enabling feature of <code>flatMap()</code>: we are able to <em>choose</em> whether the context remains in its <strong>desired case</strong>. If we continue with this example, we can try chaining <code>map()</code> to the context returned by it.</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb4"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="fu">filter</span><span class="op">(</span><span class="bu">Some</span><span class="op">(</span><span class="dv">4</span><span class="op">))(</span>_ <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span><span class="op">).</span><span class="fu">map</span><span class="op">(</span>n <span class="op">=&gt;</span> <span class="ss">s&quot;</span><span class="st">The square of even number </span><span class="ss">$n</span><span class="st"> is </span><span class="ss">${</span>n <span class="op">*</span> n<span class="ss">}&quot;</span><span class="op">)</span></span>
+<div id="cb4" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="fu">filter</span><span class="op">(</span><span class="bu">Some</span><span class="op">(</span><span class="dv">4</span><span class="op">))(</span>_ <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span><span class="op">).</span><span class="fu">map</span><span class="op">(</span>n <span class="op">=&gt;</span> <span class="ss">s&quot;</span><span class="st">The square of even number </span><span class="ss">$n</span><span class="st"> is </span><span class="ss">${</span>n <span class="op">*</span> n<span class="ss">}&quot;</span><span class="op">)</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res3<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span> <span class="bu">Some</span><span class="op">(</span>The square of even number <span class="dv">4</span> is <span class="dv">16</span><span class="op">)</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="fu">filter</span><span class="op">(</span><span class="bu">Some</span><span class="op">(</span><span class="dv">3</span><span class="op">))(</span>_ <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span><span class="op">).</span><span class="fu">map</span><span class="op">(</span>n <span class="op">=&gt;</span> <span class="ss">s&quot;</span><span class="st">The square of even number </span><span class="ss">$n</span><span class="st"> is </span><span class="ss">${</span>n <span class="op">*</span> n<span class="ss">}&quot;</span><span class="op">)</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res4<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span></code></pre></div>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res4<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span></code></pre>
+</div>
 </div>
 <p>Thus we are able to gate <code>map()</code> behind the case of the context we return from the <code>flatMap()</code> we used in <code>filter()</code>, enabling imperative control flow.</p>
 <h2 id="monads">Monads</h2>
@@ -169,7 +177,8 @@ definitions in the sample repository.</p>
 </ul>
 <p>The <code>Monad</code> typeclass defines two functions, which by default are defined in terms of each other:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb5"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Monad<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="kw">extends</span> Applicative<span class="op">[</span>F<span class="op">]</span> <span class="op">{</span></span>
+<div id="cb5" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Monad<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="kw">extends</span> Applicative<span class="op">[</span>F<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> flatMap<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> F<span class="op">[</span>B<span class="op">]):</span> F<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">flatten</span><span class="op">(</span><span class="fu">map</span><span class="op">(</span>fa<span class="op">)(</span>f<span class="op">))</span></span>
@@ -181,7 +190,8 @@ definitions in the sample repository.</p>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Monad <span class="op">{</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> apply<span class="op">[</span>F<span class="op">[</span>_<span class="op">]:</span> Monad<span class="op">]:</span> Monad<span class="op">[</span>F<span class="op">]</span> <span class="op">=</span> implicitly<span class="op">[</span>Monad<span class="op">[</span>F<span class="op">]]</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>This means that in order to implement an instance of the <code>Monad</code> typeclass, you must implement one of either <code>flatMap()</code> or <code>flatten()</code> or calling one will recurse until the stack overflows. Some contexts are best defined using one over the other, and you have the choice to pick between the two.</p>
 <blockquote>
@@ -190,7 +200,8 @@ definitions in the sample repository.</p>
 <h3 id="composing-monads">Composing monads</h3>
 <p><code>Monad</code> also defines a special composition operator. Recall that functions may be composed together, as in <code>h = g ∘ f</code> or <em>“h is g after f”</em>. This may be expressed in two ways in vanilla Scala. Try below using the sample repository’s <code>sbt console</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb6"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> f<span class="op">:</span> <span class="bu">Int</span> <span class="op">=&gt;</span> <span class="ex">String</span> <span class="op">=</span> n <span class="op">=&gt;</span> <span class="op">(</span>n <span class="op">*</span> n<span class="op">).</span>toString</span>
+<div id="cb6" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> f<span class="op">:</span> <span class="bu">Int</span> <span class="op">=&gt;</span> <span class="ex">String</span> <span class="op">=</span> n <span class="op">=&gt;</span> <span class="op">(</span>n <span class="op">*</span> n<span class="op">).</span>toString</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> f<span class="op">:</span> <span class="bu">Int</span> <span class="op">=&gt;</span> <span class="ex">String</span> <span class="op">=</span> $Lambda$<span class="dv">5252</span><span class="op">/</span><span class="bn">0x000000010195e040</span>@<span class="dv">7</span>a76dc63</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> g<span class="op">:</span> <span class="ex">String</span> <span class="op">=&gt;</span> <span class="bu">Int</span> <span class="op">=</span> n <span class="op">=&gt;</span> n<span class="op">.</span>length</span>
@@ -211,23 +222,27 @@ definitions in the sample repository.</p>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res3<span class="op">:</span> <span class="bu">Int</span> <span class="op">=</span> <span class="dv">1</span></span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="fu">hh</span><span class="op">(</span><span class="dv">25</span><span class="op">)</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res4<span class="op">:</span> <span class="bu">Int</span> <span class="op">=</span> <span class="dv">3</span></span></code></pre></div>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res4<span class="op">:</span> <span class="bu">Int</span> <span class="op">=</span> <span class="dv">3</span></span></code></pre>
+</div>
 </div>
 <p>Scala out of the box affords the <code>compose()</code> and <code>andThen()</code> functions for composing functions of the form of <code>A =&gt; B</code> together. But these composition functions don’t work for the signature of <code>flatMap()</code>, which operates on functions of the form of <code>A =&gt; F[B]</code>.</p>
 <p>There is a form of composition for monads known as <em><a href="https://blog.ploeh.dk/2022/04/04/kleisli-composition/">Kleisli composition</a></em>. This composition will lift the following function into the context returned by the previous function and apply it to the term contained within the context if the context is in the <strong>desired case</strong>. Kleisli composition is expressed using the <em>fish</em> or <em>arrow operator</em> <code>&gt;=&gt;</code> which is defined in the sample repository as an extension operator on functions of the form <code>A =&gt; F[B]</code> where <code>F[_]</code> has an instance of <code>Monad</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb7"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">class</span> KleisliCompositionOps<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> A<span class="op">,</span> B<span class="op">](</span><span class="kw">val</span> f<span class="op">:</span> A <span class="op">=&gt;</span> F<span class="op">[</span>B<span class="op">])</span> <span class="kw">extends</span> AnyVal <span class="op">{</span></span>
+<div id="cb7" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">class</span> KleisliCompositionOps<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> A<span class="op">,</span> B<span class="op">](</span><span class="kw">val</span> f<span class="op">:</span> A <span class="op">=&gt;</span> F<span class="op">[</span>B<span class="op">])</span> <span class="kw">extends</span> AnyVal <span class="op">{</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="op">&gt;=&gt;[</span>C<span class="op">](</span>g<span class="op">:</span> B <span class="op">=&gt;</span> F<span class="op">[</span>C<span class="op">])(</span><span class="kw">implicit</span> F<span class="op">:</span> Monad<span class="op">[</span>F<span class="op">]):</span> A <span class="op">=&gt;</span> F<span class="op">[</span>C<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>x<span class="op">:</span> A<span class="op">)</span> <span class="op">=&gt;</span> F<span class="op">.</span><span class="fu">flatMap</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>x<span class="op">))(</span>g<span class="op">)</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/syntax/monad.scala#L48">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>Kleisli composition is useful for monads in that from two or more <code>flatMap()</code>-compatible functions a single function may be created that takes an unlifted argument and produces an output context as the result of applying each function in sequence first to the unlifted argument and then to each individual functions’ output contexts.</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb8"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
+<div id="cb8" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> squareEvens<span class="op">:</span> <span class="bu">Int</span> <span class="op">=&gt;</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>     <span class="op">|</span>   <span class="cf">case</span> n <span class="cf">if</span> n <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">=&gt;</span> Either<span class="op">.</span>right<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span>n <span class="op">*</span> n<span class="op">)</span></span>
@@ -255,11 +270,13 @@ definitions in the sample repository.</p>
 <span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res2<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Left</span><span class="op">(</span><span class="dv">23</span> is an odd number<span class="op">)</span></span>
 <span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="fu">evensSquaredWithEvenLastDigitsOfPi</span><span class="op">(</span><span class="dv">48</span><span class="op">)</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res3<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Left</span><span class="op">(</span><span class="dv">2304</span> <span class="op">*</span> Pi<span class="er">&#39;</span>s last digit is an odd number<span class="op">)</span></span></code></pre></div>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res3<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Left</span><span class="op">(</span><span class="dv">2304</span> <span class="op">*</span> Pi<span class="er">&#39;</span>s last digit is an odd number<span class="op">)</span></span></code></pre>
+</div>
 </div>
 <p>Above we are using the composed function directly, but because it has the form of <code>A =&gt; F[B]</code> we are able to apply it using <code>flatMap()</code> as well:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb9"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> Either<span class="op">.</span>right<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span><span class="dv">2</span><span class="op">).</span><span class="fu">flatMap</span><span class="op">(</span>evensSquaredWithEvenLastDigitsOfPi<span class="op">)</span></span>
+<div id="cb9" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> Either<span class="op">.</span>right<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span><span class="dv">2</span><span class="op">).</span><span class="fu">flatMap</span><span class="op">(</span>evensSquaredWithEvenLastDigitsOfPi<span class="op">)</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res4<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Right</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> Either<span class="op">.</span>right<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span><span class="dv">19</span><span class="op">).</span><span class="fu">flatMap</span><span class="op">(</span>evensSquaredWithEvenLastDigitsOfPi<span class="op">)</span></span>
@@ -269,14 +286,16 @@ definitions in the sample repository.</p>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res6<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Left</span><span class="op">(</span><span class="dv">16</span> <span class="op">*</span> Pi<span class="er">&#39;</span>s last digit is an odd number<span class="op">)</span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> Either<span class="op">.</span>left<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span><span class="st">&quot;Nothing&#39;s gonna happen&quot;</span><span class="op">).</span><span class="fu">flatMap</span><span class="op">(</span>evensSquaredWithEvenLastDigitsOfPi<span class="op">)</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res7<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Left</span><span class="op">(</span>Nothing<span class="er">&#39;</span>s gonna happen<span class="op">)</span></span></code></pre></div>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res7<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Left</span><span class="op">(</span>Nothing<span class="er">&#39;</span>s gonna happen<span class="op">)</span></span></code></pre>
+</div>
 </div>
 <p>Thus Kleisli composition is to <code>flatMap()</code> as function composition is to <code>map()</code>, with the key difference being that the case of the context may be changed by any one of the composed functions. Kleisli composition is powerful in that entire processes may be composed into step-by-step operations and applied as a single unit to a context via <code>flatMap()</code> or directly to an unlifted argument.</p>
 <h3 id="the-for-comprehension-and-imperative-programming">The <em>for comprehension</em> and imperative programming</h3>
 <p>Scala provides a syntax sugar over <code>flatMap()</code> in the form of the <em><a href="https://docs.scala-lang.org/tour/for-comprehensions.html">for comprehension</a></em>. Any type that provides both the <code>map()</code> and <code>flatMap()</code> functions are able to participate in this syntax sugar, and it allows for monadic operations to be expressed as if they were written as procedural code. This means that you don’t have to rely on Kleisli composition alone to express complex flows of logic, and that you also aren’t limited to single-argument input/output pipelines of functions.</p>
 <p>As a simple example, here are the above functions leveraged using a for comprehension:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb10"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
+<div id="cb10" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> squareEvens<span class="op">:</span> <span class="bu">Int</span> <span class="op">=&gt;</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>     <span class="op">|</span>   <span class="cf">case</span> n <span class="cf">if</span> n <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span> <span class="op">=&gt;</span> Either<span class="op">.</span>right<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span>n <span class="op">*</span> n<span class="op">)</span></span>
@@ -309,41 +328,49 @@ definitions in the sample repository.</p>
 <span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res2<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Right</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span></span>
 <span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> Either<span class="op">.</span>left<span class="op">[</span><span class="ex">String</span><span class="op">,</span> <span class="bu">Int</span><span class="op">](</span><span class="st">&quot;Nothing&#39;s gonna happen&quot;</span><span class="op">).</span><span class="fu">flatMap</span><span class="op">(</span>evensSquaredWithEvenLastDigitsOfPi<span class="op">)</span></span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res3<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Left</span><span class="op">(</span>Nothing<span class="er">&#39;</span>s gonna happen<span class="op">)</span></span></code></pre></div>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res3<span class="op">:</span> Either<span class="op">[</span><span class="ex">String</span><span class="op">,</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">Left</span><span class="op">(</span>Nothing<span class="er">&#39;</span>s gonna happen<span class="op">)</span></span></code></pre>
+</div>
 </div>
 <p>The key thing that a for comprehension allows for is multiple arguments to be lowered from contexts and applied to a multi-argument function that returns another context. An example of such an operation might look like this:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb11"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sendMarketingUpdate</span><span class="op">(</span>updateId<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> userId<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>MarketingUpdateStatus<span class="op">]</span> <span class="op">=</span></span>
+<div id="cb11" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sendMarketingUpdate</span><span class="op">(</span>updateId<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> userId<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>MarketingUpdateStatus<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">{</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    user <span class="op">&lt;-</span> <span class="fu">loadUser</span><span class="op">(</span>userId<span class="op">)</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    marketingTemplate <span class="op">&lt;-</span> <span class="fu">loadTemplate</span><span class="op">(</span>updateId<span class="op">)</span></span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    composedEmail <span class="op">&lt;-</span> <span class="fu">composeEmailForUser</span><span class="op">(</span>user<span class="op">,</span> marketingTemplate<span class="op">)</span></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    result <span class="op">&lt;-</span> <span class="fu">sendEmail</span><span class="op">(</span>composedEmail<span class="op">)</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> result<span class="op">.</span>toMarketingUpdateStatus</span></code></pre></div>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> result<span class="op">.</span>toMarketingUpdateStatus</span></code></pre>
+</div>
 </div>
 <p>Because <code>composeEmailForUser()</code> requires both a <code>user</code> and <code>marketingTemplate</code>, this operation function is more easily expressed using a for comprehension than Kleisli composition.</p>
 <p>However you don’t have to abandon applicative functions when using for comprehensions. The above function may be written to independently load the user and template:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb12"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sendMarketingUpdate</span><span class="op">(</span>updateId<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> userId<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>MarketingUpdateStatus<span class="op">]</span> <span class="op">=</span></span>
+<div id="cb12" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sendMarketingUpdate</span><span class="op">(</span>updateId<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> userId<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>MarketingUpdateStatus<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">{</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>user<span class="op">,</span> marketingTemplate<span class="op">)</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fu">loadUser</span><span class="op">(</span>userId<span class="op">),</span> <span class="fu">loadTemplate</span><span class="op">(</span>updateId<span class="op">)).</span>tupled</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    composedEmail <span class="op">&lt;-</span> <span class="fu">composeEmailForUser</span><span class="op">(</span>user<span class="op">,</span> marketingTemplate<span class="op">)</span></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    result <span class="op">&lt;-</span> <span class="fu">sendEmail</span><span class="op">(</span>composedEmail<span class="op">)</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> result<span class="op">.</span>toMarketingUpdateStatus</span></code></pre></div>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> result<span class="op">.</span>toMarketingUpdateStatus</span></code></pre>
+</div>
 </div>
 <p>The code can be trimmed just a little bit more, as well:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb13"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sendMarketingUpdate</span><span class="op">(</span>updateId<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> userId<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>MarketingUpdateStatus<span class="op">]</span> <span class="op">=</span></span>
+<div id="cb13" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">sendMarketingUpdate</span><span class="op">(</span>updateId<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> userId<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>MarketingUpdateStatus<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">{</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    composedEmail <span class="op">&lt;-</span> <span class="op">(</span><span class="fu">loadUser</span><span class="op">(</span>userId<span class="op">),</span> <span class="fu">loadTemplate</span><span class="op">(</span>updateId<span class="op">)).</span><span class="fu">mapN</span><span class="op">(</span>composeEmailForUser<span class="op">)</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    result <span class="op">&lt;-</span> <span class="fu">sendEmail</span><span class="op">(</span>composedEmail<span class="op">)</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> result<span class="op">.</span>toMarketingUpdateStatus</span></code></pre></div>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> result<span class="op">.</span>toMarketingUpdateStatus</span></code></pre>
+</div>
 </div>
 <p>This means that with applicative functions, you can express imperative code to some degree by gating functions dependent on a set of inputs, such as <code>composeEmailForUser()</code>, and lean on monad’s <code>flatMap()</code> for when you need absolute ordering of computations. These two styles of computation thus complement each other.</p>
 <h2 id="becoming-a-monad">Becoming a Monad</h2>
 <p>In order to become a <code>Monad</code>, an effect type must implement the typeclass. Let’s implement instances for the usual suspects, <code>Option</code>, <code>Either</code>, and <code>List</code>. As <code>Monad</code> is a specialization of <code>Applicative</code> and thus also <code>Functor</code>, we can simply upgrade our <code>Applicative</code> instances to become <code>Monad</code>s:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb14"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">val</span> optionMonad<span class="op">:</span> Monad<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> Monad<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">{</span></span>
+<div id="cb14" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">val</span> optionMonad<span class="op">:</span> Monad<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> Monad<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">{</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// keep existing definitions</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -377,7 +404,8 @@ definitions in the sample repository.</p>
 <span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
 <span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
 <span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span>reverse</span>
-<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p>See the instances of <code>Monad</code> for
@@ -398,7 +426,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <h3 id="defining-monad-laws-as-properties">Defining monad laws as properties</h3>
 <p>The monad laws may be defined as <code>scalacheck</code> properties, as <a href="/blog/2022/06/05/enabling-control-flow/#defining-the-applicative-laws-as-properties">previously for applicatives</a>. These properties assert “for all” instances of a particular monad <code>F[_]</code>, the properties should hold. We know we have a well-behaved monad if the property checks pass.</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb15"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> MonadLaws <span class="op">{</span> <span class="kw">this</span><span class="op">:</span> Laws <span class="kw">with</span> ApplicativeLaws <span class="op">=&gt;</span></span>
+<div id="cb15" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> MonadLaws <span class="op">{</span> <span class="kw">this</span><span class="op">:</span> Laws <span class="kw">with</span> ApplicativeLaws <span class="op">=&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">implicit</span> <span class="kw">def</span> arbitraryFA<span class="op">[</span>F<span class="op">[</span>_<span class="op">]:</span> LiftedGen<span class="op">,</span> A<span class="op">:</span> Arbitrary<span class="op">]:</span> Arbitrary<span class="op">[</span>F<span class="op">[</span>A<span class="op">]]</span> <span class="op">=</span> <span class="fu">Arbitrary</span><span class="op">(</span>arbitrary<span class="op">[</span>A<span class="op">].</span>lift<span class="op">)</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -459,14 +488,16 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
 <span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/MonadLaws.scala">See here</a> for the definition of the trait.</p>
 </blockquote>
 <p>Our laws specs can now extend this trait and assert that their tested contexts conform to the monad laws. For example, the laws spec for <code>Option</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb16"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OptionLaws <span class="kw">extends</span> Laws <span class="kw">with</span> FunctorLaws <span class="kw">with</span> ApplicativeLaws <span class="kw">with</span> MonadLaws <span class="op">{</span></span>
+<div id="cb16" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OptionLaws <span class="kw">extends</span> Laws <span class="kw">with</span> FunctorLaws <span class="kw">with</span> ApplicativeLaws <span class="kw">with</span> MonadLaws <span class="op">{</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">import</span> <span class="ex">Option</span><span class="op">.</span>Instances<span class="op">.</span>_</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -484,7 +515,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  checkFunctorLaws<span class="op">[</span><span class="ex">Option</span><span class="op">]()</span></span>
 <span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  checkApplicativeLaws<span class="op">[</span><span class="ex">Option</span><span class="op">]()</span></span>
 <span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  checkMonadLaws<span class="op">[</span><span class="ex">Option</span><span class="op">]()</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p>See the laws specs for <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L146">Option</a>,
@@ -501,7 +533,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 </ol>
 <p>These laws specifically also define another typeclass called a <strong>monoid</strong>, which is a specialization of a <strong>semigroup</strong> that adds an <em>identity</em> or <em>empty</em> element. The identity element is special in that combining it with any other element produces that other element.</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb17"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Monoid<span class="op">[</span>M<span class="op">]</span> <span class="kw">extends</span> Semigroup<span class="op">[</span>M<span class="op">]</span> <span class="op">{</span></span>
+<div id="cb17" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Monoid<span class="op">[</span>M<span class="op">]</span> <span class="kw">extends</span> Semigroup<span class="op">[</span>M<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> empty<span class="op">:</span> M</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
@@ -509,7 +542,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Monoid <span class="op">{</span></span>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> apply<span class="op">[</span>M<span class="op">:</span> Monoid<span class="op">]:</span> Monoid<span class="op">[</span>M<span class="op">]</span> <span class="op">=</span> implicitly<span class="op">[</span>Monoid<span class="op">[</span>M<span class="op">]]</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>Monoids are nearly as common as semigroups, as not all semigroups are monoids, and you’ve probably used quite a few of them:</p>
 <ul>
@@ -539,7 +573,8 @@ are also monads. You’ve probably been using them as such without realizing!</p
 <h3 id="beware-the-imperative-trap">Beware the imperative trap</h3>
 <p>Because monads allow you to express functional programming in a style that closely mirrors procedural code, especially within the syntax of the for comprehension, it’s very easy to fall into a trap of procedural spaghetti even though you’re using a functional programming abstraction. This occurs because for comprehensions allow you to expose multiple terms and pass them around at varying points within the for comprehension, mimicking procedural state-passing:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb18"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">performTransaction</span><span class="op">(</span>accountNo<span class="op">:</span> <span class="ex">Long</span><span class="op">,</span> amount<span class="op">:</span> <span class="ex">Currency</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span><span class="bu">Unit</span><span class="op">]</span> <span class="op">=</span></span>
+<div id="cb18" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">performTransaction</span><span class="op">(</span>accountNo<span class="op">:</span> <span class="ex">Long</span><span class="op">,</span> amount<span class="op">:</span> <span class="ex">Currency</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span><span class="bu">Unit</span><span class="op">]</span> <span class="op">=</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">{</span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    account <span class="op">&lt;-</span> <span class="fu">loadAccount</span><span class="op">(</span>accountNo<span class="op">)</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    transaction <span class="op">&lt;-</span> <span class="fu">beginTransaction</span><span class="op">(</span>account<span class="op">)</span></span>
@@ -554,7 +589,8 @@ are also monads. You’ve probably been using them as such without realizing!</p
 <span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">flatMap</span><span class="op">(</span>_ <span class="op">=&gt;</span> <span class="fu">endTransaction</span><span class="op">(</span>transaction<span class="op">))</span></span>
 <span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
 <span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> <span class="op">()</span></span></code></pre></div>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">yield</span> <span class="op">()</span></span></code></pre>
+</div>
 </div>
 <p>This code would be hard to refactor as there’s a lot of arguments being passed around. It’s procedural code wrapped in a for comprehension! A smell in particular is a <code>Unit</code>-return, as it indicates something is causing side-effects with no way to sense what actions have been performed or what state the total operation finished in.</p>
 <h2 id="going-forward">Going forward</h2>

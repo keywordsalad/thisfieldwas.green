@@ -10,7 +10,7 @@
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
 
-<meta property="og:site_name" content="">
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:title" content="Promoting changes with App-Config-App">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2012/11/28/promoting-changes-with-app-config-app/">
 <meta property="og:description" content="The App-Config-App now lets you promote changes between environments!">
@@ -76,7 +76,7 @@
 
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">4m 23s</span></p>
+<p>Estimated reading time: <span class="length">5m 45s</span></p>
 </div>
 <p>The App-Config-App now lets you promote changes between environments!</p>
 <!--more-->
@@ -93,23 +93,24 @@ promotion between environments.</p>
 <h2 id="promoting-changes-with-app-config-app">Promoting changes with App-Config-App</h2>
 <p>The App-Config-App <code>setup_example.rb</code> creates four branches with the following
 mappings:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Mapping        Source    Destination</span>
+<div id="cb1" class="sourceCode">
+<pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Mapping        Source    Destination</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>------------------------------------</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dev-qa         dev       qa</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>qa-staging     qa        staging</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>staging-prod   staging   prod</span></code></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>staging-prod   staging   prod</span></code></pre>
+</div>
 <p>If you login to App-Config-App and go to “Promote Changes,” you get an interface
 showing these relationships:</p>
 <figure id="img-promote-changes" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config3/promote_changes.png" class="image-link">
-        <img src="/images/app-config3/promote_changes.png" id="img-promote-changes-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config3/promote_changes.png" class="image-link">
+<img src="/images/app-config3/promote_changes.png" id="img-promote-changes-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>Changes between environments can be promoted in either direction along a mapping
 configuration. The receiving environment accepts all changes (developers would
@@ -117,27 +118,25 @@ know this as an ‘accept-theirs’ resolution) and you are then allowed to revi
 the changes by clicking on the “Pending Changes” link.</p>
 <p>For example, I’ve promoted changes from “qa” to “dev”:</p>
 <figure id="img-promote-result" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config3/promote_result.png" class="image-link">
-        <img src="/images/app-config3/promote_result.png" id="img-promote-result-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config3/promote_result.png" class="image-link">
+<img src="/images/app-config3/promote_result.png" id="img-promote-result-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>I can then review the changes by clicking on “Pending Changes”:</p>
 <figure id="img-pending-changes" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config3/pending_changes.png" class="image-link">
-        <img src="/images/app-config3/pending_changes.png" id="img-pending-changes-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config3/pending_changes.png" class="image-link">
+<img src="/images/app-config3/pending_changes.png" id="img-pending-changes-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>Changes may be edited or reverted before committing them.</p>
 <h2 id="promoting-changes-using-p4v">Promoting changes using P4V</h2>
@@ -147,47 +146,46 @@ changes get promoted, but it requires a little more work.</p>
 <p>I’ve connected P4V to my App-Config-App user workspace to perform the same
 promotion from “qa” to “dev”:</p>
 <figure id="img-config-promotion" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config3/p4v.png" class="image-link">
-        <img src="/images/app-config3/p4v.png" id="img-config-promotion-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config3/p4v.png" class="image-link">
+<img src="/images/app-config3/p4v.png" id="img-config-promotion-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>Select the “qa” folder, then from the menu bar go to “Actions” &gt;
 “Merge/Integrate”. This will bring up a wizard for performing the integration.</p>
 <p>Select the following:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="an">Merge method:</span><span class="co"> &quot;Use branch mapping&quot;</span></span>
+<div id="cb2" class="sourceCode">
+<pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="an">Merge method:</span><span class="co"> &quot;Use branch mapping&quot;</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">Branch mapping:</span><span class="co"> &quot;dev-qa&quot;</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">Automatically resolve files after merging:</span><span class="co"> checked</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">Resolve option:</span><span class="co"> &quot;Accept source&quot;</span></span></code></pre></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">Resolve option:</span><span class="co"> &quot;Accept source&quot;</span></span></code></pre>
+</div>
 <p>And ensure the direction of integration is “Target” &lt; “Source”:</p>
 <figure id="img-config-integrate" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config3/p4v_integrate.png" class="image-link">
-        <img src="/images/app-config3/p4v_integrate.png" id="img-config-integrate-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config3/p4v_integrate.png" class="image-link">
+<img src="/images/app-config3/p4v_integrate.png" id="img-config-integrate-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>Finally, click “Merge”. If you expand the “dev” folder, you can see the where
 the changes are:</p>
 <figure id="img-config-results" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config3/p4v_integrate_result.png" class="image-link">
-        <img src="/images/app-config3/p4v_integrate_result.png" id="img-config-results-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config3/p4v_integrate_result.png" class="image-link">
+<img src="/images/app-config3/p4v_integrate_result.png" id="img-config-results-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>You are now free to modify the files further before finally committing the
 changes.</p>

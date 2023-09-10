@@ -10,7 +10,7 @@
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
 
-<meta property="og:site_name" content="">
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:title" content="Using Perforce Chronicle for application configuration">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/">
 <meta property="og:description" content="Following Paul Hammant&#39;s post App-config workflow using SCM and subsequent proof of concept backed by Git, I will show that an app-config application backed by Perforce is possible using Perforce Chronicle.">
@@ -74,7 +74,7 @@
 
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">16m 6s</span></p>
+<p>Estimated reading time: <span class="length">43m 11s</span></p>
 </div>
 <p>Following Paul Hammant’s post <a href="http://paulhammant.com/2012/07/10/app-config-workflow-using-scm/">App-config workflow using SCM</a> and subsequent
 <a href="http://paulhammant.com/2012/08/14/app-config-using-git-and-angular/">proof of concept</a> backed by Git, I will show that an app-config application
@@ -111,7 +111,8 @@ Plain Text” content type with the fields <em>title</em> and <em>content</em>:<
 <li>Click “Add Content Type”</li>
 <li>Enter the following information:</li>
 </ol>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource ini numberLines"><code class="sourceCode ini"><span id="cb1-1"><a href="#cb1-1"></a><span class="dt">Id:       plaintext</span></span>
+<div id="cb1" class="sourceCode">
+<pre class="sourceCode numberSource ini numberLines"><code class="sourceCode ini"><span id="cb1-1"><a href="#cb1-1"></a><span class="dt">Id:       plaintext</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="dt">Label:    Plain Text</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="dt">Group:    Assets</span></span>
 <span id="cb1-4"><a href="#cb1-4"></a><span class="dt">Elements:</span></span>
@@ -128,7 +129,8 @@ Plain Text” content type with the fields <em>title</em> and <em>content</em>:<
 <span id="cb1-15"><a href="#cb1-15"></a><span class="dt">options.label </span><span class="ot">=</span><span class="st"> &quot;Content&quot;</span></span>
 <span id="cb1-16"><a href="#cb1-16"></a><span class="dt">options.required </span><span class="ot">=</span><span class="st"> </span><span class="kw">true</span></span>
 <span id="cb1-17"><a href="#cb1-17"></a><span class="dt">display.tagName </span><span class="ot">=</span><span class="st"> pre</span></span>
-<span id="cb1-18"><a href="#cb1-18"></a><span class="dt">display.filters.0 </span><span class="ot">=</span><span class="st"> HtmlSpecialChars</span></span></code></pre></div>
+<span id="cb1-18"><a href="#cb1-18"></a><span class="dt">display.filters.0 </span><span class="ot">=</span><span class="st"> HtmlSpecialChars</span></span></code></pre>
+</div>
 <p>Click “Save”.</p>
 <h2 id="the-config-app">The Config App</h2>
 <p>I’ve borrowed heavily from Paul’s <a href="https://github.com/paul-hammant/app-config-app/blob/master/index.html">app-config HTML page</a>, which uses
@@ -138,7 +140,8 @@ Framework has a utility class for encoding, decoding, and pretty-printing JSON,
 and Chronicle also ships with the <a href="https://github.com/paulgb/simplediff/">simplediff</a> utility for performing diffs
 with PHP.</p>
 <p>The source JSON configuration is the same, albeit sorted:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource json numberLines"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">{</span></span>
+<div id="cb2" class="sourceCode">
+<pre class="sourceCode numberSource json numberLines"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">{</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a>  <span class="dt">&quot;bannedNicks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
 <span id="cb2-3"><a href="#cb2-3"></a>    <span class="st">&quot;derek&quot;</span><span class="ot">,</span></span>
 <span id="cb2-4"><a href="#cb2-4"></a>    <span class="st">&quot;dino&quot;</span><span class="ot">,</span></span>
@@ -150,10 +153,12 @@ with PHP.</p>
 <span id="cb2-10"><a href="#cb2-10"></a>  <span class="dt">&quot;lighton&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
 <span id="cb2-11"><a href="#cb2-11"></a>  <span class="dt">&quot;loadMaxPercent&quot;</span><span class="fu">:</span> <span class="st">&quot;88&quot;</span><span class="fu">,</span></span>
 <span id="cb2-12"><a href="#cb2-12"></a>  <span class="dt">&quot;nextShutdownDate&quot;</span><span class="fu">:</span> <span class="st">&quot;8</span><span class="ch">\/</span><span class="st">9</span><span class="ch">\/</span><span class="st">2012&quot;</span></span>
-<span id="cb2-13"><a href="#cb2-13"></a><span class="fu">}</span></span></code></pre></div>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="fu">}</span></span></code></pre>
+</div>
 <p>The <code>index.html</code> page has been modified from the original to support only the
 basic <em>commit</em> and <em>diffs</em> functionality:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource html numberLines"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1"></a><span class="dt">&lt;!DOCTYPE </span>html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;</span>
+<div id="cb3" class="sourceCode">
+<pre class="sourceCode numberSource html numberLines"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1"></a><span class="dt">&lt;!DOCTYPE </span>html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;</span>
 <span id="cb3-2"><a href="#cb3-2"></a>        &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;<span class="dt">&gt;</span></span>
 <span id="cb3-3"><a href="#cb3-3"></a><span class="dt">&lt;</span><span class="kw">html</span> <span class="er">lang</span><span class="ot">=</span><span class="st">&quot;en&quot;</span> <span class="er">xmlns:ng</span><span class="ot">=</span><span class="st">&quot;http://angularjs.org&quot;</span><span class="dt">&gt;</span></span>
 <span id="cb3-4"><a href="#cb3-4"></a><span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;</span></span>
@@ -226,7 +231,8 @@ basic <em>commit</em> and <em>diffs</em> functionality:</p>
 <span id="cb3-71"><a href="#cb3-71"></a>  <span class="dt">&lt;</span><span class="kw">div</span> <span class="er">ng:bind</span><span class="ot">=</span><span class="st">&quot;svrMessage | html:&#39;unsafe&#39;&quot;</span><span class="dt">&gt;</span></span>
 <span id="cb3-72"><a href="#cb3-72"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
 <span id="cb3-73"><a href="#cb3-73"></a><span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
-<span id="cb3-74"><a href="#cb3-74"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<span id="cb3-74"><a href="#cb3-74"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre>
+</div>
 <p>Both of these assets were added by performing:</p>
 <ol type="1">
 <li>Click “Add” from the top navbar</li>
@@ -259,7 +265,8 @@ between the last commit and the current content.</p>
 <li><code>INSTALL/application/appconfig/views/scripts/index</code></li>
 </ul>
 <p>Declare the module with <code>INSTALL/application/appconfig/module.ini</code>:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource ini numberLines"><code class="sourceCode ini"><span id="cb4-1"><a href="#cb4-1"></a><span class="dt">version </span><span class="ot">=</span><span class="st"> </span><span class="fl">1.0</span></span>
+<div id="cb4" class="sourceCode">
+<pre class="sourceCode numberSource ini numberLines"><code class="sourceCode ini"><span id="cb4-1"><a href="#cb4-1"></a><span class="dt">version </span><span class="ot">=</span><span class="st"> </span><span class="fl">1.0</span></span>
 <span id="cb4-2"><a href="#cb4-2"></a><span class="dt">description </span><span class="ot">=</span><span class="st"> Application config proof of concept</span></span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="dt">icon </span><span class="ot">=</span><span class="st"> images/icon.png</span></span>
 <span id="cb4-4"><a href="#cb4-4"></a><span class="dt">tags </span><span class="ot">=</span><span class="st"> config</span></span>
@@ -285,16 +292,22 @@ between the last commit and the current content.</p>
 <span id="cb4-24"><a href="#cb4-24"></a><span class="dt">appconfig-operation.defaults.controller </span><span class="ot">=</span><span class="st"> index</span></span>
 <span id="cb4-25"><a href="#cb4-25"></a><span class="dt">appconfig-operation.defaults.action </span><span class="ot">=</span><span class="st"> index</span></span>
 <span id="cb4-26"><a href="#cb4-26"></a><span class="dt">appconfig-operation.map.action </span><span class="ot">=</span><span class="st"> </span><span class="dv">1</span></span>
-<span id="cb4-27"><a href="#cb4-27"></a><span class="dt">appconfig-operation.map.resource </span><span class="ot">=</span><span class="st"> </span><span class="dv">2</span></span></code></pre></div>
+<span id="cb4-27"><a href="#cb4-27"></a><span class="dt">appconfig-operation.map.resource </span><span class="ot">=</span><span class="st"> </span><span class="dv">2</span></span></code></pre>
+</div>
 <p>Add a view script for displaying plaintext
 assets, <code>INSTALL/application/appconfig/views/scripts/index/index.phtml</code>:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">&lt;?</span><span class="op">=</span><span class="va">$this</span>-&gt;entry-&gt;getValue(<span class="st">&#39;content&#39;</span>) <span class="kw">?&gt;</span></span></code></pre></div>
+<div id="cb5" class="sourceCode">
+<pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">&lt;?</span><span class="op">=</span><span class="va">$this</span>-&gt;entry-&gt;getValue(<span class="st">&#39;content&#39;</span>) <span class="kw">?&gt;</span></span></code></pre>
+</div>
 <p>Add a view script for displaying
 diffs, <code>INSTALL/application/appconfig/views/scripts/index/diffs.phtml</code>:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1"></a><span class="op">&lt;</span>pre<span class="op">&gt;&lt;</span><span class="ot">?</span><span class="op">=</span><span class="va">$this</span>-&gt;diffs <span class="kw">?&gt;</span><span class="op">&lt;/</span>pre<span class="op">&gt;</span></span></code></pre></div>
+<div id="cb6" class="sourceCode">
+<pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb6-1"><a href="#cb6-1"></a><span class="op">&lt;</span>pre<span class="op">&gt;&lt;</span><span class="ot">?</span><span class="op">=</span><span class="va">$this</span>-&gt;diffs <span class="kw">?&gt;</span><span class="op">&lt;/</span>pre<span class="op">&gt;</span></span></code></pre>
+</div>
 <p>And a controller
 at <code>INSTALL/application/appconfig/controllers/IndexController.phtml</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">&lt;?php</span></span>
+<div id="cb7" class="sourceCode">
+<pre class="sourceCode numberSource php numberLines"><code class="sourceCode php"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">&lt;?php</span></span>
 <span id="cb7-2"><a href="#cb7-2"></a></span>
 <span id="cb7-3"><a href="#cb7-3"></a><span class="fu">defined</span>(<span class="st">&#39;LIBRARY_PATH&#39;</span>) <span class="op">or</span> <span class="fu">define</span>(<span class="st">&#39;LIBRARY_PATH&#39;</span><span class="ot">,</span> <span class="fu">dirname</span>(<span class="cn">__DIR__</span>))<span class="ot">;</span></span>
 <span id="cb7-4"><a href="#cb7-4"></a><span class="kw">require_once</span> <span class="cn">LIBRARY_PATH</span> <span class="op">.</span> <span class="st">&#39;/simplediff/simplediff.php&#39;</span><span class="ot">;</span></span>
@@ -378,7 +391,8 @@ at <code>INSTALL/application/appconfig/controllers/IndexController.phtml</code>:
 <span id="cb7-82"><a href="#cb7-82"></a>            }</span>
 <span id="cb7-83"><a href="#cb7-83"></a>        }</span>
 <span id="cb7-84"><a href="#cb7-84"></a>    }</span>
-<span id="cb7-85"><a href="#cb7-85"></a>}</span></code></pre></div>
+<span id="cb7-85"><a href="#cb7-85"></a>}</span></code></pre>
+</div>
 <h2 id="angularjs">AngularJS</h2>
 <p>After all files are in place, Chronicle needs to be notified that the new module
 exists by going to “Manage” &gt; “Modules”, where the “Appconfig” module will be
@@ -390,67 +404,62 @@ stack_configuration.json and post changes back.</p>
 <p>From <code>http://localhost/appconfig/index.html</code>, the data from
 stack_configuration.json is loaded into the form:</p>
 <figure id="img-config-form" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config/start.png" class="image-link">
-        <img src="/images/app-config/start.png" id="img-config-form-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config/start.png" class="image-link">
+<img src="/images/app-config/start.png" id="img-config-form-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>Edits to stack_configuration.json can be made using the form, and the diffs
 viewed by clicking on “View Diffs”:</p>
 <figure id="img-config-diffs" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config/diffs.png" class="image-link">
-        <img src="/images/app-config/diffs.png" id="img-config-diffs-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config/diffs.png" class="image-link">
+<img src="/images/app-config/diffs.png" id="img-config-diffs-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>The changes can be saved by entering a commit message and clicking “Commit
 Changes”. After which, clicking “View Diffs” will show no changes:</p>
 <figure id="img-config-commit" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config/diffs-after-commit.png" class="image-link">
-        <img src="/images/app-config/diffs-after-commit.png" id="img-config-commit-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config/diffs-after-commit.png" class="image-link">
+<img src="/images/app-config/diffs-after-commit.png" id="img-config-commit-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>To show that edits have in fact been made to stack_configuration.json, go
 to <code>http://localhost/stack_configuration.json</code>, select “History” and click on ”
 History List”:</p>
 <figure id="img-config-history" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config/history.png" class="image-link">
-        <img src="/images/app-config/history.png" id="img-config-history-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config/history.png" class="image-link">
+<img src="/images/app-config/history.png" id="img-config-history-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <p>Chronicle also provides an interface for viewing diffs between revisions:</p>
 <figure id="img-config-revisions" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/app-config/history-diffs.png" class="image-link">
-        <img src="/images/app-config/history-diffs.png" id="img-config-revisions-img"loading="lazy"
-                          >
-      </a>
-    </p>
-    
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/app-config/history-diffs.png" class="image-link">
+<img src="/images/app-config/history-diffs.png" id="img-config-revisions-img"loading="lazy"
+                        >
+</a>
+</p>
+</div>
 </figure>
 <h2 id="disk-usage">Disk Usage</h2>
 <p>Something to remember in using Chronicle is that each resource requested from

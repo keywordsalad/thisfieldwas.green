@@ -10,7 +10,7 @@
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
 
-<meta property="og:site_name" content="">
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:title" content="Highly available ssh tunnels">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2022/02/09/persistent-ssh-tunnels/">
 <meta property="og:description" content="In my previous post I complained about systemd giving up when it fails to maintain ssh tunnels. In this post, I complain about systemd a bit more and how I gave up and stopped using it for managing my ssh tunnels.">
@@ -79,7 +79,7 @@
 </div>
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">4m 20s</span></p>
+<p>Estimated reading time: <span class="length">6m 42s</span></p>
 </div>
 <p>In my previous post, <a href="/blog/2021/12/11/reasons-why-my-website-is-offline/" title="Reasons why my website is offline">Reasons why my website is offline</a>, I complained about <code>systemd</code> giving up when it fails to maintain <code>ssh</code> tunnels. In this post, I complain about <code>systemd</code> a bit more and how I gave up and stopped using it for managing my <code>ssh</code> tunnels.</p>
 <!--more-->
@@ -93,26 +93,32 @@
 <li>The <em>closet computer</em> handles the traffic it receives</li>
 </ol>
 <p><strong>This is how it looks:</strong></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>         +-BASTION-SERVER--------------\</span>
+<div id="cb1" class="sourceCode">
+<pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>         +-BASTION-SERVER--------------\</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>         | &lt;=proxy=&gt; | &lt;===remote tunnel===&gt; +-CLOSET-COMPUTER---\</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>SSH ---&gt; | *:22----&gt; | localhost:10022 | --&gt; | *:22 SSH          |</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>HTTP --&gt; | *:80----&gt; | localhost:10080 | --&gt; | *:80 goto 443 duh |</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>HTTPS -&gt; | *:443---&gt; | localhost:10443 | --&gt; | *:443 my website  |</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>         `-----------+-----------------+     `-------------------+</span></code></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>         `-----------+-----------------+     `-------------------+</span></code></pre>
+</div>
 <h2 id="failure-systemd-and-duct-tape">Failure, <code>systemd</code>, and duct tape</h2>
 <p>When my home internet connection is down, the remote <code>ssh</code> tunnels into the <em>closet computer</em> fail to reopen. I have been using <code>systemd</code> on <em>closet computer</em> to manage these tunnels, and <code>systemd</code> will eventually stop trying to open the tunnels if the network remains inaccessible. This retry-then-give-up behavior that <code>systemd</code> exhibits is to safeguard against situations such as the <a href="https://en.wikipedia.org/wiki/Thundering_herd_problem">thundering herd problem</a> and <a href="https://unix.stackexchange.com/questions/289629/systemd-restart-always-is-not-honored">this Stackoverflow question</a> highlights the specific levers used to configure <code>systemd</code>’s retry behavior. To paraphrase, <code>systemd</code> tries to recover within a fixed amount of tries before it gives up. Given that there is a retry limit, I can’t reasonably extend the interval between tries so that my webserver recovers from a multi-hour outage without personally intervening. Moreover, I have to be physically next to the computer to recover it when this happens.</p>
 <p>I can’t make any guarantees about my internet connection’s uptime and that I’m not at risk of unleashing a thundering herd against my own infrastructure. As a solution, <code>systemd</code> therefore does not make sense for keeping my <code>ssh</code> tunnels tunnels open.</p>
 <p>As a better solution, one both held together by duct tape and recommended by <a href="https://internetwebsite.ofvlad.xyz">Vlad</a>, I have instead leveraged a simple cronjob:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>*/5 * * * * ssh closet.thisfieldwas.green true || ssh -fN bastion.thisfieldwas.green</span></code></pre></div>
+<div id="cb2" class="sourceCode">
+<pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>*/5 * * * * ssh closet.thisfieldwas.green true || ssh -fN bastion.thisfieldwas.green</span></code></pre>
+</div>
 <p>And added the following <code>ssh</code> configuration to the <code>autossh</code> user that opens the tunnels:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Host bastion.thisfieldwas.green</span>
+<div id="cb3" class="sourceCode">
+<pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Host bastion.thisfieldwas.green</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    Port 22</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    RemoteForward 10022 localhost:22</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    RemoteForward 10080 localhost:80</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    RemoteForward 10443 localhost:443</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>Host closet.thisfieldwas.green</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ProxyCommand ssh jump_user@bastion.thisfieldwas.green -W 127.0.0.1:10022</span></code></pre></div>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    ProxyCommand ssh jump_user@bastion.thisfieldwas.green -W 127.0.0.1:10022</span></code></pre>
+</div>
 <p>This simple setup works by testing every five minutes whether the <code>ssh</code> tunnel to <em>closet computer</em> is open by <code>ssh</code>’ing in by its external hostname via <code>ssh closet.thisfieldwas.green true</code>. There is an account named <code>jump_user</code> that is allowed to <code>ssh</code> into the tunnels open on the <em>bastion server</em> and all <code>ssh</code> requests to <em>closet computer</em> proxy through this user account. If an <code>ssh</code> connection cannot be made, then the remote tunnels are opened via <code>ssh -fN bastion.thisfieldwas.green</code>. This setup works when I reboot the <em>closet computer</em>, if I unplug my router, or if my internet connection drops.</p>
 <p>I don’t have to worry about my husband Corey accidentally tripping over the power cable because I know that he will plug it back in. When the <em>closet computer</em> has powered back on, the tunnels open shortly after, and I’m offline for about five minutes for a small hiccup. For a self-hosted webserver, I think this is acceptable.</p>
 <h2 id="todo"><span class="citation" data-cites="TODO">@TODO</span></h2>

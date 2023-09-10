@@ -10,7 +10,7 @@
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
 
-<meta property="og:site_name" content="">
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:title" content="Enabling Control Flow in Functional Programming">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2022/06/05/enabling-control-flow/">
 <meta property="og:description" content="Remember functors? They are structures that abstract away complexity imposed by nondeterminism present in contexts that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their undesired case and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.">
@@ -81,7 +81,7 @@
 </div>
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">32m 5s</span></p>
+<p>Estimated reading time: <span class="length">2h 13m 15s</span></p>
 </div>
 <p>Remember <strong>functors</strong>? Recall from my last post, <a href="/blog/2022/03/15/contexts-and-effects/" title="Contexts and Effects in Functional Programming">Contexts and Effects in Functional Programming</a>, they are structures that abstract away complexity imposed by nondeterminism present in <strong>contexts</strong> that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their <strong>undesired case</strong> and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.</p>
 <!--more-->
@@ -97,12 +97,14 @@
 <h2 id="motivating-applicative-functors-as-a-design-pattern">Motivating applicative functors as a design pattern</h2>
 <p>Recall the <code>Functor</code> typeclass:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb1"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Functor<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
+<div id="cb1" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Functor<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Functor <span class="op">{</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> apply<span class="op">[</span>F<span class="op">[</span>_<span class="op">]:</span> Functor<span class="op">]:</span> Functor<span class="op">[</span>F<span class="op">]</span> <span class="op">=</span> implicitly<span class="op">[</span>Functor<span class="op">[</span>F<span class="op">]]</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
@@ -113,7 +115,8 @@
 <p>Functions lifted into a context are permitted to compute if the context is in the <strong>desired case</strong>. But if a function is lifted into a context that is in the <strong>undesired case</strong>, then computation is halted. This means that the case of any context may control the flow of execution within a program.</p>
 <p>You can try for yourself from the sample repository’s <code>sbt console</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb2"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
+<div id="cb2" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> desiredOption<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">Some</span><span class="op">(</span><span class="dv">42</span><span class="op">)</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> desiredOption<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">Some</span><span class="op">(</span><span class="dv">42</span><span class="op">)</span></span>
@@ -125,18 +128,22 @@
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> undesiredOption<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> undesiredOption<span class="op">.</span><span class="fu">map</span><span class="op">(</span>_<span class="op">.</span>toString<span class="op">).</span><span class="fu">map</span><span class="op">(</span>numStr <span class="op">=&gt;</span> <span class="ss">s&quot;</span><span class="st">backwards: </span><span class="ss">${</span>numStr<span class="op">.</span>reverse<span class="ss">}&quot;</span><span class="op">)</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>res1<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span></code></pre></div>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>res1<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span></code></pre>
+</div>
 </div>
 <p>Functors only allow lifting functions of the form <code>f: A =&gt; B</code>. The context can’t be modified with a function having this signature, which means we can’t use a functor specifically to influence control flow by injecting a context in its <strong>undesired case</strong>. Functors respect the <em>existing case</em> of a context: they cannot modify it.</p>
 <h2 id="introducing-control-flow">Introducing control flow</h2>
 <p>What function might allow for control flow using contexts? There is one, <code>map2()</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb3"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map2<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> A<span class="op">,</span> B<span class="op">,</span> C<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">],</span> fb<span class="op">:</span> F<span class="op">[</span>B<span class="op">])(</span>f<span class="op">:</span> <span class="op">(</span>A<span class="op">,</span> B<span class="op">)</span> <span class="op">=&gt;</span> C<span class="op">):</span> F<span class="op">[</span>C<span class="op">]</span></span></code></pre></div>
+<div id="cb3" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map2<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> A<span class="op">,</span> B<span class="op">,</span> C<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">],</span> fb<span class="op">:</span> F<span class="op">[</span>B<span class="op">])(</span>f<span class="op">:</span> <span class="op">(</span>A<span class="op">,</span> B<span class="op">)</span> <span class="op">=&gt;</span> C<span class="op">):</span> F<span class="op">[</span>C<span class="op">]</span></span></code></pre>
+</div>
 </div>
 <p>This two-argument analog of <code>map()</code> unlocks a key capability: controlling whether to proceed or halt computation against the terms contained within the contexts <code>fa</code> and <code>fb</code>. If both <code>fa</code> and <code>fb</code> are in their <strong>desired case</strong>, then there are instances of <code>A</code> and <code>B</code> against which the function <code>f</code> may be applied. But if either one or both are in their <strong>undesired case</strong>, then <code>f</code> does not apply, and the <strong>undesired cases</strong> are <em>propagated</em> through <code>F[C]</code>. This means that <code>fa</code> and <code>fb</code> become <em>levers</em> with which to halt computation that would be performed using function <code>f</code> and subsequent computation against context <code>F[C]</code>.</p>
 <p>Take for example addition lifted into the context of <code>Option[Int]</code> within the sample repository’s <code>sbt console</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb4"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
+<div id="cb4" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> F <span class="op">=</span> Applicative<span class="op">[</span><span class="ex">Option</span><span class="op">]</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> F<span class="op">:</span> Applicative<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">=</span> Option$Instances$$anon$<span class="dv">1</span></span>
@@ -151,7 +158,8 @@
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res2<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> F<span class="op">.</span><span class="fu">map2</span><span class="op">(</span><span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">](),</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]())(</span>_ <span class="op">+</span> _<span class="op">)</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res3<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span></code></pre></div>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> res3<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="bu">None</span></span></code></pre>
+</div>
 </div>
 <p>Only when both arguments are in their <strong>desired case</strong> does the function of addition apply. If either or both arguments are in their <strong>undesired case</strong>, then the <strong>undesired case</strong> is <em>propagated</em>. This does not allow the function to apply, and halts any further operations against the context. <em>The functions that produce the two input contexts are thus capable of controlling whether computation via <code>f</code> proceeds and permits further computation against the context <code>F[C]</code>.</em></p>
 <h2 id="applicative-functors">Applicative functors</h2>
@@ -159,7 +167,8 @@
 <p>Applicative functors as a specialization arise in the type of <code>A</code> contained within a functor <code>F[_]</code>. If <code>A</code> is merely an opaque type, then <code>F[A]</code> is a functor and no more. But if <code>A</code> is specifically known to have some type <code>A =&gt; B</code>, that is to say <em><code>A</code> is a function</em>, then <code>F[A =&gt; B]</code> is an <em>applicative</em> functor.</p>
 <p>Applicatives define two functions from which many more are derived, including <code>map2()</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb5"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Applicative<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="kw">extends</span> Functor<span class="op">[</span>F<span class="op">]</span> <span class="op">{</span></span>
+<div id="cb5" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Applicative<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="kw">extends</span> Functor<span class="op">[</span>F<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> pure<span class="op">[</span>A<span class="op">](</span>a<span class="op">:</span> A<span class="op">):</span> F<span class="op">[</span>A<span class="op">]</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -171,7 +180,8 @@
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Applicative <span class="op">{</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> apply<span class="op">[</span>F<span class="op">:</span> Applicative<span class="op">]:</span> Applicative<span class="op">[</span>F<span class="op">]</span> <span class="op">=</span> implicitly<span class="op">[</span>Applicative<span class="op">[</span>F<span class="op">]]</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala">See here</a> for the definition in the sample repository.</p>
@@ -184,8 +194,10 @@
 </ul>
 <p>You might be wondering why a function would ever be lifted into a context? I will demonstrate why this is desirable in how <code>ap()</code> works by defining <code>map2()</code> within <code>Applicative</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb6"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map2<span class="op">[</span>A<span class="op">,</span> B<span class="op">,</span> C<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">],</span> fb<span class="op">:</span> F<span class="op">[</span>B<span class="op">])(</span>f<span class="op">:</span> <span class="op">(</span>A<span class="op">,</span> B<span class="op">)</span> <span class="op">=&gt;</span> C<span class="op">):</span> F<span class="op">[</span>C<span class="op">]</span> <span class="op">=</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ap</span><span class="op">(</span><span class="fu">ap</span><span class="op">(</span><span class="fu">pure</span><span class="op">(</span>f<span class="op">.</span>curried<span class="op">))(</span>fa<span class="op">))(</span>fb<span class="op">)</span></span></code></pre></div>
+<div id="cb6" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map2<span class="op">[</span>A<span class="op">,</span> B<span class="op">,</span> C<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">],</span> fb<span class="op">:</span> F<span class="op">[</span>B<span class="op">])(</span>f<span class="op">:</span> <span class="op">(</span>A<span class="op">,</span> B<span class="op">)</span> <span class="op">=&gt;</span> C<span class="op">):</span> F<span class="op">[</span>C<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ap</span><span class="op">(</span><span class="fu">ap</span><span class="op">(</span><span class="fu">pure</span><span class="op">(</span>f<span class="op">.</span>curried<span class="op">))(</span>fa<span class="op">))(</span>fb<span class="op">)</span></span></code></pre>
+</div>
 </div>
 <p>Lifting <code>f</code> into the context works following these steps:</p>
 <ol type="1">
@@ -197,8 +209,10 @@
 <p>Each step of lifted function application accounts for the case of the function and argument contexts and halts if either context is in the <strong>undesired case</strong>. The <strong>undesired case</strong> will <em>propagate instead</em> through <code>F[C]</code> if and when it exists.</p>
 <p>You might have noticed, <code>map2()</code> looks an awful lot like <code>map()</code>. In fact, <code>Applicative</code> provides a default implementation of <code>map()</code> following the same pattern:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb7"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ap</span><span class="op">(</span><span class="fu">pure</span><span class="op">(</span>f<span class="op">))(</span>fa<span class="op">)</span></span></code></pre></div>
+<div id="cb7" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> map<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>fa<span class="op">:</span> F<span class="op">[</span>A<span class="op">])(</span>f<span class="op">:</span> A <span class="op">=&gt;</span> B<span class="op">):</span> F<span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ap</span><span class="op">(</span><span class="fu">pure</span><span class="op">(</span>f<span class="op">))(</span>fa<span class="op">)</span></span></code></pre>
+</div>
 </div>
 <p>If your context implements <code>Applicative</code>, then it also implements <code>Functor</code> with no extra work. You can always provide your own implementation of <code>map()</code> if it is more efficient to do so.</p>
 <h2 id="validation-as-a-use-case">Validation as a use case</h2>
@@ -207,11 +221,14 @@
 <p>When constructing a <code>User</code> from data that we receive from an external source, such as a form or API, we can use <code>ap()</code> to lift <code>User</code>’s curried constructor into a validation context and apply it to validated arguments. If all arguments are valid, then we should receive a validation context containing a valid <code>User</code>. If any arguments are invalid, then we should receive an invalid context with all reasons for validation failure.</p>
 <p>Here is the definition for <code>User</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb8"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">User</span><span class="op">(</span>username<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> email<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> password<span class="op">:</span> <span class="ex">String</span><span class="op">)</span></span></code></pre></div>
+<div id="cb8" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">User</span><span class="op">(</span>username<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> email<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> password<span class="op">:</span> <span class="ex">String</span><span class="op">)</span></span></code></pre>
+</div>
 </div>
 <p>Each of <code>username</code>, <code>email</code>, and <code>password</code> must to be valid in order for <code>User</code> itself to be valid. This requires the introduction of a validation context:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb9"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> Validated<span class="op">[+</span>E<span class="op">,</span> <span class="op">+</span>A<span class="op">]</span> <span class="op">{</span></span>
+<div id="cb9" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">sealed</span> <span class="kw">trait</span> Validated<span class="op">[+</span>E<span class="op">,</span> <span class="op">+</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> invalid<span class="op">:</span> E</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -226,7 +243,8 @@
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="ex">Invalid</span><span class="op">[+</span>E<span class="op">](</span>invalid<span class="op">:</span> E<span class="op">)</span> <span class="kw">extends</span> Validated<span class="op">[</span>E<span class="op">,</span> Nothing<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> valid<span class="op">:</span> Nothing <span class="op">=</span> <span class="cf">throw</span> <span class="kw">new</span> <span class="ex">NoSuchElementException</span><span class="op">(</span><span class="st">&quot;Invalid.valid&quot;</span><span class="op">)</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala">See here</a> for the definitions in the sample repository.</p>
@@ -235,12 +253,14 @@
 <p>The <code>Applicative</code> instance for <code>Either</code> in the context of validation has one key flaw: it short-circuits on the first <code>Left</code>.</p>
 <p>Refer to <code>Either</code>’s implementation of <code>ap()</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb10"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">override</span> <span class="kw">def</span> ap<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>ff<span class="op">:</span> Either<span class="op">[</span>X<span class="op">,</span> A <span class="op">=&gt;</span> B<span class="op">])(</span>fa<span class="op">:</span> Either<span class="op">[</span>X<span class="op">,</span> A<span class="op">]):</span> Either<span class="op">[</span>X<span class="op">,</span> B<span class="op">]</span> <span class="op">=</span></span>
+<div id="cb10" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">override</span> <span class="kw">def</span> ap<span class="op">[</span>A<span class="op">,</span> B<span class="op">](</span>ff<span class="op">:</span> Either<span class="op">[</span>X<span class="op">,</span> A <span class="op">=&gt;</span> B<span class="op">])(</span>fa<span class="op">:</span> Either<span class="op">[</span>X<span class="op">,</span> A<span class="op">]):</span> Either<span class="op">[</span>X<span class="op">,</span> B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span>ff<span class="op">,</span> fa<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="op">(</span><span class="fu">Right</span><span class="op">(</span>f<span class="op">),</span> <span class="fu">Right</span><span class="op">(</span>a<span class="op">))</span> <span class="op">=&gt;</span> <span class="fu">Right</span><span class="op">(</span><span class="fu">f</span><span class="op">(</span>a<span class="op">))</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="op">(</span><span class="fu">Left</span><span class="op">(</span>x<span class="op">),</span> _<span class="op">)</span>         <span class="op">=&gt;</span> <span class="fu">Left</span><span class="op">(</span>x<span class="op">)</span></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="op">(</span>_<span class="op">,</span> <span class="fu">Left</span><span class="op">(</span>x<span class="op">))</span>         <span class="op">=&gt;</span> <span class="fu">Left</span><span class="op">(</span>x<span class="op">)</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L145-L150">See here</a> for <code>Either</code>’s definition of <code>ap()</code>.</p>
@@ -249,7 +269,8 @@
 <h3 id="validation-via-applicative">Validation via <code>Applicative</code></h3>
 <p><code>Validated</code> contains the valid value you want or the reasons for invalidation. We could fail to receive a <code>User</code> for three or more reasons related to <code>username</code>, <code>email</code>, and <code>password</code> all being invalid, which implies that term <code>E</code> represents some data containing one or more of <em>something</em>. This has a specific implication on how we define an instance of <code>Applicative</code> for <code>Validated</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb11"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">def</span> validatedApplicative<span class="op">[</span>E<span class="op">]:</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">=</span></span>
+<div id="cb11" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">def</span> validatedApplicative<span class="op">[</span>E<span class="op">]:</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">=</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">new</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">{</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> pure<span class="op">[</span>A<span class="op">](</span>a<span class="op">:</span> A<span class="op">):</span> Validated<span class="op">[</span>E<span class="op">,</span> A<span class="op">]</span> <span class="op">=</span> <span class="fu">Valid</span><span class="op">(</span>a<span class="op">)</span></span>
@@ -261,18 +282,21 @@
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">(</span><span class="ex">Invalid</span><span class="op">(</span>x<span class="op">),</span> _<span class="op">)</span> <span class="op">=&gt;</span> <span class="ex">Invalid</span><span class="op">(</span>x<span class="op">)</span></span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">(</span>_<span class="op">,</span> <span class="ex">Invalid</span><span class="op">(</span>y<span class="op">))</span> <span class="op">=&gt;</span> <span class="ex">Invalid</span><span class="op">(</span>y<span class="op">)</span></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>When there are two instances of <code>E</code> we don’t have a way to combine them as <code>E</code> is an opaque type. Without concretely defining <code>E</code>, such as with <code>List[String]</code> or another similar structure, we won’t be able to combine their values, but this creates an inflexible API. Specifically, this inability to combine <code>E</code> leaves <code>Validated</code> in the same position that <code>Either</code> is in: the <em>first</em> <strong>undesired case</strong> propagates and subsequent cases are <em>swallowed</em>. How do we <em>combine</em> the <strong>undesired cases</strong>?</p>
 <h3 id="modeling-combinable-structures">Modeling combinable structures</h3>
 <p>Structures defining a <code>combine()</code> function form a typeclass known as a <strong>semigroup</strong> under a specific condition: that <code>combine()</code> is associative. Semigroups are very common, and constraining <code>E</code> to have an instance of <code>Semigroup</code> provides great API flexibility. First, let’s see how the <code>Semigroup</code> typeclass is defined:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb12"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Semigroup<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
+<div id="cb12" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Semigroup<span class="op">[</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">combine</span><span class="op">(</span>left<span class="op">:</span> A<span class="op">,</span> right<span class="op">:</span> A<span class="op">):</span> A</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> Semigroup <span class="op">{</span></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> apply<span class="op">[</span>A<span class="op">:</span> Semigroup<span class="op">]:</span> Semigroup<span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> <span class="kw">implicit</span><span class="op">[</span>Semigroup<span class="op">[</span>A<span class="op">]]</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Semigroup.scala">See here</a> for the definition in the sample repository.</p>
@@ -287,7 +311,8 @@
 </ul>
 <p>The <code>combine()</code> function must be associative. This can be tested with a <code>scalacheck</code> property:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb13"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> checkSemigroupLaws<span class="op">[</span>S<span class="op">:</span> Semigroup<span class="op">:</span> Arbitrary<span class="op">]():</span> <span class="bu">Unit</span> <span class="op">=</span> <span class="op">{</span></span>
+<div id="cb13" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> checkSemigroupLaws<span class="op">[</span>S<span class="op">:</span> Semigroup<span class="op">:</span> Arbitrary<span class="op">]():</span> <span class="bu">Unit</span> <span class="op">=</span> <span class="op">{</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">import</span> green<span class="op">.</span>thisfieldwas<span class="op">.</span>embracingnondeterminism<span class="op">.</span>syntax<span class="op">.</span>semigroup<span class="op">.</span>_</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -300,14 +325,16 @@
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>      <span class="op">(</span>a <span class="op">|+|</span> b<span class="op">)</span> <span class="op">|+|</span> c mustBe a <span class="op">|+|</span> <span class="op">(</span>b <span class="op">|+|</span> c<span class="op">)</span></span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/SemigroupLaws.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>Given an <code>E</code> with an instance of <code>Semigroup</code>, we can define an <code>Applicative</code> instance for <code>Validated</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb14"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">def</span> validatedApplicative<span class="op">[</span>E<span class="op">:</span> Semigroup<span class="op">]:</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">=</span></span>
+<div id="cb14" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">def</span> validatedApplicative<span class="op">[</span>E<span class="op">:</span> Semigroup<span class="op">]:</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">=</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">new</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">{</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">import</span> Semigroup<span class="op">.</span>Syntax<span class="op">.</span>_</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -320,7 +347,8 @@
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">(</span><span class="ex">Invalid</span><span class="op">(</span>x<span class="op">),</span> _<span class="op">)</span>          <span class="op">=&gt;</span> <span class="ex">Invalid</span><span class="op">(</span>x<span class="op">)</span></span>
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">(</span>_<span class="op">,</span> <span class="ex">Invalid</span><span class="op">(</span>y<span class="op">))</span>          <span class="op">=&gt;</span> <span class="ex">Invalid</span><span class="op">(</span>y<span class="op">)</span></span>
 <span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala#L111-L149">See here</a> for the definition in the sample repository.</p>
@@ -334,7 +362,8 @@
 <p>Naively, a <code>List[String]</code> works for <code>E</code>. It forms a <code>Semigroup</code> under concatenation, but concatenation isn’t cheap in Scala <code>List</code>s. It can also be empty per its type, which means that as <code>E</code> you have to code for invariants where it is actually empty.</p>
 <p>There exists a better structure, and we can whip it together pretty quick: the <code>NonEmptyChain</code>. This structure is a context modeled as two cases: either a single value, or a pair of separate instances of itself appended together. This allows for a <code>List</code>-like structure with constant-time concatenation that can be converted to a <code>Seq</code> in linear time.</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb15"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> NonEmptyChain<span class="op">[+</span>A<span class="op">]</span> <span class="op">{</span></span>
+<div id="cb15" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> NonEmptyChain<span class="op">[+</span>A<span class="op">]</span> <span class="op">{</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">import</span> NonEmptyChain<span class="op">.</span>_</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -377,14 +406,16 @@
 <span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span> <span class="co">`</span>NonEmptyChain<span class="co">`</span> forms a <span class="co">`</span>Semigroup<span class="co">`</span> under the <span class="co">`</span>append<span class="co">()`</span> function<span class="co">.</span></span>
 <span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">*/</span></span>
 <span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>  <span class="kw">implicit</span> <span class="kw">def</span> nonEmptyChainSemigroup<span class="op">[</span>A<span class="op">]:</span> Semigroup<span class="op">[</span>NonEmptyChain<span class="op">[</span>A<span class="op">]]</span> <span class="op">=</span> _ append _</span>
-<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChain.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>Using a <code>NonEmptyChain</code>, we can start writing validation functions for <code>User</code> to test that they work:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb16"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> green<span class="op">.</span>thisfieldwas<span class="op">.</span>embracingnondeterminism<span class="op">.</span>syntax<span class="op">.</span>applicative<span class="op">.</span>_</span>
+<div id="cb16" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> green<span class="op">.</span>thisfieldwas<span class="op">.</span>embracingnondeterminism<span class="op">.</span>syntax<span class="op">.</span>applicative<span class="op">.</span>_</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> green<span class="op">.</span>thisfieldwas<span class="op">.</span>embracingnondeterminism<span class="op">.</span>syntax<span class="op">.</span>validated<span class="op">.</span>_</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">User</span><span class="op">(</span>username<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> email<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> password<span class="op">:</span> <span class="ex">String</span><span class="op">)</span></span>
@@ -422,11 +453,13 @@
 <span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>  User<span class="op">.</span>curried<span class="op">.</span>pure<span class="op">[</span>Validated<span class="op">[</span>NonEmptyChain<span class="op">[</span><span class="ex">String</span><span class="op">],</span> <span class="op">*]]</span></span>
 <span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">ap</span><span class="op">(</span><span class="fu">validateUsername</span><span class="op">(</span>username<span class="op">))</span></span>
 <span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">ap</span><span class="op">(</span><span class="fu">validateEmail</span><span class="op">(</span>email<span class="op">))</span></span>
-<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">ap</span><span class="op">(</span><span class="fu">validatePassword</span><span class="op">(</span>password<span class="op">))</span></span></code></pre></div>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">ap</span><span class="op">(</span><span class="fu">validatePassword</span><span class="op">(</span>password<span class="op">))</span></span></code></pre>
+</div>
 </div>
 <p>Using this function, we can attempt to create a <code>User</code> with nothing but invalid data and get the complete collection of errors back:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb17"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> validatedUser <span class="op">=</span> <span class="fu">validateUser</span><span class="op">(</span></span>
+<div id="cb17" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> validatedUser <span class="op">=</span> <span class="fu">validateUser</span><span class="op">(</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  username <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">,</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  email <span class="op">=</span> <span class="st">&quot;bananaphone&quot;</span><span class="op">,</span></span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  password <span class="op">=</span> <span class="st">&quot;</span><span class="ch">\n\t\r\r\r</span><span class="st">&quot;</span><span class="op">,</span></span>
@@ -443,11 +476,13 @@
 <span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;Password must contain at least one symbol&quot;</span><span class="op">,</span></span>
 <span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
 <span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>And with valid data, receive a constructed <code>User</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb18"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> validatedUser <span class="op">=</span> <span class="fu">validateUser</span><span class="op">(</span></span>
+<div id="cb18" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> validatedUser <span class="op">=</span> <span class="fu">validateUser</span><span class="op">(</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  username  <span class="op">=</span> <span class="st">&quot;commander.keen&quot;</span><span class="op">,</span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  email <span class="op">=</span> <span class="st">&quot;commander.keen@vorticonexterminator.net&quot;</span><span class="op">,</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  password <span class="op">=</span> <span class="st">&quot;m4rti@an$Rul3&quot;</span><span class="op">,</span></span>
@@ -458,7 +493,8 @@
 <span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    email <span class="op">=</span> <span class="st">&quot;commander.keen@vorticonexterminator.net&quot;</span><span class="op">,</span></span>
 <span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    password <span class="op">=</span> <span class="st">&quot;m4rti@an$Rul3&quot;</span><span class="op">,</span></span>
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L50-L141">See here</a> for the specs in the sample repository.</p>
@@ -469,21 +505,25 @@
 <p>It may not have been obvious from <code>validateUser()</code>, but each validation function evaluates independently of the other validation functions. In the <code>Validation</code> context, this means that each function executes without impacting the other functions regardless of individual success or failure. Imagine for a moment, what if the functions were evaluated within an asynchronous context?</p>
 <p>Let’s define a function on the <code>Applicative</code> typeclass that gathers the results of some effectful operations:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb19"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sequence<span class="op">[</span>A<span class="op">](</span>listFa<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>F<span class="op">[</span>A<span class="op">]]):</span> F<span class="op">[</span><span class="ex">List</span><span class="op">[</span>A<span class="op">]]</span> <span class="op">=</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  listFa<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span><span class="fu">pure</span><span class="op">(</span><span class="ex">List</span><span class="op">[</span>A<span class="op">]()))((</span>fListA<span class="op">,</span> fa<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">map2</span><span class="op">(</span>fa<span class="op">,</span> fListA<span class="op">)(</span>_ <span class="op">::</span> _<span class="op">))</span></span></code></pre></div>
+<div id="cb19" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sequence<span class="op">[</span>A<span class="op">](</span>listFa<span class="op">:</span> <span class="ex">List</span><span class="op">[</span>F<span class="op">[</span>A<span class="op">]]):</span> F<span class="op">[</span><span class="ex">List</span><span class="op">[</span>A<span class="op">]]</span> <span class="op">=</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  listFa<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span><span class="fu">pure</span><span class="op">(</span><span class="ex">List</span><span class="op">[</span>A<span class="op">]()))((</span>fListA<span class="op">,</span> fa<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">map2</span><span class="op">(</span>fa<span class="op">,</span> fListA<span class="op">)(</span>_ <span class="op">::</span> _<span class="op">))</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala#L83-L96">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>And then if we load three <code>User</code>s at once:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb20"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">loadUser</span><span class="op">(</span>email<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>User<span class="op">]</span> <span class="op">=</span> <span class="op">???</span></span>
+<div id="cb20" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">loadUser</span><span class="op">(</span>email<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> <span class="ex">Future</span><span class="op">[</span>User<span class="op">]</span> <span class="op">=</span> <span class="op">???</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> loadingUsers <span class="op">=</span> Applicative<span class="op">[</span><span class="ex">Future</span><span class="op">].</span><span class="fu">sequence</span><span class="op">(</span><span class="ex">List</span><span class="op">(</span></span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">loadUser</span><span class="op">(</span><span class="st">&quot;test@email.com&quot;</span><span class="op">),</span></span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">loadUser</span><span class="op">(</span><span class="st">&quot;student@school.edu&quot;</span><span class="op">),</span></span>
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">loadUser</span><span class="op">(</span><span class="st">&quot;admin@foundation.net&quot;</span><span class="op">),</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="op">))</span></span></code></pre></div>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="op">))</span></span></code></pre>
+</div>
 </div>
 <p>The variable <code>loadingUsers</code> now contains <code>Future[List[User]]</code>. As each <code>Future[User]</code> resolves, they are collected into a <code>List</code>. Because each <code>loadUser()</code> function executes independently, this has a profound implication in the context of a <code>Future</code>: they are executed concurrently!</p>
 <p>Should any <code>User</code> fail to load, the <strong>undesired case</strong> will <em>propagate</em> and the <code>sequence()</code> function will halt. <em>All other <code>User</code>s are discarded.</em></p>
@@ -491,18 +531,21 @@
 <h4 id="products-of-contexts">Products of contexts</h4>
 <p>Given a 2-tuple of functors <code>(F[A], F[B])</code> you can invert the nesting of the context and the 2-tuple using the <code>pure()</code> and <code>ap()</code> functions from <code>Applicative</code> with the following steps:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb21"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
+<div id="cb21" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="op">:</span>load console<span class="op">/</span>imports<span class="op">.</span>scala</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> productOfSomes <span class="op">=</span> <span class="op">(</span><span class="ex">Option</span><span class="op">(</span><span class="dv">42</span><span class="op">),</span> <span class="ex">Option</span><span class="op">(</span><span class="st">&quot;banana&quot;</span><span class="op">))</span></span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> productOfSomes<span class="op">:</span> <span class="op">(</span><span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">],</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">])</span> <span class="op">=</span> <span class="op">(</span><span class="bu">Some</span><span class="op">(</span><span class="dv">42</span><span class="op">),</span> <span class="bu">Some</span><span class="op">(</span><span class="st">&quot;banana&quot;</span><span class="op">))</span></span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> someOfProduct <span class="op">=</span> <span class="op">(</span>_<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> _<span class="op">:</span> <span class="ex">String</span><span class="op">).</span>curried<span class="op">.</span>pure<span class="op">[</span><span class="ex">Option</span><span class="op">].</span><span class="fu">ap</span><span class="op">(</span>productOfSomes<span class="op">.</span>_1<span class="op">).</span><span class="fu">ap</span><span class="op">(</span>productOfSomes<span class="op">.</span>_2<span class="op">)</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> someOfProduct<span class="op">:</span> <span class="ex">Option</span><span class="op">[(</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">)]</span> <span class="op">=</span> <span class="bu">Some</span><span class="op">((</span><span class="dv">42</span><span class="op">,</span> <span class="st">&quot;banana&quot;</span><span class="op">))</span></span></code></pre></div>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> someOfProduct<span class="op">:</span> <span class="ex">Option</span><span class="op">[(</span><span class="bu">Int</span><span class="op">,</span> <span class="ex">String</span><span class="op">)]</span> <span class="op">=</span> <span class="bu">Some</span><span class="op">((</span><span class="dv">42</span><span class="op">,</span> <span class="st">&quot;banana&quot;</span><span class="op">))</span></span></code></pre>
+</div>
 </div>
 <p>This has an important implication, specifically that unlike the <code>sequence()</code> function these operations allow for gathering effectful operations that produce contexts with heterogeneous terms. Scala allows for tuples up to 22 elements, and it makes sense to abstract the above operations for each tuple size, especially because even at just 2 elements writing all of these out is already clunky!</p>
 <p>In the sample repository, I have written a macro which <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/macro/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/GenerateTupleSyntax.scala">adds two extension methods</a> to each tuple size. Here’s the code that is generated for the 2-tuple:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb22"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">class</span> Tuple2Ops<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> T1<span class="op">,</span> T2<span class="op">](</span><span class="kw">val</span> t<span class="op">:</span> <span class="op">(</span>F<span class="op">[</span>T1<span class="op">],</span> F<span class="op">[</span>T2<span class="op">]))</span> <span class="kw">extends</span> AnyVal <span class="op">{</span></span>
+<div id="cb22" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">class</span> Tuple2Ops<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> T1<span class="op">,</span> T2<span class="op">](</span><span class="kw">val</span> t<span class="op">:</span> <span class="op">(</span>F<span class="op">[</span>T1<span class="op">],</span> F<span class="op">[</span>T2<span class="op">]))</span> <span class="kw">extends</span> AnyVal <span class="op">{</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Converts a product of contexts `(F[T1], F[T2])` into a context of a product `F[(T1, T2)]`</span></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">tupled</span><span class="op">(</span><span class="kw">implicit</span> F<span class="op">:</span> Applicative<span class="op">[</span>F<span class="op">]):</span> F<span class="op">[(</span>T1<span class="op">,</span> T2<span class="op">)]</span> <span class="op">=</span></span>
@@ -511,22 +554,26 @@
 <span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Applies a product of contexts `(F[T1], F[T1])` to function, giving a result in context</span></span>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> mapN<span class="op">[</span>Out<span class="op">](</span>f<span class="op">:</span> <span class="op">(</span>T1<span class="op">,</span> T2<span class="op">)</span> <span class="op">=&gt;</span> Out<span class="op">)(</span><span class="kw">implicit</span> F<span class="op">:</span> Applicative<span class="op">[</span>F<span class="op">]):</span> F<span class="op">[</span>Out<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    F<span class="op">.</span><span class="fu">ap</span><span class="op">(</span>F<span class="op">.</span><span class="fu">ap</span><span class="op">(</span>F<span class="op">.</span><span class="fu">pure</span><span class="op">(</span>f<span class="op">.</span>curried<span class="op">))(</span>t<span class="op">.</span>_1<span class="op">))(</span>t<span class="op">.</span>_2<span class="op">)</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>Being able to invert the nesting of a tuple and a context is most powerful when constructing case classes from arguments produced by effectful operations. By using the <code>mapN()</code> function, for example, validating arguments to the <code>User</code> constructor may be rewritten like this:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb23"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">validateUser</span><span class="op">(</span>username<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> email<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> password<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> Validated<span class="op">[</span>NonEmptyChain<span class="op">[</span><span class="ex">String</span><span class="op">],</span> User<span class="op">]</span> <span class="op">=</span></span>
+<div id="cb23" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">validateUser</span><span class="op">(</span>username<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> email<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> password<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> Validated<span class="op">[</span>NonEmptyChain<span class="op">[</span><span class="ex">String</span><span class="op">],</span> User<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">validateUsername</span><span class="op">(</span>username<span class="op">),</span></span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">validateEmail</span><span class="op">(</span>email<span class="op">),</span></span>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">validatePassword</span><span class="op">(</span>password<span class="op">)</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">).</span><span class="fu">mapN</span><span class="op">(</span>User<span class="op">)</span></span></code></pre></div>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">).</span><span class="fu">mapN</span><span class="op">(</span>User<span class="op">)</span></span></code></pre>
+</div>
 </div>
 <p>This syntax afforded by the <code>mapN()</code> extension method is much more concise and closely matches the constructor arguments order passed to <code>User</code> itself. After all, <code>User</code> is a product of results produced by contexts, which evaluate independently of each other as they do in the <code>sequence()</code> function.</p>
 <h2 id="becoming-an-applicative">Becoming an Applicative</h2>
 <p>In order to become an <code>Applicative</code>, an effect type must implement the typeclass. Let’s implement instances for the usual suspects, <code>Option</code>, <code>Either</code>, and <code>List</code>. As <code>Applicative</code> is a specialization of <code>Functor</code>, we can simply upgrade our current <code>Functor</code> instances to become <code>Applicative</code>s:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb24"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">val</span> optionApplicative<span class="op">:</span> Applicative<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> Applicative<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">{</span></span>
+<div id="cb24" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">val</span> optionApplicative<span class="op">:</span> Applicative<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">=</span> <span class="kw">new</span> Applicative<span class="op">[</span><span class="ex">Option</span><span class="op">]</span> <span class="op">{</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// removed map() and now using the default</span></span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -565,7 +612,8 @@
 <span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">f</span><span class="op">(</span>a<span class="op">)</span> <span class="op">::</span> innerResult</span>
 <span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
 <span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}.</span>reverse</span>
-<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p>See the instances of <code>Applicative</code> for
@@ -589,7 +637,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <p>In order to properly test our applicative instances, we need to be able to generate a broad range of inputs to verify that the applicative properties hold with a high degree of confidence. Specifically, “for all” <code>List</code>s, for example, the property checks for <code>Applicative</code> must pass for each generated instance. We will leverage <code>scalacheck</code> for property-based testing. <code>scalacheck</code> will generate for us a set of arbitrary instances of the contexts and execute tests called <em>property checks</em> against each to verify that each check passes. If all checks pass, then the property may be considered to hold “for all” instances of the tested context.</p>
 <p>Generating an arbitrary context <code>F[_]</code> containing an arbitrary <code>A</code> is not supported directly by <code>scalacheck</code>, however. We can leverage this typeclass below to enable generating instances of <code>F[A]</code> from any generator for <code>A</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb25"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>scalacheck<span class="op">.</span>Gen</span>
+<div id="cb25" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>scalacheck<span class="op">.</span>Gen</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> LiftedGen<span class="op">[</span>F<span class="op">[</span>_<span class="op">]]</span> <span class="op">{</span></span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -607,7 +656,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>       <span class="kw">def</span> lift<span class="op">[</span>F<span class="op">[</span>_<span class="op">]:</span> LiftedGen<span class="op">]:</span> Gen<span class="op">[</span>F<span class="op">[</span>A<span class="op">]]</span> <span class="op">=</span> LiftedGen<span class="op">[</span>F<span class="op">].</span>lift<span class="op">[</span>A<span class="op">](</span>gen<span class="op">)</span></span>
 <span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>     <span class="op">}</span></span>
 <span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>   <span class="op">}</span></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a> <span class="op">}</span></span></code></pre></div>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a> <span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/util/LiftedGen.scala">See here</a> for the definition in the sample repository.</p>
@@ -615,7 +665,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <h3 id="defining-the-applicative-laws-as-properties">Defining the applicative laws as properties</h3>
 <p>Now we will walk through defining the properties of <code>Applicative</code> in such a way that we simply supply the contexts as the argument to the test. This way we only define the properties once.</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb26"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> ApplicativeLaws <span class="op">{</span> <span class="kw">this</span><span class="op">:</span> Laws <span class="kw">with</span> FunctorLaws <span class="op">=&gt;</span></span>
+<div id="cb26" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> ApplicativeLaws <span class="op">{</span> <span class="kw">this</span><span class="op">:</span> Laws <span class="kw">with</span> FunctorLaws <span class="op">=&gt;</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span> Defined per Applicative laws taken from the Haskell wiki<span class="co">:</span></span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">*</span> <span class="co">[[</span>https<span class="co">://</span>en<span class="co">.</span>wikibooks<span class="co">.</span>org<span class="co">/</span>wiki<span class="co">/</span>Haskell<span class="co">/</span>Applicative_functors<span class="co">#</span>Applicative_functor_laws<span class="co">]]</span></span>
@@ -678,14 +729,16 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
 <span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/ApplicativeLaws.scala">See here</a> for the full definition of the trait.</p>
 </blockquote>
 <p>With this trait, laws specs can be written for each context.</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb27"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">abstract</span> <span class="kw">class</span> Laws <span class="kw">extends</span> AnyPropSpec <span class="kw">with</span> ScalaCheckPropertyChecks <span class="kw">with</span> Matchers <span class="op">{</span></span>
+<div id="cb27" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">abstract</span> <span class="kw">class</span> Laws <span class="kw">extends</span> AnyPropSpec <span class="kw">with</span> ScalaCheckPropertyChecks <span class="kw">with</span> Matchers <span class="op">{</span></span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">implicit</span> <span class="kw">override</span> <span class="kw">val</span> generatorDrivenConfig<span class="op">:</span> PropertyCheckConfiguration <span class="op">=</span></span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">PropertyCheckConfiguration</span><span class="op">(</span>minSuccessful <span class="op">=</span> <span class="dv">100</span><span class="op">)</span></span>
@@ -744,7 +797,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb27-57"><a href="#cb27-57" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-58"><a href="#cb27-58" aria-hidden="true" tabindex="-1"></a>  checkFunctorLaws<span class="op">[</span><span class="ex">List</span><span class="op">]()</span></span>
 <span id="cb27-59"><a href="#cb27-59" aria-hidden="true" tabindex="-1"></a>  checkApplicativeLaws<span class="op">[</span><span class="ex">List</span><span class="op">]()</span></span>
-<span id="cb27-60"><a href="#cb27-60" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb27-60"><a href="#cb27-60" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p>See these laws specs for
@@ -756,7 +810,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <h4 id="but-dont-forget-validated">But don’t forget <code>Validated</code>!</h4>
 <p>We also defined an <code>Applicative</code> instance for <code>Validated</code> above:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb28"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">def</span> validatedApplicative<span class="op">[</span>E<span class="op">:</span> Semigroup<span class="op">]:</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">=</span></span>
+<div id="cb28" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">def</span> validatedApplicative<span class="op">[</span>E<span class="op">:</span> Semigroup<span class="op">]:</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">=</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">new</span> Applicative<span class="op">[</span>Validated<span class="op">[</span>E<span class="op">,</span> <span class="op">*]]</span> <span class="op">{</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">import</span> Semigroup<span class="op">.</span>Syntax<span class="op">.</span>_</span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -769,11 +824,13 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">(</span><span class="ex">Invalid</span><span class="op">(</span>x<span class="op">),</span> _<span class="op">)</span>          <span class="op">=&gt;</span> <span class="ex">Invalid</span><span class="op">(</span>x<span class="op">)</span></span>
 <span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="op">(</span>_<span class="op">,</span> <span class="ex">Invalid</span><span class="op">(</span>y<span class="op">))</span>          <span class="op">=&gt;</span> <span class="ex">Invalid</span><span class="op">(</span>y<span class="op">)</span></span>
 <span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
-<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>This instance should be tested as well:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb29"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ValidatedLawsSpec <span class="kw">extends</span> Laws <span class="kw">with</span> FunctorLaws <span class="kw">with</span> ApplicativeLaws <span class="op">{</span></span>
+<div id="cb29" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ValidatedLawsSpec <span class="kw">extends</span> Laws <span class="kw">with</span> FunctorLaws <span class="kw">with</span> ApplicativeLaws <span class="op">{</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">import</span> Validated<span class="op">.</span>Instances<span class="op">.</span>_</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">import</span> NonEmptyChain<span class="op">.</span>Instances<span class="op">.</span>_</span>
@@ -807,11 +864,13 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a>  checkFunctorLaws<span class="op">[</span>ValidatedNec<span class="op">[</span><span class="ex">Exception</span><span class="op">,</span> <span class="op">*]]()</span></span>
 <span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a>  checkApplicativeLaws<span class="op">[</span>ValidatedNec<span class="op">[</span><span class="ex">Exception</span><span class="op">,</span> <span class="op">*]]()</span></span>
-<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>And we should also make sure <code>NonEmptyChain</code> is well-behaved as a semigroup:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb30"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NonEmptyChainLaws <span class="kw">extends</span> Laws <span class="kw">with</span> SemigroupLaws <span class="op">{</span></span>
+<div id="cb30" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NonEmptyChainLaws <span class="kw">extends</span> Laws <span class="kw">with</span> SemigroupLaws <span class="op">{</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">import</span> NonEmptyChain<span class="op">.</span>Instances<span class="op">.</span>_</span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -835,7 +894,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Arbitrary</span><span class="op">(</span>nonEmptyChainLiftedGen<span class="op">.</span><span class="fu">lift</span><span class="op">(</span>arbitrary<span class="op">[</span>A<span class="op">]))</span></span>
 <span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>  checkSemigroupLaws<span class="op">[</span>NonEmptyChain<span class="op">[</span><span class="bu">Int</span><span class="op">]]()</span></span>
-<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <blockquote>
 <p>See these laws specs for

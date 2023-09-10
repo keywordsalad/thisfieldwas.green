@@ -2,7 +2,7 @@
 User-agent: *
 Disallow: /drafts
 Disallow: /drafts/*
-Sitemap: https://thisfieldwas.green/sitemap.xml
+Sitemap: /sitemap.xml
 
 User-agent: GPTBot
 Disallow: /

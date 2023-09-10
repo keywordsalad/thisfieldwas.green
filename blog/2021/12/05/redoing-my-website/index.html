@@ -10,7 +10,7 @@
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
 
-<meta property="og:site_name" content="">
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:title" content="Redoing my website with Haskell and Hakyll">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2021/12/05/redoing-my-website/">
 <meta property="og:description" content="My website prior to 2021 was authored using octopress or jekyll. Truthfully I don&#39;t remember which as I haven&#39;t touched my website in quite a few years. I want to update my homepage and I&#39;m in a bind because I don&#39;t know how to produce a build after I make changes.">
@@ -76,7 +76,7 @@
 
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">15m 46s</span></p>
+<p>Estimated reading time: <span class="length">19m 51s</span></p>
 </div>
 <p>I’m picking up a COVID project: <em>Redoing my website!</em></p>
 <p>My website prior to 2021 was authored using <a href="http://octopress.org/"><code>octopress</code></a> or <a href="https://jekyllrb.com/"><code>jekyll</code></a>. Truthfully I don’t remember which as I haven’t touched my website in quite a few years. I want to update my homepage and I’m in a bind because I don’t know how to produce a build after I make changes.</p>
@@ -113,11 +113,13 @@
 <li>When routed, a transformation is applied by means of the <code>Compiler</code> monad.</li>
 </ol>
 <p><strong>Rules for copying images into my site</strong></p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource haskell numberLines"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1"></a><span class="ot">images ::</span> <span class="dt">Rules</span> ()</span>
+<div id="cb1" class="sourceCode">
+<pre class="sourceCode numberSource haskell numberLines"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1"></a><span class="ot">images ::</span> <span class="dt">Rules</span> ()</span>
 <span id="cb1-2"><a href="#cb1-2"></a>images <span class="ot">=</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a>  match <span class="st">&quot;images/**&quot;</span> <span class="kw">do</span>        <span class="co">-- 1. match all files in the images folder</span></span>
 <span id="cb1-4"><a href="#cb1-4"></a>    route idRoute             <span class="co">-- 2. output image with the file name as-is</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a>    compile copyFileCompiler  <span class="co">-- 3. copy image file from source to output as-is</span></span></code></pre></div>
+<span id="cb1-5"><a href="#cb1-5"></a>    compile copyFileCompiler  <span class="co">-- 3. copy image file from source to output as-is</span></span></code></pre>
+</div>
 <h3 id="turning-one-thing-into-another">Turning one thing into another</h3>
 <p>Compilers are cool, they’re where all the magic happens! Through compilers I use <code>hakyll</code>’s magic to transform <code>markdown</code> and <code>html</code> into <code>html</code> for viewing in a browser. <code>hakyll</code> out-of-the-box supports multiple input and output formats, and I suspect that in addition to a plain-old technical blog I can also write a really large textbook source in <code>LaTeX</code> and output a <code>pdf</code>.</p>
 <p>I sense that compilers are <code>hakyll</code>’s primary extension point, as I lean on these heavily and develop opinions as I spend time with them.</p>
@@ -164,20 +166,24 @@
 <h3 id="type-inferencing-is-a-real-treat-until-it-doesnt-work">Type inferencing is a real treat until it doesn’t work</h3>
 <p>Sometimes Haskell can’t figure out what I’m trying to tell it to do. I didn’t read any formal documentation on how Haskell’s type inferencing algorithm works specifically (the system derives from <a href="https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system">Hindley-Milner</a>, interesting stuff) but I did develop some intuition over time. Unfortunately words escape me and I can’t seem to explain how it works just yet.</p>
 <p>Occasionally I have to tell Haskell what to do, and there is a syntax for this:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource haskell numberLines"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">-- Haskell doesn&#39;t know that I mean &quot;page&quot; is a `String` and not `[a]`</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>constField <span class="st">&quot;layout&quot;</span> (<span class="st">&quot;page&quot;</span><span class="ot"> ::</span> <span class="dt">String</span>)</span></code></pre></div>
+<div id="cb2" class="sourceCode">
+<pre class="sourceCode numberSource haskell numberLines"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">-- Haskell doesn&#39;t know that I mean &quot;page&quot; is a `String` and not `[a]`</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>constField <span class="st">&quot;layout&quot;</span> (<span class="st">&quot;page&quot;</span><span class="ot"> ::</span> <span class="dt">String</span>)</span></code></pre>
+</div>
 <p>That particular instance above is due to a <a href="http://dev.stephendiehl.com/hask/#overlappinginstances">footgun</a> I use so that lists of type <code>[a]</code> are treated generally and <code>Strings</code>, which are just <code>[Char]</code>, are treated specially. Haskell can’t tell the difference in this case unless I provide the extra type information.</p>
 <h3 id="using-css-is-still-like-the-family-guy-meme">Using <code>css</code> is still like the Family Guy meme</h3>
 <figure id="family-guy-css" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/redoing-my-website/family-guy-css.gif" class="image-link">
-        <img src="/images/redoing-my-website/family-guy-css.gif" id="family-guy-css-img"loading="lazy"
-                           title="<code>css</code>: it's still like this, but it got prettier" alt="<code>css</code>: it's still like this, but it got prettier">
-      </a>
-    </p>
-    <figcaption><code>css</code>: it's still like this, but it got prettier</figcaption>
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/redoing-my-website/family-guy-css.gif" class="image-link">
+<img src="/images/redoing-my-website/family-guy-css.gif" id="family-guy-css-img"loading="lazy"
+                         title="<code>css</code>: it's still like this, but it got prettier" alt="<code>css</code>: it's still like this, but it got prettier">
+</a>
+</p>
+<figcaption>
+<code>css</code>: it’s still like this, but it got prettier
+</figcaption>
+</div>
 </figure>
 <p>I probably haven’t touched <code>css</code> since 2013, which right now is about 8 years ago. It feels the same, with a few upgrades that are in very much the same vein as the old stuff. It’s still weird and clunky, at least to me. For as frustrated as I find myself with it, I am happy with how the site looks considering that I don’t particularly know what I’m doing.</p>
 <p>Despite feeling as though I’m fumbling about, I’m so proud to have figured out how to style my site so that looks great on both desktop and mobile, that it scales across multiple resolutions, but that it especially feels like I did not compromise on aesthetics or functionality. Try looking at this or other pages from desktop or phone, and try especially comparing landscape vs. portrait!</p>

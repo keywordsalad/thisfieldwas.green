@@ -10,7 +10,7 @@
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
 
-<meta property="og:site_name" content="">
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:title" content="The Set Function">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2022/06/16/set-function/">
 <meta property="og:description" content="What is a Set? A Set can tell you whether or not an value is a member of the Set. This means that a Set is merely a function, specifically of type A to Boolean. In this post I will explore the usage of **combinators** to build a Set from elementary functions alone.">
@@ -77,18 +77,21 @@
 
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">2m 58s</span></p>
+<p>Estimated reading time: <span class="length">15m 31s</span></p>
 </div>
 <p>What is a <code>Set</code>? A <code>Set</code> can tell you whether or not an <code>value</code> is a member of the <code>Set</code>. This means that a <code>Set</code> is merely a function, specifically of type <code>A =&gt; Boolean</code>. In this post I will explore the usage of <strong>combinators</strong> to build a <code>Set</code> from elementary functions alone.</p>
 <!--more-->
 <h2 id="modeling-a-set">Modeling a <code>Set</code></h2>
 <p>I’m going to use a trait to model a <code>Set</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb1"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> <span class="op">(</span>A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">)</span></span></code></pre></div>
+<div id="cb1" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> <span class="op">(</span>A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">)</span></span></code></pre>
+</div>
 </div>
 <p>And define the most elementary of <code>Set</code>s, the <em>empty <code>Set</code></em> and <em>singleton <code>Set</code></em>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb2"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> empty<span class="op">[</span>A<span class="op">]():</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> _ <span class="op">=&gt;</span> <span class="kw">false</span></span>
+<div id="cb2" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> empty<span class="op">[</span>A<span class="op">]():</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> _ <span class="op">=&gt;</span> <span class="kw">false</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> singleton<span class="op">[</span>A<span class="op">](</span>value<span class="op">:</span> A<span class="op">):</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> test <span class="op">=&gt;</span> test <span class="op">==</span> value</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -98,72 +101,88 @@
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> justOne <span class="op">=</span> <span class="fu">singleton</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">justOne</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="co">// true</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">justOne</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span> <span class="co">// false</span></span></code></pre></div>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">justOne</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span> <span class="co">// false</span></span></code></pre>
+</div>
 </div>
 <p>But what about more complex sets?</p>
 <h2 id="the-set-of-natural-numbers">The <code>Set</code> of natural numbers</h2>
 <p>The <code>Set</code> of natural numbers requires more work to model. Specifically, it represents a lower bound of <code>0</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb3"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">nat</span><span class="op">(</span>value<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Boolean</span> <span class="op">=</span> value <span class="op">&gt;=</span> <span class="dv">0</span></span></code></pre></div>
+<div id="cb3" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">nat</span><span class="op">(</span>value<span class="op">:</span> <span class="bu">Int</span><span class="op">):</span> <span class="ex">Boolean</span> <span class="op">=</span> value <span class="op">&gt;=</span> <span class="dv">0</span></span></code></pre>
+</div>
 </div>
 <p>But this is very concrete. A lower bound specifically is a type of <em>predicate</em>, and this can be parameterized:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb4"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">satisfy</span><span class="op">(</span>predicate<span class="op">:</span> A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">):</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> predicate</span>
+<div id="cb4" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">satisfy</span><span class="op">(</span>predicate<span class="op">:</span> A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">):</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="op">=</span> predicate</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> nat<span class="op">:</span> <span class="ex">Set</span><span class="op">[</span><span class="bu">Int</span><span class="op">]</span> <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">)</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">nat</span><span class="op">(-</span><span class="dv">1</span><span class="op">)</span> <span class="co">// false</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">nat</span><span class="op">(</span><span class="dv">0</span><span class="op">)</span> <span class="co">// true</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">nat</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="co">// true</span></span></code></pre></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">nat</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="co">// true</span></span></code></pre>
+</div>
 </div>
 <h2 id="building-a-set">Building a <code>Set</code></h2>
 <p>How do I add values to the <code>Set</code>? I have to be able to combine <code>Set</code>s:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb5"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> <span class="op">(</span>A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">)</span> <span class="op">{</span></span>
+<div id="cb5" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> <span class="op">(</span>A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">)</span> <span class="op">{</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="op">|[</span>B <span class="op">&gt;:</span> A<span class="op">](</span>other<span class="op">:</span> <span class="ex">Set</span><span class="op">[</span>B<span class="op">]):</span> <span class="ex">Set</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=&gt;</span> <span class="kw">this</span><span class="op">(</span>value<span class="op">)</span> <span class="op">||</span> <span class="fu">other</span><span class="op">(</span>value<span class="op">)</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>By combining <code>Set</code>s, I can now specify that a <code>value</code> be one of two <code>value</code>s in a <code>Set</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb6"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> oneOrTwo <span class="op">=</span> <span class="fu">singleton</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">|</span> <span class="fu">singleton</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span></span>
+<div id="cb6" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> oneOrTwo <span class="op">=</span> <span class="fu">singleton</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">|</span> <span class="fu">singleton</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">oneOrTwo</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="co">// true</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">oneOrTwo</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span> <span class="co">// true</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">oneOrTwo</span><span class="op">(</span><span class="dv">3</span><span class="op">)</span> <span class="co">// false</span></span></code></pre></div>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">oneOrTwo</span><span class="op">(</span><span class="dv">3</span><span class="op">)</span> <span class="co">// false</span></span></code></pre>
+</div>
 </div>
 <p>But this <code>|</code> operator doesn’t allow me to set boundaries using predicates, as it represents a <em>disjoint <code>Set</code></em>. This means <code>value</code>s must be present at least in one <code>Set</code> or the other:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb7"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> singleDigits <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">|</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&lt;=</span> <span class="dv">9</span><span class="op">)</span></span>
+<div id="cb7" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> singleDigits <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">|</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&lt;=</span> <span class="dv">9</span><span class="op">)</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">singleDigits</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span> <span class="co">// true</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">singleDigits</span><span class="op">(-</span><span class="dv">1</span><span class="op">)</span> <span class="co">// true</span></span></code></pre></div>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">singleDigits</span><span class="op">(-</span><span class="dv">1</span><span class="op">)</span> <span class="co">// true</span></span></code></pre>
+</div>
 </div>
 <p>I need another operator requiring membership in both <code>Set</code>s, so that I can create a <em>joint <code>Set</code></em>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb8"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> <span class="op">(</span>A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">)</span> <span class="op">{</span></span>
+<div id="cb8" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> <span class="ex">Set</span><span class="op">[</span>A<span class="op">]</span> <span class="kw">extends</span> <span class="op">(</span>A <span class="op">=&gt;</span> <span class="ex">Boolean</span><span class="op">)</span> <span class="op">{</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="op">|[</span>B <span class="op">&gt;:</span> A<span class="op">](</span>other<span class="op">:</span> <span class="ex">Set</span><span class="op">[</span>B<span class="op">]):</span> <span class="ex">Set</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=&gt;</span> <span class="kw">this</span><span class="op">(</span>value<span class="op">)</span> <span class="op">||</span> <span class="fu">other</span><span class="op">(</span>value<span class="op">)</span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="op">&amp;[</span>B <span class="op">&gt;:</span> A<span class="op">](</span>other<span class="op">:</span> <span class="ex">Set</span><span class="op">[</span>B<span class="op">]):</span> <span class="ex">Set</span><span class="op">[</span>B<span class="op">]</span> <span class="op">=</span></span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=&gt;</span> <span class="kw">this</span><span class="op">(</span>value<span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu">other</span><span class="op">(</span>value<span class="op">)</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre>
+</div>
 </div>
 <p>The <code>&amp;</code> operator now requires that the <code>value</code> exists in <em>both</em> <code>Set</code>s:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb9"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> singleDigits <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&lt;=</span> <span class="dv">9</span><span class="op">)</span></span>
+<div id="cb9" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> singleDigits <span class="op">=</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&lt;=</span> <span class="dv">9</span><span class="op">)</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">singleDigits</span><span class="op">(</span><span class="dv">2</span><span class="op">)</span> <span class="co">// true</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">singleDigits</span><span class="op">(</span><span class="dv">9</span><span class="op">)</span> <span class="co">// true</span></span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">singleDigits</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span> <span class="co">// false</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">singleDigits</span><span class="op">(-</span><span class="dv">1</span><span class="op">)</span> <span class="co">// false</span></span></code></pre></div>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">singleDigits</span><span class="op">(-</span><span class="dv">1</span><span class="op">)</span> <span class="co">// false</span></span></code></pre>
+</div>
 </div>
 <h3 id="building-a-complex-set">Building a complex <code>Set</code></h3>
 <p>I’m going to build a weird <code>Set</code> of numbers from <code>0-100</code>, <code>102</code>, <code>104</code>, <code>220-230</code>, and all numbers greater than <code>300</code> that are divisible by <code>17</code>:</p>
 <div class="numberLines">
-<div class="sourceCode" id="cb10"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> complexSet <span class="op">=</span> <span class="op">(</span><span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&lt;=</span> <span class="dv">100</span><span class="op">))</span> <span class="op">|</span></span>
+<div id="cb10" class="sourceCode">
+<pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> complexSet <span class="op">=</span> <span class="op">(</span><span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&gt;=</span> <span class="dv">0</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&lt;=</span> <span class="dv">100</span><span class="op">))</span> <span class="op">|</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">singleton</span><span class="op">(</span><span class="dv">102</span><span class="op">)</span> <span class="op">|</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">singleton</span><span class="op">(</span><span class="dv">104</span><span class="op">)</span> <span class="op">|</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span><span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&gt;=</span> <span class="dv">220</span><span class="op">)</span> <span class="op">|</span> <span class="fu">satisfy</span><span class="op">(</span>_ <span class="op">&lt;=</span> <span class="dv">230</span><span class="op">))</span> <span class="op">|</span></span>
@@ -174,7 +193,8 @@
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">complexSet</span><span class="op">(</span><span class="dv">180</span><span class="op">)</span> <span class="co">// false</span></span>
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">complexSet</span><span class="op">(</span><span class="dv">227</span><span class="op">)</span> <span class="co">// true</span></span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">complexSet</span><span class="op">(</span><span class="dv">340</span><span class="op">)</span> <span class="co">// true</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">complexSet</span><span class="op">(</span><span class="dv">341</span><span class="op">)</span> <span class="co">// false</span></span></code></pre></div>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">complexSet</span><span class="op">(</span><span class="dv">341</span><span class="op">)</span> <span class="co">// false</span></span></code></pre>
+</div>
 </div>
 <h2 id="takeaway">Takeaway</h2>
 <p>Using functions alone, complex logic can be composed from atomic, testable building blocks. These functions that take other functions as arguments to produce new functions are referred to as <strong>combinators</strong> as they <em>combine</em> their capabilities.</p>

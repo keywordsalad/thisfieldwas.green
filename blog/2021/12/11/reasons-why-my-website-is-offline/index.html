@@ -10,7 +10,7 @@
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
 
-<meta property="og:site_name" content="">
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:title" content="Reasons why my website is offline">
 <meta property="og:url" content="https://thisfieldwas.green/blog/2021/12/11/reasons-why-my-website-is-offline/">
 <meta property="og:description" content="My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and low-key minimalist, found next to the garbage chute at his condo building.">
@@ -81,7 +81,7 @@
 </div>
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">15m 27s</span></p>
+<p>Estimated reading time: <span class="length">19m 54s</span></p>
 </div>
 <p>My website is hosted from a 2007 HP Pavilion tower that my best friend, Vlad, a privacy buff and <a href="https://internetwebsite.ofvlad.xyz">low-key minimalist</a>, found next to the garbage chute at his condo building.</p>
 <!--more-->
@@ -155,17 +155,21 @@
 <p>I don’t have a static IP. My ISP’s network infrastructure simply doesn’t allow for it, as the infrastructure is based on a mesh of wireless signal that is propagated between large, unsightly antennas installed on top of each house using their service. To get around this, I swallow my pride and purchase, again, a cloud server from <code>linode</code>. I call this one my <em>bastion server</em>, and with it I have this sort of static IP address that I can configure my domains to point to.</p>
 <p>As I still can’t reach from the outside world into my closet, I have to perform a little magic…</p>
 <p>Using <code>ssh</code>, I can open a <a href="https://www.ssh.com/academy/ssh/tunneling/example#remote-forwarding">remote tunnel</a> from <em>closet computer</em> to the <em>bastion server</em> with this command:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">ssh</span> <span class="at">-R</span> 10080:localhost:80 bastion.oflogan.xyz</span></code></pre></div>
+<div id="cb1" class="sourceCode">
+<pre class="sourceCode numberSource bash numberLines"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">ssh</span> <span class="at">-R</span> 10080:localhost:80 bastion.oflogan.xyz</span></code></pre>
+</div>
 <p>This command binds a connection to the <em>bastion server</em>’s <code>localhost:10080</code> port and forwards it to <em>closet computer</em>’s <code>*:80</code> port. You may notice that I’m using port <code>10080</code> rather than <code>80</code>, and this is because I am using a non-priveleged user to open the tunnel, as only <code>root</code> may bind to ports under <code>1024</code>.</p>
 <p>Because the remote tunnel binds <code>localhost:10080</code> on the <em>bastion server</em>, this means that the tunnel is not accessible publicly, and that my website is still in the closet. In order for my website to come out of the closet, I use an <code>nginx</code> <a href="https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/">reverse proxy</a> to forward the <em>bastion server</em>’s public port <code>*:80</code> to <code>localhost:10080</code>. With this final connection made, the world can reach out and see my website coming out of the closet.</p>
 <p>I can set up reverse proxies for each port, <code>22</code>, <code>80</code>, and <code>443</code>, on the <em>bastion server</em> into reverse tunnels from <em>closet computer</em>’s <code>22</code>, <code>80</code>, and <code>443</code> ports to the <em>bastion server</em>’s <code>10022</code>, <code>10080</code>, and <code>10443</code> ports. I then leverage <code>autossh</code> to maintain persistent remote tunnels from <em>closet computer</em> to the <em>bastion server</em>.</p>
 <p><strong>This is how it looks:</strong></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>         +-BASTION-SERVER--------------\</span>
+<div id="cb2" class="sourceCode">
+<pre class="sourceCode txt nowrap"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>         +-BASTION-SERVER--------------\</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>         | &lt;=proxy=&gt; | &lt;===remote tunnel===&gt; +-CLOSET-COMPUTER---\</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>SSH ---&gt; | *:22----&gt; | localhost:10022 | --&gt; | *:22 SSH          |</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>HTTP --&gt; | *:80----&gt; | localhost:10080 | --&gt; | *:80 goto 443 duh |</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>HTTPS -&gt; | *:443---&gt; | localhost:10443 | --&gt; | *:443 my website  |</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>         `-----------+-----------------+     `-------------------+</span></code></pre></div>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>         `-----------+-----------------+     `-------------------+</span></code></pre>
+</div>
 <p>It’s ok that I’m using a cloud server for this, I tell myself, because none of my data is stored on it. But also, I think I pulled off something kinda cool.</p>
 <p>This is a really fragile architecture, however. If the <code>ssh</code> tunnels aren’t up, the site can’t be served. I can’t even get an error page out as there doesn’t seem to be a way to query for whether the reverse proxies are passing any data through. This setup is really kinda crap like that.</p>
 <p>Being what it is, <code>systemd</code> on <em>closet computer</em> will stop <code>autossh</code> from retrying connections to the <em>bastion server</em> after a certain period. This is a major problem if there’s a hiccup in the home internet connection. Sometimes my internet is out for five minutes, but that’s a tradeoff made when using a cheaper, locally-based ISP over Comcast’s cartoon villain bundled contracts. At a minimum, I need to use something other than <code>systemd</code> to manage my <code>ssh</code> tunnels, as it hasn’t been reliable <em>at all</em> and is probably one of the bigger points of failure because it cascades with any failures at the router.</p>
@@ -174,15 +178,17 @@
 <p>I have a lot of problems hosting my website and source code from my <em>closet computer</em> in terms of uptime. Mostly related to tripping over the power cable, though in other ways the setup isn’t resilient. It’s been a really rewarding experience nonetheless. I’m working with tech that I use all the time as a consumer, but have never myself had to engineer or maintain. It’s a fun puzzle.</p>
 <p>Hosting my website and source code myself feels very empowering. I feel as if I reclaimed a little piece of the internet. For that alone I want to see what more I can self host. The internet today clusters around a centralizing oligopoly of services, and I pine for the days when every odd person had their own small, weird website, and frequented a handful of small, niche forums, each with just enough users to be interesting. Now there’s Facebook. GitHub. Google… If I name a <em>thing</em>: there’s likely a single site that I would go to for that <em>thing</em>. That <em>thing</em> has likely regressed in quality towards the mean and mediocre. And when I go to that site for that <em>thing</em>, I can’t tell whether I’ve found the <em>thing</em> or an ad for a subscription service that gives me access to the <em>thing</em> at a markup.</p>
 <figure id="closet-computer-in-context" class="image">
-  <div class="aside-content">
-    <p class="content">
-      <a href="/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png" class="image-link">
-        <img src="/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png" id="closet-computer-in-context-img"loading="lazy"
-                           title="Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first." alt="Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.">
-      </a>
-    </p>
-    <figcaption>Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.</figcaption>
-  </div>
+<div class="aside-content">
+<p class="content">
+<a href="/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png" class="image-link">
+<img src="/images/reasons-my-website-is-offline/coming-out-of-the-closet-1024x768.png" id="closet-computer-in-context-img"loading="lazy"
+                         title="Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first." alt="Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.">
+</a>
+</p>
+<figcaption>
+Cables and all, the <em>closet computer</em> in context. Corey asked me to dust first.
+</figcaption>
+</div>
 </figure>
 <p>I severely took for granted the uptime that a third party service could give me. It’s making me rethink what the total cost of what third party hosting actually looks like, not only in terms of dollars and nebulous ideals, but more importantly in terms of peace of mind. Terms such as <em>will the promotion committee be able to see that writeup I referred them to?</em> I would absolutely benefit from hosting my website from my <em>bastion server</em> instead, but perhaps after I reread <code>linode</code>’s service agreements to allay my confounding mind.</p>
 <p>Regarding nebulous ideals, Copilot makes a very strong case for treating <a href="https://www.brookings.edu/blog/techtank/2018/02/21/should-we-treat-data-as-labor-lets-open-up-the-discussion/">data as a form of labor</a>. At the time of this writing, Wed Dec 8, 2021, Copilot is in technical review and accessible via waitlist. I can’t find any mention of licensing cost, or whether there will be a distinction between paid and community editions. If Copilot is available as an exclusively free service, then I believe it stands as an excellent reinvestment back into the community and profession as a whole. If someone is paying for Copilot, then we are collectively exploited within some legally-accepted gray area, because we agreed to be.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
