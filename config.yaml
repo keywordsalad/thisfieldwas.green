@@ -2,7 +2,8 @@ default: &default
   site-info: &default-site-info
     title: This Field Was Green
     description: I keep my field green by writing about tech and sometimes life.
-    root: http://localhost:8000
+    host: http://localhost:8000
+    root: ''
     comments-site: localhost
     author-name: Logan McGrath
     author-email: logan.mcgrath@thisfieldwas.green
@@ -35,7 +36,7 @@ prod:
     inflate-css: false
   site-info:
     <<: *default-site-info
-    root: https://thisfieldwas.green
+    host: https://thisfieldwas.green
     comments-site: thisfieldwas.green
 
 review:
@@ -45,7 +46,7 @@ review:
     inflate-css: false
   site-info:
     <<: *default-site-info
-    root: https://review.thisfieldwas.green
+    host: https://review.thisfieldwas.green
     comments-site: review.thisfieldwas.green
 
 preview:
@@ -55,5 +56,5 @@ preview:
     inflate-css: false
   site-info:
     <<: *default-site-info
-    root: https://preview.thisfieldwas.green
+    host: https://preview.thisfieldwas.green
     comments-site: preview.thisfieldwas.green

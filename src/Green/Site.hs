@@ -15,7 +15,7 @@ import Green.Site.Robots
 import Green.Site.Sitemap
 import Green.Site.Static
 import Green.Site.Templates
-import Green.Template.Custom.Context
+import Green.Template.Context
 
 site :: SiteConfig -> Rules ()
 site config = do

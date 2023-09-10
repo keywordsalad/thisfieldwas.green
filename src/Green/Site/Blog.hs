@@ -5,8 +5,9 @@ import Green.Compiler (loadExistingSnapshots)
 import Green.Config
 import Green.Route
 import Green.Template
-import Green.Template.Custom
-import qualified Hakyll as H
+import Hakyll qualified as H
+import Hakyllbars as HB
+import Hakyllbars.Field.Date (dateFromMetadata, normalizedDateTimeFormat, parseTimeM')
 import System.FilePath
 
 buildBlogTags :: (H.MonadMetadata m) => m Tags
@@ -74,6 +75,7 @@ posts context = do
       getResourceBody >>= applyTemplates do
         applyContext $ postContext <> context
         applyContent
+        applyCompiler calculateReadingTimeCompiler
         saveSnapshots ["content"]
         applyLayout
 
@@ -87,14 +89,15 @@ postsRoute =
 previews :: SiteConfig -> Context String -> Rules ()
 previews config context
   | config ^. sitePreview = do
-    match "_drafts/**" $ version "preview" do
-      route $ previewRoute (config ^. siteTimeLocale)
-      compile $
-        getResourceBody >>= applyTemplates do
-          applyContext $ postContext <> context
-          applyContent
-          saveSnapshots ["content"]
-          applyLayout
+      match "_drafts/**" $ version "preview" do
+        route $ previewRoute (config ^. siteTimeLocale)
+        compile $
+          getResourceBody >>= applyTemplates do
+            applyContext $ postContext <> context
+            applyContent
+            applyCompiler calculateReadingTimeCompiler
+            saveSnapshots ["content"]
+            applyLayout
   | otherwise = return ()
 
 previewRoute :: TimeLocale -> Routes
@@ -109,7 +112,7 @@ previewRoute timeLocale =
                     date =
                       formatTime timeLocale "%Y/%m/%d" . fromJust $
                         dateFromMetadata timeLocale ["published", "date"] m
-                          >>= parseTimeM' timeLocale normalizedFormat
+                          >>= parseTimeM' timeLocale normalizedDateTimeFormat
                  in dirName </> date </> baseName
             )
       )
@@ -127,6 +130,7 @@ drafts context = do
             <> constField "noindex" True
             <> context
         applyContent
+        applyCompiler calculateReadingTimeCompiler
         saveSnapshots ["content"]
         applyLayout
 
@@ -151,7 +155,6 @@ tagsPages tags context =
             <> constField "layout" ("page" :: String)
             <> context
         applyTemplate "_templates/posts-under-tag.html"
-        applyCompiler pandocCompiler
         applyLayout
 
 postContext :: Context String
@@ -188,4 +191,4 @@ dateRoute = gsubRoute datePattern (H.replaceAll "-" (const "/"))
     datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}-"
 
 tagListField :: String -> Context String
-tagListField key = field key $ lift . getTags . itemIdentifier
+tagListField key = field key $ lift . H.getTags . itemIdentifier

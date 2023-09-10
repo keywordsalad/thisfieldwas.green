@@ -1,13 +1,13 @@
 module Green.Config where
 
-import qualified Data.Aeson.Key as Key
+import Data.Aeson.Key qualified as Key
 import Data.Aeson.Types
 import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as Char8
+import Data.ByteString.Char8 qualified as Char8
 import Data.Yaml
 import Green.Common
 import Green.Lens
-import qualified Hakyll as H
+import Hakyll qualified as H
 
 data SiteDebug = SiteDebug
   { _debugPreview :: Bool,
@@ -42,7 +42,8 @@ instance ToJSON SiteDebug where
       ]
 
 data SiteInfo = SiteInfo
-  { _siteRoot :: String,
+  { _siteHost :: String,
+    _siteRoot :: String,
     _siteTitle :: String,
     _siteDescription :: String,
     _siteCommentsId :: String,
@@ -60,7 +61,8 @@ makeLenses ''SiteInfo
 instance FromJSON SiteInfo where
   parseJSON = withObject "SiteInfo" \info ->
     SiteInfo
-      <$> info .: "root"
+      <$> info .: "host"
+      <*> info .: "root"
       <*> info .: "title"
       <*> info .:? "description" .!= ""
       <*> info .: "comments-site"
@@ -74,7 +76,8 @@ instance FromJSON SiteInfo where
 instance ToJSON SiteInfo where
   toJSON SiteInfo {..} =
     object
-      [ "root" .= _siteRoot,
+      [ "host" .= _siteHost,
+        "root" .= _siteRoot,
         "title" .= _siteTitle,
         "description" .= _siteDescription,
         "comments-site" .= _siteCommentsId,
@@ -161,7 +164,7 @@ instance ToJSON SiteConfig where
 instance Show SiteConfig where
   show = Char8.unpack . encode . toJSON
 
-customIgnoreFile :: Foldable t => t FilePath -> FilePath -> Bool
+customIgnoreFile :: (Foldable t) => t FilePath -> FilePath -> Bool
 customIgnoreFile allowedFiles path =
   H.ignoreFile H.defaultConfiguration path
     && takeFileName path `notElem` allowedFiles
@@ -202,11 +205,15 @@ parseSiteConfigJSON env timeLocale time = withObject "SiteConfig" \allConfig -> 
     envKey = fromMaybe "default" $ lookup "SITE_ENV" env
     overrideDebugSettings debug =
       debug
-        & debugPreview %~ (\x -> maybe x read $ lookup "SITE_PREVIEW" env)
-        & debugInflateCss %~ (\x -> maybe x read $ lookup "SITE_INFLATE_CSS" env)
-        & debugInflateJs %~ (\x -> maybe x read $ lookup "SITE_INFLATE_JS" env)
+        & debugPreview
+        %~ (\x -> maybe x read $ lookup "SITE_PREVIEW" env)
+        & debugInflateCss
+        %~ (\x -> maybe x read $ lookup "SITE_INFLATE_CSS" env)
+        & debugInflateJs
+        %~ (\x -> maybe x read $ lookup "SITE_INFLATE_JS" env)
 
 parseConfigYaml :: [(String, String)] -> TimeLocale -> ZonedTime -> ByteString -> Either String SiteConfig
 parseConfigYaml env timeLocale time =
-  first prettyPrintParseException . decodeEither'
+  first prettyPrintParseException
+    . decodeEither'
     >=> parseEither (parseSiteConfigJSON env timeLocale time)

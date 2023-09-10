@@ -45,20 +45,10 @@ library
       Green.Site.Static
       Green.Site.Templates
       Green.Template
-      Green.Template.Ast
       Green.Template.Compiler
       Green.Template.Context
       Green.Template.Custom
-      Green.Template.Custom.Context
-      Green.Template.Custom.DateField
-      Green.Template.Custom.GitField
-      Green.Template.Custom.HtmlField
-      Green.Template.Field
-      Green.Template.Pandoc
-      Green.Template.Source
-      Green.Template.Source.Lexer
-      Green.Template.Source.Parser
-      Green.Template.Source.Util
+      Green.Template.HtmlField
       Green.Template.Tags
       Green.Util
   other-modules:
@@ -85,6 +75,7 @@ library
       FunctionalDependencies
       GADTs
       GeneralizedNewtypeDeriving
+      ImportQualifiedPost
       InstanceSigs
       KindSignatures
       LambdaCase
@@ -112,27 +103,20 @@ library
       MissingH
     , aeson
     , base >=4.14 && <5
-    , binary
     , bytestring
-    , data-default
     , directory
     , filepath
     , hakyll
+    , hakyllbars
     , hjsmin
     , microlens
     , microlens-th
     , mtl
-    , network-uri
     , optparse-applicative
     , pandoc
-    , parsec
-    , process
-    , scientific
     , template-haskell
     , text
     , time
-    , unordered-containers
-    , vector
     , yaml
   default-language: Haskell2010
 
@@ -162,6 +146,7 @@ executable author
       FunctionalDependencies
       GADTs
       GeneralizedNewtypeDeriving
+      ImportQualifiedPost
       InstanceSigs
       KindSignatures
       LambdaCase
@@ -216,6 +201,7 @@ executable site
       FunctionalDependencies
       GADTs
       GeneralizedNewtypeDeriving
+      ImportQualifiedPost
       InstanceSigs
       KindSignatures
       LambdaCase
@@ -283,6 +269,7 @@ test-suite test
       FunctionalDependencies
       GADTs
       GeneralizedNewtypeDeriving
+      ImportQualifiedPost
       InstanceSigs
       KindSignatures
       LambdaCase

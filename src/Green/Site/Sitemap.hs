@@ -2,9 +2,8 @@ module Green.Site.Sitemap where
 
 import Green.Common
 import Green.Site.Blog (buildBlogTags, loadPublishedPosts)
-import Green.Template
-import Green.Template.Custom
-import qualified Hakyll as H
+import Hakyll qualified as H
+import Hakyllbars as HB
 
 sitemap :: Context String -> Rules ()
 sitemap siteContext =

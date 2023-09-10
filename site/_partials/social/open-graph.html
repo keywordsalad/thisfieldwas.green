@@ -1,8 +1,8 @@
-<meta property="og:site_name" content="{{og.siteTitle | escapeHtml}}">
+<meta property="og:site_name" content="{{og.siteTitle | default siteTitle | escapeHtml}}">
 <meta property="og:title" content="{{og.title | default title | escapeHtml}}">
-<meta property="og:url" content="{{siteRoot}}{{og.url | default url | escapeHtmlUri}}">
+<meta property="og:url" content="{{siteUrl}}{{og.url | default url | escapeHtmlUri}}">
 <meta property="og:description" content="{{og.description | default description | escapeHtml}}">
-<meta property="og:image:url" content="{{siteRoot}}{{og.image.url | default '/images/grass-256x256.png' | escapeHtmlUri}}">
+<meta property="og:image:url" content="{{siteUrl}}{{og.image.url | default '/images/grass-256x256.png' | escapeHtmlUri}}">
 {{#if og.image.alt-}}
   <meta property="og:image:alt" content="{{og.image.alt | escapeHtml}}">
 {{-#end}}

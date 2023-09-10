@@ -3,11 +3,11 @@ changefreq: weekly
 ---
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <id>{{siteRoot}}</id>
+  <id>{{siteUrl}}</id>
   <title>{{siteTitle | escapeHtml}}</title>
   <subtitle>{{siteDescription | escapeHtml}}</subtitle>
-  <icon>{{siteRoot}}/images/grass-256x256.png</icon>
-  <link href="{{siteRoot | escapeHtmlUri}}" />
+  <icon>{{siteUrl}}/images/grass-256x256.png</icon>
+  <link href="{{siteUrl | escapeHtmlUri}}" />
   <link rel="self" href="{{absUrl | escapeHtmlUri}}" />
   <updated>{{lastUpdated}}</updated>
   <author>

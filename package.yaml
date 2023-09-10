@@ -18,29 +18,21 @@ library:
   source-dirs: src
   dependencies:
     - aeson
-    - binary
     - bytestring
-    - data-default
     - directory
     - filepath
     - hakyll
+    - hakyllbars
     - hjsmin
-    # - JuicyPixels
     - MissingH
     - microlens
     - microlens-th
     - mtl
-    - network-uri
     - optparse-applicative
     - pandoc
-    - parsec
-    - process
-    - scientific
     - template-haskell
     - text
     - time
-    - unordered-containers
-    - vector
     - yaml
 
 executables:
@@ -99,6 +91,7 @@ default-extensions:
   - FunctionalDependencies
   - GADTs
   - GeneralizedNewtypeDeriving
+  - ImportQualifiedPost
   - InstanceSigs
   - KindSignatures
   - LambdaCase

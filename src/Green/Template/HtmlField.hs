@@ -1,16 +1,12 @@
-module Green.Template.Custom.HtmlField where
+module Green.Template.HtmlField where
 
 import Green.Common
-import Green.Template
 import Green.Util (dropIndex)
-import Network.URI (escapeURIString, isUnescapedInURI)
+import Hakyllbars
 
 -- | Trims @index.html@ from @$url$@'s
 trimmedUrlField :: String -> Context String
-trimmedUrlField = mapField dropIndex . urlField
-
-siteRootField :: String -> Context String
-siteRootField = constField "siteRoot"
+trimmedUrlField key = mapField dropIndex $ urlField key "siteRoot"
 
 codeField :: Context String
 codeField = functionField "code" f
@@ -46,13 +42,3 @@ youtubeField = functionField "youtube" f
       tplWithContext (ytFields <> defaults) do
         applyTemplate "_templates/youtube.html"
         tplPopBody
-
-escapeHtmlField :: Context String
-escapeHtmlField = functionField "escapeHtml" f
-  where
-    f = return . escapeHtml
-
-escapeHtmlUriField :: Context String
-escapeHtmlUriField = functionField "escapeHtmlUri" f
-  where
-    f = return . escapeHtml . escapeURIString isUnescapedInURI

@@ -1,18 +1,18 @@
 <figure class="video">
-  <div class="video-container">
-    <iframe src="https://www.youtube.com/embed/{{video}}"
-      {{#if title-}}
-        title="{{title | escapeHtml}}"
-      {{#else-}}
-        title="YouTube video player"
-      {{#end}}
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-    </iframe>
-  </div>
-  {{#if title-}}
-  <figcaption>
-    {{-title-}}
-  </figcaption>
-  {{-#end}}
+<div class="video-container">
+  <iframe src="https://www.youtube.com/embed/{{video}}"
+    {{#if title-}}
+      title="{{title | escapeHtml}}"
+    {{#else-}}
+      title="YouTube video player"
+    {{#end}}
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+  </iframe>
+</div>
+{{#if title-}}
+<figcaption>
+  {{-title-}}
+</figcaption>
+{{-#end}}
 </figure>

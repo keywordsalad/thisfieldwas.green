@@ -2,9 +2,8 @@ module Green.Site.Feed where
 
 import Green.Common
 import Green.Site.Blog (loadPublishedPosts, postContext, teaserContext)
-import Green.Template
-import Green.Template.Custom
 import Hakyll (recentFirst)
+import Hakyllbars as HB
 
 feed :: Context String -> Rules ()
 feed context = do

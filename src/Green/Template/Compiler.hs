@@ -1,180 +1,112 @@
 module Green.Template.Compiler where
 
-import Control.Applicative (liftA3)
-import Control.Monad.State.Strict
-import Data.Bifunctor
-import Data.List.NonEmpty as NonEmpty
+import Data.Text qualified as T
 import Green.Common
-import Green.Template.Ast
-import Green.Template.Context hiding (field)
-import Green.Template.Source.Parser (parse)
-import Hakyll.Core.Compiler.Internal
+import Hakyll
+import System.FilePath
+import Text.Pandoc
 
--- | Takes an item and compiles a template from it.
-compileTemplateItem :: Item String -> Compiler Template
-compileTemplateItem item = do
-  let filePath = toFilePath $ itemIdentifier item
-  either (fail . show) return $ parse filePath (itemBody item)
-
-loadTemplate :: Identifier -> TemplateRunner a Template
-loadTemplate = lift . fmap itemBody . load
-
-applyTemplate :: Identifier -> TemplateRunner String ()
-applyTemplate =
-  loadTemplate
-    >=> reduceTemplate
-    >=> lift . makeItem
-    >=> tplPushItem
-
-applyAsTemplate :: TemplateRunner String ()
-applyAsTemplate =
-  tplModifyItem do
-    lift . compileTemplateItem
-      >=> reduceTemplate
-      >=> lift . makeItem
-
-reduceTemplate :: Template -> TemplateRunner String String
-reduceTemplate (Template bs src) =
-  tplWithCall ("template " ++ src) (reduceBlocks bs)
-
-reduceBlocks :: [Block] -> TemplateRunner String String
-reduceBlocks = stringify . intoValue <=< applyBlocks
-
-applyBlocks :: [Block] -> TemplateRunner String [ContextValue String]
-applyBlocks = mapM applyBlock
-
-applyBlock :: Block -> TemplateRunner String (ContextValue String)
-applyBlock = tplWithPos getBlockPos \case
-  TextBlock t _ -> return $ intoValue t
-  ExpressionBlock e _ -> eval e
-  CommentBlock {} -> return EmptyValue
-  ChromeBlock e bs pos ->
-    fmap intoValue do
-      bs' <- reduceBlocks bs
-      eval e >>= \case
-        FunctionValue f -> f (intoValue bs')
-        x -> tplFail $ "invalid chrome function " ++ show x ++ " near " ++ show pos
-  AltBlock (ApplyBlock e bs _ :| alts) maybeDefault _ ->
-    intoValue <$> applyAltBlock e bs alts maybeDefault
-
-applyAltBlock ::
-  Expression ->
-  [Block] ->
-  [ApplyBlock] ->
-  Maybe DefaultBlock ->
-  TemplateRunner String [ContextValue String]
-applyAltBlock guard' bs alts maybeDefault =
-  eval guard' >>= \case
-    FunctionValue f -> pure <$> f (intoValue bs)
-    x ->
-      isTruthy x >>= \case
-        True -> applyBlocks bs
-        False -> case alts of
-          ApplyBlock guard'' bs' _ : alts' -> applyAltBlock guard'' bs' alts' maybeDefault
-          [] -> case maybeDefault of
-            Just (DefaultBlock bs' _) -> applyBlocks bs'
-            Nothing -> return []
-
-eval :: Expression -> TemplateRunner a (ContextValue a)
-eval = tplWithPos getExpressionPos \case
-  NameExpression name pos -> do
-    (context, item, trace) <-
-      liftA3 (,,) tplContext tplItem tplTrace `catchError` \e -> do
-        tplFail $ "Caught error in template: " ++ show e ++ " near " ++ show pos
-    s <- get
-    (x, s') <-
-      lift $
-        runStateT (unContext context name) s `compilerCatch` \case
-          CompilationFailure ne ->
-            compilerThrow (NonEmpty.toList ne)
-          CompilationNoResult ss ->
-            -- TODO figure out how to get state changes to persist if value comes back empty
-            return (UndefinedValue name item (show pos : trace) ss, s)
-    put s'
-    return x
-  StringExpression s _ -> return $ intoValue s
-  IntExpression n _ -> return $ intoValue n
-  DoubleExpression x _ -> return $ intoValue x
-  BoolExpression b _ -> return $ intoValue b
-  ApplyExpression f x _ -> apply f x
-  AccessExpression target field pos ->
-    eval target >>= \case
-      ContextValue target' -> do
-        name <-
-          eval field >>= \case
-            StringValue x -> return x
-            x -> tplFail $ "invalid field " ++ show x ++ " near " ++ show (getExpressionPos field)
-        s <- get
-        (x, s') <-
-          lift $
-            runStateT (unContext target' name) s `compilerCatch` \case
-              CompilationFailure errors ->
-                compilerThrow (NonEmpty.toList errors)
-              CompilationNoResult _ ->
-                -- TODO figure out how to get state changes to persist if value comes back empty
-                return (EmptyValue, s)
-        put s'
-        return x
-      EmptyValue -> return EmptyValue
-      UndefinedValue {} -> return EmptyValue
-      x -> tplFail $ "invalid context " ++ show x ++ " near " ++ show pos
-  FilterExpression x f _ -> apply f x
-  ContextExpression pairs _ -> do
-    pairs' <- mapM (sequence . second eval) pairs
-    return $ ContextValue (intoContext pairs')
-  ListExpression xs _ -> intoValue <$> mapM eval xs
+calculateReadingTimeCompiler :: Item String -> Compiler (Item String)
+calculateReadingTimeCompiler item@(Item id' _) = do
+  let ext = takeExtension $ toFilePath id'
+  go ext
   where
-    apply f x =
-      eval f >>= \case
-        FunctionValue f' -> f' (ThunkValue $ eval x)
-        x' -> tplFail $ "invalid function " ++ show x' ++ " in " ++ show (getExpressionPos f)
+    go ".html" = return item
+    go _ = renderPandocWithTransform readerOptions writerOptions calculateReadingTime item
 
-stringify :: ContextValue String -> TemplateRunner String String
-stringify = \case
-  EmptyValue -> return ""
-  UndefinedValue name item trace errors ->
-    tplFail $
-      "can't stringify undefined value " ++ show name
-        ++ "\nin item context for "
-        ++ itemFilePath item
-        ++ "\ntrace=[\n\t"
-        ++ intercalate ",\n\t" trace
-        ++ "\n],\nsuppressed=[\n\t"
-        ++ intercalate ",\n\t" errors
-        ++ "\n]\n"
-  ContextValue {} -> tplFail "can't stringify context"
-  ListValue xs -> mconcat <$> mapM stringify xs
-  BoolValue b -> return $ show b
-  StringValue s -> return s
-  DoubleValue x -> return $ show x
-  IntValue n -> return $ show n
-  FunctionValue {} -> tplFail "can't stringify function"
-  BlockValue block -> case block of
-    TextBlock t _ -> return t
-    CommentBlock {} -> return ""
-    ExpressionBlock e _ -> stringify =<< eval e
-    _ -> stringify =<< applyBlock block
-  ItemValue item -> return $ itemBody item
-  ThunkValue fx -> stringify =<< force =<< fx
-  PairValue (_, x) -> stringify x
+readerOptions :: ReaderOptions
+readerOptions =
+  defaultHakyllReaderOptions
+    { readerExtensions =
+        foldl (flip ($)) (readerExtensions defaultHakyllReaderOptions) $
+          [ enableExtension Ext_smart,
+            enableExtension Ext_inline_code_attributes,
+            disableExtension Ext_markdown_in_html_blocks
+          ]
+    }
 
-isTruthy :: ContextValue a -> TemplateRunner a Bool
-isTruthy = \case
-  EmptyValue -> return False
-  UndefinedValue {} -> return False
-  ContextValue {} -> return True
-  ListValue xs -> return $ not (null xs)
-  BoolValue x -> return x
-  StringValue x -> return $ not (null x)
-  DoubleValue x -> return $ x /= 0
-  IntValue x -> return $ x /= 0
-  FunctionValue {} -> return True
-  BlockValue {} -> return True
-  ItemValue _ -> return True
-  ThunkValue fx -> isTruthy =<< force =<< fx
-  PairValue (_, x) -> isTruthy x
+writerOptions :: WriterOptions
+writerOptions = defaultHakyllWriterOptions
 
-force :: ContextValue a -> TemplateRunner a (ContextValue a)
-force = \case
-  ThunkValue fx -> force =<< fx
-  x -> return x
+calculateReadingTime :: Pandoc -> Pandoc
+calculateReadingTime doc@(Pandoc meta blocks) =
+  Pandoc meta (timeEstimateBlock : blocks)
+  where
+    timeEstimateBlock =
+      Div
+        ("", ["estimated-reading-time"], [])
+        [ Para
+            [ Str "Estimated reading time: ",
+              Span ("", ["length"], []) [Str timeEstimate]
+            ]
+        ]
+    timeEstimate = timeEstimateString doc
+    timeEstimateString = T.pack . toClockString . timeEstimateSeconds
+    timeEstimateSeconds = (`quot` wordsPerSecond) . wordsLength
+    wordsLength = (`quot` lettersPerWord) . documentLength
+    wordsPerSecond = 4
+    lettersPerWord = 5
+
+toClockString :: Int -> String
+toClockString i
+  | i >= 60 * 60 = show hours ++ "h " ++ show minutes ++ "m " ++ show seconds ++ "s"
+  | i >= 60 = show minutes ++ "m " ++ show seconds ++ "s"
+  | otherwise = show seconds ++ "s"
+  where
+    hours = i `quot` (60 * 60)
+    minutes = (i `rem` (60 * 60)) `quot` 60
+    seconds = i `rem` 60
+
+documentLength :: Pandoc -> Int
+documentLength (Pandoc _ blocks') = blocksLength blocks'
+  where
+    blocksLength = sum . (blockLength <$>)
+    blockLength = \case
+      Plain inlines -> inlinesLength inlines
+      Para inlines -> inlinesLength inlines
+      LineBlock inlinesList -> sum (inlinesLength <$> inlinesList)
+      CodeBlock _ text -> T.length text
+      RawBlock _ text -> T.length text
+      BlockQuote blocks -> blocksLength blocks
+      OrderedList _ blocksList -> blocksListLength blocksList
+      BulletList blocksList -> blocksListLength blocksList
+      DefinitionList x0 -> sum $ uncurry (+) . bimap inlinesLength blocksListLength <$> x0
+      Header _ _ inlines -> inlinesLength inlines
+      HorizontalRule -> 1
+      Table _ cap _ th tbs tf -> captionLength cap + lettersFromHeader th + sum (tableLength <$> tbs) + lettersFromFooter tf
+        where
+          tableLength (TableBody _ _ rows1 rows2) = sum (lettersFromRow <$> rows1) + sum (lettersFromRow <$> rows2)
+          lettersFromHeader (TableHead _ rows) = sum (lettersFromRow <$> rows)
+          lettersFromRow (Row _ cells) = sum (lettersFromCell <$> cells)
+          lettersFromCell (Cell _ _ _ _ blocks) = sum (blockLength <$> blocks)
+          lettersFromFooter (TableFoot _ rows) = sum (lettersFromRow <$> rows)
+      Div _ blocks -> blocksLength blocks
+      Figure _ caption blocks -> captionLength caption + blocksLength blocks
+      where
+        blocksListLength blocksList = sum (blocksLength <$> blocksList)
+        captionLength (Caption inlines blocks) = maybe 0 inlinesLength inlines + blocksLength blocks
+
+    inlinesLength = sum . (inlineLength <$>)
+      where
+        inlineLength = \case
+          Str text -> T.length text
+          Emph inlines -> inlinesLength inlines
+          Underline inlines -> inlinesLength inlines
+          Strong inlines -> inlinesLength inlines
+          Strikeout inlines -> inlinesLength inlines
+          Superscript inlines -> inlinesLength inlines
+          Subscript inlines -> inlinesLength inlines
+          SmallCaps inlines -> inlinesLength inlines
+          Quoted _ inlines -> inlinesLength inlines
+          Cite cis inlines -> sum (lettersFromCitation <$> cis) + inlinesLength inlines
+          Code _ text -> T.length text
+          Space -> 1
+          SoftBreak -> 1
+          LineBreak -> 1
+          Math _ text -> T.length text
+          RawInline _ text -> T.length text
+          Link _ inlines _ -> inlinesLength inlines
+          Image _ inlines _ -> inlinesLength inlines
+          Note blocks -> blocksLength blocks
+          Span _ inlines -> inlinesLength inlines
+        lettersFromCitation citation = inlinesLength (citationPrefix citation) + inlinesLength (citationSuffix citation)

@@ -3,8 +3,9 @@ module Green.Site.Pages where
 import Control.Monad (forM_)
 import Green.Common
 import Green.Route
-import Green.Template.Custom
+import Green.Template
 import Hakyll (fromGlob)
+import Hakyllbars as HB
 
 pages :: Context String -> Rules ()
 pages context = forM_ ["_pages/", "_errors/"] \dir -> do

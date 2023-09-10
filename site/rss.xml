@@ -8,12 +8,12 @@ changefreq: weekly
 <channel>
   <title>{{siteTitle | escapeHtml}}</title>
   <description>{{siteDescription | escapeHtml}}</description>
-  <link>{{siteRoot}}</link>
+  <link>{{siteUrl}}</link>
   <atom:link href="{{absUrl | escapeHtmlUri}}" rel="self" type="application/rss+xml" />
   <image>
-    <url>{{siteRoot}}/images/grass-256x256.png</url>
+    <url>{{siteUrl}}/images/grass-256x256.png</url>
     <title>{{siteTitle}}</title>
-    <link>{{siteRoot}}</link>
+    <link>{{siteUrl}}</link>
   </image>
   <category>Technology</category>
   <category>Software Engineering</category>

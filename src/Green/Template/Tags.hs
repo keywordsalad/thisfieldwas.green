@@ -2,16 +2,15 @@ module Green.Template.Tags
   ( module Green.Template.Tags,
     Tags,
     buildTags,
-    getTags,
   )
 where
 
 import Data.Char (toLower)
 import Green.Common
-import Green.Template.Context
 import Green.Util
 import Hakyll (Tags, buildTags, getTags, renderTagCloudWith)
-import qualified Hakyll
+import Hakyll qualified
+import Hakyllbars as HB
 
 normalizeTag :: String -> String
 normalizeTag tag = toLower <$> sanitized
