@@ -236,10 +236,6 @@ test-suite test
   other-modules:
       Green.RouteSpec
       Green.Site.BlogSpec
-      Green.Template.AstStructure
-      Green.Template.Source.LexerSpec
-      Green.Template.Source.ParserSpec
-      Green.Template.Source.TestSupport
       Green.TestSupport
       Green.TestSupport.Compiler
       Green.TestSupport.Config
@@ -299,6 +295,5 @@ test-suite test
     , green
     , hakyll
     , hspec
-    , parsec
     , time
   default-language: Haskell2010

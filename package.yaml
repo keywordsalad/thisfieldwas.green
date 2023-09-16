@@ -68,7 +68,6 @@ tests:
       - green
       - hakyll
       - hspec
-      - parsec
       - time
 
 default-extensions:

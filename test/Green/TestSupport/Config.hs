@@ -33,7 +33,8 @@ defaultSiteConfigWith hakyllConfig =
       _siteEnv = [],
       _siteInfo =
         SiteInfo
-          { _siteRoot = "/",
+          { _siteHost = "https://thisold.blog",
+            _siteRoot = "/",
             _siteTitle = "This Old Blog",
             _siteDescription = "An old blog full of stuff",
             _siteAuthorName = "Old Blogger",
