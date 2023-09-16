@@ -3,7 +3,14 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: hakyllbars-1.0.0.0@sha256:706b3bef423361f752ded30fbcc0f872e45f934161af0102ce314d9dd38a36e2,6713
+    pantry-tree:
+      sha256: d10a1f38c63de4bdc9b2c6023a8eda268e7989a82b0bf0f61b9dc1641be59459
+      size: 2058
+  original:
+    hackage: hakyllbars-1.0.0.0
 snapshots:
 - completed:
     sha256: 64d66303f927e87ffe6b8ccf736229bf608731e80d7afdf62bdd63c59f857740
