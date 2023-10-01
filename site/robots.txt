@@ -4,6 +4,20 @@ Disallow: /drafts
 Disallow: /drafts/*
 Sitemap: {{siteRoot}}/sitemap.xml
 
+User-agent: CCBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
 User-agent: GPTBot
 Disallow: /
 
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
