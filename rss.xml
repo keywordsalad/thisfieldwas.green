@@ -20,7 +20,7 @@
   <pubDate>Mon, 05 Sep 2022 12:55:18 -0700</pubDate>
   <lastBuildDate>Mon, 05 Sep 2022 12:55:18 -0700</lastBuildDate>
   <generator>Hakyll</generator>
-  <copyright>Copyright &#169; 2012-2023 Logan McGrath. All rights reserved.</copyright>
+  <copyright>Copyright &#169; 2012-2024 Logan McGrath. All rights reserved.</copyright>
   <item>
       <title>Parser Combinators</title>
       <description>In my post I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: parsing text.</description>
