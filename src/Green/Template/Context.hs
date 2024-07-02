@@ -5,7 +5,7 @@ import Green.Config
 import Green.Site.Blog (loadPublishedPosts)
 import Green.Template.HtmlField
 import Hakyll (recentFirst)
-import Hakyllbars as HB
+import Green.Hakyllbars as HB
 
 customContext :: SiteConfig -> Context String
 customContext config = self

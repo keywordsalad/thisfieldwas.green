@@ -6,8 +6,8 @@ import Green.Config
 import Green.Route
 import Green.Template
 import Hakyll qualified as H
-import Hakyllbars as HB
-import Hakyllbars.Field.Date (dateFromMetadata, normalizedDateTimeFormat, parseTimeM')
+import Green.Hakyllbars as HB
+import Green.Hakyllbars.Field.Date (dateFromMetadata, normalizedDateTimeFormat, parseTimeM')
 import System.FilePath
 
 buildBlogTags :: (H.MonadMetadata m) => m Tags

@@ -3,7 +3,7 @@ module Green.Template.Custom where
 import Control.Monad.State.Strict (forM_)
 import Data.List (nub)
 import Green.Common
-import Hakyllbars as HB
+import Green.Hakyllbars as HB
 
 saveSnapshots :: [String] -> TemplateRunner String ()
 saveSnapshots snapshots = do

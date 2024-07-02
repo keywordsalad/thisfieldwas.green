@@ -3,7 +3,7 @@ module Green.Site.Sitemap where
 import Green.Common
 import Green.Site.Blog (buildBlogTags, loadPublishedPosts)
 import Hakyll qualified as H
-import Hakyllbars as HB
+import Green.Hakyllbars as HB
 
 sitemap :: Context String -> Rules ()
 sitemap siteContext =

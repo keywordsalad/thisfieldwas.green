@@ -26,6 +26,22 @@ library
       Green.Common
       Green.Compiler
       Green.Config
+      Green.Hakyllbars
+      Green.Hakyllbars.Ast
+      Green.Hakyllbars.Common
+      Green.Hakyllbars.Compiler
+      Green.Hakyllbars.Context
+      Green.Hakyllbars.Field
+      Green.Hakyllbars.Field.Date
+      Green.Hakyllbars.Field.Git
+      Green.Hakyllbars.Field.Html
+      Green.Hakyllbars.Pandoc
+      Green.Hakyllbars.Source
+      Green.Hakyllbars.Source.Lexer
+      Green.Hakyllbars.Source.Parser
+      Green.Hakyllbars.Source.Util
+      Green.Hakyllbars.Template
+      Green.Hakyllbars.Util
       Green.Lens
       Green.Lens.Hakyll
       Green.Lens.TH
@@ -103,20 +119,27 @@ library
       MissingH
     , aeson
     , base >=4.14 && <5
+    , binary
     , bytestring
+    , data-default
     , directory
     , filepath
     , hakyll
-    , hakyllbars
     , hjsmin
     , microlens
     , microlens-th
     , mtl
+    , network-uri
     , optparse-applicative
     , pandoc
+    , parsec
+    , process
+    , scientific
     , template-haskell
     , text
     , time
+    , unordered-containers
+    , vector
     , yaml
   default-language: Haskell2010
 

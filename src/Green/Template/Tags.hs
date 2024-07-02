@@ -10,7 +10,7 @@ import Green.Common
 import Green.Util
 import Hakyll (Tags, buildTags, getTags, renderTagCloudWith)
 import Hakyll qualified
-import Hakyllbars as HB
+import Green.Hakyllbars as HB
 
 normalizeTag :: String -> String
 normalizeTag tag = toLower <$> sanitized

@@ -1,7 +1,7 @@
 module Green.Site.Templates where
 
 import Green.Common
-import Hakyllbars as HB
+import Green.Hakyllbars as HB
 
 templates :: Rules Dependency
 templates = do

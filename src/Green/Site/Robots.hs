@@ -2,7 +2,7 @@ module Green.Site.Robots where
 
 import Green.Common
 import Green.Config
-import Hakyllbars as HB
+import Green.Hakyllbars as HB
 
 robotsTxt :: SiteConfig -> Context String -> Rules ()
 robotsTxt config context =

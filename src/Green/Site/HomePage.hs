@@ -4,7 +4,7 @@ import Green.Common
 import Green.Site.Blog
 import Green.Template.Custom
 import Hakyll (recentFirst)
-import Hakyllbars as HB
+import Green.Hakyllbars as HB
 
 homePage :: Context String -> Rules ()
 homePage siteContext =

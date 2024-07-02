@@ -5,7 +5,7 @@ import Green.Common
 import Green.Route
 import Green.Template
 import Hakyll (fromGlob)
-import Hakyllbars as HB
+import Green.Hakyllbars as HB
 
 pages :: Context String -> Rules ()
 pages context = forM_ ["_pages/", "_errors/"] \dir -> do

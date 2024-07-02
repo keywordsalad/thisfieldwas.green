@@ -2,7 +2,7 @@ module Green.Template.HtmlField where
 
 import Green.Common
 import Green.Util (dropIndex)
-import Hakyllbars
+import Green.Hakyllbars
 
 -- | Trims @index.html@ from @$url$@'s
 trimmedUrlField :: String -> Context String
