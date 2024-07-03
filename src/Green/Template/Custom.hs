@@ -1,6 +1,6 @@
 module Green.Template.Custom where
 
-import Control.Monad.State.Strict (forM_)
+import Control.Monad (forM_)
 import Data.List (nub)
 import Green.Common
 import Green.Hakyllbars as HB

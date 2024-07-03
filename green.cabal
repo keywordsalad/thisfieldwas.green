@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -257,6 +257,11 @@ test-suite test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Green.Hakyllbars.AstStructure
+      Green.Hakyllbars.Source.LexerSpec
+      Green.Hakyllbars.Source.ParserSpec
+      Green.Hakyllbars.Source.TestSupport
+      Green.Hakyllbars.TestSupport
       Green.RouteSpec
       Green.Site.BlogSpec
       Green.TestSupport
@@ -318,5 +323,6 @@ test-suite test
     , green
     , hakyll
     , hspec
+    , parsec
     , time
   default-language: Haskell2010
