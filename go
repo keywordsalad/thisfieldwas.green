@@ -108,7 +108,7 @@ _verify-prerequisites () {
   git tag -a "$tag" -m "Build on $(date) generated from $sha"
   git push origin "$tag"
 
-  rsync -ahp * bastion.thisfieldwas.green:/var/www/thisfieldwas.green/
+  #rsync -ahp * bastion.thisfieldwas.green:/var/www/thisfieldwas.green/
   popd
 }
 
