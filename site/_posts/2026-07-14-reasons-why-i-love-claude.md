@@ -98,7 +98,7 @@ Anyway. NUMPY IS C, PYTHON. I don't make the rules.
 3. Tedious work? Blast everything in under ten minutes 💪
 4. Bug? Didn't even make it into the commit, honey! ✨
 5. Bug? Caught it in `/code-review` 🏆
-6. Bug? SQUASHED 🐛
+6. Bug? SQUASHED 👠
 
 Sometimes she creates a bug herself. That's why I'm here, of course. 💅
 
