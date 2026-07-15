@@ -1,0 +1,26 @@
+@import "_variables.scss";
+
+.no-header-numbering, #preamble {
+  >h2::before, >h3::before, >h4::before {
+    content: none !important;
+    counter-increment: none;
+  }
+}
+
+#programming-languages-on-love-island {
+  margin: 2em 0;
+  padding: 1em 2em;
+  border: $border-regular;
+}
+
+#preamble {
+  font-family: monospace;
+  font-size: 90%;
+  margin: 2em 0;
+  padding: 1em 2em;
+  border: $border-regular;
+
+  h2, h3, h4 {
+    font-family: monospace;
+  }
+}
