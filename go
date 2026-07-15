@@ -101,6 +101,15 @@ _verify-prerequisites () {
   SITE_ENV=prod ⚡rebuild
 
   pushd ./_site
+  # The rebuild's clean step wipes _site/*, favicons included. If favicon
+  # generation was skipped (inkscape unavailable), they'd otherwise be committed
+  # as deletions — restore the versions tracked on the _site branch instead.
+  # No-op when favicons were regenerated (nothing shows up as deleted).
+  deleted_favicons="$(git ls-files --deleted | grep -E 'favicon\.ico|images/grass-[0-9]' || true)"
+  if [[ -n "$deleted_favicons" ]]; then
+    _bad-message "Favicons not regenerated; retaining versions from the _site branch"
+    echo "$deleted_favicons" | while IFS= read -r f; do git checkout -- "$f"; done
+  fi
   git add .
   git commit -m "Build on $(date) generated from $sha"
   git push origin _site
@@ -156,6 +165,19 @@ _verify-prerequisites () {
 
 ⚡favicons () {
   _help-line "Generate favicon and og:image from grass.svg"
+
+  # Favicon generation needs inkscape (rasterize grass.svg) plus imagemagick
+  # (convert/identify). These aren't always installable — e.g. locked-down work
+  # machines can't install the inkscape cask. Since grass.svg changes rarely,
+  # skip generation gracefully when any tool is missing and let the existing
+  # favicons stand (publish restores them from the _site branch).
+  for tool in inkscape convert identify; do
+    if ! command -v "$tool" &> /dev/null; then
+      _bad-message "$tool not found; skipping favicon generation (retaining existing favicons)"
+      return 0
+    fi
+  done
+
   src_file="$(pwd)/site/images/grass.svg"
   out_dir="$(pwd)/_site/images"
   mkdir -p "$out_dir"
