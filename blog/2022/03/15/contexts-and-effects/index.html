@@ -1,41 +1,22 @@
 <!doctype html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="google-site-verification"
-      content="xhJhOHXKb-sdapo1BtUE55gj5Oh_mm0qzlqAqaqjXLU"
-    />
+<head>
 
-    <meta
-      name="description"
-      content="Ever wonder what the purpose of that map() method was on so many objects?"
-    />
-    <meta name="author" content="Logan McGrath" />
-    <title>Contexts and Effects in Functional Programming - This Field Was Green</title>
-    <link rel="canonical" href="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/" />
-    <link
-      rel="shortcut icon"
-      sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256"
-      href="https://thisfieldwas.green/favicon.ico"
-    />
-    <link rel="me" href="https://tech.lgbt/@keywordsalad" />
-    <link
-      rel="alternate"
-      type="application/atom+xml"
-      title="This Field Was Green — Atom"
-      href="https://thisfieldwas.green/atom.xml"
-    />
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title="This Field Was Green — RSS"
-      href="https://thisfieldwas.green/rss.xml"
-    />
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="google-site-verification" content="xhJhOHXKb-sdapo1BtUE55gj5Oh_mm0qzlqAqaqjXLU" />
 
-    <meta property="og:site_name" content="This Field Was Green">
+<meta name="description" content="Ever wonder what the purpose of that map() method was on so many objects?" />
+<meta name="author" content="Logan McGrath" />
+<title>Contexts and Effects in Functional Programming - This Field Was Green</title>
+<link rel="canonical" href="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/" />
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico" />
+<link rel="me" href="https://tech.lgbt/@keywordsalad" />
+<link rel="alternate" type="application/atom+xml" title="This Field Was Green — Atom" href="https://thisfieldwas.green/atom.xml" />
+<link rel="alternate" type="application/rss+xml" title="This Field Was Green — RSS" href="https://thisfieldwas.green/rss.xml" />
+
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Contexts and Effects in Functional Programming">
@@ -104,8 +85,8 @@
 }
 </script>
 <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/posts/embracing-nondeterminism-part-1.css" /><script src="/js/main.js" async></script>
-    <script src="/js/scroll-shadows.js" async></script>
+<link rel="stylesheet" href="/css/posts/embracing-nondeterminism-part-1.css" /><script src="/js/main.js" async></script>
+<script src="/js/scroll-shadows.js" async></script>
 <script>
   let scrollShadowsXSelectors = ["pre.sourceCode","#img-tree-functor .content",]
   let scrollShadowsYSelectors = []
@@ -118,9 +99,11 @@
   })
 </script>
 
-  </head>
-  <body>
-    
+
+</head>
+<body>
+
+
 <header class="page-header">
   <div class="content-bound">
     <div class="logo-icon"><a href="/" tabindex="-1" title="This Field Was Green"></a></div>
@@ -156,12 +139,15 @@
 
 <div class="post-thumbnail">
   <a href="/images/tags/functional-programming/functional-grass-128x128.png">
-    <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Contexts and Effects in Functional Programming" width="128" height="128" loading="lazy">
+    <picture>
+      <source srcset="/images/tags/functional-programming/functional-grass-128x128.webp" type="image/webp">
+      <img src="/images/tags/functional-programming/functional-grass-128x128.png" alt="Contexts and Effects in Functional Programming" width="128" height="128" loading="lazy">
+    </picture>
   </a>
 </div>
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">1h 49m 29s</span></p>
+<p>Estimated reading time: <span class="length">1h 49m 41s</span></p>
 </div>
 <p>Have you ever received an unexpected <code>null</code> reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?</p>
 <!--more-->
@@ -693,8 +679,11 @@ Retry strategies must track previous state in order to calculate their next retr
 <div class="aside-content">
 <p class="content">
 <a href="/images/embracing-nondeterminism/list-functor-512x512.png" class="image-link">
+<picture>
+<source srcset="/images/embracing-nondeterminism/list-functor-512x512.webp" type="image/webp">
 <img src="/images/embracing-nondeterminism/list-functor-512x512.png" id="img-list-functor-img"loading="lazy"
                          title="Applying <code>map</code> to a <code>List[Int]</code>." alt="Applying <code>map</code> to a <code>List[Int]</code>.">
+</picture>
 </a>
 </p>
 <figcaption>
@@ -706,8 +695,11 @@ Applying <code>map</code> to a <code>List[Int]</code>.
 <div class="aside-content">
 <p class="content">
 <a href="/images/embracing-nondeterminism/binary-tree-functor-1024x340.png" class="image-link">
+<picture>
+<source srcset="/images/embracing-nondeterminism/binary-tree-functor-1024x340.webp" type="image/webp">
 <img src="/images/embracing-nondeterminism/binary-tree-functor-1024x340.png" id="img-tree-functor-img"loading="lazy"
                          title="Applying <code>map</code> to a <code>BinaryTree[Int]</code>." alt="Applying <code>map</code> to a <code>BinaryTree[Int]</code>.">
+</picture>
 </a>
 </p>
 <figcaption>
@@ -1022,5 +1014,6 @@ and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/
   </div>
 </footer>
 
-  </body>
+
+</body>
 </html>

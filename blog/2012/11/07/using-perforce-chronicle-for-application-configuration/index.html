@@ -1,41 +1,22 @@
 <!doctype html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="google-site-verification"
-      content="xhJhOHXKb-sdapo1BtUE55gj5Oh_mm0qzlqAqaqjXLU"
-    />
+<head>
 
-    <meta
-      name="description"
-      content="Following Paul Hammant&#39;s post App-config workflow using SCM and subsequent proof of concept backed by Git, I will show that an app-config application backed by Perforce is possible using Perforce Chronicle."
-    />
-    <meta name="author" content="Logan McGrath" />
-    <title>Using Perforce Chronicle for application configuration - This Field Was Green</title>
-    <link rel="canonical" href="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/" />
-    <link
-      rel="shortcut icon"
-      sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256"
-      href="https://thisfieldwas.green/favicon.ico"
-    />
-    <link rel="me" href="https://tech.lgbt/@keywordsalad" />
-    <link
-      rel="alternate"
-      type="application/atom+xml"
-      title="This Field Was Green — Atom"
-      href="https://thisfieldwas.green/atom.xml"
-    />
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title="This Field Was Green — RSS"
-      href="https://thisfieldwas.green/rss.xml"
-    />
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="google-site-verification" content="xhJhOHXKb-sdapo1BtUE55gj5Oh_mm0qzlqAqaqjXLU" />
 
-    <meta property="og:site_name" content="This Field Was Green">
+<meta name="description" content="Following Paul Hammant&#39;s post App-config workflow using SCM and subsequent proof of concept backed by Git, I will show that an app-config application backed by Perforce is possible using Perforce Chronicle." />
+<meta name="author" content="Logan McGrath" />
+<title>Using Perforce Chronicle for application configuration - This Field Was Green</title>
+<link rel="canonical" href="https://thisfieldwas.green/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/" />
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico" />
+<link rel="me" href="https://tech.lgbt/@keywordsalad" />
+<link rel="alternate" type="application/atom+xml" title="This Field Was Green — Atom" href="https://thisfieldwas.green/atom.xml" />
+<link rel="alternate" type="application/rss+xml" title="This Field Was Green — RSS" href="https://thisfieldwas.green/rss.xml" />
+
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Using Perforce Chronicle for application configuration">
@@ -101,8 +82,8 @@
 }
 </script>
 <link rel="stylesheet" href="/css/main.css" />
-    <script src="/js/main.js" async></script>
-    <script src="/js/scroll-shadows.js" async></script>
+<script src="/js/main.js" async></script>
+<script src="/js/scroll-shadows.js" async></script>
 <script>
   let scrollShadowsXSelectors = ["pre.sourceCode",]
   let scrollShadowsYSelectors = []
@@ -115,9 +96,11 @@
   })
 </script>
 
-  </head>
-  <body>
-    
+
+</head>
+<body>
+
+
 <header class="page-header">
   <div class="content-bound">
     <div class="logo-icon"><a href="/" tabindex="-1" title="This Field Was Green"></a></div>
@@ -151,7 +134,7 @@
 
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">43m 5s</span></p>
+<p>Estimated reading time: <span class="length">43m 28s</span></p>
 </div>
 <p>Following Paul Hammant’s post <a href="http://paulhammant.com/2012/07/10/app-config-workflow-using-scm/">App-config workflow using SCM</a> and subsequent
 <a href="http://paulhammant.com/2012/08/14/app-config-using-git-and-angular/">proof of concept</a> backed by Git, I will show that an app-config application
@@ -484,8 +467,11 @@ stack_configuration.json is loaded into the form:</p>
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config/start.png" class="image-link">
+<picture>
+<source srcset="/images/app-config/start.webp" type="image/webp">
 <img src="/images/app-config/start.png" id="img-config-form-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -496,8 +482,11 @@ viewed by clicking on “View Diffs”:</p>
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config/diffs.png" class="image-link">
+<picture>
+<source srcset="/images/app-config/diffs.webp" type="image/webp">
 <img src="/images/app-config/diffs.png" id="img-config-diffs-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -508,8 +497,11 @@ Changes”. After which, clicking “View Diffs” will show no changes:</p>
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config/diffs-after-commit.png" class="image-link">
+<picture>
+<source srcset="/images/app-config/diffs-after-commit.webp" type="image/webp">
 <img src="/images/app-config/diffs-after-commit.png" id="img-config-commit-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -521,8 +513,11 @@ History List”:</p>
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config/history.png" class="image-link">
+<picture>
+<source srcset="/images/app-config/history.webp" type="image/webp">
 <img src="/images/app-config/history.png" id="img-config-history-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -532,8 +527,11 @@ History List”:</p>
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config/history-diffs.png" class="image-link">
+<picture>
+<source srcset="/images/app-config/history-diffs.webp" type="image/webp">
 <img src="/images/app-config/history-diffs.png" id="img-config-revisions-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -651,5 +649,6 @@ all my questions as I worked with Chronicle, especially Randy Defauw.</p>
   </div>
 </footer>
 
-  </body>
+
+</body>
 </html>

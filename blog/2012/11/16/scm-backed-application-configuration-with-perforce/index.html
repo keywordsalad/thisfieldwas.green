@@ -1,41 +1,22 @@
 <!doctype html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="google-site-verification"
-      content="xhJhOHXKb-sdapo1BtUE55gj5Oh_mm0qzlqAqaqjXLU"
-    />
+<head>
 
-    <meta
-      name="description"
-      content="Continuing from my last post, I&#39;ve forked Paul Hammant&#39;s original App-Config-App and modified it to work against Perforce. I&#39;ve decided not to continue using Perforce Chronicle as it is primarily intended for content management."
-    />
-    <meta name="author" content="Logan McGrath" />
-    <title>SCM-Backed Application Configuration with Perforce - This Field Was Green</title>
-    <link rel="canonical" href="https://thisfieldwas.green/blog/2012/11/16/scm-backed-application-configuration-with-perforce/" />
-    <link
-      rel="shortcut icon"
-      sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256"
-      href="https://thisfieldwas.green/favicon.ico"
-    />
-    <link rel="me" href="https://tech.lgbt/@keywordsalad" />
-    <link
-      rel="alternate"
-      type="application/atom+xml"
-      title="This Field Was Green — Atom"
-      href="https://thisfieldwas.green/atom.xml"
-    />
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title="This Field Was Green — RSS"
-      href="https://thisfieldwas.green/rss.xml"
-    />
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="google-site-verification" content="xhJhOHXKb-sdapo1BtUE55gj5Oh_mm0qzlqAqaqjXLU" />
 
-    <meta property="og:site_name" content="This Field Was Green">
+<meta name="description" content="Continuing from my last post, I&#39;ve forked Paul Hammant&#39;s original App-Config-App and modified it to work against Perforce. I&#39;ve decided not to continue using Perforce Chronicle as it is primarily intended for content management." />
+<meta name="author" content="Logan McGrath" />
+<title>SCM-Backed Application Configuration with Perforce - This Field Was Green</title>
+<link rel="canonical" href="https://thisfieldwas.green/blog/2012/11/16/scm-backed-application-configuration-with-perforce/" />
+<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="https://thisfieldwas.green/favicon.ico" />
+<link rel="me" href="https://tech.lgbt/@keywordsalad" />
+<link rel="alternate" type="application/atom+xml" title="This Field Was Green — Atom" href="https://thisfieldwas.green/atom.xml" />
+<link rel="alternate" type="application/rss+xml" title="This Field Was Green — RSS" href="https://thisfieldwas.green/rss.xml" />
+
+<meta property="og:site_name" content="This Field Was Green">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="SCM-Backed Application Configuration with Perforce">
@@ -103,8 +84,8 @@
 }
 </script>
 <link rel="stylesheet" href="/css/main.css" />
-    <script src="/js/main.js" async></script>
-    <script src="/js/scroll-shadows.js" async></script>
+<script src="/js/main.js" async></script>
+<script src="/js/scroll-shadows.js" async></script>
 <script>
   let scrollShadowsXSelectors = ["pre.sourceCode",]
   let scrollShadowsYSelectors = []
@@ -117,9 +98,11 @@
   })
 </script>
 
-  </head>
-  <body>
-    
+
+</head>
+<body>
+
+
 <header class="page-header">
   <div class="content-bound">
     <div class="logo-icon"><a href="/" tabindex="-1" title="This Field Was Green"></a></div>
@@ -153,7 +136,7 @@
 
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">8m 11s</span></p>
+<p>Estimated reading time: <span class="length">8m 31s</span></p>
 </div>
 <p>Continuing from my <a href="/blog/2012/11/07/using-perforce-chronicle-for-application-configuration/">last post</a>, I’ve <a href="https://github.com/lmcgrath/App-Config-App/">forked</a> Paul Hammant’s original
 App-Config-App and modified it to work against Perforce. I’ve decided not to
@@ -186,8 +169,11 @@ also added a few other things:</p>
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config2/start.png" class="image-link">
+<picture>
+<source srcset="/images/app-config2/start.webp" type="image/webp">
 <img src="/images/app-config2/start.png" id="img-app-start-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -200,8 +186,11 @@ up a form for editing <code>aardvark_configuration.json</code> as in the previou
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config2/aardvark_configuration.png" class="image-link">
+<picture>
+<source srcset="/images/app-config2/aardvark_configuration.webp" type="image/webp">
 <img src="/images/app-config2/aardvark_configuration.png" id="img-app-config-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -214,8 +203,11 @@ change the email address and fiddle around with the banned nicks, then go click
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config2/changes.png" class="image-link">
+<picture>
+<source srcset="/images/app-config2/changes.webp" type="image/webp">
 <img src="/images/app-config2/changes.png" id="img-app-changes-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -229,8 +221,11 @@ the form:</p>
 <div class="aside-content">
 <p class="content">
 <a href="/images/app-config2/aardvark_configuration-changed.png" class="image-link">
+<picture>
+<source srcset="/images/app-config2/aardvark_configuration-changed.webp" type="image/webp">
 <img src="/images/app-config2/aardvark_configuration-changed.png" id="image-app-commit-img"loading="lazy"
                         >
+</picture>
 </a>
 </p>
 </div>
@@ -356,5 +351,6 @@ per-branch permissions.</p>
   </div>
 </footer>
 
-  </body>
+
+</body>
 </html>
