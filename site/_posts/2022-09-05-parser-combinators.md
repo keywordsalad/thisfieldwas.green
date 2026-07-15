@@ -13,7 +13,7 @@ description: >-
   common problem: parsing text.
 layout: post
 comments: true
-code_repo: https://bitsof.thisfieldwas.green/keywordsalad/parser-combinators/src/branch/post/parser-combinators
+code_repo: https://github.com/keywordsalad/parser-combinators/tree/post/parser-combinators
 ---
 
 In my post {{linkedTitle "_posts/2022-06-16-set-function.md"}} I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: _parsing text_.

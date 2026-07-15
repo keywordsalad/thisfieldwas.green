@@ -51,8 +51,7 @@ data SiteInfo = SiteInfo
     _siteAuthorEmail :: String,
     _siteLinkedInProfile :: String,
     _siteGitHubProfile :: String,
-    _siteGiteaProfile :: String,
-    _siteGiteaWebUrl :: String
+    _siteGitHubWebUrl :: String
   }
   deriving (Show)
 
@@ -70,8 +69,7 @@ instance FromJSON SiteInfo where
       <*> info .: "author-email"
       <*> info .: "linkedin-profile"
       <*> info .: "github-profile"
-      <*> info .: "gitea-profile"
-      <*> info .: "gitea-web-url"
+      <*> info .: "github-web-url"
 
 instance ToJSON SiteInfo where
   toJSON SiteInfo {..} =
@@ -85,8 +83,7 @@ instance ToJSON SiteInfo where
         "author-email" .= _siteAuthorEmail,
         "linkedin-profile" .= _siteLinkedInProfile,
         "github-profile" .= _siteGitHubProfile,
-        "gitea-profile" .= _siteGiteaProfile,
-        "gitea-web-url" .= _siteGiteaWebUrl
+        "github-web-url" .= _siteGitHubWebUrl
       ]
 
 data SiteDisplayFormat = SiteDisplayFormat
