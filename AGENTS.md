@@ -57,7 +57,6 @@ generated help listing.
 | `./go favicons`      | Generate favicons / og:image from `site/images/grass.svg`              |
 | `./go publish`       | Build with `SITE_ENV=prod` and publish (main-only — see **Deploy**)    |
 | `./go preview`       | Build with `SITE_ENV=preview` and rsync to the preview host            |
-| `./go force-publish` | Emergency: rsync the current `_site/` as-is                            |
 
 If you'd rather bypass `./go`, the underlying commands are plain Stack:
 
@@ -251,7 +250,6 @@ There is **no CI/CD** — deployment is manual via `./go`.
   tag. (The final `rsync … bastion.thisfieldwas.green` line is currently
   commented out — publishing = pushing built output to the `_site` branch.)
 - **`./go preview`** — rebuild with `SITE_ENV=preview`, rsync to the preview host.
-- **`./go force-publish`** — emergency rsync of `_site/` as-is. Use sparingly.
 
 The published domain is pinned by `site/CNAME` (`thisfieldwas.green`).
 

@@ -150,11 +150,6 @@ _verify-prerequisites () {
   stack test
 }
 
-⚡force-publish () {
-  _help-line "Publish generated site as-is. Only use this for emergencies!"
-  rsync -ahp _site/* closet.oflogan.xyz:/usr/share/nginx/thisfieldwas.green/
-}
-
 ⚡datestamp () {
   _help-line "Generate ISO-8601 datestamp with time and offset"
   DATE=$(date +"%Y-%m-%dT%H:%M:%S%z")
