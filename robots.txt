@@ -1,8 +1,8 @@
-# Generated from commit 2ff3048
+# Generated from commit 28b975e
 User-agent: *
 Disallow: /drafts
 Disallow: /drafts/*
-Sitemap: /sitemap.xml
+Sitemap: https://thisfieldwas.green/sitemap.xml
 
 User-agent: CCBot
 Disallow: /
