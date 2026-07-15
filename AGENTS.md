@@ -272,6 +272,10 @@ The published domain is pinned by `site/CNAME` (`thisfieldwas.green`).
   exhaustive, or the build fails.
 - **Lenses:** microlens (`microlens` / `microlens-th`), generated via
   TemplateHaskell in `Green/Lens/*` and `Green/Config.hs`.
+- **Spell check:** the repo tracks a [cSpell](https://cspell.org/) word list in
+  `.vscode/settings.json`. When you introduce project jargon (a new tool,
+  extension, identifier, or acronym) that the checker flags, add it there in the
+  same change so the dictionary stays current for everyone.
 
 ## Key dependencies
 
