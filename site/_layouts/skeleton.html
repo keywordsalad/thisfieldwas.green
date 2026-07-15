@@ -1,43 +1,58 @@
 <!doctype html>
 <html lang="en" prefix="og: https://ogp.me/ns#">
-<head>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {{#if noindex-}}
+    <meta name="robots" content="noindex" />
+    <meta name="googlebot" content="noindex" />
+    {{#end-}}
+    <meta
+      name="google-site-verification"
+      content="xhJhOHXKb-sdapo1BtUE55gj5Oh_mm0qzlqAqaqjXLU"
+    />
 
-<meta charset="utf-8">
-<meta http-equiv="x-ua-compatible" content="ie=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-{{#if noindex-}}
-<meta name="robots" content="noindex">
-<meta name="googlebot" content="noindex">
-{{#end-}}
+    <meta
+      name="description"
+      content="{{description | default siteDescription | escapeHtml}}"
+    />
+    <meta name="author" content="{{author | escapeHtml}}" />
+    <title>{{#if title}}{{title}} - {{#end}}{{siteTitle}}</title>
+    <link rel="canonical" href="{{absUrl}}" />
+    <link
+      rel="shortcut icon"
+      sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256"
+      href="{{siteUrl}}/favicon.ico"
+    />
+    <link rel="me" href="https://tech.lgbt/@keywordsalad" />
+    <link
+      rel="alternate"
+      type="application/atom+xml"
+      title="{{siteTitle}} — Atom"
+      href="{{siteUrl}}/atom.xml"
+    />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="{{siteTitle}} — RSS"
+      href="{{siteUrl}}/rss.xml"
+    />
 
-<meta name="description" content="{{description | default siteDescription | escapeHtml}}">
-<meta name="author" content="{{author | escapeHtml}}">
-<title>{{#if title}}{{title}} - {{#end}}{{siteTitle}}</title>
-<link rel="canonical" href="{{absUrl}}">
-<link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="{{siteUrl}}/favicon.ico">
-<link rel="me" href="https://tech.lgbt/@keywordsalad">
-<link rel="alternate" type="application/atom+xml" title="{{siteTitle}} — Atom" href="{{siteUrl}}/atom.xml">
-<link rel="alternate" type="application/rss+xml" title="{{siteTitle}} — RSS" href="{{siteUrl}}/rss.xml">
+    {{#if useSocial-}} {{-partial "social/open-graph"-}} {{-partial
+    "social/structured-data"-}} {{-#end-}} {{#for preloadImages-}}
+    <link rel="preload" as="image" href="{{getUrl item}}" />
+    {{-#end-}}
 
-{{#if useSocial-}}
-{{-partial "social/open-graph"-}}
-{{-partial "social/structured-data"-}}
-{{-#end-}}
+    <link rel="stylesheet" href="/css/main.css" />
+    {{#for stylesheets-}}
+    <link rel="stylesheet" href="{{getUrl item}}" />
+    {{-#end-}}
 
-{{#for preloadImages-}}
-<link rel="preload" as="image" href="{{getUrl item}}">
-{{-#end-}}
-
-<link rel="stylesheet" href="/css/main.css">
-{{#for stylesheets-}}
-<link rel="stylesheet" href="{{getUrl item}}">
-{{-#end-}}
-
-<script src="{{getUrl 'js/main.js'}}" async></script>
-{{partial "scroll-shadows"}}
-
-</head>
-<body>
-{{body}}
-</body>
+    <script src="{{getUrl 'js/main.js'}}" async></script>
+    {{partial "scroll-shadows"}}
+  </head>
+  <body>
+    {{body}}
+  </body>
 </html>
