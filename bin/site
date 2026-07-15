@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-make build
+stack build
 stack exec site "$@"

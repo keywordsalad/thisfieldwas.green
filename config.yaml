@@ -9,8 +9,7 @@ default: &default
     author-email: logan.mcgrath@thisfieldwas.green
     linkedin-profile: https://www.linkedin.com/in/loganmcgrath
     github-profile: https://github.com/keywordsalad
-    gitea-profile: https://bitsof.thisfieldwas.green/keywordsalad
-    gitea-web-url: https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit
+    github-web-url: https://github.com/keywordsalad/thisfieldwas.green
 
   display-formats:
     date-short-format: '%B %e, %Y'

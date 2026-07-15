@@ -41,8 +41,7 @@ defaultSiteConfigWith hakyllConfig =
             _siteAuthorEmail = "blogger@thisold.blog",
             _siteLinkedInProfile = "https://linkedin.com/in/xyz1abc2def3ghi4jkl5mno6pqr7stu8vw",
             _siteGitHubProfile = "https://github.com/thisold.blog",
-            _siteGiteaProfile = "https://bitsof.thisold.blog/blogger",
-            _siteGiteaWebUrl = "https://bitsof.thisold.blog/blogger/blog",
+            _siteGitHubWebUrl = "https://github.com/thisold.blog/blog",
             _siteCommentsId = "blog"
           },
       _siteCurrentTime = fromJust defaultTestTime,

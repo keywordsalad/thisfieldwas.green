@@ -1,5 +1,3 @@
-tap "homebrew/bundle"
-tap "homebrew/core"
-tap "sass/sass"
+tap "dart-lang/dart"
 brew "haskell-stack"
 brew "sass"

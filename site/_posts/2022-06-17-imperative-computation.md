@@ -17,7 +17,7 @@ og:
   image:
     url: /images/tags/functional-programming/functional-grass-512x512.png
     alt:  Leveraging the case of the previous effect to indicate whether computation of the next effect should proceed.
-code_repo: https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3
+code_repo: https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3
 ---
 
 Remember **functors** and **applicatives**? In my last post {{linkedTitle "_posts/2022-06-05-enabling-control-flow.md"}} we explored how functors and applicatives abstract over **desired** and **undesired cases** of **contexts** in order to express control flow and permit independent computation. In this post we will explore **monads** and how to leverage their specific abstraction to express **imperative** control flow.

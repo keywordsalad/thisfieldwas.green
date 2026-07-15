@@ -41,12 +41,11 @@ customContext config = self
           constField "author" (info ^. siteAuthorName), -- default to authorName
           constField "linkedInProfile" (info ^. siteLinkedInProfile),
           constField "githubProfile" (info ^. siteGitHubProfile),
-          constField "giteaProfile" (info ^. siteGiteaProfile),
           constField "useSocial" True,
           constField "article" False,
           constField "commentsSiteId" (info ^. siteCommentsId),
           dateFields dateConfig,
-          gitFields (config ^. siteProviderDirectory) (info ^. siteGiteaWebUrl),
+          gitFields (config ^. siteProviderDirectory) (info ^. siteGitHubWebUrl),
           defaultFields (info ^. siteHost) (info ^. siteRoot)
         ]
     currentTime =
