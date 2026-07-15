@@ -1,0 +1,15 @@
+# Hakyllbars templates, not plain HTML.
+#
+# These files use `{{ ... }}` / `{{#if}}` / `{{#for}}` template syntax that an
+# HTML formatter does not understand: it reflows tags, splits `{{#if id}}` into
+# `{{#if⏎id}}`, and rewrites whitespace. Several of these templates are also
+# embedded into Markdown posts and re-parsed by Pandoc, which is whitespace
+# sensitive — formatter-introduced blank lines/indentation make Pandoc render an
+# `<img>` as a code block. Keep the formatter out of them.
+site/_templates/
+site/_partials/
+site/_layouts/
+
+# Generated output and build caches.
+_site/
+_cache/

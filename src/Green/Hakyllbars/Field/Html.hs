@@ -33,13 +33,13 @@ escapeJsonField = functionField "escapeJson" f
     f (s :: String) = return (concatMap escapeJsonChar s)
 
 -- | Rewrites an image path's extension to @.webp@ for the formats we transcode
--- (PNG/JPEG). Returns an empty string for anything else, so callers can omit a
--- @\<source\>@ that would otherwise point at a nonexistent file.
+-- (PNG/JPEG/GIF). Returns an empty string for anything else, so callers can omit
+-- a @\<source\>@ that would otherwise point at a nonexistent file.
 asWebpField :: Context String
 asWebpField = functionField "asWebp" f
   where
     f (path :: String)
-      | (toLower <$> takeExtension path) `elem` [".png", ".jpg", ".jpeg"] =
+      | (toLower <$> takeExtension path) `elem` [".png", ".jpg", ".jpeg", ".gif"] =
           return (replaceExtension path "webp")
       | otherwise = return ""
 
