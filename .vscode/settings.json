@@ -7,6 +7,7 @@
     "bytestring",
     "chainl",
     "changefreq",
+    "cwebp",
     "datestamp",
     "deadlift",
     "dquote",
@@ -50,6 +51,8 @@
     "unlines",
     "unsafePerformIO",
     "unwords",
+    "srcset",
+    "webp",
     "yassified",
     "Zig"
   ]

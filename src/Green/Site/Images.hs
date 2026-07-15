@@ -4,15 +4,28 @@ import Green.Common
 import Hakyll
 
 images :: Rules ()
-images =
+images = do
   match ("images/**" .&&. blacklist) do
     route idRoute
     compile copyFileCompiler
+  -- Emit a near-lossless WebP sibling for every PNG/JPEG so templates can offer
+  -- a modern, better-compressed source via <picture> (see the `asWebp` field).
+  -- The `webp` version keeps a distinct identifier from the copied original.
+  match webpConvertible do
+    version "webp" do
+      route $ setExtension "webp"
+      compile do
+        image <- getResourceLBS
+        withItemBody (unixFilterLBS "cwebp" cwebpArgs) image
   where
     blacklist =
       foldl1 (.||.) . fmap complement $
         [ "*.xcf"
         ]
+    webpConvertible =
+      "images/**.png" .||. "images/**.jpg" .||. "images/**.jpeg"
+    -- Read PNG/JPEG from stdin (`-`), write WebP to stdout (`-o -`).
+    cwebpArgs = ["-near_lossless", "60", "-quiet", "-o", "-", "--", "-"]
 
 -- images :: SiteConfig -> Rules ()
 -- images config = do

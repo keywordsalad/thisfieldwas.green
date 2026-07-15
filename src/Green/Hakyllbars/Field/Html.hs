@@ -2,14 +2,16 @@ module Green.Hakyllbars.Field.Html
   ( escapeHtmlField,
     escapeHtmlUriField,
     escapeJsonField,
+    asWebpField,
   )
 where
 
-import Data.Char (ord)
+import Data.Char (ord, toLower)
 import Green.Hakyllbars.Common
 import Green.Hakyllbars.Context
 import Network.URI (escapeURIString, isUnescapedInURI)
 import Numeric (showHex)
+import System.FilePath (replaceExtension, takeExtension)
 
 -- | Escapes HTML before interpolating in a template.
 escapeHtmlField :: Context String
@@ -29,6 +31,17 @@ escapeJsonField :: Context String
 escapeJsonField = functionField "escapeJson" f
   where
     f (s :: String) = return (concatMap escapeJsonChar s)
+
+-- | Rewrites an image path's extension to @.webp@ for the formats we transcode
+-- (PNG/JPEG). Returns an empty string for anything else, so callers can omit a
+-- @\<source\>@ that would otherwise point at a nonexistent file.
+asWebpField :: Context String
+asWebpField = functionField "asWebp" f
+  where
+    f (path :: String)
+      | (toLower <$> takeExtension path) `elem` [".png", ".jpg", ".jpeg"] =
+          return (replaceExtension path "webp")
+      | otherwise = return ""
 
 -- | Escapes a single character for a JSON string literal. The @\<@ escape guards
 -- against a @\</script\>@ sequence breaking out of an inline JSON-LD block.
