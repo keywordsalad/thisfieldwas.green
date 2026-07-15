@@ -81,7 +81,7 @@
 </div>
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">2h 13m 19s</span></p>
+<p>Estimated reading time: <span class="length">2h 12m 50s</span></p>
 </div>
 <p>Remember <strong>functors</strong>? Recall from my last post, <a href="/blog/2022/03/15/contexts-and-effects/" title="Contexts and Effects in Functional Programming">Contexts and Effects in Functional Programming</a>, they are structures that abstract away complexity imposed by nondeterminism present in <strong>contexts</strong> that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their <strong>undesired case</strong> and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.</p>
 <!--more-->
@@ -93,7 +93,7 @@
 <li><a href="/blog/2022/06/17/imperative-computation/" title="Imperative Computation in Functional Programming">Imperative Computation in Functional Programming</a></li>
 </ol>
 </blockquote>
-<p><em>The code that accompanies this post may be found <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2" title="Accompanying code repository">here</a>.</em></p>
+<p><em>The code that accompanies this post may be found <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2" title="Accompanying code repository">here</a>.</em></p>
 <h2 id="motivating-applicative-functors-as-a-design-pattern">Motivating applicative functors as a design pattern</h2>
 <p>Recall the <code>Functor</code> typeclass:</p>
 <div class="numberLines">
@@ -107,7 +107,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>For any context <code>F[A]</code>, the <code>map()</code> function accepts another function <code>f: A =&gt; B</code> and applies it to the term within the context, giving back <code>F[B]</code>.</p>
 <p>Contexts that are functors thus allow abstraction over unknown cases. For example, a function <code>f: A =&gt; B</code> may be lifted into an <code>Option[A]</code> and applied if an instance of <code>A</code> is present. If no instance of <code>A</code> is present, then nothing happens. Specifically, by using <code>map()</code> the function <code>f</code> is unconcerned with the unknown quantity of <code>A</code>’s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities, allowing the business logic expressed by the lifted functions to focus only on the terms that they operate against.</p>
@@ -184,7 +184,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>Note that <code>Applicative</code> extends <code>Functor</code> as it is a specialization. All applicatives are also functors and therefore also provide the <code>map()</code> function.</p>
 <p>The new functions defined by applicatives offer two capabilities:</p>
@@ -247,7 +247,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala">See here</a> for the definitions in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala">See here</a> for the definitions in the sample repository.</p>
 </blockquote>
 <h4 id="why-use-a-new-validated-context-instead-of-either">Why use a new <code>Validated</code> context instead of <code>Either</code>?</h4>
 <p>The <code>Applicative</code> instance for <code>Either</code> in the context of validation has one key flaw: it short-circuits on the first <code>Left</code>.</p>
@@ -263,7 +263,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L145-L150">See here</a> for <code>Either</code>’s definition of <code>ap()</code>.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L145-L150">See here</a> for <code>Either</code>’s definition of <code>ap()</code>.</p>
 </blockquote>
 <p>For both cases of <code>Left</code> they are immediately returned and there is no specific handling for situations where both <code>ff</code> and <code>fa</code> may be in the <code>Left</code> case. This means that the first <code>Left</code> propagates and all subsequent <code>Left</code>s are swallowed. In the context of validation, this means that for any number of validation errors that the context might produce, we would only receive the first error. We would have to resolve the error and re-run the operation, and repeat for each subsequent error until the operation as a whole succeeded. This makes <code>Either</code> a very poor choice for modeling validation. It represents strictly one thing or the other, whereas validation we can specialize to propagate all reasons for failure.</p>
 <h3 id="validation-via-applicative">Validation via <code>Applicative</code></h3>
@@ -299,15 +299,15 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Semigroup.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Semigroup.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>A semigroup is thus an additive form of data. Here’s a few familiar data types that you may have used as semigroups without realizing it:</p>
 <ul>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L51">Lists under concatenation</a></li>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L22">Strings under concatenation</a></li>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L17">Integers under addition</a></li>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/BooleanSpec.scala#L12">Booleans under <code>&amp;&amp;</code></a></li>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L33">Sets under union</a></li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L51">Lists under concatenation</a></li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L22">Strings under concatenation</a></li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L17">Integers under addition</a></li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/BooleanSpec.scala#L12">Booleans under <code>&amp;&amp;</code></a></li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L33">Sets under union</a></li>
 </ul>
 <p>The <code>combine()</code> function must be associative. This can be tested with a <code>scalacheck</code> property:</p>
 <div class="numberLines">
@@ -329,7 +329,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/SemigroupLaws.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/SemigroupLaws.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>Given an <code>E</code> with an instance of <code>Semigroup</code>, we can define an <code>Applicative</code> instance for <code>Validated</code>:</p>
 <div class="numberLines">
@@ -351,7 +351,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala#L111-L149">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala#L111-L149">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>This means that <code>Validated</code> is usable as an <code>Applicative</code> for any case where <code>E</code> is combinable. What implications does this have?</p>
 <ul>
@@ -410,7 +410,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChain.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChain.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>Using a <code>NonEmptyChain</code>, we can start writing validation functions for <code>User</code> to test that they work:</p>
 <div class="numberLines">
@@ -497,7 +497,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L50-L141">See here</a> for the specs in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L50-L141">See here</a> for the specs in the sample repository.</p>
 </blockquote>
 <p>Applicatives thus enable entire computations to succeed if all context arguments are in the <strong>desired case</strong>. If any argument is in the <strong>undesired case</strong>, then this case is <em>propagated</em> and the computation as a whole fails.</p>
 <p>Each of <code>validateUsername()</code>, <code>validateEmail()</code>, and <code>validatePassword()</code> act as levers on whether a <code>User</code> is successfully produced. Writing specific if-statements to guide whether a <code>User</code> is produced or errors returned instead is not required: the <code>Applicative</code> typeclass succinctly abstracts away the necessary plumbing to control the flow of logic required to handle <strong>undesired cases</strong>. Errors are declared where they should occur and the abstraction handles the rest.</p>
@@ -511,7 +511,7 @@
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala#L83-L96">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala#L83-L96">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>And then if we load three <code>User</code>s at once:</p>
 <div class="numberLines">
@@ -542,7 +542,7 @@
 </div>
 </div>
 <p>This has an important implication, specifically that unlike the <code>sequence()</code> function these operations allow for gathering effectful operations that produce contexts with heterogeneous terms. Scala allows for tuples up to 22 elements, and it makes sense to abstract the above operations for each tuple size, especially because even at just 2 elements writing all of these out is already clunky!</p>
-<p>In the sample repository, I have written a macro which <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/macro/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/GenerateTupleSyntax.scala">adds two extension methods</a> to each tuple size. Here’s the code that is generated for the 2-tuple:</p>
+<p>In the sample repository, I have written a macro which <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/macro/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/GenerateTupleSyntax.scala">adds two extension methods</a> to each tuple size. Here’s the code that is generated for the 2-tuple:</p>
 <div class="numberLines">
 <div id="cb22" class="sourceCode">
 <pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">implicit</span> <span class="kw">class</span> Tuple2Ops<span class="op">[</span>F<span class="op">[</span>_<span class="op">],</span> T1<span class="op">,</span> T2<span class="op">](</span><span class="kw">val</span> t<span class="op">:</span> <span class="op">(</span>F<span class="op">[</span>T1<span class="op">],</span> F<span class="op">[</span>T2<span class="op">]))</span> <span class="kw">extends</span> AnyVal <span class="op">{</span></span>
@@ -617,9 +617,9 @@
 </div>
 <blockquote>
 <p>See the instances of <code>Applicative</code> for
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L195"><code>Option</code></a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L151"><code>Either</code></a>,
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L238-L275"><code>List</code></a> in the sample repository.</p>
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L195"><code>Option</code></a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L151"><code>Either</code></a>,
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L238-L275"><code>List</code></a> in the sample repository.</p>
 </blockquote>
 <p><code>Option</code> and <code>Either</code>’s instances of <code>Applicative</code> are straight-forward: if a function and argument are present, they are applied and the result returned in the <strong>desired case</strong>. If either are missing, then the <strong>undesired case</strong> is <em>propagated</em> instead.</p>
 <p><code>List</code> looks very different at first glance, but conceptually performs the same way. Specifically, <code>List</code> performs a Cartesian product of its functions and arguments, applying each pair together and building a new <code>List</code> from the results. If either the function or argument <code>List</code> are empty, then an empty result <code>List</code> is returned, as an empty <code>List</code> represents the <strong>undesired case</strong>.</p>
@@ -660,7 +660,7 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/util/LiftedGen.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/util/LiftedGen.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <h3 id="defining-the-applicative-laws-as-properties">Defining the applicative laws as properties</h3>
 <p>Now we will walk through defining the properties of <code>Applicative</code> in such a way that we simply supply the contexts as the argument to the test. This way we only define the properties once.</p>
@@ -733,7 +733,7 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/ApplicativeLaws.scala">See here</a> for the full definition of the trait.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/ApplicativeLaws.scala">See here</a> for the full definition of the trait.</p>
 </blockquote>
 <p>With this trait, laws specs can be written for each context.</p>
 <div class="numberLines">
@@ -802,9 +802,9 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 </div>
 <blockquote>
 <p>See these laws specs for
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L145"><code>Option</code></a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L135"><code>Either</code></a>,
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L180"><code>List</code></a> in the sample repository.</p>
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L145"><code>Option</code></a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L135"><code>Either</code></a>,
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L180"><code>List</code></a> in the sample repository.</p>
 </blockquote>
 <p><em>Try running these specs!</em></p>
 <h4 id="but-dont-forget-validated">But don’t forget <code>Validated</code>!</h4>
@@ -899,8 +899,8 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 </div>
 <blockquote>
 <p>See these laws specs for
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L144-L170"><code>Validated</code></a>
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L94-L102"><code>NonEmptyChain</code></a></p>
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L144-L170"><code>Validated</code></a>
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L94-L102"><code>NonEmptyChain</code></a></p>
 </blockquote>
 <h3 id="implications-of-the-applicative-laws">Implications of the applicative laws</h3>
 <p>Each of <code>Option</code>, <code>Either</code>, and <code>List</code> conform to the applicative laws and we only had to write the properties once. These properties prove that functions and arguments used within these contexts maintain referential transparency in their arrangements and that the specific contexts do not change the factoring semantics of the code.</p>
@@ -915,15 +915,22 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
     </div>
     <div class="page-comments">
   <p><strong>Please share with me your thoughts and feedback!</strong></p>
-  <script>
-    var remark_config = {
-      host: 'https://remark42.thisfieldwas.green',
-      site_id: 'thisfieldwas.green',
-      url: 'https://thisfieldwas.green/blog/2022/06/05/enabling-control-flow/'
-    }
-  </script>
-  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
-  <div id="remark42"></div>
+  <script
+    src="https://giscus.app/client.js"
+    data-repo="keywordsalad/thisfieldwas.green"
+    data-repo-id="R_kgDOMROB0Q"
+    data-category="Q&A"
+    data-category-id="DIC_kwDOMROB0c4DBOBF"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="light"
+    data-lang="en"
+    crossorigin="anonymous"
+    async
+  ></script>
 </div>
 
   </div>
@@ -943,7 +950,7 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
       <li>Site proudly generated by <a href="https://jaspervdj.be/hakyll">Hakyll</a> with <a href="https://keywordsalad.github.io/hakyllbars">Hakyllbars</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/76883e1/site/_posts/2022-06-05-enabling-control-flow.md">2022-06-05-enabling-control-flow.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/76883e1">76883e1</a>.</p>
+    <p class="generated">This page was rendered from <a href="https://github.com/keywordsalad/thisfieldwas.green/blob/e5e4148/site/_posts/2022-06-05-enabling-control-flow.md">2022-06-05-enabling-control-flow.md</a> at commit <a class="commit-link" href="https://github.com/keywordsalad/thisfieldwas.green/commit/e5e4148">e5e4148</a>.</p>
   </div>
 </footer>
 

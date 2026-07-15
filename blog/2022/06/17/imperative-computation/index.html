@@ -77,7 +77,7 @@
 
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">1h 25m 36s</span></p>
+<p>Estimated reading time: <span class="length">1h 25m 15s</span></p>
 </div>
 <p>Remember <strong>functors</strong> and <strong>applicatives</strong>? In my last post <a href="/blog/2022/06/05/enabling-control-flow/" title="Enabling Control Flow in Functional Programming">Enabling Control Flow in Functional Programming</a> we explored how functors and applicatives abstract over <strong>desired</strong> and <strong>undesired cases</strong> of <strong>contexts</strong> in order to express control flow and permit independent computation. In this post we will explore <strong>monads</strong> and how to leverage their specific abstraction to express <strong>imperative</strong> control flow.</p>
 <!--more-->
@@ -89,7 +89,7 @@
 <li><strong>Imperative Computation in Functional Programming</strong></li>
 </ol>
 </blockquote>
-<p><em>The code that accompanies this post may be found <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3" title="Accompanying code repository">here</a>.</em></p>
+<p><em>The code that accompanies this post may be found <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3" title="Accompanying code repository">here</a>.</em></p>
 <h2 id="motivating-monads-as-a-design-pattern">Motivating monads as a design pattern</h2>
 <p>Recall the <code>Functor</code> and <code>Applicative</code> typeclasses:</p>
 <div class="numberLines">
@@ -121,8 +121,8 @@
 </div>
 </div>
 <blockquote>
-<p>See <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala"><code>Functor</code></a>
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala"><code>Applicative</code>’s</a>
+<p>See <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala"><code>Functor</code></a>
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala"><code>Applicative</code>’s</a>
 definitions in the sample repository.</p>
 </blockquote>
 <p><code>Functor</code> abstracts over contexts’ <strong>unknown cases</strong> by <em>lifting</em> a function via <code>map()</code> and applying it to instances of the term produced by the context if they exist. Control flow can’t be expressed using <code>map()</code> because it does not permit the case of the context to be modified.</p>
@@ -195,7 +195,7 @@ definitions in the sample repository.</p>
 </div>
 <p>This means that in order to implement an instance of the <code>Monad</code> typeclass, you must implement one of either <code>flatMap()</code> or <code>flatten()</code> or calling one will recurse until the stack overflows. Some contexts are best defined using one over the other, and you have the choice to pick between the two.</p>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Monad.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Monad.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <h3 id="composing-monads">Composing monads</h3>
 <p><code>Monad</code> also defines a special composition operator. Recall that functions may be composed together, as in <code>h = g ∘ f</code> or <em>“h is g after f”</em>. This may be expressed in two ways in vanilla Scala. Try below using the sample repository’s <code>sbt console</code>:</p>
@@ -237,7 +237,7 @@ definitions in the sample repository.</p>
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/syntax/monad.scala#L48">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/syntax/monad.scala#L48">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>Kleisli composition is useful for monads in that from two or more <code>flatMap()</code>-compatible functions a single function may be created that takes an unlifted argument and produces an output context as the result of applying each function in sequence first to the unlifted argument and then to each individual functions’ output contexts.</p>
 <div class="numberLines">
@@ -409,9 +409,9 @@ definitions in the sample repository.</p>
 </div>
 <blockquote>
 <p>See the instances of <code>Monad</code> for
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L218"><code>Option</code></a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L174"><code>Either</code></a>,
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L239-L302"><code>List</code></a> in the sample repository.</p>
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L218"><code>Option</code></a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L174"><code>Either</code></a>,
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L239-L302"><code>List</code></a> in the sample repository.</p>
 </blockquote>
 <p>In the above example, I implemented the <code>Monad</code> instances using <code>flatten()</code>. These could alternatively be implemented using <code>flatMap()</code>. You might try to do this if you wish as an exercise.</p>
 <h2 id="monad-laws">Monad laws</h2>
@@ -492,7 +492,7 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/MonadLaws.scala">See here</a> for the definition of the trait.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/MonadLaws.scala">See here</a> for the definition of the trait.</p>
 </blockquote>
 <p>Our laws specs can now extend this trait and assert that their tested contexts conform to the monad laws. For example, the laws spec for <code>Option</code>:</p>
 <div class="numberLines">
@@ -519,9 +519,9 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 </div>
 </div>
 <blockquote>
-<p>See the laws specs for <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L146">Option</a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L136">Either</a>,
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L181">List</a></p>
+<p>See the laws specs for <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L146">Option</a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L136">Either</a>,
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L181">List</a></p>
 </blockquote>
 <h3 id="implications-of-the-monad-laws">Implications of the monad laws</h3>
 <p>You may have noticed that the characteristics of the monad laws are somewhat different from the functor and applicative laws. They build using composition directly, specifically Kleisli composition, but don’t assert that function composition generally is retained within their contexts the same way that functor or applicative’s laws do.</p>
@@ -547,10 +547,10 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 </div>
 <p>Monoids are nearly as common as semigroups, as not all semigroups are monoids, and you’ve probably used quite a few of them:</p>
 <ul>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L80-L88"><code>List</code></a>’s identity element is the empty <code>List()</code>.</li>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L21-L29"><code>String</code></a>’s identity element is the empty <code>""</code>.</li>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22"><code>Int</code></a>’s identity element is <code>0</code>.</li>
-<li><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L80-L88"><code>Set</code></a>’s identity element is the empty <code>Set()</code>.</li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L80-L88"><code>List</code></a>’s identity element is the empty <code>List()</code>.</li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L21-L29"><code>String</code></a>’s identity element is the empty <code>""</code>.</li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22"><code>Int</code></a>’s identity element is <code>0</code>.</li>
+<li><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L80-L88"><code>Set</code></a>’s identity element is the empty <code>Set()</code>.</li>
 </ul>
 <p>The key difference between monads and these monoids above is that monads form an <em>additive function</em> in contrast to <em>additive data</em>. Functions of the form <code>A =&gt; F[B]</code> are combinable using <code>&gt;=&gt;</code> to produce new functions of the same form, and this operation is associative, which means that monads form semigroups under Kleisli composition. They form monoids as the <code>pure()</code> function satisfies the identity element in that it doesn’t alter its argument when composed to either the left or right side of a function of the form <code>A =&gt; F[B]</code>.</p>
 <blockquote>
@@ -562,10 +562,10 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <p>– From James Iry’s “<a href="https://web.archive.org/web/20220609203110/https://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html">A Brief, Incomplete, and Mostly Wrong History of Programming Languages</a>”</p>
 </blockquote>
 <p>In addition to being monoids, Scala’s
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63"><code>List</code></a> and
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L32-L63"><code>Set</code></a> are also monads and I have asserted that they are well behaved with property checks.
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L30-L61"><code>Option</code></a>
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L30-L61"><code>Either</code></a>
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63"><code>List</code></a> and
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L32-L63"><code>Set</code></a> are also monads and I have asserted that they are well behaved with property checks.
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L30-L61"><code>Option</code></a>
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L30-L61"><code>Either</code></a>
 are also monads. You’ve probably been using them as such without realizing!</p>
 <p>The real takeaway from the monad laws is that you get <em>imperative computation as a composable structure</em>. You retain referential transparency in that associativity guarantees that your operations may be grouped arbitrarily, allowing you to factor the steps of your program with a large degree of freedom.</p>
 <h2 id="what-is-enabled-by-monads">What is enabled by monads?</h2>
@@ -609,15 +609,22 @@ are also monads. You’ve probably been using them as such without realizing!</p
     </div>
     <div class="page-comments">
   <p><strong>Please share with me your thoughts and feedback!</strong></p>
-  <script>
-    var remark_config = {
-      host: 'https://remark42.thisfieldwas.green',
-      site_id: 'thisfieldwas.green',
-      url: 'https://thisfieldwas.green/blog/2022/06/17/imperative-computation/'
-    }
-  </script>
-  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
-  <div id="remark42"></div>
+  <script
+    src="https://giscus.app/client.js"
+    data-repo="keywordsalad/thisfieldwas.green"
+    data-repo-id="R_kgDOMROB0Q"
+    data-category="Q&A"
+    data-category-id="DIC_kwDOMROB0c4DBOBF"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="light"
+    data-lang="en"
+    crossorigin="anonymous"
+    async
+  ></script>
 </div>
 
   </div>
@@ -637,7 +644,7 @@ are also monads. You’ve probably been using them as such without realizing!</p
       <li>Site proudly generated by <a href="https://jaspervdj.be/hakyll">Hakyll</a> with <a href="https://keywordsalad.github.io/hakyllbars">Hakyllbars</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/76883e1/site/_posts/2022-06-17-imperative-computation.md">2022-06-17-imperative-computation.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/76883e1">76883e1</a>.</p>
+    <p class="generated">This page was rendered from <a href="https://github.com/keywordsalad/thisfieldwas.green/blob/e5e4148/site/_posts/2022-06-17-imperative-computation.md">2022-06-17-imperative-computation.md</a> at commit <a class="commit-link" href="https://github.com/keywordsalad/thisfieldwas.green/commit/e5e4148">e5e4148</a>.</p>
   </div>
 </footer>
 

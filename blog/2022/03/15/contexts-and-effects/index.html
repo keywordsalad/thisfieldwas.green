@@ -84,7 +84,7 @@
 </div>
 
 <div class="estimated-reading-time">
-<p>Estimated reading time: <span class="length">1h 49m 52s</span></p>
+<p>Estimated reading time: <span class="length">1h 49m 29s</span></p>
 </div>
 <p>Have you ever received an unexpected <code>null</code> reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?</p>
 <!--more-->
@@ -96,7 +96,7 @@
 <li><a href="/blog/2022/06/17/imperative-computation/" title="Imperative Computation in Functional Programming">Imperative Computation in Functional Programming</a></li>
 </ol>
 </blockquote>
-<p><em>The code that accompanies this post may be found <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1" title="Accompanying code repository">here</a>.</em></p>
+<p><em>The code that accompanies this post may be found <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1" title="Accompanying code repository">here</a>.</em></p>
 <p>Significant portions of program logic exist to address specific cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it’s running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a <code>null</code> reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.</p>
 <p><em><a href="https://en.wikipedia.org/wiki/Defensive_programming">Defensive programming</a></em> as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on <em><a href="https://en.wikipedia.org/wiki/Tacit_knowledge">tacit knowledge</a></em> and imposes complex code to handle and recover from them. <em>This complex code draws focus from writing the business logic that drives the value of programs</em>.</p>
 <p>In this post I will provide <strong>effects</strong> as a model for characterizing nondeterminism and unknowns in programs. I will introduce a <strong>design pattern</strong> to abstract complexity using this model.</p>
@@ -493,7 +493,7 @@ Retry strategies must track previous state in order to calculate their next retr
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p><strong><code>Either[X, A]</code></strong> by convention is the effect of <em>either</em> success with term <code>A</code> <em>or</em> failure with term <code>X</code>:</p>
 <div class="numberLines">
@@ -507,7 +507,7 @@ Retry strategies must track previous state in order to calculate their next retr
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p><strong><code>List[A]</code></strong> is the effect of <em>unknown length</em>, sort, and cardinality of instances of term <code>A</code>:</p>
 <div class="numberLines">
@@ -521,7 +521,7 @@ Retry strategies must track previous state in order to calculate their next retr
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <h3 id="an-object-oriented-approach-to-contexts">An object-oriented approach to contexts</h3>
 <p>Both <code>Option[A]</code> and <code>Either[X, A]</code> have roughly the same <em>structure</em> in that there either is or isn’t an instance of the desired term <code>A</code>. Because of this, a <em>lowering</em> operation <code>extract: F[A] =&gt; A</code> is possible as it means the same thing between both of them: <code>extract</code> either gets the existing instance of the term <code>A</code> or it faults. In object oriented programming, <code>Option[A]</code> and <code>Either[X, A]</code> might expose such an interface:</p>
@@ -544,7 +544,7 @@ Retry strategies must track previous state in order to calculate their next retr
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/one">See here</a> for the definitions of <code>Option</code>, <code>Either</code>, and <code>List</code> using the single-value <code>Extractable</code> interface.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/one">See here</a> for the definitions of <code>Option</code>, <code>Either</code>, and <code>List</code> using the single-value <code>Extractable</code> interface.</p>
 </blockquote>
 <h4 id="generalizing-for-an-unknown-length-of-term-a">Generalizing for an unknown length of term <code>A</code></h4>
 <p>How do you <code>extract</code> the term <code>A</code> from a <code>List[A]</code> such that it means the same thing as in <code>Option[A]</code> and <code>Either[X, A]</code>?</p>
@@ -575,10 +575,10 @@ Retry strategies must track previous state in order to calculate their next retr
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/seq">See here</a> for the definitions of <code>Option</code>, <code>Either</code>, and <code>List</code> using the multi-value <code>Extractable</code> interface with <code>Seq</code>.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/seq">See here</a> for the definitions of <code>Option</code>, <code>Either</code>, and <code>List</code> using the multi-value <code>Extractable</code> interface with <code>Seq</code>.</p>
 </blockquote>
-<p><em>This interface however is not coherent.</em> Faulting on absence is preserved as a behavior in <code>Option[A]</code> and <code>Either[X, A]</code>, but Scala’s <code>Seq[A]</code> is allowed to be empty per its definition. Allowing <code>List[A]</code> to be empty implies that it should be allowed to return an empty <code>Seq[A]</code> from <code>extract</code>. In order to preserve faulting on absence, <code>extract</code> must return a <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/nel"><code>NonEmptyList[A]</code> instead</a>, as this has the effect of always having <em>at least one</em> instance of term <code>A</code>. You’re still stuck with an unknown length of instances, though.</p>
-<p>This interface essentially transforms these contexts into <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala"><code>NonEmptyList[A]</code></a> and imposes its specific complexity on all of your code. You would probably be very unhappy using it.</p>
+<p><em>This interface however is not coherent.</em> Faulting on absence is preserved as a behavior in <code>Option[A]</code> and <code>Either[X, A]</code>, but Scala’s <code>Seq[A]</code> is allowed to be empty per its definition. Allowing <code>List[A]</code> to be empty implies that it should be allowed to return an empty <code>Seq[A]</code> from <code>extract</code>. In order to preserve faulting on absence, <code>extract</code> must return a <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/nel"><code>NonEmptyList[A]</code> instead</a>, as this has the effect of always having <em>at least one</em> instance of term <code>A</code>. You’re still stuck with an unknown length of instances, though.</p>
+<p>This interface essentially transforms these contexts into <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala"><code>NonEmptyList[A]</code></a> and imposes its specific complexity on all of your code. You would probably be very unhappy using it.</p>
 <p>What about implementing <code>extract</code> for <code>Future[A]</code>? When applied to <code>Future[A]</code>, the <code>extract</code> function by its own signature is a blocking call. You want your dependency on <code>A</code> to be properly asynchronous.</p>
 <p>This interface does not generalize for more than the contexts of <code>Option</code> and <code>Either</code>, and it requires that they both subclass a shared trait. A better interface exists. It also doesn’t force these types into the same hierarchy.</p>
 <blockquote>
@@ -599,7 +599,7 @@ Retry strategies must track previous state in order to calculate their next retr
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>What <code>map()</code> does is <em>lift</em> the function <code>f: A =&gt; B</code> into the box so that it behaves as <code>F[A] =&gt; F[B]</code>, giving back <code>F[B]</code>.</p>
 <p>This <em>lifting</em> of functions that <code>map()</code> performs is <em>coherent across contexts</em>. With <code>map()</code> you can apply <code>f: A =&gt; B</code> to any <code>List[A]</code> just as you can any <code>IO[A]</code>. The results of both operations are predictable: your <code>List[A]</code> maps to <code>List[B]</code> and your <code>IO[A]</code> maps to <code>IO[B]</code>.</p>
@@ -686,7 +686,7 @@ Applying <code>map</code> to a <code>BinaryTree[Int]</code>.
 </div>
 </div>
 <blockquote>
-<p><a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
+<p><a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala">See here</a> for the definition in the sample repository.</p>
 </blockquote>
 <p>Instances of the <code>Functor</code> typeclass implement this trait and make themselves available implicitly:</p>
 <div class="numberLines">
@@ -721,11 +721,11 @@ Applying <code>map</code> to a <code>BinaryTree[Int]</code>.
 <p>These three instances for <code>Option[_]</code>, <code>Either[X, _]</code>, and <code>List[_]</code> show remarkable similarities, and this isn’t uncommon across functors for most data structures. Note in particular how <code>List[_]</code> is recursive, with the base case <code>Nil</code> representing void. Implementations of <code>Functor</code> are more complex in contexts such as <code>IO[_]</code> and <code>Future[_]</code> because they are managing side effects. <em>What is key is that the complexities imposed by each of these contexts are completely abstracted</em>, allowing function <code>f: A =&gt; B</code> to operate unburdened by effects with a focus on specific program logic.</p>
 <blockquote>
 <p>Follow these links for the instances in the sample repository for
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L104-L126">Option</a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L112-L133">Either</a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L237-L257">List</a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala#L99-L119">NonEmptyList</a>,
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/package.scala#L23-L42">Id</a>.</p>
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L104-L126">Option</a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L112-L133">Either</a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L237-L257">List</a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala#L99-L119">NonEmptyList</a>,
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/package.scala#L23-L42">Id</a>.</p>
 </blockquote>
 <p>Can you see how functors enable control flow and short-circuiting? The <strong>undesirable cases</strong> are the specific branches of logic that enable this. If there’s “nothing here”, then they don’t do anything. In the specific case of <code>Either[X, _]</code>, <code>Left</code> may be used to carry some error state in its term <code>X</code>. This satisfies the effect of <em>either</em> <code>A</code> for success <em>or</em> <code>X</code> for failure.</p>
 <blockquote>
@@ -835,13 +835,13 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
 <blockquote>
 <ul>
 <li>See the functor laws applied to Scala’s Standard Library
-types <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L12-L26"><code>Either</code></a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L12-L26"><code>List</code></a>,
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L12-L26"><code>Option</code></a></li>
-<li>See the <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/FunctorLaws.scala">generalized functor laws</a>
-applied to our <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L109">Option</a>,
-<a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L132">Either</a>,
-and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L169">List</a> types.</li>
+types <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L12-L26"><code>Either</code></a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L12-L26"><code>List</code></a>,
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L12-L26"><code>Option</code></a></li>
+<li>See the <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/FunctorLaws.scala">generalized functor laws</a>
+applied to our <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L109">Option</a>,
+<a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L132">Either</a>,
+and <a href="https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L169">List</a> types.</li>
 </ul>
 </blockquote>
 <p>These laws assert that functors preserve the behavior of functions <code>f</code> and <code>g</code> as if they were composed and also applied in sequence independent of <code>map()</code>. Functors thus <em>compose functional effects</em> because this property of composition is retained within the context of their effects. The seam introduced by <code>map()</code> creates a hard delineation between any context’s complexity of effects and the business logic of pure functions <code>f</code> and <code>g</code>.</p>
@@ -906,15 +906,22 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
     </div>
     <div class="page-comments">
   <p><strong>Please share with me your thoughts and feedback!</strong></p>
-  <script>
-    var remark_config = {
-      host: 'https://remark42.thisfieldwas.green',
-      site_id: 'thisfieldwas.green',
-      url: 'https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/'
-    }
-  </script>
-  <script>!function(e,n){for(var o=0;o<e.length;o++){var r=n.createElement("script"),c=".js",d=n.head||n.body;"noModule"in r?(r.type="module",c=".mjs"):r.async=!0,r.defer=!0,r.src=remark_config.host+"/web/"+e[o]+c,d.appendChild(r)} }(remark_config.components||["embed"],document);</script>
-  <div id="remark42"></div>
+  <script
+    src="https://giscus.app/client.js"
+    data-repo="keywordsalad/thisfieldwas.green"
+    data-repo-id="R_kgDOMROB0Q"
+    data-category="Q&A"
+    data-category-id="DIC_kwDOMROB0c4DBOBF"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="light"
+    data-lang="en"
+    crossorigin="anonymous"
+    async
+  ></script>
 </div>
 
   </div>
@@ -934,7 +941,7 @@ and <a href="https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondetermi
       <li>Site proudly generated by <a href="https://jaspervdj.be/hakyll">Hakyll</a> with <a href="https://keywordsalad.github.io/hakyllbars">Hakyllbars</a>.</li>
       <li><a href="https://www.flaticon.com/free-icon/grass_2790190">Icon</a> made by <a href="https://www.flaticon.com/authors/good-ware">Good Ware</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</li>
     </ul>
-    <p class="generated">This page was rendered from <a href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/76883e1/site/_posts/2022-03-15-contexts-and-effects.md">2022-03-15-contexts-and-effects.md</a> at commit <a class="commit-link" href="https://bitsof.thisfieldwas.green/keywordsalad/thisfieldwas.green/src/commit/76883e1">76883e1</a>.</p>
+    <p class="generated">This page was rendered from <a href="https://github.com/keywordsalad/thisfieldwas.green/blob/e5e4148/site/_posts/2022-03-15-contexts-and-effects.md">2022-03-15-contexts-and-effects.md</a> at commit <a class="commit-link" href="https://github.com/keywordsalad/thisfieldwas.green/commit/e5e4148">e5e4148</a>.</p>
   </div>
 </footer>
 

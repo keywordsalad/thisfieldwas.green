@@ -11,7 +11,7 @@
     <name>Logan McGrath</name>
     <email>logan.mcgrath@thisfieldwas.green</email>
   </author>
-  <rights>Copyright &#169; 2012-2024 Logan McGrath. All rights reserved.</rights>
+  <rights>Copyright &#169; 2012-2026 Logan McGrath. All rights reserved.</rights>
   <generator uri="https://jaspervdj.be/hakyll/">Hakyll</generator>
   <entry>
       <id>https://thisfieldwas.green/blog/2022/09/05/parser-combinators/</id>
@@ -19,7 +19,7 @@
       <updated>2022-09-05T12:55:18-07:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2022/09/05/parser-combinators/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 10m 2s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 10m 1s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;In my post &lt;a href=&quot;/blog/2022/06/16/set-function/&quot; title=&quot;The Set Function&quot;&gt;The Set Function&lt;/a&gt; I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: &lt;em&gt;parsing text&lt;/em&gt;.&lt;/p&gt;
 </summary>
@@ -27,12 +27,12 @@
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 10m 2s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 10m 1s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;In my post &lt;a href=&quot;/blog/2022/06/16/set-function/&quot; title=&quot;The Set Function&quot;&gt;The Set Function&lt;/a&gt; I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: &lt;em&gt;parsing text&lt;/em&gt;.&lt;/p&gt;
 &lt;!--more--&gt;
 &lt;blockquote&gt;
-&lt;p&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/parser-combinators/src/branch/post/parser-combinators&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The code that accompanies this post may be found &lt;a href=&quot;https://github.com/keywordsalad/parser-combinators/tree/post/parser-combinators&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id=&quot;the-parse-function&quot;&gt;The &lt;code&gt;parse()&lt;/code&gt; function&lt;/h2&gt;
 &lt;p&gt;Parsers begin as a simple signature, a function called &lt;code&gt;parse()&lt;/code&gt; from an input &lt;code&gt;Int&lt;/code&gt; offset and &lt;code&gt;String&lt;/code&gt; to either a failed offset or matched offset.&lt;/p&gt;
@@ -532,7 +532,7 @@
       <updated>2022-06-17T08:47:11-07:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2022/06/17/imperative-computation/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 25m 36s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 25m 15s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot; title=&quot;Enabling Control Flow in Functional Programming&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
 </summary>
@@ -540,7 +540,7 @@
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 25m 36s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 25m 15s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt; and &lt;strong&gt;applicatives&lt;/strong&gt;? In my last post &lt;a href=&quot;/blog/2022/06/05/enabling-control-flow/&quot; title=&quot;Enabling Control Flow in Functional Programming&quot;&gt;Enabling Control Flow in Functional Programming&lt;/a&gt; we explored how functors and applicatives abstract over &lt;strong&gt;desired&lt;/strong&gt; and &lt;strong&gt;undesired cases&lt;/strong&gt; of &lt;strong&gt;contexts&lt;/strong&gt; in order to express control flow and permit independent computation. In this post we will explore &lt;strong&gt;monads&lt;/strong&gt; and how to leverage their specific abstraction to express &lt;strong&gt;imperative&lt;/strong&gt; control flow.&lt;/p&gt;
 &lt;!--more--&gt;
@@ -552,7 +552,7 @@
 &lt;li&gt;&lt;strong&gt;Imperative Computation in Functional Programming&lt;/strong&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&quot;motivating-monads-as-a-design-pattern&quot;&gt;Motivating monads as a design pattern&lt;/h2&gt;
 &lt;p&gt;Recall the &lt;code&gt;Functor&lt;/code&gt; and &lt;code&gt;Applicative&lt;/code&gt; typeclasses:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -584,8 +584,8 @@
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;See &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala&quot;&gt;&lt;code&gt;Functor&lt;/code&gt;&lt;/a&gt;
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala&quot;&gt;&lt;code&gt;Applicative&lt;/code&gt;’s&lt;/a&gt;
+&lt;p&gt;See &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala&quot;&gt;&lt;code&gt;Functor&lt;/code&gt;&lt;/a&gt;
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala&quot;&gt;&lt;code&gt;Applicative&lt;/code&gt;’s&lt;/a&gt;
 definitions in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;Functor&lt;/code&gt; abstracts over contexts’ &lt;strong&gt;unknown cases&lt;/strong&gt; by &lt;em&gt;lifting&lt;/em&gt; a function via &lt;code&gt;map()&lt;/code&gt; and applying it to instances of the term produced by the context if they exist. Control flow can’t be expressed using &lt;code&gt;map()&lt;/code&gt; because it does not permit the case of the context to be modified.&lt;/p&gt;
@@ -658,7 +658,7 @@ definitions in the sample repository.&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;This means that in order to implement an instance of the &lt;code&gt;Monad&lt;/code&gt; typeclass, you must implement one of either &lt;code&gt;flatMap()&lt;/code&gt; or &lt;code&gt;flatten()&lt;/code&gt; or calling one will recurse until the stack overflows. Some contexts are best defined using one over the other, and you have the choice to pick between the two.&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Monad.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Monad.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&quot;composing-monads&quot;&gt;Composing monads&lt;/h3&gt;
 &lt;p&gt;&lt;code&gt;Monad&lt;/code&gt; also defines a special composition operator. Recall that functions may be composed together, as in &lt;code&gt;h = g ∘ f&lt;/code&gt; or &lt;em&gt;“h is g after f”&lt;/em&gt;. This may be expressed in two ways in vanilla Scala. Try below using the sample repository’s &lt;code&gt;sbt console&lt;/code&gt;:&lt;/p&gt;
@@ -700,7 +700,7 @@ definitions in the sample repository.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/syntax/monad.scala#L48&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/syntax/monad.scala#L48&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Kleisli composition is useful for monads in that from two or more &lt;code&gt;flatMap()&lt;/code&gt;-compatible functions a single function may be created that takes an unlifted argument and produces an output context as the result of applying each function in sequence first to the unlifted argument and then to each individual functions’ output contexts.&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -872,9 +872,9 @@ definitions in the sample repository.&lt;/p&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;See the instances of &lt;code&gt;Monad&lt;/code&gt; for
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L218&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L174&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;,
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L239-L302&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt; in the sample repository.&lt;/p&gt;
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L218&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L174&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;,
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L239-L302&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt; in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;In the above example, I implemented the &lt;code&gt;Monad&lt;/code&gt; instances using &lt;code&gt;flatten()&lt;/code&gt;. These could alternatively be implemented using &lt;code&gt;flatMap()&lt;/code&gt;. You might try to do this if you wish as an exercise.&lt;/p&gt;
 &lt;h2 id=&quot;monad-laws&quot;&gt;Monad laws&lt;/h2&gt;
@@ -955,7 +955,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/MonadLaws.scala&quot;&gt;See here&lt;/a&gt; for the definition of the trait.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/MonadLaws.scala&quot;&gt;See here&lt;/a&gt; for the definition of the trait.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Our laws specs can now extend this trait and assert that their tested contexts conform to the monad laws. For example, the laws spec for &lt;code&gt;Option&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -982,9 +982,9 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;See the laws specs for &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L146&quot;&gt;Option&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L136&quot;&gt;Either&lt;/a&gt;,
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L181&quot;&gt;List&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;See the laws specs for &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L146&quot;&gt;Option&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L136&quot;&gt;Either&lt;/a&gt;,
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L181&quot;&gt;List&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&quot;implications-of-the-monad-laws&quot;&gt;Implications of the monad laws&lt;/h3&gt;
 &lt;p&gt;You may have noticed that the characteristics of the monad laws are somewhat different from the functor and applicative laws. They build using composition directly, specifically Kleisli composition, but don’t assert that function composition generally is retained within their contexts the same way that functor or applicative’s laws do.&lt;/p&gt;
@@ -1010,10 +1010,10 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;/div&gt;
 &lt;p&gt;Monoids are nearly as common as semigroups, as not all semigroups are monoids, and you’ve probably used quite a few of them:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L80-L88&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt;’s identity element is the empty &lt;code&gt;List()&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L21-L29&quot;&gt;&lt;code&gt;String&lt;/code&gt;&lt;/a&gt;’s identity element is the empty &lt;code&gt;&quot;&quot;&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22&quot;&gt;&lt;code&gt;Int&lt;/code&gt;&lt;/a&gt;’s identity element is &lt;code&gt;0&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L80-L88&quot;&gt;&lt;code&gt;Set&lt;/code&gt;&lt;/a&gt;’s identity element is the empty &lt;code&gt;Set()&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L80-L88&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt;’s identity element is the empty &lt;code&gt;List()&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L21-L29&quot;&gt;&lt;code&gt;String&lt;/code&gt;&lt;/a&gt;’s identity element is the empty &lt;code&gt;&quot;&quot;&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L10-L22&quot;&gt;&lt;code&gt;Int&lt;/code&gt;&lt;/a&gt;’s identity element is &lt;code&gt;0&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L80-L88&quot;&gt;&lt;code&gt;Set&lt;/code&gt;&lt;/a&gt;’s identity element is the empty &lt;code&gt;Set()&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;The key difference between monads and these monoids above is that monads form an &lt;em&gt;additive function&lt;/em&gt; in contrast to &lt;em&gt;additive data&lt;/em&gt;. Functions of the form &lt;code&gt;A =&amp;gt; F[B]&lt;/code&gt; are combinable using &lt;code&gt;&amp;gt;=&amp;gt;&lt;/code&gt; to produce new functions of the same form, and this operation is associative, which means that monads form semigroups under Kleisli composition. They form monoids as the &lt;code&gt;pure()&lt;/code&gt; function satisfies the identity element in that it doesn’t alter its argument when composed to either the left or right side of a function of the form &lt;code&gt;A =&amp;gt; F[B]&lt;/code&gt;.&lt;/p&gt;
 &lt;blockquote&gt;
@@ -1025,10 +1025,10 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;p&gt;– From James Iry’s “&lt;a href=&quot;https://web.archive.org/web/20220609203110/https://james-iry.blogspot.com/2009/05/brief-incomplete-and-mostly-wrong.html&quot;&gt;A Brief, Incomplete, and Mostly Wrong History of Programming Languages&lt;/a&gt;”&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;In addition to being monoids, Scala’s
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt; and
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L32-L63&quot;&gt;&lt;code&gt;Set&lt;/code&gt;&lt;/a&gt; are also monads and I have asserted that they are well behaved with property checks.
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L30-L61&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L30-L61&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L32-L63&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt; and
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L32-L63&quot;&gt;&lt;code&gt;Set&lt;/code&gt;&lt;/a&gt; are also monads and I have asserted that they are well behaved with property checks.
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L30-L61&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part3/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L30-L61&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;
 are also monads. You’ve probably been using them as such without realizing!&lt;/p&gt;
 &lt;p&gt;The real takeaway from the monad laws is that you get &lt;em&gt;imperative computation as a composable structure&lt;/em&gt;. You retain referential transparency in that associativity guarantees that your operations may be grouped arbitrarily, allowing you to factor the steps of your program with a large degree of freedom.&lt;/p&gt;
 &lt;h2 id=&quot;what-is-enabled-by-monads&quot;&gt;What is enabled by monads?&lt;/h2&gt;
@@ -1216,7 +1216,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
       <updated>2022-06-05T14:01:07-07:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2022/06/05/enabling-control-flow/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;2h 13m 19s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;2h 12m 50s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot; title=&quot;Contexts and Effects in Functional Programming&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
 </summary>
@@ -1224,7 +1224,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;2h 13m 19s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;2h 12m 50s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Remember &lt;strong&gt;functors&lt;/strong&gt;? Recall from my last post, &lt;a href=&quot;/blog/2022/03/15/contexts-and-effects/&quot; title=&quot;Contexts and Effects in Functional Programming&quot;&gt;Contexts and Effects in Functional Programming&lt;/a&gt;, they are structures that abstract away complexity imposed by nondeterminism present in &lt;strong&gt;contexts&lt;/strong&gt; that produce some output; contexts such as optionality, network interaction, or validation. When contexts fail to produce some output, they are in their &lt;strong&gt;undesired case&lt;/strong&gt; and no computation may be performed against them. In this post we will explore how to exploit this characteristic to halt computation in order to express control flow.&lt;/p&gt;
 &lt;!--more--&gt;
@@ -1236,7 +1236,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot; title=&quot;Imperative Computation in Functional Programming&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&quot;motivating-applicative-functors-as-a-design-pattern&quot;&gt;Motivating applicative functors as a design pattern&lt;/h2&gt;
 &lt;p&gt;Recall the &lt;code&gt;Functor&lt;/code&gt; typeclass:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -1250,7 +1250,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;For any context &lt;code&gt;F[A]&lt;/code&gt;, the &lt;code&gt;map()&lt;/code&gt; function accepts another function &lt;code&gt;f: A =&amp;gt; B&lt;/code&gt; and applies it to the term within the context, giving back &lt;code&gt;F[B]&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Contexts that are functors thus allow abstraction over unknown cases. For example, a function &lt;code&gt;f: A =&amp;gt; B&lt;/code&gt; may be lifted into an &lt;code&gt;Option[A]&lt;/code&gt; and applied if an instance of &lt;code&gt;A&lt;/code&gt; is present. If no instance of &lt;code&gt;A&lt;/code&gt; is present, then nothing happens. Specifically, by using &lt;code&gt;map()&lt;/code&gt; the function &lt;code&gt;f&lt;/code&gt; is unconcerned with the unknown quantity of &lt;code&gt;A&lt;/code&gt;’s presence. Many contexts encode dimensions of unknown quantities, and as functors they completely abstract the nondeterminism of these quantities, allowing the business logic expressed by the lifted functions to focus only on the terms that they operate against.&lt;/p&gt;
@@ -1327,7 +1327,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Note that &lt;code&gt;Applicative&lt;/code&gt; extends &lt;code&gt;Functor&lt;/code&gt; as it is a specialization. All applicatives are also functors and therefore also provide the &lt;code&gt;map()&lt;/code&gt; function.&lt;/p&gt;
 &lt;p&gt;The new functions defined by applicatives offer two capabilities:&lt;/p&gt;
@@ -1390,7 +1390,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala&quot;&gt;See here&lt;/a&gt; for the definitions in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala&quot;&gt;See here&lt;/a&gt; for the definitions in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h4 id=&quot;why-use-a-new-validated-context-instead-of-either&quot;&gt;Why use a new &lt;code&gt;Validated&lt;/code&gt; context instead of &lt;code&gt;Either&lt;/code&gt;?&lt;/h4&gt;
 &lt;p&gt;The &lt;code&gt;Applicative&lt;/code&gt; instance for &lt;code&gt;Either&lt;/code&gt; in the context of validation has one key flaw: it short-circuits on the first &lt;code&gt;Left&lt;/code&gt;.&lt;/p&gt;
@@ -1406,7 +1406,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L145-L150&quot;&gt;See here&lt;/a&gt; for &lt;code&gt;Either&lt;/code&gt;’s definition of &lt;code&gt;ap()&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L145-L150&quot;&gt;See here&lt;/a&gt; for &lt;code&gt;Either&lt;/code&gt;’s definition of &lt;code&gt;ap()&lt;/code&gt;.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;For both cases of &lt;code&gt;Left&lt;/code&gt; they are immediately returned and there is no specific handling for situations where both &lt;code&gt;ff&lt;/code&gt; and &lt;code&gt;fa&lt;/code&gt; may be in the &lt;code&gt;Left&lt;/code&gt; case. This means that the first &lt;code&gt;Left&lt;/code&gt; propagates and all subsequent &lt;code&gt;Left&lt;/code&gt;s are swallowed. In the context of validation, this means that for any number of validation errors that the context might produce, we would only receive the first error. We would have to resolve the error and re-run the operation, and repeat for each subsequent error until the operation as a whole succeeded. This makes &lt;code&gt;Either&lt;/code&gt; a very poor choice for modeling validation. It represents strictly one thing or the other, whereas validation we can specialize to propagate all reasons for failure.&lt;/p&gt;
 &lt;h3 id=&quot;validation-via-applicative&quot;&gt;Validation via &lt;code&gt;Applicative&lt;/code&gt;&lt;/h3&gt;
@@ -1442,15 +1442,15 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Semigroup.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Semigroup.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;A semigroup is thus an additive form of data. Here’s a few familiar data types that you may have used as semigroups without realizing it:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L51&quot;&gt;Lists under concatenation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L22&quot;&gt;Strings under concatenation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L17&quot;&gt;Integers under addition&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/BooleanSpec.scala#L12&quot;&gt;Booleans under &lt;code&gt;&amp;amp;&amp;amp;&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L33&quot;&gt;Sets under union&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L51&quot;&gt;Lists under concatenation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/StringSpec.scala#L22&quot;&gt;Strings under concatenation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/IntegerSpec.scala#L17&quot;&gt;Integers under addition&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/BooleanSpec.scala#L12&quot;&gt;Booleans under &lt;code&gt;&amp;amp;&amp;amp;&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/SetSpec.scala#L33&quot;&gt;Sets under union&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;The &lt;code&gt;combine()&lt;/code&gt; function must be associative. This can be tested with a &lt;code&gt;scalacheck&lt;/code&gt; property:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -1472,7 +1472,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/SemigroupLaws.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/SemigroupLaws.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Given an &lt;code&gt;E&lt;/code&gt; with an instance of &lt;code&gt;Semigroup&lt;/code&gt;, we can define an &lt;code&gt;Applicative&lt;/code&gt; instance for &lt;code&gt;Validated&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -1494,7 +1494,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala#L111-L149&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Validated.scala#L111-L149&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;This means that &lt;code&gt;Validated&lt;/code&gt; is usable as an &lt;code&gt;Applicative&lt;/code&gt; for any case where &lt;code&gt;E&lt;/code&gt; is combinable. What implications does this have?&lt;/p&gt;
 &lt;ul&gt;
@@ -1553,7 +1553,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChain.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChain.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Using a &lt;code&gt;NonEmptyChain&lt;/code&gt;, we can start writing validation functions for &lt;code&gt;User&lt;/code&gt; to test that they work:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -1640,7 +1640,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L50-L141&quot;&gt;See here&lt;/a&gt; for the specs in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L50-L141&quot;&gt;See here&lt;/a&gt; for the specs in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Applicatives thus enable entire computations to succeed if all context arguments are in the &lt;strong&gt;desired case&lt;/strong&gt;. If any argument is in the &lt;strong&gt;undesired case&lt;/strong&gt;, then this case is &lt;em&gt;propagated&lt;/em&gt; and the computation as a whole fails.&lt;/p&gt;
 &lt;p&gt;Each of &lt;code&gt;validateUsername()&lt;/code&gt;, &lt;code&gt;validateEmail()&lt;/code&gt;, and &lt;code&gt;validatePassword()&lt;/code&gt; act as levers on whether a &lt;code&gt;User&lt;/code&gt; is successfully produced. Writing specific if-statements to guide whether a &lt;code&gt;User&lt;/code&gt; is produced or errors returned instead is not required: the &lt;code&gt;Applicative&lt;/code&gt; typeclass succinctly abstracts away the necessary plumbing to control the flow of logic required to handle &lt;strong&gt;undesired cases&lt;/strong&gt;. Errors are declared where they should occur and the abstraction handles the rest.&lt;/p&gt;
@@ -1654,7 +1654,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala#L83-L96&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/control/Applicative.scala#L83-L96&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;And then if we load three &lt;code&gt;User&lt;/code&gt;s at once:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -1685,7 +1685,7 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;p&gt;This has an important implication, specifically that unlike the &lt;code&gt;sequence()&lt;/code&gt; function these operations allow for gathering effectful operations that produce contexts with heterogeneous terms. Scala allows for tuples up to 22 elements, and it makes sense to abstract the above operations for each tuple size, especially because even at just 2 elements writing all of these out is already clunky!&lt;/p&gt;
-&lt;p&gt;In the sample repository, I have written a macro which &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/macro/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/GenerateTupleSyntax.scala&quot;&gt;adds two extension methods&lt;/a&gt; to each tuple size. Here’s the code that is generated for the 2-tuple:&lt;/p&gt;
+&lt;p&gt;In the sample repository, I have written a macro which &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/macro/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/GenerateTupleSyntax.scala&quot;&gt;adds two extension methods&lt;/a&gt; to each tuple size. Here’s the code that is generated for the 2-tuple:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
 &lt;div id=&quot;cb22&quot; class=&quot;sourceCode&quot;&gt;
 &lt;pre class=&quot;sourceCode scala&quot;&gt;&lt;code class=&quot;sourceCode scala&quot;&gt;&lt;span id=&quot;cb22-1&quot;&gt;&lt;a href=&quot;#cb22-1&quot; aria-hidden=&quot;true&quot; tabindex=&quot;-1&quot;&gt;&lt;/a&gt;&lt;span class=&quot;kw&quot;&gt;implicit&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;class&lt;/span&gt; Tuple2Ops&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;F&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;_&lt;span class=&quot;op&quot;&gt;],&lt;/span&gt; T1&lt;span class=&quot;op&quot;&gt;,&lt;/span&gt; T2&lt;span class=&quot;op&quot;&gt;](&lt;/span&gt;&lt;span class=&quot;kw&quot;&gt;val&lt;/span&gt; t&lt;span class=&quot;op&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;op&quot;&gt;(&lt;/span&gt;F&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;T1&lt;span class=&quot;op&quot;&gt;],&lt;/span&gt; F&lt;span class=&quot;op&quot;&gt;[&lt;/span&gt;T2&lt;span class=&quot;op&quot;&gt;]))&lt;/span&gt; &lt;span class=&quot;kw&quot;&gt;extends&lt;/span&gt; AnyVal &lt;span class=&quot;op&quot;&gt;{&lt;/span&gt;&lt;/span&gt;
@@ -1760,9 +1760,9 @@ are also monads. You’ve probably been using them as such without realizing!&lt
 &lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;See the instances of &lt;code&gt;Applicative&lt;/code&gt; for
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L195&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L151&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;,
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L238-L275&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt; in the sample repository.&lt;/p&gt;
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L159-L195&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L114-L151&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;,
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L238-L275&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt; in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;code&gt;Option&lt;/code&gt; and &lt;code&gt;Either&lt;/code&gt;’s instances of &lt;code&gt;Applicative&lt;/code&gt; are straight-forward: if a function and argument are present, they are applied and the result returned in the &lt;strong&gt;desired case&lt;/strong&gt;. If either are missing, then the &lt;strong&gt;undesired case&lt;/strong&gt; is &lt;em&gt;propagated&lt;/em&gt; instead.&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;List&lt;/code&gt; looks very different at first glance, but conceptually performs the same way. Specifically, &lt;code&gt;List&lt;/code&gt; performs a Cartesian product of its functions and arguments, applying each pair together and building a new &lt;code&gt;List&lt;/code&gt; from the results. If either the function or argument &lt;code&gt;List&lt;/code&gt; are empty, then an empty result &lt;code&gt;List&lt;/code&gt; is returned, as an empty &lt;code&gt;List&lt;/code&gt; represents the &lt;strong&gt;undesired case&lt;/strong&gt;.&lt;/p&gt;
@@ -1803,7 +1803,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/util/LiftedGen.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/util/LiftedGen.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&quot;defining-the-applicative-laws-as-properties&quot;&gt;Defining the applicative laws as properties&lt;/h3&gt;
 &lt;p&gt;Now we will walk through defining the properties of &lt;code&gt;Applicative&lt;/code&gt; in such a way that we simply supply the contexts as the argument to the test. This way we only define the properties once.&lt;/p&gt;
@@ -1876,7 +1876,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/ApplicativeLaws.scala&quot;&gt;See here&lt;/a&gt; for the full definition of the trait.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/control/ApplicativeLaws.scala&quot;&gt;See here&lt;/a&gt; for the full definition of the trait.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;With this trait, laws specs can be written for each context.&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -1945,9 +1945,9 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;See these laws specs for
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L145&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L135&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;,
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L180&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt; in the sample repository.&lt;/p&gt;
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L127-L145&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L112-L135&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;,
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L159-L180&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt; in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;em&gt;Try running these specs!&lt;/em&gt;&lt;/p&gt;
 &lt;h4 id=&quot;but-dont-forget-validated&quot;&gt;But don’t forget &lt;code&gt;Validated&lt;/code&gt;!&lt;/h4&gt;
@@ -2042,8 +2042,8 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;/div&gt;
 &lt;blockquote&gt;
 &lt;p&gt;See these laws specs for
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L144-L170&quot;&gt;&lt;code&gt;Validated&lt;/code&gt;&lt;/a&gt;
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L94-L102&quot;&gt;&lt;code&gt;NonEmptyChain&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ValidatedSpec.scala#L144-L170&quot;&gt;&lt;code&gt;Validated&lt;/code&gt;&lt;/a&gt;
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part2/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyChainSpec.scala#L94-L102&quot;&gt;&lt;code&gt;NonEmptyChain&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&quot;implications-of-the-applicative-laws&quot;&gt;Implications of the applicative laws&lt;/h3&gt;
 &lt;p&gt;Each of &lt;code&gt;Option&lt;/code&gt;, &lt;code&gt;Either&lt;/code&gt;, and &lt;code&gt;List&lt;/code&gt; conform to the applicative laws and we only had to write the properties once. These properties prove that functions and arguments used within these contexts maintain referential transparency in their arrangements and that the specific contexts do not change the factoring semantics of the code.&lt;/p&gt;
@@ -2061,7 +2061,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
       <updated>2022-06-05T13:21:27-07:00</updated>
       <link rel="alternate" href="https://thisfieldwas.green/blog/2022/03/15/contexts-and-effects/" />
       <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 49m 52s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 49m 29s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Have you ever received an unexpected &lt;code&gt;null&lt;/code&gt; reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?&lt;/p&gt;
 </summary>
@@ -2069,7 +2069,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
         <name>Logan McGrath</name>
         </author>
       <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
-&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 49m 52s&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;1h 49m 29s&lt;/span&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;Have you ever received an unexpected &lt;code&gt;null&lt;/code&gt; reference? Have you ever written a function to validate some input only to have it turn into spaghetti over time? How do you anticipate exceptions and protect against them at runtime?&lt;/p&gt;
 &lt;!--more--&gt;
@@ -2081,7 +2081,7 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;li&gt;&lt;a href=&quot;/blog/2022/06/17/imperative-computation/&quot; title=&quot;Imperative Computation in Functional Programming&quot;&gt;Imperative Computation in Functional Programming&lt;/a&gt;&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;The code that accompanies this post may be found &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1&quot; title=&quot;Accompanying code repository&quot;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Significant portions of program logic exist to address specific cases imposed by nondeterminism and unknown quantities. Have you ever written some code only to find out it does something unexpected when it’s running in production? To protect against unexpected behavior you first have to be aware that an operation may return something unexpected, such as a &lt;code&gt;null&lt;/code&gt; reference, invalid data, or throw an exception, and then write code that anticipates and recovers from such cases.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Defensive_programming&quot;&gt;Defensive programming&lt;/a&gt;&lt;/em&gt; as a practice tries to protect against errors and unknowns by preempting how they might occur. However anticipation of errors and unknowns rests entirely on &lt;em&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Tacit_knowledge&quot;&gt;tacit knowledge&lt;/a&gt;&lt;/em&gt; and imposes complex code to handle and recover from them. &lt;em&gt;This complex code draws focus from writing the business logic that drives the value of programs&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;In this post I will provide &lt;strong&gt;effects&lt;/strong&gt; as a model for characterizing nondeterminism and unknowns in programs. I will introduce a &lt;strong&gt;design pattern&lt;/strong&gt; to abstract complexity using this model.&lt;/p&gt;
@@ -2478,7 +2478,7 @@ Retry strategies must track previous state in order to calculate their next retr
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;Either[X, A]&lt;/code&gt;&lt;/strong&gt; by convention is the effect of &lt;em&gt;either&lt;/em&gt; success with term &lt;code&gt;A&lt;/code&gt; &lt;em&gt;or&lt;/em&gt; failure with term &lt;code&gt;X&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -2492,7 +2492,7 @@ Retry strategies must track previous state in order to calculate their next retr
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;List[A]&lt;/code&gt;&lt;/strong&gt; is the effect of &lt;em&gt;unknown length&lt;/em&gt;, sort, and cardinality of instances of term &lt;code&gt;A&lt;/code&gt;:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -2506,7 +2506,7 @@ Retry strategies must track previous state in order to calculate their next retr
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h3 id=&quot;an-object-oriented-approach-to-contexts&quot;&gt;An object-oriented approach to contexts&lt;/h3&gt;
 &lt;p&gt;Both &lt;code&gt;Option[A]&lt;/code&gt; and &lt;code&gt;Either[X, A]&lt;/code&gt; have roughly the same &lt;em&gt;structure&lt;/em&gt; in that there either is or isn’t an instance of the desired term &lt;code&gt;A&lt;/code&gt;. Because of this, a &lt;em&gt;lowering&lt;/em&gt; operation &lt;code&gt;extract: F[A] =&amp;gt; A&lt;/code&gt; is possible as it means the same thing between both of them: &lt;code&gt;extract&lt;/code&gt; either gets the existing instance of the term &lt;code&gt;A&lt;/code&gt; or it faults. In object oriented programming, &lt;code&gt;Option[A]&lt;/code&gt; and &lt;code&gt;Either[X, A]&lt;/code&gt; might expose such an interface:&lt;/p&gt;
@@ -2529,7 +2529,7 @@ Retry strategies must track previous state in order to calculate their next retr
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/one&quot;&gt;See here&lt;/a&gt; for the definitions of &lt;code&gt;Option&lt;/code&gt;, &lt;code&gt;Either&lt;/code&gt;, and &lt;code&gt;List&lt;/code&gt; using the single-value &lt;code&gt;Extractable&lt;/code&gt; interface.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/one&quot;&gt;See here&lt;/a&gt; for the definitions of &lt;code&gt;Option&lt;/code&gt;, &lt;code&gt;Either&lt;/code&gt;, and &lt;code&gt;List&lt;/code&gt; using the single-value &lt;code&gt;Extractable&lt;/code&gt; interface.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h4 id=&quot;generalizing-for-an-unknown-length-of-term-a&quot;&gt;Generalizing for an unknown length of term &lt;code&gt;A&lt;/code&gt;&lt;/h4&gt;
 &lt;p&gt;How do you &lt;code&gt;extract&lt;/code&gt; the term &lt;code&gt;A&lt;/code&gt; from a &lt;code&gt;List[A]&lt;/code&gt; such that it means the same thing as in &lt;code&gt;Option[A]&lt;/code&gt; and &lt;code&gt;Either[X, A]&lt;/code&gt;?&lt;/p&gt;
@@ -2560,10 +2560,10 @@ Retry strategies must track previous state in order to calculate their next retr
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/seq&quot;&gt;See here&lt;/a&gt; for the definitions of &lt;code&gt;Option&lt;/code&gt;, &lt;code&gt;Either&lt;/code&gt;, and &lt;code&gt;List&lt;/code&gt; using the multi-value &lt;code&gt;Extractable&lt;/code&gt; interface with &lt;code&gt;Seq&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/seq&quot;&gt;See here&lt;/a&gt; for the definitions of &lt;code&gt;Option&lt;/code&gt;, &lt;code&gt;Either&lt;/code&gt;, and &lt;code&gt;List&lt;/code&gt; using the multi-value &lt;code&gt;Extractable&lt;/code&gt; interface with &lt;code&gt;Seq&lt;/code&gt;.&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;&lt;em&gt;This interface however is not coherent.&lt;/em&gt; Faulting on absence is preserved as a behavior in &lt;code&gt;Option[A]&lt;/code&gt; and &lt;code&gt;Either[X, A]&lt;/code&gt;, but Scala’s &lt;code&gt;Seq[A]&lt;/code&gt; is allowed to be empty per its definition. Allowing &lt;code&gt;List[A]&lt;/code&gt; to be empty implies that it should be allowed to return an empty &lt;code&gt;Seq[A]&lt;/code&gt; from &lt;code&gt;extract&lt;/code&gt;. In order to preserve faulting on absence, &lt;code&gt;extract&lt;/code&gt; must return a &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/nel&quot;&gt;&lt;code&gt;NonEmptyList[A]&lt;/code&gt; instead&lt;/a&gt;, as this has the effect of always having &lt;em&gt;at least one&lt;/em&gt; instance of term &lt;code&gt;A&lt;/code&gt;. You’re still stuck with an unknown length of instances, though.&lt;/p&gt;
-&lt;p&gt;This interface essentially transforms these contexts into &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala&quot;&gt;&lt;code&gt;NonEmptyList[A]&lt;/code&gt;&lt;/a&gt; and imposes its specific complexity on all of your code. You would probably be very unhappy using it.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;This interface however is not coherent.&lt;/em&gt; Faulting on absence is preserved as a behavior in &lt;code&gt;Option[A]&lt;/code&gt; and &lt;code&gt;Either[X, A]&lt;/code&gt;, but Scala’s &lt;code&gt;Seq[A]&lt;/code&gt; is allowed to be empty per its definition. Allowing &lt;code&gt;List[A]&lt;/code&gt; to be empty implies that it should be allowed to return an empty &lt;code&gt;Seq[A]&lt;/code&gt; from &lt;code&gt;extract&lt;/code&gt;. In order to preserve faulting on absence, &lt;code&gt;extract&lt;/code&gt; must return a &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/extractables/nel&quot;&gt;&lt;code&gt;NonEmptyList[A]&lt;/code&gt; instead&lt;/a&gt;, as this has the effect of always having &lt;em&gt;at least one&lt;/em&gt; instance of term &lt;code&gt;A&lt;/code&gt;. You’re still stuck with an unknown length of instances, though.&lt;/p&gt;
+&lt;p&gt;This interface essentially transforms these contexts into &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala&quot;&gt;&lt;code&gt;NonEmptyList[A]&lt;/code&gt;&lt;/a&gt; and imposes its specific complexity on all of your code. You would probably be very unhappy using it.&lt;/p&gt;
 &lt;p&gt;What about implementing &lt;code&gt;extract&lt;/code&gt; for &lt;code&gt;Future[A]&lt;/code&gt;? When applied to &lt;code&gt;Future[A]&lt;/code&gt;, the &lt;code&gt;extract&lt;/code&gt; function by its own signature is a blocking call. You want your dependency on &lt;code&gt;A&lt;/code&gt; to be properly asynchronous.&lt;/p&gt;
 &lt;p&gt;This interface does not generalize for more than the contexts of &lt;code&gt;Option&lt;/code&gt; and &lt;code&gt;Either&lt;/code&gt;, and it requires that they both subclass a shared trait. A better interface exists. It also doesn’t force these types into the same hierarchy.&lt;/p&gt;
 &lt;blockquote&gt;
@@ -2584,7 +2584,7 @@ Retry strategies must track previous state in order to calculate their next retr
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;What &lt;code&gt;map()&lt;/code&gt; does is &lt;em&gt;lift&lt;/em&gt; the function &lt;code&gt;f: A =&amp;gt; B&lt;/code&gt; into the box so that it behaves as &lt;code&gt;F[A] =&amp;gt; F[B]&lt;/code&gt;, giving back &lt;code&gt;F[B]&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;This &lt;em&gt;lifting&lt;/em&gt; of functions that &lt;code&gt;map()&lt;/code&gt; performs is &lt;em&gt;coherent across contexts&lt;/em&gt;. With &lt;code&gt;map()&lt;/code&gt; you can apply &lt;code&gt;f: A =&amp;gt; B&lt;/code&gt; to any &lt;code&gt;List[A]&lt;/code&gt; just as you can any &lt;code&gt;IO[A]&lt;/code&gt;. The results of both operations are predictable: your &lt;code&gt;List[A]&lt;/code&gt; maps to &lt;code&gt;List[B]&lt;/code&gt; and your &lt;code&gt;IO[A]&lt;/code&gt; maps to &lt;code&gt;IO[B]&lt;/code&gt;.&lt;/p&gt;
@@ -2671,7 +2671,7 @@ Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;BinaryTree[Int]&lt;/code&
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Functor.scala&quot;&gt;See here&lt;/a&gt; for the definition in the sample repository.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Instances of the &lt;code&gt;Functor&lt;/code&gt; typeclass implement this trait and make themselves available implicitly:&lt;/p&gt;
 &lt;div class=&quot;numberLines&quot;&gt;
@@ -2706,11 +2706,11 @@ Applying &lt;code&gt;map&lt;/code&gt; to a &lt;code&gt;BinaryTree[Int]&lt;/code&
 &lt;p&gt;These three instances for &lt;code&gt;Option[_]&lt;/code&gt;, &lt;code&gt;Either[X, _]&lt;/code&gt;, and &lt;code&gt;List[_]&lt;/code&gt; show remarkable similarities, and this isn’t uncommon across functors for most data structures. Note in particular how &lt;code&gt;List[_]&lt;/code&gt; is recursive, with the base case &lt;code&gt;Nil&lt;/code&gt; representing void. Implementations of &lt;code&gt;Functor&lt;/code&gt; are more complex in contexts such as &lt;code&gt;IO[_]&lt;/code&gt; and &lt;code&gt;Future[_]&lt;/code&gt; because they are managing side effects. &lt;em&gt;What is key is that the complexities imposed by each of these contexts are completely abstracted&lt;/em&gt;, allowing function &lt;code&gt;f: A =&amp;gt; B&lt;/code&gt; to operate unburdened by effects with a focus on specific program logic.&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Follow these links for the instances in the sample repository for
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L104-L126&quot;&gt;Option&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L112-L133&quot;&gt;Either&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L237-L257&quot;&gt;List&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala#L99-L119&quot;&gt;NonEmptyList&lt;/a&gt;,
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/package.scala#L23-L42&quot;&gt;Id&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Option.scala#L104-L126&quot;&gt;Option&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/Either.scala#L112-L133&quot;&gt;Either&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/List.scala#L237-L257&quot;&gt;List&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/NonEmptyList.scala#L99-L119&quot;&gt;NonEmptyList&lt;/a&gt;,
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/main/scala/green/thisfieldwas/embracingnondeterminism/data/package.scala#L23-L42&quot;&gt;Id&lt;/a&gt;.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;Can you see how functors enable control flow and short-circuiting? The &lt;strong&gt;undesirable cases&lt;/strong&gt; are the specific branches of logic that enable this. If there’s “nothing here”, then they don’t do anything. In the specific case of &lt;code&gt;Either[X, _]&lt;/code&gt;, &lt;code&gt;Left&lt;/code&gt; may be used to carry some error state in its term &lt;code&gt;X&lt;/code&gt;. This satisfies the effect of &lt;em&gt;either&lt;/em&gt; &lt;code&gt;A&lt;/code&gt; for success &lt;em&gt;or&lt;/em&gt; &lt;code&gt;X&lt;/code&gt; for failure.&lt;/p&gt;
 &lt;blockquote&gt;
@@ -2820,13 +2820,13 @@ and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-no
 &lt;blockquote&gt;
 &lt;ul&gt;
 &lt;li&gt;See the functor laws applied to Scala’s Standard Library
-types &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L12-L26&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L12-L26&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt;,
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L12-L26&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;See the &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/FunctorLaws.scala&quot;&gt;generalized functor laws&lt;/a&gt;
-applied to our &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L109&quot;&gt;Option&lt;/a&gt;,
-&lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L132&quot;&gt;Either&lt;/a&gt;,
-and &lt;a href=&quot;https://bitsof.thisfieldwas.green/keywordsalad/embracing-nondeterminism-code/src/branch/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L169&quot;&gt;List&lt;/a&gt; types.&lt;/li&gt;
+types &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/EitherSpec.scala#L12-L26&quot;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/ListSpec.scala#L12-L26&quot;&gt;&lt;code&gt;List&lt;/code&gt;&lt;/a&gt;,
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/stdlib/OptionSpec.scala#L12-L26&quot;&gt;&lt;code&gt;Option&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;See the &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/FunctorLaws.scala&quot;&gt;generalized functor laws&lt;/a&gt;
+applied to our &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/OptionSpec.scala#L109&quot;&gt;Option&lt;/a&gt;,
+&lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/EitherSpec.scala#L132&quot;&gt;Either&lt;/a&gt;,
+and &lt;a href=&quot;https://github.com/keywordsalad/embracing-nondeterminism-code/tree/part1/src/test/scala/green/thisfieldwas/embracingnondeterminism/data/ListSpec.scala#L169&quot;&gt;List&lt;/a&gt; types.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;These laws assert that functors preserve the behavior of functions &lt;code&gt;f&lt;/code&gt; and &lt;code&gt;g&lt;/code&gt; as if they were composed and also applied in sequence independent of &lt;code&gt;map()&lt;/code&gt;. Functors thus &lt;em&gt;compose functional effects&lt;/em&gt; because this property of composition is retained within the context of their effects. The seam introduced by &lt;code&gt;map()&lt;/code&gt; creates a hard delineation between any context’s complexity of effects and the business logic of pure functions &lt;code&gt;f&lt;/code&gt; and &lt;code&gt;g&lt;/code&gt;.&lt;/p&gt;
