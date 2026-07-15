@@ -5,12 +5,6 @@ author: Logan McGrath
 date: 2022-05-30T10:04:42-0700
 published: 2022-06-17T08:47:11-0700
 tags: functional programming, programming, scala, design patterns, contexts
-description: >-
-  Remember functors and applicatives? In my last post we explored how functors
-  and applicatives abstract over desired and undesired cases of contexts in
-  order to express control flow and permit independent computation. In this post
-  we will explore monads and how to leverage their specific abstraction to
-  express imperative control flow.
 layout: post
 comments: true
 og:

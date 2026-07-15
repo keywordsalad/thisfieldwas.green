@@ -5,13 +5,6 @@ author: Logan McGrath
 date: 2022-05-07T14:21:23-0700
 published: 2022-06-05T14:01:07-0700
 tags: functional programming, programming, scala, design patterns, contexts
-description: >-
-  Remember functors? They are structures that abstract away complexity imposed
-  by nondeterminism present in contexts that produce some output; contexts such
-  as optionality, network interaction, or validation. When contexts fail to
-  produce some output, they are in their undesired case and no computation may
-  be performed against them. In this post we will explore how to exploit this
-  characteristic to halt computation in order to express control flow.
 layout: post
 comments: true
 thumbnail: /images/tags/functional-programming/functional-grass-128x128.png

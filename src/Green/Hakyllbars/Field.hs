@@ -41,7 +41,7 @@ import Green.Hakyllbars.Compiler
 import Green.Hakyllbars.Context
 import Green.Hakyllbars.Field.Date (DateConfig, dateFields, defaultDateConfigWith)
 import Green.Hakyllbars.Field.Git (gitFields)
-import Green.Hakyllbars.Field.Html (escapeHtmlField, escapeHtmlUriField)
+import Green.Hakyllbars.Field.Html (escapeHtmlField, escapeHtmlUriField, escapeJsonField)
 import Green.Hakyllbars.Util (stripSuffix)
 import System.FilePath
 
@@ -61,6 +61,7 @@ defaultFields host siteRoot =
       linkedTitleField "linkedTitle" "title" "url",
       escapeHtmlField,
       escapeHtmlUriField,
+      escapeJsonField,
       putField "put",
       addField "add",
       putBlockField "putBlock",

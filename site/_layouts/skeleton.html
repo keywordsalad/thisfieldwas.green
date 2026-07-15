@@ -10,14 +10,18 @@
 <meta name="googlebot" content="noindex">
 {{#end-}}
 
-{{#if description}}<meta name="description" content="{{description | escapeHtml}}">{{#end-}}
+<meta name="description" content="{{description | default siteDescription | escapeHtml}}">
+<meta name="author" content="{{author | escapeHtml}}">
 <title>{{#if title}}{{title}} - {{#end}}{{siteTitle}}</title>
 <link rel="canonical" href="{{absUrl}}">
 <link rel="shortcut icon" sizes="16x16 32x32 48x48 64x64 96x96 128x128 256x256" href="{{siteUrl}}/favicon.ico">
 <link rel="me" href="https://tech.lgbt/@keywordsalad">
+<link rel="alternate" type="application/atom+xml" title="{{siteTitle}} — Atom" href="{{siteUrl}}/atom.xml">
+<link rel="alternate" type="application/rss+xml" title="{{siteTitle}} — RSS" href="{{siteUrl}}/rss.xml">
 
 {{#if useSocial-}}
 {{-partial "social/open-graph"-}}
+{{-partial "social/structured-data"-}}
 {{-#end-}}
 
 {{#for preloadImages-}}

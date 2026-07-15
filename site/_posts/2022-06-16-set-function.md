@@ -5,11 +5,6 @@ author: Logan McGrath
 date: 2022-06-16T21:29:05-0700
 published: 2022-06-16T22:22:26-0700
 tags: functional programming, programming, scala, design patterns, combinators
-description: >-
-  What is a Set? A Set can tell you whether or not an value is a member of the
-  Set. This means that a Set is merely a function, specifically of type A to
-  Boolean. In this post I will explore the usage of **combinators** to build a
-  Set from elementary functions alone.
 layout: post
 comments: true
 ---

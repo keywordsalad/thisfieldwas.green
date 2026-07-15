@@ -1,0 +1,43 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "{{siteUrl}}/#website",
+      "url": "{{siteUrl | escapeJson}}",
+      "name": "{{siteTitle | escapeJson}}",
+      "description": "{{description | default siteDescription | escapeJson}}",
+      "inLanguage": "en-US",
+      "publisher": { "@id": "{{siteUrl}}/#person" }
+    },
+    {
+      "@type": "Person",
+      "@id": "{{siteUrl}}/#person",
+      "name": "{{authorName | escapeJson}}",
+      "email": "{{authorEmail | escapeJson}}",
+      "url": "{{siteUrl | escapeJson}}",
+      "sameAs": [
+        "{{linkedInProfile | escapeJson}}",
+        "{{githubProfile | escapeJson}}",
+        "https://tech.lgbt/@keywordsalad"
+      ]
+    }{{#if published-}},
+    {
+      "@type": "BlogPosting",
+      "@id": "{{absUrl}}#article",
+      "mainEntityOfPage": "{{absUrl | escapeJson}}",
+      "url": "{{absUrl | escapeJson}}",
+      "headline": "{{title | default siteTitle | escapeJson}}",
+      "description": "{{description | default siteDescription | escapeJson}}",
+      "image": "{{siteUrl}}{{og.image.url | default '/images/grass-1024x1024.png' | escapeJson}}",
+      "datePublished": "{{published | dateAs robotTime}}",
+      "dateModified": "{{updated | dateAs robotTime}}",
+      "inLanguage": "en-US",
+      "keywords": "{{#for tagList-}}{{item | escapeJson}}, {{-#end}}",
+      "author": { "@id": "{{siteUrl}}/#person" },
+      "publisher": { "@id": "{{siteUrl}}/#person" }
+    }{{-#end}}
+  ]
+}
+</script>

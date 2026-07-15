@@ -2,7 +2,7 @@
 User-agent: *
 Disallow: /drafts
 Disallow: /drafts/*
-Sitemap: {{siteRoot}}/sitemap.xml
+Sitemap: {{siteUrl}}/sitemap.xml
 
 User-agent: CCBot
 Disallow: /
