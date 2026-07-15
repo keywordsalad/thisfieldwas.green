@@ -9,6 +9,7 @@ default: &default
     linkedin-profile: https://www.linkedin.com/in/loganmcgrath
     github-profile: https://github.com/keywordsalad
     github-web-url: https://github.com/keywordsalad/thisfieldwas.green
+    mastodon-profile: https://tech.lgbt/@armed_banana
 
   display-formats:
     date-short-format: '%B %e, %Y'

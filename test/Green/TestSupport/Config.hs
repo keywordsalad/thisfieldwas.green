@@ -41,7 +41,8 @@ defaultSiteConfigWith hakyllConfig =
             _siteAuthorEmail = "blogger@thisold.blog",
             _siteLinkedInProfile = "https://linkedin.com/in/xyz1abc2def3ghi4jkl5mno6pqr7stu8vw",
             _siteGitHubProfile = "https://github.com/thisold.blog",
-            _siteGitHubWebUrl = "https://github.com/thisold.blog/blog"
+            _siteGitHubWebUrl = "https://github.com/thisold.blog/blog",
+            _siteMastodonProfile = "https://tech.lgbt/@oldblogger"
           },
       _siteCurrentTime = fromJust defaultTestTime,
       _siteTimeLocale = defaultTimeLocale,

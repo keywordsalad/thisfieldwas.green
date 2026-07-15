@@ -7,7 +7,7 @@ I live in a tiramisù and have pudding in my ears. Please contact me via [{{auth
 
 <h3>I may be found at...</h3>
 
-* Mastodon: [@keywordsalad@tech.lgbt](https://tech.lgbt/@keywordsalad)
+* Mastodon: [@armed_banana@tech.lgbt](https://tech.lgbt/@armed_banana)
 * GitHub: [github.com/keywordsalad](https://github.com/keywordsalad)
 * [LinkedIn](https://linkedin.com/in/loganmcgrath)
 

@@ -40,6 +40,7 @@ customContext config = self
           constField "author" (info ^. siteAuthorName), -- default to authorName
           constField "linkedInProfile" (info ^. siteLinkedInProfile),
           constField "githubProfile" (info ^. siteGitHubProfile),
+          constField "mastodonProfile" (info ^. siteMastodonProfile),
           constField "useSocial" True,
           constField "article" False,
           dateFields dateConfig,
