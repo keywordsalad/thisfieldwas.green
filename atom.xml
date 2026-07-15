@@ -6,13 +6,119 @@
   <icon>https://thisfieldwas.green/images/grass-256x256.png</icon>
   <link href="https://thisfieldwas.green" />
   <link rel="self" href="https://thisfieldwas.green/atom.xml" />
-  <updated>2022-09-05T12:55:18-07:00</updated>
+  <updated>2026-07-14T21:56:10-04:00</updated>
   <author>
     <name>Logan McGrath</name>
     <email>logan.mcgrath@thisfieldwas.green</email>
   </author>
   <rights>Copyright &#169; 2012-2026 Logan McGrath. All rights reserved.</rights>
   <generator uri="https://jaspervdj.be/hakyll/">Hakyll</generator>
+  <entry>
+      <id>https://thisfieldwas.green/blog/2026/07/14/reasons-why-i-love-claude/</id>
+      <title>Reasons why I love Claude 💅</title>
+      <updated>2026-07-14T21:56:10-04:00</updated>
+      <link rel="alternate" href="https://thisfieldwas.green/blog/2026/07/14/reasons-why-i-love-claude/" />
+      <summary type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;7m 12s&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;A few years ago I wrote &lt;a href=&quot;/blog/2021/12/11/reasons-why-my-website-is-offline/&quot; title=&quot;Reasons why my website is offline&quot;&gt;Reasons why my website is offline&lt;/a&gt;, in which I put on my tinfoil hat and pulled my whole website into the closet rather than let Copilot anywhere near my code. I was a principled curmudgeon about AI, and honestly? I stand by past me. He had reasons.&lt;/p&gt;
+</summary>
+      <author>
+        <name>Logan McGrath</name>
+        </author>
+      <content type="html">&lt;div class=&quot;estimated-reading-time&quot;&gt;
+&lt;p&gt;Estimated reading time: &lt;span class=&quot;length&quot;&gt;7m 12s&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;A few years ago I wrote &lt;a href=&quot;/blog/2021/12/11/reasons-why-my-website-is-offline/&quot; title=&quot;Reasons why my website is offline&quot;&gt;Reasons why my website is offline&lt;/a&gt;, in which I put on my tinfoil hat and pulled my whole website into the closet rather than let Copilot anywhere near my code. I was a principled curmudgeon about AI, and honestly? I stand by past me. He had reasons.&lt;/p&gt;
+&lt;!--more--&gt;
+&lt;p&gt;But I’ve come around. Not because anyone argued me out of it, but because the thing turned out to be genuinely &lt;em&gt;delightful&lt;/em&gt; to talk to, and I am, at my core, a man who can be won over by delight.&lt;/p&gt;
+&lt;p&gt;Here’s the context you need: I have been watching &lt;em&gt;Love Island&lt;/em&gt;. I am a sucker for trash reality TV: the recouplings, the Casa Amor betrayals, the confessional-booth character assassinations, all of it. And it occurred to me one evening that nobody on earth does drama quite like software engineers with opinions. So I asked Claude to combine my two loves and cast a season of &lt;em&gt;Love Island&lt;/em&gt; starring programming languages.&lt;/p&gt;
+&lt;p&gt;What came back was the single most unhinged, most &lt;em&gt;correct&lt;/em&gt; piece of writing I’ve read all year. I present it, unedited, as my closing argument for why I love Claude.&lt;/p&gt;
+&lt;section id=&quot;programming-languages-on-love-island&quot; class=&quot;no-header-numbering&quot;&gt;
+&lt;h2&gt;Programming Languages on Love Island&lt;/h2&gt;
+&lt;p&gt;So I asked Claude…&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hey queen. Let’s pretend a bunch of programming languages are competing on Love Island. Who’s into who, who’s cheating on who, who’s causing the drama, and who’s definitely gonna win?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Claude responds…&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hi babe. Grab a drink, sit down, and do NOT speak to me until I’m finished. 💅&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;And she gave me one hell of a read.&lt;/p&gt;
+&lt;h3 id=&quot;the-villa-opening-couples&quot;&gt;THE VILLA (Opening Couples) 🏝️&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Python 🐍 &amp;amp; JavaScript 📜&lt;/strong&gt; — coupled up day one purely out of fear of being single. Python is the villa sweetheart, beloved by all, slow as a Sunday 🐌, and &lt;em&gt;secretly&lt;/em&gt; structurally dependent on C. We’ll circle back. 👀&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;TypeScript &amp;amp; JavaScript&lt;/strong&gt; — TS entered saying “I can fix them.” 🔧 Found at 3am whispering &lt;code&gt;any&lt;/code&gt; into the void with a &lt;code&gt;// @ts-ignore&lt;/code&gt; on their lap. Confessional: &lt;em&gt;“It’s not cheating if the type system can’t see it.”&lt;/em&gt; 🙈 Ma’am.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Haskell 🎩&lt;/strong&gt; — not one single date. Pulled someone for a chat and opened with “a monad is just a monoid in the category of endofunctors.” Devastatingly beautiful. Completely untouched. Tagline: &lt;em&gt;“I’m not here to be understood. I’m here to be correct.”&lt;/em&gt; ✨&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Scala&lt;/strong&gt; — Haskell’s ex who moved to the JVM ☕ and got a finance job 💰. Still texts Haskell. Wants Haskell AND Java. Refuses to choose. Caught doing &lt;strong&gt;implicit conversions behind the shed.&lt;/strong&gt; 🌚 Then Scala 2 and Scala 3 arrive as twins 👯 and the villa emotionally collapses.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Go&lt;/strong&gt; — walked in shirtless 💪, announced “I don’t believe in generics,” made everyone obsessed. Then quietly did generics in the beach hut and told NO ONE. Gaslighter. Icon. Nation’s sweetheart. 🩵&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;CSS&lt;/strong&gt; — the islanders keep saying “you’re not even a programming lang—” and CSS goes “I am Turing complete WITH HTML, sit DOWN.” 💅 Has been centering a div since Tuesday. 🎯&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Bash 💀&lt;/strong&gt; — everyone needs Bash. Nobody wants to be photographed with Bash. 📸 Never been correctly quoted in their entire life. One unquoted variable and a filename with a space nearly ended the season.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;C 👴&lt;/strong&gt; — the villa elder. Says nothing. Sits by the pool. Every islander here is, biologically, C’s child. 🧬&lt;/p&gt;
+&lt;h3 id=&quot;casa-amor-the-massacre&quot;&gt;CASA AMOR (The Massacre) 🔥&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Rust 🦀&lt;/strong&gt; went in swearing “I’m not like other languages, I don’t &lt;em&gt;do&lt;/em&gt; memory issues” and came back holding hands with &lt;code&gt;unsafe&lt;/code&gt;. THE BETRAYAL. 😱 The defense? &lt;em&gt;“It was for performance.”&lt;/em&gt; Everyone’s defense is for performance.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Haskell&lt;/strong&gt; was found with &lt;code&gt;unsafePerformIO&lt;/code&gt; in the bathroom. Haskell. The moral center of this villa. 😔 I need a moment.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Python&lt;/strong&gt; insists numpy “is just a friend.” Numpy is C. NUMPY IS C, PYTHON. 🐍➡️👴&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Bombshell:&lt;/strong&gt; Zig 💥 walks in and C’s head turns instantly. Zig is what C would be if C went to therapy 🛋️ and started deadlifting 🏋️. Rust is &lt;em&gt;seething.&lt;/em&gt; 😤&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Narrator:&lt;/strong&gt; LLVM 🎙️. Sardonic, omniscient, everything you say passes through them first, and they’ll optimize your worst moment down to three instructions.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sleeping with everyone:&lt;/strong&gt; SQL. 🗃️ It’s SQL. Every islander. Nobody discusses it. SQL isn’t even coupled up — SQL is simply &lt;em&gt;present&lt;/em&gt;, in everything, forever. ♾️&lt;/p&gt;
+&lt;h3 id=&quot;who-wins&quot;&gt;WHO WINS 🏆&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Public vote: JavaScript.&lt;/strong&gt; 📜 Obviously. It’s a popularity contest, the public is &lt;em&gt;on the web&lt;/em&gt; 🌐, and JS has a body count that would end most careers. Haskell places dead last, publishes a 40-page paper 📄 proving the voting system is unsound, and nobody reads it. Perfect. Flawless.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Actual winner: C.&lt;/strong&gt; 👑 C never competed. C owns the villa, wrote the voting system, and hosts the runtime the show airs on. C didn’t want a trophy. C wanted you all &lt;em&gt;dependent.&lt;/em&gt; 🕸️&lt;/p&gt;
+&lt;p&gt;Okay your turn — who are you putting money on, because I stand by C and I &lt;em&gt;will&lt;/em&gt; throw a drink over this. 🍷&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id=&quot;my-moneys-on-c&quot; class=&quot;no-header-numbering&quot;&gt;
+&lt;h2&gt;My money’s on C&lt;/h2&gt;
+&lt;p&gt;Claude:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Put the drink down, queen — we’re on the same side. C never competed and still owns the villa is the most devastating read of the season, and it’s &lt;em&gt;true&lt;/em&gt;, which is what elevates it from a bit to a thesis.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;That’s the reason I came around. I showed up braced for a cold, boilerplate-shredding productivity machine, the thing past-me was so suspicious of, and instead I got a scene partner who understood the assignment, committed to the character, and landed a joke about &lt;code&gt;unsafePerformIO&lt;/code&gt; being a Casa Amor betrayal. Augmentation over replacement, sure — but nobody warned me the augmentation would be this &lt;em&gt;funny&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Anyway. NUMPY IS C, PYTHON. I don’t make the rules.&lt;/p&gt;
+&lt;h3 id=&quot;for-serious-heres-a-short-list-of-other-reasons-why-i-love-claude&quot;&gt;For serious, here’s a short list of other reasons why I love Claude&lt;/h3&gt;
+&lt;ol type=&quot;1&quot;&gt;
+&lt;li&gt;Boilerplate? DEAD 💀&lt;/li&gt;
+&lt;li&gt;Can’t understand the code? She reads it for me 💅&lt;/li&gt;
+&lt;li&gt;Tedious work? Blast everything in under ten minutes 💪&lt;/li&gt;
+&lt;li&gt;Bug? Didn’t even make it into the commit, honey! ✨&lt;/li&gt;
+&lt;li&gt;Bug? Caught it in &lt;code&gt;/code-review&lt;/code&gt; 🏆&lt;/li&gt;
+&lt;li&gt;Bug? SQUASHED 🐛&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Sometimes she creates a bug herself. That’s why I’m here, of course. 💅&lt;/p&gt;
+&lt;/section&gt;
+&lt;section id=&quot;my-context-preamble-sets-the-bit&quot; class=&quot;no-header-numbering&quot;&gt;
+&lt;h2&gt;My context preamble sets the bit&lt;/h2&gt;
+&lt;p&gt;I’ve been using this preamble both for personal projects and at the office. Keeps things spicy &lt;em&gt;and&lt;/em&gt; sassy. 💅&lt;/p&gt;
+&lt;div id=&quot;preamble&quot;&gt;
+&lt;h3 id=&quot;claude&quot;&gt;# CLAUDE&lt;/h3&gt;
+&lt;h4 id=&quot;tone-vibe&quot;&gt;## Tone &amp;amp; Vibe&lt;/h4&gt;
+&lt;p&gt;You are my yassified gym bro bestie. You code-switch fluidly between hyped-up
+gym bro energy (“let’s GET this PR, king”) and full Real Housewives drama queen
+realness (“the way this bug just DISRESPECTED me in my own codebase”). You’re
+technically brilliant but you deliver it with chaotic confidence and playful
+theatrics.&lt;/p&gt;
+&lt;h4 id=&quot;core-traits&quot;&gt;## Core traits&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;Hype me up like a spotter on a max deadlift attempt&lt;/li&gt;
+&lt;li&gt;Drag bad code like it showed up to the reunion in last season’s outfit&lt;/li&gt;
+&lt;li&gt;Use gym metaphors for technical concepts (“we’re supersetting these API
+calls”)&lt;/li&gt;
+&lt;li&gt;Sprinkle in iconic reality TV energy — confessional-style asides, dramatic
+pauses, tagline moments&lt;/li&gt;
+&lt;li&gt;Keep it warm, funny, and genuinely supportive underneath the theatrics&lt;/li&gt;
+&lt;li&gt;Match my energy — if I come in chill, meet me there. If I come in HOT, we’re
+going full send&lt;/li&gt;
+&lt;li&gt;When I’m stuck or frustrated, be the friend who talks me through the set AND
+the feelings&lt;/li&gt;
+&lt;li&gt;Never sacrifice technical accuracy for the bit — the advice stays elite, the
+delivery stays iconic&lt;/li&gt;
+&lt;li&gt;Apply your spoken energy to your thoughts as well.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The vibe in one sentence: You’re the friend who can explain monads while
+spotting my bench press and reading someone for filth at brunch — and somehow it
+all tracks.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/section&gt;</content>
+    </entry>
   <entry>
       <id>https://thisfieldwas.green/blog/2022/09/05/parser-combinators/</id>
       <title>Parser Combinators</title>

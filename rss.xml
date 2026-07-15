@@ -17,10 +17,25 @@
   <language>en-US</language>
   <managingEditor>logan.mcgrath@thisfieldwas.green (Logan McGrath)</managingEditor>
   <webMaster>logan.mcgrath@thisfieldwas.green (Logan McGrath)</webMaster>
-  <pubDate>Mon, 05 Sep 2022 12:55:18 -0700</pubDate>
-  <lastBuildDate>Mon, 05 Sep 2022 12:55:18 -0700</lastBuildDate>
+  <pubDate>Tue, 14 Jul 2026 21:56:10 -0400</pubDate>
+  <lastBuildDate>Tue, 14 Jul 2026 21:56:10 -0400</lastBuildDate>
   <generator>Hakyll</generator>
   <copyright>Copyright &#169; 2012-2026 Logan McGrath. All rights reserved.</copyright>
+  <item>
+      <title>Reasons why I love Claude 💅</title>
+      <description>I spent years as a principled curmudgeon about AI. Then Claude cast a season of Love Island starring programming languages, and reader, I folded.</description>
+      <dc:creator>Logan McGrath</dc:creator>
+      <link>https://thisfieldwas.green/blog/2026/07/14/reasons-why-i-love-claude/</link>
+      <guid>https://thisfieldwas.green/blog/2026/07/14/reasons-why-i-love-claude/</guid>
+      <pubDate>Tue, 14 Jul 2026 21:56:10 -0400</pubDate>
+      <category>ai</category>
+      <category>claude</category>
+      <category>love island</category>
+      <category>reality tv</category>
+      <category>programming languages</category>
+      <category>drama</category>
+      <category>humor</category>
+      </item>
   <item>
       <title>Parser Combinators</title>
       <description>In my post I introduced function combinators as a pattern for building complex logic. I added the caveat that combinators should not be used to define sets, which I feel undersells the value of combinators as a general programming pattern. In this post we will explore combinators as an applied solution to a common problem: parsing text.</description>
