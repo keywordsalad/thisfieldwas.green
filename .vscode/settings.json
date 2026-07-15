@@ -1,8 +1,12 @@
 {
   "cSpell.words": [
+    "acks",
+    "Bifunctor",
     "bytestring",
+    "chainl",
     "changefreq",
     "datestamp",
+    "dquote",
     "DYLD",
     "Emph",
     "fmap",
@@ -11,15 +15,29 @@
     "frontmatter",
     "ghcwa",
     "gitea",
+    "gsub",
     "Hakyllbars",
     "hjsmin",
     "hpack",
     "Hspec",
     "inkscape",
+    "keywordsalad",
+    "mappend",
+    "mconcat",
+    "mempty",
     "microlens",
+    "Monoid",
+    "monoidally",
+    "noindex",
     "optparse",
     "prefs",
     "rewatch",
-    "thisfieldwas"
+    "Semigroup",
+    "squote",
+    "subparser",
+    "succ",
+    "thisfieldwas",
+    "unlines",
+    "unwords"
   ]
 }
