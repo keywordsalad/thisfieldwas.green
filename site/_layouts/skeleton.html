@@ -27,7 +27,7 @@
 
 {{#for preloadImages-}}
 <link rel="preload" as="image" href="{{getUrl item}}"{{#if (getUrl item | asWebp)}} imagesrcset="{{getUrl item | asWebp}}" type="image/webp"{{#end}} />
-{{-#end-}}
+{{#end-}}
 
 <link rel="stylesheet" href="/css/main.css" />
 {{#for stylesheets-}}

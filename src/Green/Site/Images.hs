@@ -1,11 +1,15 @@
 module Green.Site.Images where
 
+import Data.Text qualified as T
 import Green.Common
 import Hakyll
 
 images :: Rules ()
 images = do
-  match ("images/**" .&&. blacklist) do
+  match grassIconPattern do
+    route idRoute
+    compile getResourceString
+  match ("images/**" .&&. blacklist .&&. complement grassIconPattern) do
     route idRoute
     compile copyFileCompiler
   -- Emit a WebP sibling for every raster image so templates can offer a modern,
@@ -48,3 +52,27 @@ images = do
 
 -- imageCompiler :: [Int] -> Item a
 -- imageCompiler sizes = do
+
+grassIconSource :: String
+grassIconSource = "images/grass.svg"
+
+grassIconPattern :: Pattern
+grassIconPattern = fromGlob grassIconSource
+
+-- | Encode an SVG document as a compact, URL-encoded `data:` URI suitable for a
+-- CSS `url()` value: drop the XML prolog, collapse whitespace, single-quote
+-- attributes (so the whole thing can be wrapped in double quotes), and
+-- percent-encode the characters that would otherwise break the URI — notably
+-- `#` in the fill colors.
+svgDataUri :: T.Text -> T.Text
+svgDataUri svg = "data:image/svg+xml," <> percentEncode collapsed
+  where
+    body = snd $ T.breakOn "<svg" svg
+    collapsed = T.unwords $ T.words $ T.replace "\"" "'" body
+    -- `%` must be encoded first so the escapes introduced below aren't re-encoded.
+    percentEncode =
+      T.replace "&" "%26"
+        . T.replace ">" "%3E"
+        . T.replace "<" "%3C"
+        . T.replace "#" "%23"
+        . T.replace "%" "%25"
