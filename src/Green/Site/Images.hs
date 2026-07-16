@@ -14,10 +14,15 @@ images = do
     compile copyFileCompiler
   -- Emit a WebP sibling for every raster image so templates can offer a modern,
   -- better-compressed source via <picture> (see the `asWebp` field). The `webp`
-  -- version keeps a distinct identifier from the copied original. Still images
-  -- go through cwebp (near-lossless); animated GIFs need gif2webp, which cwebp
-  -- can't read.
-  match stillConvertible do
+  -- version keeps a distinct identifier from the copied original. Photographs
+  -- (site/images/about-me) compress far better as lossy WebP; other stills
+  -- (screenshots, diagrams) stay near-lossless to keep text and edges crisp.
+  -- Animated GIFs need gif2webp, which cwebp can't read.
+  match (stillConvertible .&&. photoPattern) do
+    version "webp" do
+      route $ setExtension "webp"
+      compile $ toWebp "cwebp" lossyCwebpArgs
+  match (stillConvertible .&&. complement photoPattern) do
     version "webp" do
       route $ setExtension "webp"
       compile $ toWebp "cwebp" cwebpArgs
@@ -35,7 +40,10 @@ images = do
         ]
     stillConvertible =
       "images/**.png" .||. "images/**.jpg" .||. "images/**.jpeg"
+    -- Photographs that should use lossy (not near-lossless) WebP.
+    photoPattern = "images/about-me/**"
     cwebpArgs = ["-near_lossless", "60", "-quiet", "-o", "-", "--", "-"]
+    lossyCwebpArgs = ["-q", "82", "-quiet", "-o", "-", "--", "-"]
     gif2webpArgs = ["-lossy", "-q", "50", "-quiet", "-o", "-", "--", "-"]
 
 -- images :: SiteConfig -> Rules ()
