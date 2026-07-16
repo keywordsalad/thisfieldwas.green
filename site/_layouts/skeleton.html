@@ -26,7 +26,7 @@
 {{-#end-}}
 
 {{#for preloadImages-}}
-<link rel="preload" as="image" href="{{getUrl item}}"{{#if (getUrl item | asWebp)}} imagesrcset="{{getUrl item | asWebp}}" type="image/webp"{{#end}} />
+<link rel="preload" as="image" fetchpriority="high" href="{{getUrl item}}"{{#if (getUrl item | asWebp)}} imagesrcset="{{getUrl item | asWebp}}" type="image/webp"{{#end}} />
 {{#end-}}
 
 <link rel="stylesheet" href="/css/main.css" />
