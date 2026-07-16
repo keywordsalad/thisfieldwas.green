@@ -1,10 +1,10 @@
 module Green.Site.HomePage where
 
 import Green.Common
+import Green.Hakyllbars as HB
 import Green.Site.Blog
 import Green.Template.Custom
 import Hakyll (recentFirst)
-import Green.Hakyllbars as HB
 
 homePage :: Context String -> Rules ()
 homePage siteContext =

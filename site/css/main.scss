@@ -1,5 +1,11 @@
 @import "theme";
 
+// Utility class for elements that need only the brand icon (e.g. the header
+// logo). Bulleted elements get the icon through the grass-icon-bullet mixin.
+.grass-icon {
+  @extend %grass-icon-bg;
+}
+
 @import "elements/default";
 @import "elements/headers";
 @import "elements/asides";

@@ -1,5 +1,13 @@
+// The brand icon background, emitted once and shared via @extend so the (large)
+// inlined data URI appears a single time in the compiled stylesheet no matter
+// how many selectors use it. `$grass-icon` is provided by the CSS compiler
+// (src/Green/Site/Css.hs).
+%grass-icon-bg {
+  background: $grass-icon;
+}
+
 @mixin grass-icon-bullet {
-  background-image: $grass-icon;
+  @extend %grass-icon-bg;
   background-size: 1.3em 1.3em;
   background-position: 0 0.1em;
   background-repeat: no-repeat;

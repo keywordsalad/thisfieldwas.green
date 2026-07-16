@@ -19,13 +19,13 @@ import Green.Template.Context
 
 site :: SiteConfig -> Rules ()
 site config = do
+  let context = customContext config
   brokenLinks
   images
   js config
   scss config
   templatesDependency <- templates
   rulesExtraDependencies [templatesDependency] do
-    let context = customContext config
     homePage context
     pages context
     blog config context

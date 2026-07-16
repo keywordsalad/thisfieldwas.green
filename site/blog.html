@@ -7,15 +7,11 @@ changefreq: weekly
 ---
 
 {{-#for latestPost}}
-  <h2 class="post-title"><a href="{{url}}">{{title}}</a></h2>
-  <p class="latest-post-label">Latest Post!</p>
-  {{partial "post-meta"}}
-  {{partial "post-thumbnail"}}
-  {{-teaser}}
-  <p class="read-more no-border"><a href="{{url}}">Read more...</a></p>
-{{-#end}}
-
-{{#if tagCloud-}}
+<h2 class="post-title"><a href="{{url}}">{{title}}</a></h2>
+<p class="latest-post-label">Latest Post!</p>
+{{partial "post-meta"}} {{partial "post-thumbnail"}} {{-teaser}}
+<p class="read-more no-border"><a href="{{url}}">Read more...</a></p>
+{{-#end}} {{#if tagCloud-}}
 <h2 class="tags hard-section">Tag Cloud</h2>
 <p class="tag-cloud" data-show-count>{{tagCloud}}</p>
 {{#end-}}
@@ -23,11 +19,11 @@ changefreq: weekly
 <h2>Previous posts</h2>
 
 {{#for previousPosts-}}
-  <h3 class="post-title"><a href="{{url}}">{{title}}</a></h3>
-  {{partial "post-meta"}}
-  {{partial "post-thumbnail"}}
-  {{-teaser}}
-  <p class="read-more"><a href="{{url}}">Read more...</a></p>
+<h3 class="post-title"><a href="{{url}}">{{title}}</a></h3>
+{{partial "post-meta"}} {{partial "post-thumbnail"}} {{-teaser}}
+<p class="read-more"><a href="{{url}}">Read more...</a></p>
 {{#end-}}
 
-<p class="view-all-posts"><a href="{{getUrl 'archives.html'}}">View all posts</a></p>
+<p class="view-all-posts">
+  <a href="{{getUrl 'archives.html'}}">View all posts</a>
+</p>
