@@ -2,10 +2,10 @@ module Green.Template.Context where
 
 import Green.Common
 import Green.Config
+import Green.Hakyllbars as HB
 import Green.Site.Blog (loadPublishedPosts)
 import Green.Template.HtmlField
 import Hakyll (recentFirst)
-import Green.Hakyllbars as HB
 
 customContext :: SiteConfig -> Context String
 customContext config = self
@@ -31,6 +31,7 @@ customContext config = self
           imageFigureField,
           youtubeField,
           codeField,
+          inlineStylesheetField "inlineStylesheet",
           constField "currentTime" currentTime,
           constField "siteTitle" (info ^. siteTitle),
           constField "siteDescription" (info ^. siteDescription),
@@ -54,3 +55,19 @@ customContext config = self
         (config ^. siteCurrentTime)
     info = config ^. siteInfo
     dateConfig = defaultDateConfigWith (config ^. siteTimeLocale) (config ^. siteCurrentTime)
+
+-- | Loads the compiled body of a stylesheet (by its source identifier, e.g.
+-- @css/pages/homepage.scss@) so it can be dropped into a @<style>@ tag and
+-- inlined into the page, avoiding an extra render-blocking request. Loading
+-- through Hakyll keeps the dependency tracked.
+inlineStylesheetField :: String -> Context String
+inlineStylesheetField key = functionField key f
+  where
+    f (filePath :: FilePath) =
+      dropCharset <$> lift (loadBody $ fromFilePath filePath :: Compiler String)
+    -- `@charset` is only valid at the very start of an external stylesheet; inside
+    -- a `<style>` tag it is an ignored no-op, so drop the one Dart Sass emits (the
+    -- document's UTF-8 encoding governs the inlined content).
+    dropCharset css
+      | "@charset " `isPrefixOf` css = drop 1 (dropWhile (/= ';') css)
+      | otherwise = css

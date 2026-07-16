@@ -31,7 +31,7 @@
 
 <link rel="stylesheet" href="/css/main.css" />
 {{#for stylesheets-}}
-<link rel="stylesheet" href="{{getUrl item}}" />
+<style>{{ inlineStylesheet item }}</style>
 {{-#end-}}
 
 <script src="{{getUrl 'js/main.js'}}" async></script>
